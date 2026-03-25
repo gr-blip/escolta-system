@@ -1,0 +1,1 @@
+web: gunicorn escolta_system.wsgi

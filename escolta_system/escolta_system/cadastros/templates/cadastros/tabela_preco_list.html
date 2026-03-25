@@ -1,0 +1,63 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}Tabelas de Preço{% endblock %}
+{% block page_title %}Tabelas de Preço{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / Faturamento / Tabelas de Preço{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'tabela_preco_create' %}" class="btn btn-primary">
+    <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+    Nova Tabela
+  </a>
+{% endblock %}
+{% block content %}
+<div class="search-bar">
+  <form method="get" style="display:flex;gap:10px;align-items:center;flex:1">
+    <input type="text" name="q" value="{{ q }}" placeholder="Buscar por cliente ou nome da tabela...">
+    <button type="submit" class="btn btn-secondary">Buscar</button>
+    {% if q %}<a href="{% url 'tabela_preco_list' %}" class="btn btn-secondary">Limpar</a>{% endif %}
+  </form>
+</div>
+<div class="card" style="padding:0">
+  {% if tabelas %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Cliente</th><th>Nome / Rota</th><th>Tipo</th>
+        <th>Valor Escolta</th><th>Franquia KM</th><th>Franquia Horas</th>
+        <th>Exc. KM</th><th>Exc. Hora</th><th>Pedágio</th><th>Situação</th><th>Ações</th>
+      </tr></thead>
+      <tbody>
+        {% for t in tabelas %}
+        <tr>
+          <td style="color:var(--text);font-weight:500">{{ t.cliente.razao_social }}</td>
+          <td style="color:var(--blue-light);font-weight:600">{{ t.nome }}</td>
+          <td><span class="badge badge-gray">{{ t.get_tipo_viagem_display }}</span></td>
+          <td style="color:var(--green);font-weight:600">R$ {{ t.valor_escolta }}</td>
+          <td style="color:var(--text2)">{{ t.franquia_km }} km</td>
+          <td style="color:var(--text2)">{{ t.franquia_horas }}</td>
+          <td style="color:var(--text2)">R$ {{ t.excedente_km }}/km</td>
+          <td style="color:var(--text2)">R$ {{ t.excedente_hora }}/hr</td>
+          <td style="color:var(--text2)">{% if t.cobrar_pedagio == 'sim' %}{% if t.pedagio_fixo %}R$ {{ t.pedagio_fixo }}{% else %}Sim{% endif %}{% else %}Não{% endif %}</td>
+          <td>{% if t.situacao == 'ativo' %}<span class="badge badge-green">Ativo</span>{% else %}<span class="badge badge-gray">Inativo</span>{% endif %}</td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <a href="{% url 'tabela_preco_edit' t.pk %}" class="btn-icon" title="Editar">
+                <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M9.5 2.5l2 2-7 7H2.5v-2l7-7z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+              </a>
+              <a href="{% url 'tabela_preco_delete' t.pk %}" class="btn-icon" style="color:var(--red);border-color:#3a1515;background:var(--red-bg)" title="Excluir">
+                <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M2 4h10M5 4V2.5h4V4M5.5 6.5v4M8.5 6.5v4M3 4l.7 7.5h6.6L11 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="padding:48px;text-align:center;color:var(--text3)">
+    <div style="font-size:14px">Nenhuma tabela de preço cadastrada</div>
+    <a href="{% url 'tabela_preco_create' %}" class="btn btn-primary" style="margin-top:16px">+ Nova Tabela</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

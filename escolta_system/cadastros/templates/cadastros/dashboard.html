@@ -1,0 +1,89 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a>{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Agentes ativos</div>
+    <div class="stat-value">{{ total_agentes }}</div>
+    <div class="stat-sub"><a href="{% url 'agente_list' %}" style="color:var(--blue-light);text-decoration:none">Ver todos →</a></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Viaturas ativas</div>
+    <div class="stat-value">{{ total_viaturas }}</div>
+    <div class="stat-sub"><a href="{% url 'viatura_list' %}" style="color:var(--blue-light);text-decoration:none">Ver todas →</a></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Clientes ativos</div>
+    <div class="stat-value">{{ total_clientes }}</div>
+    <div class="stat-sub"><a href="{% url 'cliente_list' %}" style="color:var(--blue-light);text-decoration:none">Ver todos →</a></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Armamentos disponíveis</div>
+    <div class="stat-value">{{ total_armamentos }}</div>
+    <div class="stat-sub"><a href="{% url 'armamento_list' %}" style="color:var(--blue-light);text-decoration:none">Ver todos →</a></div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div class="card">
+    <div class="card-title">
+      <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Agentes recentes
+    </div>
+    {% if agentes_recentes %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Nome</th><th>Função</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for a in agentes_recentes %}
+          <tr>
+            <td><a href="{% url 'agente_edit' a.pk %}" style="color:var(--blue-light);text-decoration:none">{{ a.nome }}</a></td>
+            <td style="color:var(--text2)">{{ a.get_funcao_display }}</td>
+            <td>
+              {% if a.status == 'ativo' %}<span class="badge badge-green">Ativo</span>
+              {% elif a.status == 'afastado' %}<span class="badge badge-amber">Afastado</span>
+              {% else %}<span class="badge badge-gray">Inativo</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p style="color:var(--text3);font-size:13px">Nenhum agente cadastrado ainda. <a href="{% url 'agente_create' %}" style="color:var(--blue-light)">Cadastrar agora →</a></p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><rect x="1" y="6" width="14" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 6V5a4 4 0 018 0v1" stroke="currentColor" stroke-width="1.3"/><circle cx="4.5" cy="12" r="1" fill="currentColor"/><circle cx="11.5" cy="12" r="1" fill="currentColor"/></svg>
+      Viaturas recentes
+    </div>
+    {% if viaturas %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Placa</th><th>Modelo</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for v in viaturas %}
+          <tr>
+            <td><a href="{% url 'viatura_edit' v.pk %}" style="color:var(--blue-light);text-decoration:none;font-family:monospace">{{ v.placa }}</a></td>
+            <td style="color:var(--text2)">{{ v.marca_modelo }}</td>
+            <td>
+              {% if v.status == 'ativa' %}<span class="badge badge-green">Ativa</span>
+              {% elif v.status == 'manutencao' %}<span class="badge badge-amber">Manutenção</span>
+              {% else %}<span class="badge badge-gray">Inativa</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p style="color:var(--text3);font-size:13px">Nenhuma viatura cadastrada ainda. <a href="{% url 'viatura_create' %}" style="color:var(--blue-light)">Cadastrar agora →</a></p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,685 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}{% if novo %}Nova OS — Detalhes{% else %}OS-{{ os.numero }}{% endif %}{% endblock %}
+{% block page_title %}{% if novo %}Abrir Ordem de Serviço{% else %}OS-{{ os.numero }}{% endif %}{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Início</a> /
+  <a href="{% url 'os_list' %}">Ordens de Serviço</a> /
+  {% if novo %}Nova OS{% else %}OS-{{ os.numero }}{% endif %}
+{% endblock %}
+
+{% block topbar_actions %}
+  {% if not novo %}
+  <a href="{% url 'os_delete' os.pk %}" class="btn btn-secondary" style="color:var(--red)">
+    <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M2 4h10M5 4V2.5h4V4M5.5 6.5v4M8.5 6.5v4M3 4l.7 7.5h6.6L11 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Excluir OS
+  </a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<style>
+/* ── layout ── */
+.os-wrap { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.os-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.os-card-header {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg3);
+}
+.os-card-header .badge-os { font-size: 13px; font-weight: 700; color: var(--blue-light); text-transform: none; letter-spacing: 0; margin-left: auto; }
+.os-card-body { padding: 20px; }
+
+/* ── grid helpers ── */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.g4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
+.g-col2 { grid-column: span 2; }
+.g-col3 { grid-column: span 3; }
+.g-col4 { grid-column: 1/-1; }
+
+/* ── fields ── */
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; display: flex; align-items: center; gap: 4px; }
+.required { color: var(--red); }
+.field input, .field select, .field textarea {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border .15s;
+  width: 100%;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px #2d6be420; }
+.field input[disabled] { opacity:.5; cursor:not-allowed; }
+
+/* ── equipe card ── */
+.equipe-preview {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-top: 10px;
+  display: none;
+}
+.equipe-preview.show { display: block; }
+.ep-row { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 6px; }
+.ep-item { font-size: 12px; color: var(--text2); }
+.ep-item strong { color: var(--text); display: block; font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; font-weight: 600; margin-bottom: 2px; }
+.ep-dot { display: inline-block; width:6px; height:6px; border-radius:50%; background:var(--green); margin-right:5px; }
+
+/* ── status badge no header ── */
+.status-aberta      { color: var(--blue-light); }
+.status-em_viagem   { color: #f59e0b; }
+.status-em_operacao { color: #f97316; }
+.status-encerrando  { color: #a855f7; }
+.status-concluida   { color: var(--green); }
+.status-finalizada  { color: #22c55e; font-weight:700; }
+.status-cancelada   { color: var(--red); }
+
+/* Bloqueio visual OS finalizada */
+.os-finalizada-overlay {
+  position:fixed;inset:0;background:rgba(0,0,0,.0);pointer-events:none;z-index:1;
+}
+.os-bloqueada fieldset, .os-bloqueada input, .os-bloqueada select,
+.os-bloqueada textarea, .os-bloqueada button[type=submit] {
+  pointer-events:none!important;opacity:.6!important;cursor:not-allowed!important;
+}
+.os-bloqueada .btn-primary { display:none!important; }
+.banner-finalizada {
+  background:#0f2a1a;border:1px solid #1a4d2a;border-radius:8px;
+  padding:12px 18px;margin-bottom:16px;
+  display:flex;align-items:center;gap:10px;
+  color:#22c55e;font-size:13px;font-weight:600;
+}
+
+/* ── divider ── */
+.sec-divider { border: none; border-top: 1px solid var(--border); margin: 4px 0 8px; }
+.sec-label { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; }
+
+.check-row { display: flex; align-items: center; gap: 8px; padding-top: 22px; }
+.check-row input[type=checkbox] { width:16px; height:16px; accent-color: var(--blue); cursor:pointer; }
+.check-row label { font-size:13px; color:var(--text2); cursor:pointer; margin:0; }
+</style>
+
+{% if not novo and os.status == 'finalizada' %}
+<div class="banner-finalizada">
+  <svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M2 8l5 5 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  OS Finalizada em {{ os.finalizada_em|date:"d/m/Y H:i"|default:"—" }} — Esta OS está bloqueada e não pode ser editada.
+</div>
+{% endif %}
+
+<form method="post" {% if not novo and os.status == 'finalizada' %}class="os-bloqueada"{% endif %}>
+{% csrf_token %}
+<div class="os-wrap">
+
+  <!-- ── CARD 1: DADOS GERAIS ── -->
+  <div class="os-card">
+    <div class="os-card-header">
+      <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><line x1="4" y1="5" x2="10" y2="5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="4" y1="7.5" x2="10" y2="7.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="4" y1="10" x2="7" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Dados Gerais
+      {% if not novo %}<span class="badge-os status-{{ os.status }}">OS-{{ os.numero }} · {{ os.get_status_display }}</span>{% endif %}
+    </div>
+    <div class="os-card-body">
+
+      <!-- linha 1: cliente + solicitante + setor -->
+      <div class="g3" style="margin-bottom:14px">
+        <div class="field g-col2">
+          <label>Cliente <span class="required">!</span></label>
+          <select name="cliente" required>
+            <option value="">— Selecione —</option>
+            {% for c in clientes %}
+            <option value="{{ c.pk }}"
+              {% if novo and draft.cliente_id == c.pk|stringformat:'s' %}selected
+              {% elif not novo and os.cliente_id == c.pk %}selected{% endif %}>
+              {{ c.razao_social }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label>Solicitante</label>
+          <input type="text" name="solicitante"
+            value="{% if novo %}{{ draft.solicitante }}{% else %}{{ os.solicitante }}{% endif %}"
+            placeholder="Nome do solicitante">
+        </div>
+      </div>
+
+      <!-- linha 2: forma + tipo + previsão início + previsão retorno + imediata + status -->
+      <div class="g4" style="margin-bottom:14px">
+        <div class="field">
+          <label>Forma Solicitação <span class="required">!</span></label>
+          <select name="forma_solicitacao" required>
+            <option value="">— Selecione —</option>
+            {% for val, label in forma_choices %}
+            <option value="{{ val }}"
+              {% if novo and draft.forma_solicitacao == val %}selected
+              {% elif not novo and os.forma_solicitacao == val %}selected{% endif %}>
+              {{ label }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label>Tipo de Viagem <span class="required">!</span></label>
+          <select name="tipo_viagem" required>
+            <option value="">— Selecione —</option>
+            <option value="urbana" {% if novo and draft.tipo_viagem == 'urbana' or not novo and os.tipo_viagem == 'urbana' %}selected{% endif %}>Urbana</option>
+            <option value="rodoviaria" {% if novo and draft.tipo_viagem == 'rodoviaria' or not novo and os.tipo_viagem == 'rodoviaria' %}selected{% endif %}>Rodoviária</option>
+            <option value="administrativa" {% if novo and draft.tipo_viagem == 'administrativa' or not novo and os.tipo_viagem == 'administrativa' %}selected{% endif %}>Administrativa</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Previsão Início <span class="required">!</span></label>
+          <input type="datetime-local" name="previsao_inicio" required
+            value="{% if novo %}{{ draft.previsao_inicio }}{% else %}{{ os.previsao_inicio|date:'Y-m-d' }}T{{ os.previsao_inicio|date:'H:i' }}{% endif %}">
+        </div>
+        <div class="field">
+          <label>Previsão Retorno</label>
+          <input type="datetime-local" name="previsao_retorno"
+            value="{% if novo %}{{ draft.previsao_retorno }}{% else %}{% if os.previsao_retorno %}{{ os.previsao_retorno|date:'Y-m-d' }}T{{ os.previsao_retorno|date:'H:i' }}{% endif %}{% endif %}">
+        </div>
+      </div>
+
+      <!-- linha 3: imediata + status (edição) -->
+      <div class="g3" style="margin-bottom:0">
+        <div class="field">
+          <label>&nbsp;</label>
+          <div class="check-row" style="padding-top:0">
+            <input type="checkbox" name="imediata" id="imediata" value="1"
+              {% if novo and draft.imediata %}checked{% elif not novo and os.imediata %}checked{% endif %}>
+            <label for="imediata" style="font-size:13px">Imediata</label>
+          </div>
+        </div>
+        {% if not novo %}
+        <div class="field">
+          <label>Status</label>
+          <select name="status">
+            <option value="aberta"      {% if os.status == 'aberta'      %}selected{% endif %}>Aberta</option>
+            <option value="em_viagem"   {% if os.status == 'em_viagem'   %}selected{% endif %}>Em Viagem</option>
+            <option value="em_operacao" {% if os.status == 'em_operacao' %}selected{% endif %}>Em Operação</option>
+            <option value="encerrando"  {% if os.status == 'encerrando'  %}selected{% endif %}>Encerrando</option>
+            <option value="concluida"   {% if os.status == 'concluida'   %}selected{% endif %}>Concluída</option>
+            <option value="finalizada"  {% if os.status == 'finalizada'  %}selected{% endif %}>Finalizada</option>
+            <option value="cancelada"   {% if os.status == 'cancelada'   %}selected{% endif %}>Cancelada</option>
+          </select>
+        </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── CARD 2: TRAJETO ── -->
+  <div class="os-card">
+    <div class="os-card-header">
+      <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><circle cx="4" cy="11" r="2" stroke="currentColor" stroke-width="1.3"/><circle cx="10" cy="3" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M4 9V6a3 3 0 013-3h1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Trajeto
+    </div>
+    <div class="os-card-body">
+      <div class="g4">
+        <div class="field g-col2">
+          <label>Cidade Origem <span class="required">!</span></label>
+          <input type="text" name="cidade_origem" required
+            value="{% if novo %}{{ draft.cidade_origem }}{% else %}{{ os.cidade_origem }}{% endif %}"
+            placeholder="Ex: Goiânia">
+        </div>
+        <div class="field">
+          <label>UF Origem <span class="required">!</span></label>
+          <select name="uf_origem" required>
+            {% for uf in ufs %}
+            <option value="{{ uf }}"
+              {% if novo and draft.uf_origem == uf %}selected
+              {% elif not novo and os.uf_origem == uf %}selected{% endif %}>{{ uf }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label>&nbsp;</label><!-- espaço -->
+        </div>
+        <div class="field g-col2">
+          <label>Cidade Destino <span class="required">!</span></label>
+          <input type="text" name="cidade_destino" required
+            value="{% if novo %}{{ draft.cidade_destino }}{% else %}{{ os.cidade_destino }}{% endif %}"
+            placeholder="Ex: Brasília">
+        </div>
+        <div class="field">
+          <label>UF Destino <span class="required">!</span></label>
+          <select name="uf_destino" required>
+            {% for uf in ufs %}
+            <option value="{{ uf }}"
+              {% if novo and draft.uf_destino == uf %}selected
+              {% elif not novo and os.uf_destino == uf %}selected{% endif %}>{{ uf }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CARD 3: EQUIPE ── -->
+  <div class="os-card">
+    <div class="os-card-header">
+      <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><circle cx="4.5" cy="4.5" r="2" stroke="currentColor" stroke-width="1.3"/><circle cx="9.5" cy="4.5" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M1 12c0-1.93 1.57-3 3.5-3s3.5 1.07 3.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M8 10.5c.45-.32 1.0-.5 1.5-.5 1.93 0 3.5 1.07 3.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Equipe de Agentes
+    </div>
+    <div class="os-card-body">
+      <div class="g2">
+        <div class="field">
+          <label>Vincular Equipe</label>
+          <select name="equipe" id="equipe-select" onchange="showEquipePreview(this)">
+            <option value="">— Selecione uma equipe —</option>
+            {% for eq in equipes %}
+            <option value="{{ eq.pk }}"
+              data-ag1="{{ eq.agente1.nome }}"
+              data-ag2="{{ eq.agente2.nome }}"
+              data-viatura="{% if eq.viatura %}{{ eq.viatura.marca_modelo }} — {{ eq.viatura.placa }}{% else %}Sem viatura{% endif %}"
+              data-status="{{ eq.get_status_display }}"
+              {% if not novo and os.equipe_id == eq.pk %}selected{% endif %}>
+              {{ eq.nome }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div style="padding-top:20px">
+          <a href="{% url 'equipe_create' %}" class="btn btn-secondary" target="_blank" style="font-size:12px">
+            <svg width="12" height="12" fill="none" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            Criar Nova Equipe
+          </a>
+        </div>
+      </div>
+
+      <!-- Preview da equipe selecionada -->
+      <div class="equipe-preview {% if not novo and os.equipe %}show{% endif %}" id="equipe-preview">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Composição da Equipe</div>
+        <div class="ep-row">
+          <div class="ep-item"><strong>Agente 1</strong><span class="ep-dot"></span><span id="ep-ag1">{% if not novo and os.equipe %}{{ os.equipe.agente1.nome }}{% endif %}</span></div>
+          <div class="ep-item"><strong>Agente 2</strong><span class="ep-dot"></span><span id="ep-ag2">{% if not novo and os.equipe %}{{ os.equipe.agente2.nome }}{% endif %}</span></div>
+          <div class="ep-item"><strong>Viatura</strong><span id="ep-viatura">{% if not novo and os.equipe and os.equipe.viatura %}{{ os.equipe.viatura.marca_modelo }} — {{ os.equipe.viatura.placa }}{% elif not novo and os.equipe %}Sem viatura{% endif %}</span></div>
+          <div class="ep-item"><strong>Status</strong><span id="ep-status">{% if not novo and os.equipe %}{{ os.equipe.get_status_display }}{% endif %}</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CARD 4: OBSERVAÇÕES ── -->
+  <div class="os-card">
+    <div class="os-card-header">
+      <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="1" y="2" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><line x1="4" y1="5" x2="10" y2="5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="4" y1="7.5" x2="8" y2="7.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Observações
+    </div>
+    <div class="os-card-body">
+      <textarea name="observacoes" rows="3" placeholder="Informações adicionais sobre a OS...">{% if not novo %}{{ os.observacoes }}{% endif %}</textarea>
+    </div>
+  </div>
+
+</div><!-- /os-wrap -->
+
+<!-- Botões -->
+<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+  <a href="{% url 'os_list' %}" class="btn btn-secondary">Cancelar</a>
+  <button type="submit" class="btn btn-primary">
+    <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    {% if novo %}Abrir Ordem de Serviço{% else %}Salvar Alterações{% endif %}
+  </button>
+</div>
+
+</form>
+
+{% if not novo %}
+<!-- ══════════════════════════════════════════════════════════════
+     SEÇÃO OPERACIONAL — só aparece em OS já salva
+     ══════════════════════════════════════════════════════════════ -->
+<form method="post" action="{% url 'os_operacional_save' os.pk %}" style="margin-top:16px">
+{% csrf_token %}
+
+<!-- ── CARD: EXECUÇÃO (Nº Folha + Tabela de tempos/km) ── -->
+<div class="os-card" style="margin-bottom:16px">
+  <div class="os-card-header">
+    <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 4v3l2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    Execução da OS
+  </div>
+  <div class="os-card-body">
+
+    <!-- Nº Folha -->
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+      <div class="field" style="max-width:160px">
+        <label>Nº Folha</label>
+        <input type="text" name="numero_folha" value="{{ operacional.numero_folha|default:'' }}" placeholder="Ex: 675">
+      </div>
+    </div>
+
+    <!-- Tabela de marcos -->
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:8px 10px;color:var(--text3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em;width:180px">Marco</th>
+            <th style="text-align:left;padding:8px 10px;color:var(--text3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em">Data / Hora</th>
+            <th style="text-align:center;padding:8px 10px;color:var(--text3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em;width:90px">Tempo</th>
+            <th style="text-align:center;padding:8px 10px;color:var(--text3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em;width:110px">KM</th>
+            <th style="text-align:center;padding:8px 10px;color:var(--text3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em;width:90px">Distância</th>
+          </tr>
+        </thead>
+        <tbody id="op-tbody">
+          {% with op=operacional %}
+          <tr class="op-row" data-row="inicio_viagem">
+            <td style="padding:7px 10px;color:var(--text2);border-bottom:1px solid var(--border)">Início de Viagem:</td>
+            <td style="padding:4px 10px;border-bottom:1px solid var(--border)">
+              <input type="datetime-local" name="inicio_viagem" class="op-dt" data-field="inicio_viagem"
+                value="{% if op and op.inicio_viagem %}{{ op.inicio_viagem|date:'Y-m-d' }}T{{ op.inicio_viagem|date:'H:i' }}{% endif %}"
+                style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:200px">
+            </td>
+            <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--text3)" id="t-inicio">00:00</td>
+            <td style="padding:4px 10px;border-bottom:1px solid var(--border)">
+              <input type="number" name="km_inicio_viagem" class="op-km" data-field="km_inicio_viagem"
+                value="{{ op.km_inicio_viagem|default:'' }}"
+                style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:90px;text-align:center">
+            </td>
+            <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--text3)" id="d-inicio">0</td>
+          </tr>
+          <tr class="op-row" data-row="chegada_operacao">
+            <td style="padding:7px 10px;color:var(--text2);border-bottom:1px solid var(--border)">Chegada Operação:</td>
+            <td style="padding:4px 10px;border-bottom:1px solid var(--border)">
+              <input type="datetime-local" name="chegada_operacao" class="op-dt" data-field="chegada_operacao"
+                value="{% if op and op.chegada_operacao %}{{ op.chegada_operacao|date:'Y-m-d' }}T{{ op.chegada_operacao|date:'H:i' }}{% endif %}"
+                style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:200px">
+            </td>
+            <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--text2);font-weight:600" id="t-chegada">{{ op.tempo_chegada|default:"00:00" }}</td>
+            <td style="padding:4px 10px;border-bottom:1px solid var(--border)">
+              <input type="number" name="km_chegada_operacao" class="op-km" data-field="km_chegada_operacao"
+                value="{{ op.km_chegada_operacao|default:'' }}"
+                style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:90px;text-align:center">
+            </td>
+            <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--text2);font-weight:600" id="d-chegada">{{ op.km_trecho_chegada|default:"0" }}</td>
+          </tr>
+          <tr class="op-row" data-row="inicio_operacao">
+            <td style="padding:7px 10px;color:var(--text2);border-bottom:1px solid var(--border)">Início Operação:</td>
+            <td style="padding:4px 10px;border-bottom:1px solid var(--border)">
+              <input type="datetime-local" name="inicio_operacao" class="op-dt" data-field="inicio_operacao"
+                value="{% if op and op.inicio_operacao %}{{ op.inicio_operacao|date:'Y-m-d' }}T{{ op.inicio_operacao|date:'H:i' }}{% endif %}"
+                style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:200px">
+            </td>
+            <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--text2);font-weight:600" id="t-inicio-op">{{ op.tempo_inicio_op|default:"00:00" }}</td>
+            <td style="padding:4px 10px;border-bottom:1px solid var(--border)">
+              <input type="number" name="km_inicio_operacao" class="op-km" data-field="km_inicio_operacao"
+                value="{{ op.km_inicio_operacao|default:'' }}"
+                style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:90px;text-align:center">
+            </td>
+            <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--text3)" id="d-inicio-op">0</td>
+          </tr>
+          <tr class="op-row" data-row="termino_operacao">
+            <td style="padding:7px 10px;color:var(--text2);border-bottom:1px solid var(--border)">Término Operação:</td>
+            <td style="padding:4px 10px;border-bottom:1px solid var(--border)">
+              <input type="datetime-local" name="termino_operacao" class="op-dt" data-field="termino_operacao"
+                value="{% if op and op.termino_operacao %}{{ op.termino_operacao|date:'Y-m-d' }}T{{ op.termino_operacao|date:'H:i' }}{% endif %}"
+                style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:200px">
+            </td>
+            <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--text2);font-weight:600" id="t-termino-op">{{ op.tempo_termino_op|default:"00:00" }}</td>
+            <td style="padding:4px 10px;border-bottom:1px solid var(--border)">
+              <input type="number" name="km_termino_operacao" class="op-km" data-field="km_termino_operacao"
+                value="{{ op.km_termino_operacao|default:'' }}"
+                style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:90px;text-align:center">
+            </td>
+            <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--text2);font-weight:600" id="d-termino-op">{{ op.km_trecho_termino_op|default:"0" }}</td>
+          </tr>
+          <tr class="op-row" data-row="termino_viagem">
+            <td style="padding:7px 10px;color:var(--text2)">Término de Viagem:</td>
+            <td style="padding:4px 10px">
+              <input type="datetime-local" name="termino_viagem" class="op-dt" data-field="termino_viagem"
+                value="{% if op and op.termino_viagem %}{{ op.termino_viagem|date:'Y-m-d' }}T{{ op.termino_viagem|date:'H:i' }}{% endif %}"
+                style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:200px">
+            </td>
+            <td style="padding:7px 10px;text-align:center;color:var(--text2);font-weight:600" id="t-termino-v">{{ op.tempo_termino_viagem|default:"00:00" }}</td>
+            <td style="padding:4px 10px">
+              <input type="number" name="km_termino_viagem" class="op-km" data-field="km_termino_viagem"
+                value="{{ op.km_termino_viagem|default:'' }}"
+                style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:90px;text-align:center">
+            </td>
+            <td style="padding:7px 10px;text-align:center;color:var(--blue-light);font-weight:700" id="d-total">{{ op.km_total|default:"0" }}</td>
+          </tr>
+          {% endwith %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Totalizadores -->
+    <div style="display:flex;flex-wrap:wrap;gap:24px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Total Viagem (Início → Término)</span>
+        <div style="display:flex;gap:16px">
+          <span style="font-size:12px;color:var(--text3)">Horas: <strong id="total-horas" style="color:var(--text);font-size:14px">—</strong></span>
+          <span style="font-size:12px;color:var(--text3)">KM: <strong id="total-km" style="color:var(--blue-light);font-size:14px">—</strong></span>
+        </div>
+      </div>
+      <div style="width:1px;background:var(--border);margin:0 4px"></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Total em Operação (Início Op. → Término Op.)</span>
+        <div style="display:flex;gap:16px">
+          <span style="font-size:12px;color:var(--text3)">Horas: <strong id="total-horas-op" style="color:var(--text);font-size:14px">—</strong></span>
+          <span style="font-size:12px;color:var(--text3)">KM: <strong id="total-km-op" style="color:var(--blue-light);font-size:14px">—</strong></span>
+        </div>
+      </div>
+      <div style="width:1px;background:var(--border);margin:0 4px"></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Pedágio</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:12px;color:var(--text3)">R$</span>
+          <input type="number" name="pedagio" min="0" step="0.01"
+            value="{{ operacional.pedagio|default:'' }}"
+            placeholder="0,00"
+            style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:14px;font-weight:600;font-family:inherit;outline:none;width:110px;text-align:right"
+            onfocus="this.style.borderColor='var(--blue)'"
+            onblur="this.style.borderColor='var(--border)'">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CARD: VEÍCULOS ESCOLTADOS ── -->
+<div class="os-card" style="margin-bottom:16px">
+  <div class="os-card-header">
+    <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="1" y="5" width="12" height="6" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 5V4a3.5 3.5 0 017 0v1" stroke="currentColor" stroke-width="1.3"/><circle cx="3.5" cy="10" r=".8" fill="currentColor"/><circle cx="10.5" cy="10" r=".8" fill="currentColor"/></svg>
+    Veículos Escoltados
+    <span style="margin-left:auto;font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">Máximo 4 veículos</span>
+  </div>
+  <div class="os-card-body">
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:center;padding:7px 6px;color:var(--text3);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;width:30px">#</th>
+            <th style="text-align:left;padding:7px 8px;color:var(--text3);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em">Veículo</th>
+            <th style="text-align:left;padding:7px 8px;color:var(--text3);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em">Placa Cavalo</th>
+            <th style="text-align:left;padding:7px 8px;color:var(--text3);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em">Placa Carreta</th>
+            <th style="text-align:left;padding:7px 8px;color:var(--text3);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em">Placa Carreta 2</th>
+            <th style="text-align:left;padding:7px 8px;color:var(--text3);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em">Motorista</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for slot in veiculo_slots %}
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:6px;text-align:center;color:var(--text3);font-size:11px;font-weight:700">{{ slot.num }}</td>
+            <td style="padding:4px 6px"><input type="text" name="veiculo_{{ slot.num }}" value="{{ slot.veiculo }}" placeholder="Tipo/modelo" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:100%;min-width:100px"></td>
+            <td style="padding:4px 6px"><input type="text" name="placa_cavalo_{{ slot.num }}" value="{{ slot.placa_cavalo }}" placeholder="AAA-0000" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:100%;min-width:100px"></td>
+            <td style="padding:4px 6px"><input type="text" name="placa_carreta_{{ slot.num }}" value="{{ slot.placa_carreta }}" placeholder="AAA-0000" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:100%;min-width:100px"></td>
+            <td style="padding:4px 6px"><input type="text" name="placa_carreta2_{{ slot.num }}" value="{{ slot.placa_carreta2 }}" placeholder="AAA-0000" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:100%;min-width:100px"></td>
+            <td style="padding:4px 6px"><input type="text" name="motorista_{{ slot.num }}" value="{{ slot.motorista }}" placeholder="Nome do motorista" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:100%;min-width:120px"></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Botão salvar operacional -->
+<div style="display:flex;justify-content:flex-end;margin-top:4px">
+  <button type="submit" class="btn btn-primary">
+    <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Salvar Dados Operacionais
+  </button>
+</div>
+
+</form>
+{% endif %}
+
+<script>
+function showEquipePreview(select) {
+  const opt = select.options[select.selectedIndex];
+  const preview = document.getElementById('equipe-preview');
+  if (!opt || !opt.value) {
+    preview.classList.remove('show');
+    return;
+  }
+  document.getElementById('ep-ag1').textContent    = opt.getAttribute('data-ag1') || '—';
+  document.getElementById('ep-ag2').textContent    = opt.getAttribute('data-ag2') || '—';
+  document.getElementById('ep-viatura').textContent = opt.getAttribute('data-viatura') || '—';
+  document.getElementById('ep-status').textContent  = opt.getAttribute('data-status') || '—';
+  preview.classList.add('show');
+}
+// Inicializar preview se já houver equipe selecionada
+window.addEventListener('DOMContentLoaded', function() {
+  const sel = document.getElementById('equipe-select');
+  if (sel && sel.value) showEquipePreview(sel);
+  recalcAll();
+});
+
+// ── Cálculo automático de tempos e KM ──────────────────────────────
+function getVal(name) {
+  const el = document.querySelector(`[name="${name}"]`);
+  return el ? el.value : '';
+}
+function diffHHMM(dt1str, dt2str) {
+  if (!dt1str || !dt2str) return '00:00';
+  const d1 = new Date(dt1str), d2 = new Date(dt2str);
+  if (isNaN(d1) || isNaN(d2)) return '00:00';
+  const diff = Math.abs(d2 - d1) / 1000;
+  const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60);
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
+function diffKM(km2, km1) {
+  const a = parseInt(km2)||0, b = parseInt(km1)||0;
+  return a > b ? a - b : 0;
+}
+function atualizarStatus() {
+  const iv = getVal('inicio_viagem');
+  const co = getVal('chegada_operacao');
+  const io = getVal('inicio_operacao');
+  const to = getVal('termino_operacao');
+  const tv = getVal('termino_viagem');
+  const sel = document.querySelector('[name="status"]');
+  if (!sel) return;
+  if (sel.value === 'cancelada') return;
+
+  let novoStatus;
+  if (tv) {
+    novoStatus = 'concluida';
+  } else if (to) {
+    novoStatus = 'encerrando';
+  } else if (co || io) {
+    novoStatus = 'em_operacao';
+  } else if (iv) {
+    novoStatus = 'em_viagem';
+  } else {
+    novoStatus = 'aberta';
+  }
+  sel.value = novoStatus;
+
+  // Atualizar visual do badge no header
+  const badge = document.querySelector('.badge-os');
+  if (badge) {
+    const labels = {
+      aberta:'Aberta', em_viagem:'Em Viagem', em_operacao:'Em Operação',
+      encerrando:'Encerrando', concluida:'Concluída', cancelada:'Cancelada'
+    };
+    const classes = {
+      aberta:'status-aberta', em_viagem:'status-em_viagem', em_operacao:'status-em_operacao',
+      encerrando:'status-encerrando', concluida:'status-concluida', cancelada:'status-cancelada'
+    };
+    badge.className = 'badge-os ' + (classes[novoStatus] || '');
+    const num = badge.textContent.split('·')[0].trim();
+    badge.textContent = num + ' · ' + (labels[novoStatus] || novoStatus);
+  }
+}
+
+function recalcAll() {
+  const iv  = getVal('inicio_viagem');
+  const co  = getVal('chegada_operacao');
+  const io  = getVal('inicio_operacao');
+  const to  = getVal('termino_operacao');
+  const tv  = getVal('termino_viagem');
+  const kiv = getVal('km_inicio_viagem');
+  const kco = getVal('km_chegada_operacao');
+  const kio = getVal('km_inicio_operacao');
+  const kto = getVal('km_termino_operacao');
+  const ktv = getVal('km_termino_viagem');
+
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+  set('t-chegada',    diffHHMM(iv, co));    // iv -> co
+  set('t-inicio-op',  diffHHMM(co, io));    // co -> io
+  set('t-termino-op', diffHHMM(io, to));    // io -> to
+  set('t-termino-v',  diffHHMM(to, tv));    // to -> tv (corrigido: era iv->tv)
+  set('d-chegada',    diffKM(kco, kiv));    // kiv -> kco
+  set('d-termino-op', diffKM(kto, kio));    // kio -> kto
+  set('d-total',      diffKM(ktv, kto));    // kto -> ktv (corrigido: era kiv->ktv)
+
+  // Total Viagem: inicio_viagem -> termino_viagem
+  const totalKM = diffKM(ktv, kiv);
+  set('total-km', totalKM > 0 ? totalKM + ' km' : '—');
+  const tv_total = diffHHMM(iv, tv);
+  set('total-horas', tv_total !== '00:00' ? tv_total : '—');
+
+  // Total Operacao: inicio_operacao -> termino_operacao
+  const totalKMop = diffKM(kto, kio);
+  set('total-km-op', totalKMop > 0 ? totalKMop + ' km' : '—');
+  const op_total = diffHHMM(io, to);
+  set('total-horas-op', op_total !== '00:00' ? op_total : '—');
+
+  // Atualizar status automaticamente
+  atualizarStatus();
+}
+
+document.querySelectorAll('.op-dt, .op-km').forEach(el => {
+  el.addEventListener('change', recalcAll);
+  el.addEventListener('input', recalcAll);
+});
+
+// ── Corrige ano com mais de 4 dígitos nos campos datetime-local ────────────
+function fixDateYear(input) {
+  const val = input.value; // formato: YYYY-MM-DDThh:mm
+  if (!val) return;
+  const parts = val.split('T');
+  if (!parts[0]) return;
+  const dateParts = parts[0].split('-');
+  if (!dateParts[0] || dateParts[0].length <= 4) return;
+  // Trunca o ano para os últimos 4 dígitos
+  dateParts[0] = dateParts[0].slice(-4);
+  parts[0] = dateParts.join('-');
+  input.value = parts.join('T');
+  recalcAll();
+}
+
+document.querySelectorAll('input[type="datetime-local"]').forEach(el => {
+  el.addEventListener('input', function() { fixDateYear(this); });
+  el.addEventListener('change', function() { fixDateYear(this); });
+  // Define max para evitar anos além de 2099
+  if (!el.getAttribute('max')) {
+    el.setAttribute('max', '2099-12-31T23:59');
+  }
+});
+</script>
+{% endblock %}

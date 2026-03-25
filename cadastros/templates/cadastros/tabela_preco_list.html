@@ -1,0 +1,87 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}Tabelas de Preço{% endblock %}
+{% block page_title %}Tabelas de Preço{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> › Faturamento › Tabelas de Preço{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'tabela_preco_create' %}" class="btn btn-primary">
+    <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    Nova Tabela
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="search-bar">
+    <form method="get" style="display:flex;gap:10px;flex:1">
+      <input type="text" name="q" value="{{ q }}" placeholder="Buscar por cliente ou nome da tabela…">
+      <button type="submit" class="btn btn-secondary">Buscar</button>
+      {% if q %}<a href="{% url 'tabela_preco_list' %}" class="btn btn-secondary">Limpar</a>{% endif %}
+    </form>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Nome / Rota</th>
+          <th>Tipo</th>
+          <th>Valor Escolta</th>
+          <th>Franquia KM</th>
+          <th>Franquia Horas</th>
+          <th>Pedágio</th>
+          <th>Situação</th>
+          <th>Próx. Reajuste</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in tabelas %}
+        <tr>
+          <td style="font-weight:500">{{ t.cliente.razao_social }}</td>
+          <td>{{ t.nome }}</td>
+          <td><span class="badge badge-gray">{{ t.get_tipo_viagem_display }}</span></td>
+          <td style="font-weight:600;color:var(--green)">R$ {{ t.valor_escolta|floatformat:2 }}</td>
+          <td>{{ t.franquia_km }} km</td>
+          <td>{{ t.franquia_horas }}</td>
+          <td>
+            {% if t.cobrar_pedagio == 'sim' %}
+              {% if t.pedagio_fixo > 0 %}R$ {{ t.pedagio_fixo|floatformat:2 }}
+              {% elif t.pedagio_percent > 0 %}{{ t.pedagio_percent }}%
+              {% else %}<span class="badge badge-blue">Sim</span>{% endif %}
+            {% else %}<span class="badge badge-gray">Não</span>{% endif %}
+          </td>
+          <td>
+            {% if t.situacao == 'ativo' %}
+              <span class="badge badge-green">Ativo</span>
+            {% else %}
+              <span class="badge badge-red">Inativo</span>
+            {% endif %}
+          </td>
+          <td style="color:var(--text2)">
+            {% if t.proximo_reajuste %}{{ t.proximo_reajuste|date:"d/m/Y" }}{% else %}—{% endif %}
+          </td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <a href="{% url 'tabela_preco_edit' t.pk %}" class="btn-icon" title="Editar">
+                <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+              </a>
+              <a href="{% url 'tabela_preco_delete' t.pk %}" class="btn-icon" title="Excluir" style="color:var(--red)">
+                <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><polyline points="2,4 14,4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M6 4V2h4v2M5 4v9a1 1 0 001 1h4a1 1 0 001-1V4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="10" style="text-align:center;color:var(--text3);padding:32px">
+            Nenhuma tabela de preço cadastrada.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

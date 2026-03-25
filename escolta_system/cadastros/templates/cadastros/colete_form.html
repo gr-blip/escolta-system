@@ -1,0 +1,37 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / <a href="{% url 'colete_list' %}">Coletes</a> / {{ titulo }}{% endblock %}
+{% block topbar_actions %}<a href="{% url 'colete_list' %}" class="btn btn-secondary">← Voltar</a>{% endblock %}
+
+{% block content %}
+<form method="post">
+  {% csrf_token %}
+  <div class="card">
+    <div class="card-title">
+      <svg width="14" height="14" fill="none" viewBox="0 0 16 16">
+        <path d="M8 2C5 2 3 4 3 6v5l5 3 5-3V6c0-2-2-4-5-4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+        <path d="M6 7l1.5 1.5L10 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Identificação do colete
+    </div>
+    <div class="form-grid form-grid-2">
+      <div class="field"><label>Marca *</label>{{ form.marca }}</div>
+      <div class="field"><label>Numeração *</label>{{ form.numeracao }}</div>
+      <div class="field"><label>Nível de Proteção *</label>{{ form.protecao }}</div>
+      <div class="field"><label>Validade *</label>{{ form.validade }}</div>
+    </div>
+  </div>
+
+  {% if form.errors %}
+  <div style="background:var(--red-bg);border:1px solid #3a1515;color:var(--red);border-radius:8px;padding:12px;margin-top:16px;font-size:13px">
+    {% for field in form %}{% for error in field.errors %}<div>{{ field.label }}: {{ error }}</div>{% endfor %}{% endfor %}
+  </div>
+  {% endif %}
+
+  <div style="display:flex;gap:10px;margin-top:16px">
+    <button type="submit" class="btn btn-primary">Salvar Colete</button>
+    <a href="{% url 'colete_list' %}" class="btn btn-secondary">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

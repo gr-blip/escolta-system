@@ -1,0 +1,235 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}Boletim OS-{{ os.numero }}{% endblock %}
+{% block page_title %}Boletim de Medição — OS-{{ os.numero }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> › <a href="{% url 'boletim_list' %}">Boletins</a> › OS-{{ os.numero }}{% endblock %}
+
+{% block topbar_actions %}
+  {% if boletim.status == 'faturado' %}
+    <span class="badge badge-green" style="font-size:12px;padding:6px 12px">✓ Faturado</span>
+  {% endif %}
+  <a href="{% url 'boletim_export_pdf' %}?clientes={{ os.cliente.pk }}&q={{ os.numero }}"
+     title="Exportar este boletim em PDF"
+     style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:6px;background:#c0392b;color:#fff;font-size:12px;font-weight:600;text-decoration:none;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+      <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+      <path d="M4.603 14.087a.81.81 0 0 1-.438-.42c-.195-.388-.13-.776.08-1.102.198-.307.526-.568.897-.787a7.68 7.68 0 0 1 1.482-.645 19.47 19.47 0 0 0 1.062-2.227 7.269 7.269 0 0 1-.43-1.295c-.086-.4-.119-.796-.046-1.136.075-.354.274-.672.65-.823.192-.077.4-.12.602-.077a.7.7 0 0 1 .477.365c.088.164.12.356.127.538.007.188-.012.396-.047.614-.084.51-.27 1.134-.52 1.794a10.954 10.954 0 0 0 .98 1.686 5.753 5.753 0 0 1 1.334.05c.364.066.734.195.96.465.12.144.193.32.2.518.007.192-.047.382-.138.563a1.04 1.04 0 0 1-.354.416.856.856 0 0 1-.51.138c-.331-.014-.654-.196-.933-.417a5.712 5.712 0 0 1-.911-.95 11.651 11.651 0 0 0-1.997.406 11.307 11.307 0 0 1-1.02 1.51c-.292.35-.609.656-.927.787a.793.793 0 0 1-.58.029z"/>
+    </svg>
+    PDF
+  </a>
+  <a href="{% url 'boletim_export_xlsx' %}?clientes={{ os.cliente.pk }}&q={{ os.numero }}"
+     title="Exportar este boletim em Excel"
+     style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:6px;background:#1a6b35;color:#fff;font-size:12px;font-weight:600;text-decoration:none;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+      <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+      <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.641L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219 5.884 6.68z"/>
+    </svg>
+    Excel
+  </a>
+{% endblock %}
+
+{% block content %}
+<div style="display:grid;grid-template-columns:1fr 360px;gap:16px;align-items:start">
+
+  <!-- Coluna principal -->
+  <div>
+
+    <!-- Dados da OS -->
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title">
+        <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><rect x="2" y="1" width="12" height="14" rx="1.5" stroke="currentColor" stroke-width="1.3"/><line x1="5" y1="5" x2="11" y2="5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="5" y1="8" x2="11" y2="8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Dados da Ordem de Serviço
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Número OS</div>
+          <div style="font-weight:600">OS-{{ os.numero }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Cliente</div>
+          <div style="font-weight:500">{{ os.cliente.razao_social }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Solicitante</div>
+          <div>{{ os.solicitante|default:"—" }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Origem → Destino</div>
+          <div style="font-weight:500">
+            {% if os.cidade_origem %}
+              {{ os.cidade_origem }}/{{ os.uf_origem }} → {{ os.cidade_destino }}/{{ os.uf_destino }}
+            {% else %}—{% endif %}
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Previsão Início</div>
+          <div>{{ os.previsao_inicio|date:"d/m/Y H:i" }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Previsão Fim</div>
+          <div>{{ os.previsao_fim|date:"d/m/Y H:i"|default:"—" }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Status OS</div>
+          <div><span class="badge badge-green">{{ os.get_status_display }}</span></div>
+        </div>
+        {% if op %}
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Chegada Operação</div>
+          <div>{{ op.chegada_operacao|date:"d/m/Y H:i"|default:"—" }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Término Operação</div>
+          <div>{{ op.termino_operacao|date:"d/m/Y H:i"|default:"—" }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">KM Rodado</div>
+          <div>{{ op.km_rodado|default:"—" }} km</div>
+        </div>
+        {% if op.pedagio %}
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Pedágio Real</div>
+          <div>R$ {{ op.pedagio|floatformat:2 }}</div>
+        </div>
+        {% endif %}
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Valores calculados -->
+    <div class="card" style="margin-top:16px">
+      <div class="card-title">
+        <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><line x1="1" y1="7" x2="15" y2="7" stroke="currentColor" stroke-width="1.2"/><line x1="6" y1="7" x2="6" y2="13" stroke="currentColor" stroke-width="1.2"/></svg>
+        Valores do Boletim
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Horas Realizadas</div>
+          <div style="font-weight:500">{{ boletim.horas_realizadas }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">KM Realizado</div>
+          <div style="font-weight:500">{{ boletim.km_realizado }} km</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Horas Excedentes</div>
+          <div>{{ boletim.horas_excedentes }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">KM Excedente</div>
+          <div>{{ boletim.km_excedente }} km</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Valor Escolta</div>
+          <div>R$ {{ boletim.valor_escolta|floatformat:2 }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Excedente KM</div>
+          <div>R$ {{ boletim.valor_excedente_km|floatformat:2 }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Excedente Hora</div>
+          <div>R$ {{ boletim.valor_excedente_hora|floatformat:2 }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Pedágio</div>
+          <div>R$ {{ boletim.valor_pedagio|floatformat:2 }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Acréscimo</div>
+          <div>R$ {{ boletim.acrescimo|floatformat:2 }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Desconto</div>
+          <div style="color:var(--red)">- R$ {{ boletim.desconto|floatformat:2 }}</div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;align-items:center;gap:12px">
+        <span style="font-size:13px;color:var(--text2)">Valor Total</span>
+        <span style="font-size:26px;font-weight:700;color:var(--green)">R$ {{ boletim.valor_total|floatformat:2 }}</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Coluna lateral: formulário de edição -->
+  <div class="card" style="position:sticky;top:80px">
+    <div class="card-title">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      {% if boletim.status == 'faturado' %}Boletim Faturado{% else %}Editar Boletim{% endif %}
+    </div>
+
+    {% if boletim.status == 'faturado' %}
+    <div style="text-align:center;padding:20px 0;color:var(--text3)">
+      <svg width="32" height="32" fill="none" viewBox="0 0 24 24" style="margin:0 auto 10px;display:block;color:var(--green)"><path d="M9 12l2 2 4-4M7 2h10a2 2 0 012 2v16a2 2 0 01-2 2H7a2 2 0 01-2-2V4a2 2 0 012-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Boletim faturado. Não pode ser alterado.
+      {% if boletim.numero_nota %}
+      <div style="margin-top:10px;font-weight:600;color:var(--text)">NF: {{ boletim.numero_nota }}</div>
+      {% endif %}
+    </div>
+    {% else %}
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-grid" style="gap:12px">
+
+        <div class="field">
+          <label>Tabela de Preço</label>
+          <select name="tabela_preco">
+            <option value="">— Selecione —</option>
+            {% for t in tabelas %}
+            <option value="{{ t.pk }}" {% if boletim.tabela_preco_id == t.pk %}selected{% endif %}>{{ t.nome }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field">
+          <label>
+            Pedágio (R$)
+            {% if op and op.pedagio and boletim.valor_pedagio == 0 %}
+            <span style="color:var(--blue-light);font-weight:400"> — da OS</span>
+            {% endif %}
+          </label>
+          <input type="text" name="valor_pedagio" value="{{ pedagio_sugerido|floatformat:2 }}" placeholder="0,00">
+        </div>
+
+        <div class="field">
+          <label>Acréscimo (R$)</label>
+          <input type="text" name="acrescimo" value="{{ boletim.acrescimo|floatformat:2 }}" placeholder="0,00">
+        </div>
+
+        <div class="field">
+          <label>Desconto (R$)</label>
+          <input type="text" name="desconto" value="{{ boletim.desconto|floatformat:2 }}" placeholder="0,00">
+        </div>
+
+        <div class="field">
+          <label>Nº Nota Fiscal</label>
+          <input type="text" name="numero_nota" value="{{ boletim.numero_nota }}">
+        </div>
+
+        <div class="field">
+          <label>Observações</label>
+          <textarea name="observacoes" rows="3">{{ boletim.observacoes }}</textarea>
+        </div>
+
+      </div>
+
+      <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
+        <button type="submit" name="action" value="calcular" class="btn btn-secondary" style="justify-content:center">
+          <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><line x1="5" y1="8" x2="11" y2="8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="8" y1="5" x2="8" y2="11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Calcular Valores
+        </button>
+        <button type="submit" name="action" value="salvar" class="btn btn-primary" style="justify-content:center">
+          Salvar
+        </button>
+        <button type="submit" name="action" value="faturar" class="btn" style="background:var(--green-bg);color:var(--green);border:1px solid #1a4d2a;justify-content:center" onclick="return confirm('Confirmar faturamento? Esta ação não pode ser desfeita.')">
+          <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Marcar como Faturado
+        </button>
+      </div>
+    </form>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

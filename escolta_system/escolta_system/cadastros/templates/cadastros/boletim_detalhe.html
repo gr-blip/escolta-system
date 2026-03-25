@@ -1,0 +1,215 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}Boletim OS-{{ os.numero }}{% endblock %}
+{% block page_title %}Boletim de Medição — OS-{{ os.numero }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / <a href="{% url 'boletim_list' %}">Boletim de Medição</a> / OS-{{ os.numero }}{% endblock %}
+{% block content %}
+<style>
+.secao { background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px }
+.secao-header { padding:10px 18px;background:var(--bg3);border-bottom:1px solid var(--border);font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:8px }
+.secao-body { padding:18px }
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px}
+.lbl{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.val{font-size:13px;color:var(--text);background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:7px 10px}
+.val-money{color:var(--green);font-weight:700;font-size:15px}
+.val-exc{color:#f59e0b;font-weight:600}
+.total-box{background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:10px;padding:18px 24px;display:flex;align-items:center;justify-content:space-between}
+.total-label{font-size:12px;color:var(--blue-light);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.total-value{font-size:28px;font-weight:700;color:var(--blue-light)}
+.faturado-banner{background:#0f2a1a;border:1px solid #1a4d2a;border-radius:8px;padding:12px 18px;margin-bottom:16px;display:flex;align-items:center;gap:10px;color:#22c55e;font-size:13px;font-weight:600}
+</style>
+
+{% if boletim.status == 'faturado' %}
+<div class="faturado-banner">
+  <svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M2 8l5 5 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  Boletim Faturado{% if boletim.numero_nota %} — NF: {{ boletim.numero_nota }}{% endif %} — Dados bloqueados para edição.
+</div>
+{% endif %}
+
+<form method="post" {% if boletim.status == 'faturado' %}class="os-bloqueada"{% endif %}>
+{% csrf_token %}
+
+<!-- OS RESUMO -->
+<div class="secao">
+  <div class="secao-header">
+    <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
+    Dados da OS
+    <span style="margin-left:auto;font-size:13px;font-weight:700;color:var(--blue-light);text-transform:none;letter-spacing:0">OS-{{ os.numero }}</span>
+  </div>
+  <div class="secao-body">
+    <div class="g4">
+      <div><div class="lbl">Cliente</div><div class="val" style="font-weight:600">{{ os.cliente.razao_social }}</div></div>
+      <div><div class="lbl">Rota</div><div class="val">{{ os.cidade_origem }}/{{ os.uf_origem }} → {{ os.cidade_destino }}/{{ os.uf_destino }}</div></div>
+      <div><div class="lbl">Tipo</div><div class="val">{{ os.get_tipo_viagem_display }}</div></div>
+      <div><div class="lbl">Equipe</div><div class="val">{{ os.equipe.nome|default:"—" }}</div></div>
+    </div>
+    {% if op %}
+    <div class="g4" style="margin-top:12px">
+      <div><div class="lbl">Previsão Início</div><div class="val">{{ os.previsao_inicio|date:"d/m/Y H:i" }}</div></div>
+      <div><div class="lbl">Chegada Operação</div><div class="val">{% if op.chegada_operacao %}{{ op.chegada_operacao|date:"d/m/Y H:i" }}{% else %}<span style="color:var(--text3)">—</span>{% endif %}</div></div>
+      <div><div class="lbl">Término Operação</div><div class="val">{% if op.termino_operacao %}{{ op.termino_operacao|date:"d/m/Y H:i" }}{% else %}<span style="color:var(--text3)">—</span>{% endif %}</div></div>
+      <div><div class="lbl">KM Total ({{ op.km_inicio_viagem|default:"—" }} → {{ op.km_termino_viagem|default:"—" }})</div><div class="val">{{ op.km_total }} km</div></div>
+    </div>
+    {% if op.pedagio %}
+    <div style="margin-top:12px">
+      <div class="lbl">Pedágio Registrado na OS</div>
+      <div class="val" style="max-width:200px;color:var(--green)">R$ {{ op.pedagio }}</div>
+    </div>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
+
+<!-- TABELA DE PREÇO -->
+<div class="secao">
+  <div class="secao-header">
+    <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><rect x="1" y="3" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
+    Tabela de Preço
+  </div>
+  <div class="secao-body">
+    <div class="g2" style="margin-bottom:14px">
+      <div>
+        <div class="lbl">Selecionar Tabela <span style="color:var(--red)">!</span></div>
+        <select name="tabela_preco" id="tabela_select" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%">
+          <option value="">— Selecione a tabela a aplicar —</option>
+          {% for t in tabelas %}
+          <option value="{{ t.pk }}"
+            data-valor="{{ t.valor_escolta }}"
+            data-fkm="{{ t.franquia_km }}"
+            data-fhr="{{ t.franquia_horas }}"
+            data-exkm="{{ t.excedente_km }}"
+            data-exhr="{{ t.excedente_hora }}"
+            data-pedagio="{{ t.cobrar_pedagio }}"
+            data-pedagio-fixo="{{ t.pedagio_fixo }}"
+            {% if boletim.tabela_preco_id == t.pk %}selected{% endif %}>
+            {{ t.nome }} (R$ {{ t.valor_escolta }} | {{ t.franquia_km }}km / {{ t.franquia_horas }}h)
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <!-- Preview da tabela selecionada -->
+    <div id="tabela-preview" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px">
+      <div class="g4">
+        <div><div class="lbl">Valor Escolta</div><div style="font-size:14px;font-weight:700;color:var(--green)" id="prev-valor">—</div></div>
+        <div><div class="lbl">Franquia KM</div><div style="font-size:13px;color:var(--text2)" id="prev-fkm">—</div></div>
+        <div><div class="lbl">Franquia Horas</div><div style="font-size:13px;color:var(--text2)" id="prev-fhr">—</div></div>
+        <div><div class="lbl">Excedente KM / Hora</div><div style="font-size:13px;color:var(--text2)" id="prev-exc">—</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CÁLCULO -->
+<div class="secao">
+  <div class="secao-header">
+    <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 4v3l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    Cálculo do Faturamento
+  </div>
+  <div class="secao-body">
+    <div class="g4" style="margin-bottom:16px">
+      <div>
+        <div class="lbl">Horas Realizadas</div>
+        <div class="val" style="font-family:monospace;font-size:15px">{{ boletim.horas_realizadas|default:"—" }}</div>
+      </div>
+      <div>
+        <div class="lbl">Horas Excedentes</div>
+        <div class="val val-exc" style="font-family:monospace;font-size:15px">{{ boletim.horas_excedentes|default:"—" }}</div>
+      </div>
+      <div>
+        <div class="lbl">KM Realizado</div>
+        <div class="val" style="font-family:monospace;font-size:15px">{{ boletim.km_realizado|default:"—" }} km</div>
+      </div>
+      <div>
+        <div class="lbl">KM Excedente</div>
+        <div class="val val-exc" style="font-family:monospace;font-size:15px">{{ boletim.km_excedente|default:"0" }} km</div>
+      </div>
+    </div>
+    <div class="g4" style="margin-bottom:16px">
+      <div><div class="lbl">Valor Escolta</div><div class="val val-money">R$ {{ boletim.valor_escolta|default:"0.00" }}</div></div>
+      <div><div class="lbl">Excedente KM</div><div class="val val-money" style="color:var(--amber)">R$ {{ boletim.valor_excedente_km|default:"0.00" }}</div></div>
+      <div><div class="lbl">Excedente Hora</div><div class="val val-money" style="color:var(--amber)">R$ {{ boletim.valor_excedente_hora|default:"0.00" }}</div></div>
+      <div><div class="lbl">Pedágio</div><div class="val val-money" style="color:var(--text2)">R$ {{ boletim.valor_pedagio|default:"0.00" }}</div></div>
+    </div>
+    <div class="g4" style="margin-bottom:20px">
+      <div>
+        <div class="lbl">Acréscimo (R$)</div>
+        <input type="number" name="acrescimo" step="0.01" min="0" value="{{ boletim.acrescimo|default:'0' }}"
+          style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%">
+      </div>
+      <div>
+        <div class="lbl">Desconto (R$)</div>
+        <input type="number" name="desconto" step="0.01" min="0" value="{{ boletim.desconto|default:'0' }}"
+          style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%">
+      </div>
+      <div>
+        <div class="lbl">Nº Nota Fiscal</div>
+        <input type="text" name="numero_nota" value="{{ boletim.numero_nota|default:'' }}" placeholder="Ex: NF-00123"
+          style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%">
+      </div>
+    </div>
+
+    <div class="total-box">
+      <div>
+        <div class="total-label">Valor Total a Faturar</div>
+        <div style="font-size:11px;color:var(--blue-light);opacity:.7;margin-top:2px">Escolta + Excedentes + Pedágio + Acréscimo − Desconto</div>
+      </div>
+      <div class="total-value">R$ {{ boletim.valor_total|default:"0.00" }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- OBSERVAÇÕES -->
+<div class="secao">
+  <div class="secao-header">Observações</div>
+  <div class="secao-body">
+    <textarea name="observacoes" rows="3" placeholder="Observações sobre este boletim..."
+      style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%;resize:vertical">{{ boletim.observacoes }}</textarea>
+  </div>
+</div>
+
+<!-- BOTÕES -->
+{% if boletim.status != 'faturado' %}
+<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
+  <a href="{% url 'boletim_list' %}" class="btn btn-secondary">Voltar</a>
+  <button type="submit" name="action" value="salvar" class="btn btn-secondary">
+    <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><path d="M2 4h10M4 2v2M10 2v2M2 6h10v6H2z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    Salvar
+  </button>
+  <button type="submit" name="action" value="calcular" class="btn" style="background:#1a2540;color:var(--blue-light);border:1px solid var(--blue-border)">
+    <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 4v3l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    Calcular Valores
+  </button>
+  <button type="submit" name="action" value="faturar" class="btn" style="background:#0f2a1a;color:#22c55e;border:1px solid #1a4d2a;font-weight:700"
+    onclick="return confirm('Confirmar faturamento da OS-{{ os.numero }}? Esta ação não poderá ser desfeita.')">
+    <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><path d="M2 7l4 4 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Marcar como Faturado
+  </button>
+</div>
+{% else %}
+<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
+  <a href="{% url 'boletim_list' %}" class="btn btn-secondary">Voltar à Lista</a>
+</div>
+{% endif %}
+</form>
+
+<script>
+document.getElementById('tabela_select').addEventListener('change', function() {
+  const opt = this.options[this.selectedIndex];
+  const preview = document.getElementById('tabela-preview');
+  if (!opt.value) { preview.style.display='none'; return; }
+  preview.style.display = 'block';
+  document.getElementById('prev-valor').textContent = 'R$ ' + opt.dataset.valor;
+  document.getElementById('prev-fkm').textContent = opt.dataset.fkm + ' km';
+  document.getElementById('prev-fhr').textContent = opt.dataset.fhr + ' horas';
+  document.getElementById('prev-exc').textContent = 'R$ ' + opt.dataset.exkm + '/km  |  R$ ' + opt.dataset.exhr + '/hr';
+});
+// Mostrar preview se já tiver tabela selecionada
+window.addEventListener('DOMContentLoaded', function() {
+  const sel = document.getElementById('tabela_select');
+  if (sel.value) sel.dispatchEvent(new Event('change'));
+});
+</script>
+{% endblock %}

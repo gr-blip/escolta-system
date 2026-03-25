@@ -1,0 +1,64 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}Coletes{% endblock %}
+{% block page_title %}Coletes{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / Coletes{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'colete_create' %}" class="btn btn-primary">
+    <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    Novo Colete
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="search-bar">
+  <form method="get" style="display:flex;gap:10px;flex:1">
+    <input type="text" name="q" value="{{ q }}" placeholder="Buscar por marca ou numeração...">
+    <button type="submit" class="btn btn-secondary">Buscar</button>
+    {% if q %}<a href="{% url 'colete_list' %}" class="btn btn-secondary">Limpar</a>{% endif %}
+  </form>
+</div>
+
+<div class="card" style="padding:0">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Marca</th>
+          <th>Numeração</th>
+          <th>Nível de Proteção</th>
+          <th>Validade</th>
+          <th style="width:90px">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in coletes %}
+        <tr>
+          <td><strong style="color:var(--text)">{{ c.marca }}</strong></td>
+          <td style="font-family:monospace;color:var(--text2)">{{ c.numeracao }}</td>
+          <td>
+            {% if c.protecao == 'Nivel IIIA' or c.protecao == 'Nivel III' or c.protecao == 'Nivel IV' %}
+              <span class="badge badge-blue">{{ c.get_protecao_display }}</span>
+            {% else %}
+              <span class="badge badge-gray">{{ c.get_protecao_display }}</span>
+            {% endif %}
+          </td>
+          <td style="color:var(--text2)">{{ c.validade|date:"d/m/Y" }}</td>
+          <td>
+            <div style="display:flex;gap:4px">
+              <a href="{% url 'colete_edit' c.pk %}" class="btn-icon" title="Editar">
+                <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M11 2l3 3L5 14H2v-3L11 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+              </a>
+              <a href="{% url 'colete_delete' c.pk %}" class="btn-icon" title="Excluir" style="color:var(--red)">
+                <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M3 4h10M6 4V2h4v2M5 4l1 10h4l1-10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:32px">Nenhum colete cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

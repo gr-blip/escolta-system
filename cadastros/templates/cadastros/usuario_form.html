@@ -1,0 +1,102 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}{% if obj %}Editar Usuário{% else %}Novo Usuário{% endif %}{% endblock %}
+{% block page_title %}{% if obj %}Editar Usuário{% else %}Novo Usuário{% endif %}{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Início</a> ›
+  <a href="{% url 'usuario_list' %}">Usuários</a> ›
+  {% if obj %}{{ obj.username }}{% else %}Novo{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:640px">
+  <div class="card-title">
+    <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    {% if obj %}Editar Usuário — {{ obj.username }}{% else %}Criar Novo Usuário{% endif %}
+  </div>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <div class="form-grid form-grid-2" style="gap:16px">
+
+      <div class="form-section">Dados de Acesso</div>
+
+      <div class="field">
+        <label>Nome de usuário *</label>
+        <input name="username" value="{{ form.username.value|default:'' }}" placeholder="ex: joao.silva" required>
+        {% if form.username.errors %}<div style="color:var(--red);font-size:11px;margin-top:3px">{{ form.username.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="field">
+        <label>Nível de acesso *</label>
+        <select name="nivel">
+          <option value="operador" {% if form.nivel.value == 'operador' or not form.nivel.value %}selected{% endif %}>Operador</option>
+          <option value="admin" {% if form.nivel.value == 'admin' %}selected{% endif %}>Administrador</option>
+          <option value="developer" {% if form.nivel.value == 'developer' %}selected{% endif %}>Developer</option>
+        </select>
+      </div>
+
+      {% if not obj %}
+      <div class="field">
+        <label>Senha *</label>
+        <input type="password" name="password1" placeholder="Mínimo 8 caracteres" required>
+        {% if form.password1.errors %}<div style="color:var(--red);font-size:11px;margin-top:3px">{{ form.password1.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="field">
+        <label>Confirmar senha *</label>
+        <input type="password" name="password2" placeholder="Repita a senha" required>
+        {% if form.password2.errors %}<div style="color:var(--red);font-size:11px;margin-top:3px">{{ form.password2.errors.0 }}</div>{% endif %}
+      </div>
+      {% endif %}
+
+      <div class="form-section">Informações Pessoais</div>
+
+      <div class="field">
+        <label>Primeiro nome</label>
+        <input name="first_name" value="{{ form.first_name.value|default:'' }}" placeholder="João">
+      </div>
+
+      <div class="field">
+        <label>Sobrenome</label>
+        <input name="last_name" value="{{ form.last_name.value|default:'' }}" placeholder="Silva">
+      </div>
+
+      <div class="field field-full">
+        <label>E-mail</label>
+        <input type="email" name="email" value="{{ form.email.value|default:'' }}" placeholder="joao@demark.com.br">
+      </div>
+
+      <div class="form-section">Permissões</div>
+
+      <div class="field field-full" style="display:flex;align-items:center;gap:10px;flex-direction:row">
+        <input type="checkbox" name="is_active" id="is_active" value="1"
+          {% if form.is_active.value != False %}checked{% endif %}
+          style="width:16px;height:16px;flex-shrink:0;cursor:pointer">
+        <label for="is_active" style="cursor:pointer;margin:0">
+          <strong>Usuário Ativo</strong>
+          <span style="color:var(--text3);font-weight:400"> — desmarque para bloquear o acesso ao sistema sem excluir o usuário</span>
+        </label>
+      </div>
+
+    </div>
+
+    <!-- Guia de níveis -->
+    <div style="margin-top:18px;padding:14px;background:var(--bg3);border-radius:var(--radius);border:1px solid var(--border);font-size:12px;color:var(--text2)">
+      <div style="font-weight:600;margin-bottom:8px;color:var(--text)">📋 Níveis de acesso:</div>
+      <div style="display:grid;gap:6px">
+        <div><span style="font-weight:600;color:var(--text)">Operador</span> — acesso a cadastros e operacional (agentes, viaturas, equipes, ordens de serviço)</div>
+        <div><span style="font-weight:600;color:var(--green)">Administrador</span> — acesso total incluindo faturamento, tabelas de preços e boletins</div>
+        <div><span style="font-weight:600;color:var(--blue-light)">Developer</span> — acesso total + áreas ocultas do sistema</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button type="submit" class="btn btn-primary">
+        <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        {% if obj %}Salvar alterações{% else %}Criar usuário{% endif %}
+      </button>
+      <a href="{% url 'usuario_list' %}" class="btn btn-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

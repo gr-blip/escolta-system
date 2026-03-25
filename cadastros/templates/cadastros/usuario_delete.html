@@ -1,0 +1,30 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}Excluir Usuário — {{ obj.username }}{% endblock %}
+{% block page_title %}Excluir Usuário{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Início</a> ›
+  <a href="{% url 'usuario_list' %}">Usuários</a> ›
+  Excluir
+{% endblock %}
+
+{% block content %}
+<div class="delete-box">
+  <div class="card" style="border-color:var(--red);border-width:1px">
+    <div class="card-title" style="color:var(--red)">
+      <svg width="15" height="15" fill="none" viewBox="0 0 16 16"><path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 3v3M8 10v1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Confirmar exclusão
+    </div>
+    <p style="color:var(--text2);margin-bottom:6px">Tem certeza que deseja excluir o usuário:</p>
+    <p style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px">{{ obj.username }}</p>
+    {% if obj.get_full_name %}
+    <p style="color:var(--text3);font-size:13px;margin-bottom:16px">{{ obj.get_full_name }}</p>
+    {% endif %}
+    <p style="color:var(--red);font-size:12px;margin-bottom:20px">⚠️ Esta ação não pode ser desfeita. O usuário perderá acesso ao sistema permanentemente.</p>
+    <form method="post" style="display:flex;gap:10px">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Sim, excluir</button>
+      <a href="{% url 'usuario_list' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

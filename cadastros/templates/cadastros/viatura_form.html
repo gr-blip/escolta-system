@@ -1,0 +1,67 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / <a href="{% url 'viatura_list' %}">Viaturas</a> / {{ titulo }}{% endblock %}
+{% block topbar_actions %}<a href="{% url 'viatura_list' %}" class="btn btn-secondary">← Voltar</a>{% endblock %}
+
+{% block content %}
+<form method="post">
+  {% csrf_token %}
+  <div class="card">
+    <div class="card-title">Dados da viatura</div>
+    <div class="form-grid form-grid-3">
+      <div class="field"><label>Tipo *</label>{{ form.tipo }}</div>
+      <div class="field"><label>Marca / Modelo *</label>{{ form.marca_modelo }}</div>
+      <div class="field"><label>Ano *</label>{{ form.ano }}</div>
+      <div class="field"><label>Cor *</label>{{ form.cor }}</div>
+      <div class="field"><label>Placa *</label>{{ form.placa }}</div>
+
+      <div class="field">
+        <label>MCT / ID — Rastreador</label>
+        <select name="mct_id"
+          style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;color:var(--text);font-size:13px;width:100%;outline:none">
+          <option value="">— Sem rastreador —</option>
+          {% for r in rastreadores %}
+          <option value="{{ r.numero_serie }}"
+            {% if form.instance.mct_id == r.numero_serie %}selected{% endif %}>
+            {{ r.numero_serie }} — {{ r.marca }} {{ r.modelo }}
+          </option>
+          {% empty %}
+          <option disabled>Nenhum rastreador cadastrado</option>
+          {% endfor %}
+        </select>
+        {% if not rastreadores %}
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">
+          <a href="{% url 'rastreador_create' %}" style="color:var(--blue-light)">+ Cadastrar rastreador</a>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="field"><label>Frota</label>{{ form.frota }}</div>
+      <div class="field"><label>RENAVAM</label>{{ form.renavam }}</div>
+      <div class="field"><label>Chassi</label>{{ form.chassi }}</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Documentação e status</div>
+    <div class="form-grid form-grid-3">
+      <div class="field"><label>CRLV Vencimento</label>{{ form.crlv_validade }}</div>
+      <div class="field"><label>Seguro Vencimento</label>{{ form.seguro_validade }}</div>
+      <div class="field"><label>Status *</label>{{ form.status }}</div>
+      <div class="field field-full"><label>Observações</label>{{ form.observacoes }}</div>
+    </div>
+  </div>
+
+  {% if form.errors %}
+  <div style="background:var(--red-bg);border:1px solid #3a1515;color:var(--red);border-radius:8px;padding:12px;margin-top:16px;font-size:13px">
+    {% for field in form %}{% for error in field.errors %}<div>{{ field.label }}: {{ error }}</div>{% endfor %}{% endfor %}
+  </div>
+  {% endif %}
+
+  <div style="display:flex;gap:10px;margin-top:16px">
+    <button type="submit" class="btn btn-primary">Salvar Viatura</button>
+    <a href="{% url 'viatura_list' %}" class="btn btn-secondary">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

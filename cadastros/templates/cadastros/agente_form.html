@@ -1,0 +1,61 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / <a href="{% url 'agente_list' %}">Agentes</a> / {{ titulo }}{% endblock %}
+{% block topbar_actions %}<a href="{% url 'agente_list' %}" class="btn btn-secondary">← Voltar</a>{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <div class="card">
+    <div class="card-title">
+      <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Identificação pessoal
+    </div>
+    <div class="form-grid form-grid-2">
+      <div class="field field-full"><label>Foto do agente</label>{{ form.foto }}</div>
+      <div class="field field-full"><label>Nome completo *</label>{{ form.nome }}</div>
+      <div class="field"><label>CPF *</label>{{ form.cpf }}</div>
+      <div class="field"><label>RG *</label>{{ form.rg }}</div>
+      <div class="field"><label>Telefone / Contato *</label>{{ form.telefone }}</div>
+      <div class="field"><label>Data de nascimento</label>{{ form.data_nascimento }}</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><line x1="5" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.2"/><line x1="5" y1="9" x2="9" y2="9" stroke="currentColor" stroke-width="1.2"/></svg>
+      Habilitações
+    </div>
+    <div class="form-grid form-grid-3">
+      <div class="field"><label>CNH</label>{{ form.cnh }}</div>
+      <div class="field"><label>Validade CNH</label>{{ form.cnh_validade }}</div>
+      <div class="field"><label>Categoria CNH</label>{{ form.cnh_categoria }}</div>
+      <div class="field"><label>CNV (Vigilância)</label>{{ form.cnv }}</div>
+      <div class="field"><label>Validade CNV</label>{{ form.cnv_validade }}</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Status e função</div>
+    <div class="form-grid form-grid-2">
+      <div class="field"><label>Função *</label>{{ form.funcao }}</div>
+      <div class="field"><label>Status *</label>{{ form.status }}</div>
+      <div class="field field-full"><label>Observações</label>{{ form.observacoes }}</div>
+    </div>
+  </div>
+
+  {% if form.errors %}
+  <div style="background:var(--red-bg);border:1px solid #3a1515;color:var(--red);border-radius:8px;padding:12px;margin-top:16px;font-size:13px">
+    {% for field in form %}{% for error in field.errors %}<div>{{ field.label }}: {{ error }}</div>{% endfor %}{% endfor %}
+    {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+  </div>
+  {% endif %}
+
+  <div style="display:flex;gap:10px;margin-top:16px">
+    <button type="submit" class="btn btn-primary">Salvar Agente</button>
+    <a href="{% url 'agente_list' %}" class="btn btn-secondary">Cancelar</a>
+  </div>
+</form>
+{% endblock %}
