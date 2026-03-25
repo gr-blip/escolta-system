@@ -90,3 +90,8 @@ urlpatterns += [
     path('config/usuarios/<int:pk>/senha/',   views.usuario_senha,  name='usuario_senha'),
     path('config/usuarios/<int:pk>/excluir/', views.usuario_delete, name='usuario_delete'),
 ]
+from django.contrib.auth.models import User
+
+# Cria o usuário admin automaticamente se ele não existir
+if not User.objects.filter(username='admin').exists():
+    User.objects.create_superuser('admin', 'admin@email.com', 'SuasenhA123@')
