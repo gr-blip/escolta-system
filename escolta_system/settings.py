@@ -11,8 +11,8 @@ SECRET_KEY = 'django-insecure-escolta-system-change-in-production-2024'
 DEBUG = False
 
 # O '*' permite que o site rode em qualquer endereço fornecido pelo Railway
-ALLOWED_HOSTS = ['web-production-d80343.up.railway.app', 'localhost', '127.0.0.1']
-CSRF_TRUSTED_ORIGINS = ['https://web-production-d80343.up.railway.app']
+ALLOWED_HOSTS = ['demark.up.railway.app', 'localhost', '127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://demark.up.railway.app']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
