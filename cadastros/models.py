@@ -292,9 +292,12 @@ class OrdemServico(models.Model):
 
 class OSOperacional(models.Model):
     """Dados operacionais de execução da OS — tempos, KM e folha"""
+    import uuid as _uuid
     os = models.OneToOneField('OrdemServico', on_delete=models.CASCADE,
                               related_name='operacional', verbose_name='OS')
     numero_folha      = models.CharField(max_length=20, blank=True, verbose_name='Nº Folha')
+    token      = models.UUIDField(default=_uuid.uuid4, unique=True, editable=False, verbose_name='Token de Acesso Externo')
+    link_ativo = models.BooleanField(default=True, verbose_name='Link Externo Ativo')
 
     # Marcos de data/hora
     inicio_viagem     = models.DateTimeField(null=True, blank=True, verbose_name='Início de Viagem')

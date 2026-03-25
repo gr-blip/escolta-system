@@ -90,3 +90,10 @@ urlpatterns += [
     path('config/usuarios/<int:pk>/senha/',    views.usuario_senha,  name='usuario_senha'),
     path('config/usuarios/<int:pk>/excluir/',  views.usuario_delete, name='usuario_delete'),
 ]
+# Link Externo — Agente de Campo (sem login)
+from django.urls import path as _path
+urlpatterns += [
+    _path('os/field/<uuid:token>/',          views.os_field_link,      name='os_field_link'),
+    _path('operacional/os/<int:pk>/link/',    views.os_gerar_link,      name='os_gerar_link'),
+    _path('operacional/os/<int:pk>/desativar-link/', views.os_desativar_link, name='os_desativar_link'),
+]

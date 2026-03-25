@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OS-{{ os.numero }} — Preenchimento de Campo</title>
+  <style>
+    :root {
+      --bg: #0a0f1e;
+      --card: #111827;
+      --border: #1e3a5f;
+      --blue: #3b82f6;
+      --blue-dark: #1d4ed8;
+      --cyan: #06b6d4;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --success: #10b981;
+      --danger: #ef4444;
+      --input-bg: #1e2d40;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, #0d1b35 0%, #0a1628 100%);
+      border-bottom: 2px solid var(--border);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-logo {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .header-info h1 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 0.5px;
+    }
+    .header-info p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .os-badge {
+      margin-left: auto;
+      background: var(--blue);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    /* MAIN */
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    /* SUCCESS BANNER */
+    .alert-success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--success);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .alert-success .icon { font-size: 24px; }
+    .alert-success h3 { font-size: 15px; color: var(--success); }
+    .alert-success p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    /* OS INFO CARD */
+    .os-info-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+    .os-info-card h2 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--cyan);
+      margin-bottom: 12px;
+    }
+    .os-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .os-field label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+    .os-field p {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 2px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(59, 130, 246, 0.2);
+      color: var(--blue);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+    }
+
+    /* SECTION CARD */
+    .section-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .section-header {
+      background: rgba(59, 130, 246, 0.08);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-header .icon { font-size: 18px; }
+    .section-header h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .section-body { padding: 20px; }
+
+    /* MARCOS TABLE */
+    .marco-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(30, 58, 95, 0.5);
+    }
+    .marco-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .marco-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding-top: 8px;
+    }
+    .marco-label .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      flex-shrink: 0;
+    }
+
+    /* INPUTS */
+    .field-group { display: flex; flex-direction: column; gap: 4px; }
+    .field-group label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+    input[type="datetime-local"],
+    input[type="number"],
+    input[type="text"] {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+    input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+    input[type="number"] { -moz-appearance: textfield; }
+
+    /* PEDAGIO */
+    .input-prefix {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .prefix-label {
+      background: #1a2a40;
+      border: 1px solid var(--border);
+      border-right: none;
+      border-radius: 8px 0 0 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .input-prefix input {
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* SUBMIT */
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .btn-submit:active { transform: scale(0.98); opacity: 0.9; }
+
+    /* FOOTER */
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 30px;
+    }
+
+    @media (max-width: 480px) {
+      .marco-row { grid-template-columns: 1fr; }
+      .marco-label { padding-top: 0; }
+      .os-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-logo">🛡️</div>
+    <div class="header-info">
+      <h1>DEMARK SEGURANÇA</h1>
+      <p>Preenchimento de Campo</p>
+    </div>
+    <span class="os-badge">OS-{{ os.numero }}</span>
+  </div>
+
+  <div class="container">
+
+    {% if sucesso %}
+    <div class="alert-success">
+      <span class="icon">✅</span>
+      <div>
+        <h3>Dados salvos com sucesso!</h3>
+        <p>As informações foram atualizadas no sistema em tempo real.</p>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- INFO DA OS -->
+    <div class="os-info-card">
+      <h2>📋 Informações da Operação</h2>
+      <div class="os-grid">
+        <div class="os-field">
+          <label>Cliente</label>
+          <p>{{ os.cliente }}</p>
+        </div>
+        <div class="os-field">
+          <label>Status</label>
+          <p><span class="status-badge">⚡ {{ os.get_status_display }}</span></p>
+        </div>
+        <div class="os-field">
+          <label>Origem</label>
+          <p>{{ os.cidade_origem }}/{{ os.uf_origem }}</p>
+        </div>
+        <div class="os-field">
+          <label>Destino</label>
+          <p>{{ os.cidade_destino }}/{{ os.uf_destino }}</p>
+        </div>
+        <div class="os-field">
+          <label>Tipo</label>
+          <p>{{ os.get_tipo_viagem_display }}</p>
+        </div>
+        <div class="os-field">
+          <label>Previsão Início</label>
+          <p>{{ os.previsao_inicio|date:"d/m/Y H:i" }}</p>
+        </div>
+        {% if os.snap_agente1_nome %}
+        <div class="os-field">
+          <label>Agente 1</label>
+          <p>{{ os.snap_agente1_nome }}</p>
+        </div>
+        {% endif %}
+        {% if os.snap_agente2_nome %}
+        <div class="os-field">
+          <label>Agente 2</label>
+          <p>{{ os.snap_agente2_nome }}</p>
+        </div>
+        {% endif %}
+        {% if os.snap_viatura_placa %}
+        <div class="os-field">
+          <label>Viatura</label>
+          <p>{{ os.snap_viatura_modelo }} — {{ os.snap_viatura_placa }}</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- FORMULÁRIO -->
+    <form method="POST">
+      {% csrf_token %}
+
+      <!-- Nº FOLHA -->
+      <div class="section-card">
+        <div class="section-header">
+          <span class="icon">📄</span>
+          <h3>Número da Folha</h3>
+        </div>
+        <div class="section-body">
+          <div class="field-group">
+            <label>Nº Folha</label>
+            <input type="text" name="numero_folha" value="{{ op.numero_folha }}" placeholder="Ex: 675">
+          </div>
+        </div>
+      </div>
+
+      <!-- MARCOS -->
+      <div class="section-card">
+        <div class="section-header">
+          <span class="icon">🕐</span>
+          <h3>Marcos de Execução</h3>
+        </div>
+        <div class="section-body">
+
+          <!-- Início de Viagem -->
+          <div class="marco-row">
+            <div class="marco-label">
+              <span class="dot" style="background:#3b82f6"></span>
+              Início de Viagem
+            </div>
+            <div class="field-group">
+              <label>Data / Hora</label>
+              <input type="datetime-local" name="inicio_viagem" value="{{ fmt.inicio_viagem }}">
+            </div>
+            <div class="field-group">
+              <label>KM Hodômetro</label>
+              <input type="number" name="km_inicio_viagem" value="{{ op.km_inicio_viagem|default_if_none:'' }}" placeholder="Ex: 79710">
+            </div>
+          </div>
+
+          <!-- Chegada Operação -->
+          <div class="marco-row">
+            <div class="marco-label">
+              <span class="dot" style="background:#06b6d4"></span>
+              Chegada Operação
+            </div>
+            <div class="field-group">
+              <label>Data / Hora</label>
+              <input type="datetime-local" name="chegada_operacao" value="{{ fmt.chegada_operacao }}">
+            </div>
+            <div class="field-group">
+              <label>KM Hodômetro</label>
+              <input type="number" name="km_chegada_operacao" value="{{ op.km_chegada_operacao|default_if_none:'' }}" placeholder="Ex: 79786">
+            </div>
+          </div>
+
+          <!-- Início Operação -->
+          <div class="marco-row">
+            <div class="marco-label">
+              <span class="dot" style="background:#8b5cf6"></span>
+              Início Operação
+            </div>
+            <div class="field-group">
+              <label>Data / Hora</label>
+              <input type="datetime-local" name="inicio_operacao" value="{{ fmt.inicio_operacao }}">
+            </div>
+            <div class="field-group">
+              <label>KM Hodômetro</label>
+              <input type="number" name="km_inicio_operacao" value="{{ op.km_inicio_operacao|default_if_none:'' }}" placeholder="Ex: 79786">
+            </div>
+          </div>
+
+          <!-- Término Operação -->
+          <div class="marco-row">
+            <div class="marco-label">
+              <span class="dot" style="background:#f59e0b"></span>
+              Término Operação
+            </div>
+            <div class="field-group">
+              <label>Data / Hora</label>
+              <input type="datetime-local" name="termino_operacao" value="{{ fmt.termino_operacao }}">
+            </div>
+            <div class="field-group">
+              <label>KM Hodômetro</label>
+              <input type="number" name="km_termino_operacao" value="{{ op.km_termino_operacao|default_if_none:'' }}" placeholder="Ex: 80578">
+            </div>
+          </div>
+
+          <!-- Término de Viagem -->
+          <div class="marco-row">
+            <div class="marco-label">
+              <span class="dot" style="background:#10b981"></span>
+              Término de Viagem
+            </div>
+            <div class="field-group">
+              <label>Data / Hora</label>
+              <input type="datetime-local" name="termino_viagem" value="{{ fmt.termino_viagem }}">
+            </div>
+            <div class="field-group">
+              <label>KM Hodômetro</label>
+              <input type="number" name="km_termino_viagem" value="{{ op.km_termino_viagem|default_if_none:'' }}" placeholder="Ex: 80578">
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- PEDÁGIO -->
+      <div class="section-card">
+        <div class="section-header">
+          <span class="icon">🚦</span>
+          <h3>Pedágio</h3>
+        </div>
+        <div class="section-body">
+          <div class="field-group">
+            <label>Valor do Pedágio</label>
+            <div class="input-prefix">
+              <span class="prefix-label">R$</span>
+              <input type="text" name="pedagio"
+                     value="{{ op.pedagio|default_if_none:'' }}"
+                     placeholder="0,00" inputmode="decimal">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <button type="submit" class="btn-submit">
+        <span>💾</span> Salvar e Atualizar OS
+      </button>
+
+    </form>
+
+    <div class="footer">
+      🔒 Acesso seguro — OS-{{ os.numero }} &nbsp;|&nbsp; Demark Segurança © 2026
+    </div>
+
+  </div>
+</body>
+</html>

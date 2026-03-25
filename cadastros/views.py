@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
+from django.http import JsonResponse
 from .models import Agente, Viatura, Rastreador, Armamento, Cliente, Colete, Equipe
 from .forms import AgenteForm, ViaturaForm, RastreadorForm, ArmamentoForm, ClienteForm
 
@@ -1589,3 +1590,117 @@ def usuario_delete(request, pk):
         return redirect('usuario_list')
 
     return render(request, 'cadastros/usuario_delete.html', {'obj': u})
+
+
+# ==============================================================================
+# LINK EXTERNO — Agente de campo preenche OS sem login
+# ==============================================================================
+
+def os_field_link(request, token):
+    """Página pública para agente externo preencher dados operacionais da OS."""
+    from datetime import datetime
+
+    op = get_object_or_404(OSOperacional, token=token)
+    os_obj = op.os
+
+    if not op.link_ativo:
+        return render(request, 'cadastros/os_field_desativado.html', {'os': os_obj})
+
+    if os_obj.status == 'finalizada':
+        return render(request, 'cadastros/os_field_desativado.html', {'os': os_obj, 'finalizada': True})
+
+    erro = None
+    sucesso = False
+
+    if request.method == 'POST':
+        def parse_dt(val):
+            if not val:
+                return None
+            for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
+                try:
+                    return datetime.strptime(val, fmt)
+                except ValueError:
+                    continue
+            return None
+
+        def parse_int(val):
+            try:
+                return int(val) if val else None
+            except (ValueError, TypeError):
+                return None
+
+        op.numero_folha       = request.POST.get('numero_folha', '')
+        op.inicio_viagem      = parse_dt(request.POST.get('inicio_viagem'))
+        op.chegada_operacao   = parse_dt(request.POST.get('chegada_operacao'))
+        op.inicio_operacao    = parse_dt(request.POST.get('inicio_operacao'))
+        op.termino_operacao   = parse_dt(request.POST.get('termino_operacao'))
+        op.termino_viagem     = parse_dt(request.POST.get('termino_viagem'))
+        op.km_inicio_viagem    = parse_int(request.POST.get('km_inicio_viagem'))
+        op.km_chegada_operacao = parse_int(request.POST.get('km_chegada_operacao'))
+        op.km_inicio_operacao  = parse_int(request.POST.get('km_inicio_operacao'))
+        op.km_termino_operacao = parse_int(request.POST.get('km_termino_operacao'))
+        op.km_termino_viagem   = parse_int(request.POST.get('km_termino_viagem'))
+        pedagio_val = request.POST.get('pedagio', '').strip().replace(',', '.')
+        try:
+            op.pedagio = float(pedagio_val) if pedagio_val else None
+        except ValueError:
+            op.pedagio = None
+        op.save()
+
+        # Atualizar status da OS
+        if os_obj.status != 'cancelada':
+            if op.termino_viagem:
+                os_obj.status = 'concluida'
+            elif op.termino_operacao:
+                os_obj.status = 'encerrando'
+            elif op.chegada_operacao or op.inicio_operacao:
+                os_obj.status = 'em_operacao'
+            elif op.inicio_viagem:
+                os_obj.status = 'em_viagem'
+            os_obj.save(update_fields=['status'])
+
+        sucesso = True
+
+    def fmt_dt(dt):
+        if dt:
+            return dt.strftime('%Y-%m-%dT%H:%M')
+        return ''
+
+    return render(request, 'cadastros/os_field_link.html', {
+        'os': os_obj,
+        'op': op,
+        'sucesso': sucesso,
+        'erro': erro,
+        'fmt': {
+            'inicio_viagem':     fmt_dt(op.inicio_viagem),
+            'chegada_operacao':  fmt_dt(op.chegada_operacao),
+            'inicio_operacao':   fmt_dt(op.inicio_operacao),
+            'termino_operacao':  fmt_dt(op.termino_operacao),
+            'termino_viagem':    fmt_dt(op.termino_viagem),
+        },
+    })
+
+
+@login_required
+def os_gerar_link(request, pk):
+    """Garante que existe um OSOperacional com token e retorna JSON com o link."""
+    import json
+    os_obj = get_object_or_404(OrdemServico, pk=pk)
+    op, _ = OSOperacional.objects.get_or_create(os=os_obj)
+    op.link_ativo = True
+    op.save(update_fields=['link_ativo'])
+    url = request.build_absolute_uri(f'/os/field/{op.token}/')
+    return JsonResponse({'url': url, 'token': str(op.token)})
+
+
+@login_required
+def os_desativar_link(request, pk):
+    """Desativa o link externo da OS."""
+    os_obj = get_object_or_404(OrdemServico, pk=pk)
+    op = getattr(os_obj, 'operacional', None)
+    if op:
+        op.link_ativo = False
+        op.save(update_fields=['link_ativo'])
+        messages.success(request, 'Link externo desativado com sucesso.')
+    return redirect('os_detalhe', pk=pk)
+
