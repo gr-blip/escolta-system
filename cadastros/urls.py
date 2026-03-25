@@ -1,3 +1,6 @@
+from django.urls import path
+from . import views
+
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
 
@@ -43,16 +46,16 @@ urlpatterns += [
 
 # Equipes
 urlpatterns += [
-    path('operacional/equipes/',                          views.equipe_list,      name='equipe_list'),
-    path('operacional/equipes/nova/',                     views.equipe_create,    name='equipe_create'),
-    path('operacional/equipes/<int:pk>/editar/',          views.equipe_edit,      name='equipe_edit'),
-    path('operacional/equipes/<int:pk>/excluir/',         views.equipe_delete,    name='equipe_delete'),
-    path('operacional/equipes/<int:pk>/finalizar/',       views.equipe_finalizar, name='equipe_finalizar'),
+    path('operacional/equipes/',                           views.equipe_list,      name='equipe_list'),
+    path('operacional/equipes/nova/',                      views.equipe_create,    name='equipe_create'),
+    path('operacional/equipes/<int:pk>/editar/',           views.equipe_edit,      name='equipe_edit'),
+    path('operacional/equipes/<int:pk>/excluir/',          views.equipe_delete,    name='equipe_delete'),
+    path('operacional/equipes/<int:pk>/finalizar/',        views.equipe_finalizar, name='equipe_finalizar'),
 ]
 
 # Ordens de Servico
 urlpatterns += [
-    path('operacional/os/',                              views.os_list,              name='os_list'),
+    path('operacional/os/',                               views.os_list,              name='os_list'),
     path('operacional/os/nova/',                         views.os_nova,              name='os_nova'),
     path('operacional/os/nova/detalhe/',                 views.os_detalhe_novo,      name='os_detalhe_novo'),
     path('operacional/os/<int:pk>/',                     views.os_detalhe,           name='os_detalhe'),
@@ -81,9 +84,9 @@ urlpatterns += [
 
 # Configuração de Usuários
 urlpatterns += [
-    path('config/usuarios/',                  views.usuario_list,   name='usuario_list'),
-    path('config/usuarios/novo/',             views.usuario_create, name='usuario_create'),
-    path('config/usuarios/<int:pk>/editar/',  views.usuario_edit,   name='usuario_edit'),
-    path('config/usuarios/<int:pk>/senha/',   views.usuario_senha,  name='usuario_senha'),
-    path('config/usuarios/<int:pk>/excluir/', views.usuario_delete, name='usuario_delete'),
+    path('config/usuarios/',                   views.usuario_list,   name='usuario_list'),
+    path('config/usuarios/novo/',              views.usuario_create, name='usuario_create'),
+    path('config/usuarios/<int:pk>/editar/',   views.usuario_edit,   name='usuario_edit'),
+    path('config/usuarios/<int:pk>/senha/',    views.usuario_senha,  name='usuario_senha'),
+    path('config/usuarios/<int:pk>/excluir/',  views.usuario_delete, name='usuario_delete'),
 ]
