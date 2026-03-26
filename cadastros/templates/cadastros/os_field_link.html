@@ -318,9 +318,7 @@
                 📍 {{ op.gps_inicio_viagem_lat }}, {{ op.gps_inicio_viagem_lng }}
                 <a class="gps-map-link" href="{{ gps.inicio_viagem.url }}" target="_blank">🗺 Ver no mapa</a>
               </div>
-              <div class="mini-map" id="map_inicio_viagem" style="display:block">
-                <iframe src="https://www.google.com/maps?q={{ op.gps_inicio_viagem_lat }},{{ op.gps_inicio_viagem_lng }}&z=15&output=embed" loading="lazy"></iframe>
-              </div>
+
               {% endif %}
             </div>
           </div>
@@ -353,9 +351,7 @@
                 📍 {{ op.gps_chegada_operacao_lat }}, {{ op.gps_chegada_operacao_lng }}
                 <a class="gps-map-link" href="{{ gps.chegada_operacao.url }}" target="_blank">🗺 Ver no mapa</a>
               </div>
-              <div class="mini-map" id="map_chegada_operacao" style="display:block">
-                <iframe src="https://www.google.com/maps?q={{ op.gps_chegada_operacao_lat }},{{ op.gps_chegada_operacao_lng }}&z=15&output=embed" loading="lazy"></iframe>
-              </div>
+
               {% endif %}
             </div>
           </div>
@@ -388,9 +384,7 @@
                 📍 {{ op.gps_inicio_operacao_lat }}, {{ op.gps_inicio_operacao_lng }}
                 <a class="gps-map-link" href="{{ gps.inicio_operacao.url }}" target="_blank">🗺 Ver no mapa</a>
               </div>
-              <div class="mini-map" id="map_inicio_operacao" style="display:block">
-                <iframe src="https://www.google.com/maps?q={{ op.gps_inicio_operacao_lat }},{{ op.gps_inicio_operacao_lng }}&z=15&output=embed" loading="lazy"></iframe>
-              </div>
+
               {% endif %}
             </div>
           </div>
@@ -423,9 +417,7 @@
                 📍 {{ op.gps_termino_operacao_lat }}, {{ op.gps_termino_operacao_lng }}
                 <a class="gps-map-link" href="{{ gps.termino_operacao.url }}" target="_blank">🗺 Ver no mapa</a>
               </div>
-              <div class="mini-map" id="map_termino_operacao" style="display:block">
-                <iframe src="https://www.google.com/maps?q={{ op.gps_termino_operacao_lat }},{{ op.gps_termino_operacao_lng }}&z=15&output=embed" loading="lazy"></iframe>
-              </div>
+
               {% endif %}
             </div>
           </div>
@@ -458,9 +450,7 @@
                 📍 {{ op.gps_termino_viagem_lat }}, {{ op.gps_termino_viagem_lng }}
                 <a class="gps-map-link" href="{{ gps.termino_viagem.url }}" target="_blank">🗺 Ver no mapa</a>
               </div>
-              <div class="mini-map" id="map_termino_viagem" style="display:block">
-                <iframe src="https://www.google.com/maps?q={{ op.gps_termino_viagem_lat }},{{ op.gps_termino_viagem_lng }}&z=15&output=embed" loading="lazy"></iframe>
-              </div>
+
               {% endif %}
             </div>
           </div>
@@ -516,13 +506,11 @@
           document.getElementById('gps_' + marco + '_lng').value = lng;
 
           // Mostra status + mapa
-          const mapUrl = `https://www.google.com/maps?q=${lat},${lng}&z=16&output=embed`;
-          const mapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+              const mapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
 
           showGPSStatus(marco, 'ok',
             `📍 ${lat}, ${lng} <span style="color:var(--muted);font-size:11px">(±${acc}m)</span>
-             <a class="gps-map-link" href="${mapsLink}" target="_blank">🗺 Ver no mapa</a>`,
-            mapUrl
+             <a class="gps-map-link" href="${mapsLink}" target="_blank">🗺 Ver no mapa</a>`
           );
 
           btn.classList.remove('loading');
@@ -546,18 +534,11 @@
       );
     }
 
-    function showGPSStatus(marco, type, html, mapUrl) {
+    function showGPSStatus(marco, type, html) {
       const container = document.getElementById('gps_status_' + marco);
       container.innerHTML = `<div class="gps-status ${type}">${html}</div>`;
 
-      if (mapUrl) {
-        const mapDiv = document.createElement('div');
-        mapDiv.className = 'mini-map';
-        mapDiv.id = 'map_' + marco;
-        mapDiv.style.display = 'block';
-        mapDiv.innerHTML = `<iframe src="${mapUrl}" loading="lazy"></iframe>`;
-        container.appendChild(mapDiv);
-      }
+
     }
   </script>
 </body>
