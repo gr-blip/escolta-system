@@ -498,6 +498,8 @@ def os_nova(request):
             'cidade_destino':    request.POST.get('cidade_destino', ''),
             'uf_destino':        request.POST.get('uf_destino', 'GO'),
         }
+        request.session.modified = True
+        request.session.save()
         return redirect('os_detalhe_novo')
     return render(request, 'cadastros/os_nova.html', {'clientes': clientes, 'ufs': UFS})
 
