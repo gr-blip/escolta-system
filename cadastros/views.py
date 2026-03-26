@@ -1718,6 +1718,25 @@ def os_field_link(request, token):
         op.km_inicio_operacao  = parse_int(request.POST.get('km_inicio_operacao'))
         op.km_termino_operacao = parse_int(request.POST.get('km_termino_operacao'))
         op.km_termino_viagem   = parse_int(request.POST.get('km_termino_viagem'))
+
+        # GPS — capturado pelo browser do agente
+        def parse_dec(val):
+            try:
+                return float(val) if val and val.strip() else None
+            except (ValueError, TypeError):
+                return None
+
+        op.gps_inicio_viagem_lat    = parse_dec(request.POST.get('gps_inicio_viagem_lat'))
+        op.gps_inicio_viagem_lng    = parse_dec(request.POST.get('gps_inicio_viagem_lng'))
+        op.gps_chegada_operacao_lat = parse_dec(request.POST.get('gps_chegada_operacao_lat'))
+        op.gps_chegada_operacao_lng = parse_dec(request.POST.get('gps_chegada_operacao_lng'))
+        op.gps_inicio_operacao_lat  = parse_dec(request.POST.get('gps_inicio_operacao_lat'))
+        op.gps_inicio_operacao_lng  = parse_dec(request.POST.get('gps_inicio_operacao_lng'))
+        op.gps_termino_operacao_lat = parse_dec(request.POST.get('gps_termino_operacao_lat'))
+        op.gps_termino_operacao_lng = parse_dec(request.POST.get('gps_termino_operacao_lng'))
+        op.gps_termino_viagem_lat   = parse_dec(request.POST.get('gps_termino_viagem_lat'))
+        op.gps_termino_viagem_lng   = parse_dec(request.POST.get('gps_termino_viagem_lng'))
+
         pedagio_val = request.POST.get('pedagio', '').strip().replace(',', '.')
         try:
             op.pedagio = float(pedagio_val) if pedagio_val else None
@@ -1744,6 +1763,12 @@ def os_field_link(request, token):
             return dt.strftime('%Y-%m-%dT%H:%M')
         return ''
 
+    def fmt_gps(lat, lng):
+        if lat and lng:
+            return {'lat': float(lat), 'lng': float(lng),
+                    'url': f'https://www.google.com/maps?q={lat},{lng}'}
+        return None
+
     return render(request, 'cadastros/os_field_link.html', {
         'os': os_obj,
         'op': op,
@@ -1755,6 +1780,13 @@ def os_field_link(request, token):
             'inicio_operacao':   fmt_dt(op.inicio_operacao),
             'termino_operacao':  fmt_dt(op.termino_operacao),
             'termino_viagem':    fmt_dt(op.termino_viagem),
+        },
+        'gps': {
+            'inicio_viagem':    fmt_gps(op.gps_inicio_viagem_lat,    op.gps_inicio_viagem_lng),
+            'chegada_operacao': fmt_gps(op.gps_chegada_operacao_lat, op.gps_chegada_operacao_lng),
+            'inicio_operacao':  fmt_gps(op.gps_inicio_operacao_lat,  op.gps_inicio_operacao_lng),
+            'termino_operacao': fmt_gps(op.gps_termino_operacao_lat, op.gps_termino_operacao_lng),
+            'termino_viagem':   fmt_gps(op.gps_termino_viagem_lat,   op.gps_termino_viagem_lng),
         },
     })
 

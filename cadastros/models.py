@@ -314,6 +314,18 @@ class OSOperacional(models.Model):
     km_termino_viagem   = models.PositiveIntegerField(null=True, blank=True, verbose_name='KM Término Viagem')
     pedagio             = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Pedágio (R$)')
 
+    # Localização GPS de cada marco (lat/lng capturados pelo dispositivo do agente)
+    gps_inicio_viagem_lat     = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    gps_inicio_viagem_lng     = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    gps_chegada_operacao_lat  = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    gps_chegada_operacao_lng  = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    gps_inicio_operacao_lat   = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    gps_inicio_operacao_lng   = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    gps_termino_operacao_lat  = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    gps_termino_operacao_lng  = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    gps_termino_viagem_lat    = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    gps_termino_viagem_lng    = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+
     criado_em     = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
 

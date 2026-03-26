@@ -16,11 +16,10 @@
       --muted: #64748b;
       --success: #10b981;
       --danger: #ef4444;
+      --warning: #f59e0b;
       --input-bg: #1e2d40;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
       background: var(--bg);
@@ -28,8 +27,6 @@
       min-height: 100vh;
       padding-bottom: 40px;
     }
-
-    /* HEADER */
     .header {
       background: linear-gradient(135deg, #0d1b35 0%, #0a1628 100%);
       border-bottom: 2px solid var(--border);
@@ -42,163 +39,138 @@
       z-index: 100;
     }
     .header-logo {
-      width: 42px;
-      height: 42px;
+      width: 42px; height: 42px;
       background: linear-gradient(135deg, var(--blue), var(--cyan));
       border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
     }
-    .header-info h1 {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: 0.5px;
-    }
-    .header-info p {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
+    .header-info h1 { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: 0.5px; }
+    .header-info p { font-size: 12px; color: var(--muted); margin-top: 2px; }
     .os-badge {
       margin-left: auto;
       background: var(--blue);
       color: #fff;
       padding: 4px 12px;
       border-radius: 20px;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 1px;
+      font-size: 13px; font-weight: 700; letter-spacing: 1px;
     }
-
-    /* MAIN */
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px 16px;
-    }
-
-    /* SUCCESS BANNER */
+    .container { max-width: 600px; margin: 0 auto; padding: 20px 16px; }
     .alert-success {
-      background: rgba(16, 185, 129, 0.15);
+      background: rgba(16,185,129,.15);
       border: 1px solid var(--success);
       border-radius: 12px;
-      padding: 16px 20px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      padding: 16px 20px; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 12px;
     }
     .alert-success .icon { font-size: 24px; }
     .alert-success h3 { font-size: 15px; color: var(--success); }
     .alert-success p { font-size: 13px; color: var(--muted); margin-top: 4px; }
-
-    /* OS INFO CARD */
     .os-info-card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 16px 20px;
-      margin-bottom: 20px;
+      padding: 16px 20px; margin-bottom: 20px;
     }
-    .os-info-card h2 {
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--cyan);
-      margin-bottom: 12px;
-    }
-    .os-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .os-field label {
-      font-size: 11px;
-      text-transform: uppercase;
-      color: var(--muted);
-      letter-spacing: 0.5px;
-    }
-    .os-field p {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      margin-top: 2px;
-    }
+    .os-info-card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--cyan); margin-bottom: 12px; }
+    .os-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .os-field label { font-size: 11px; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; }
+    .os-field p { font-size: 14px; font-weight: 600; color: var(--text); margin-top: 2px; }
     .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      background: rgba(59, 130, 246, 0.2);
-      color: var(--blue);
-      border: 1px solid rgba(59, 130, 246, 0.4);
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      background: rgba(59,130,246,.2); color: var(--blue); border: 1px solid rgba(59,130,246,.4);
     }
-
-    /* SECTION CARD */
     .section-card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
-      margin-bottom: 16px;
-      overflow: hidden;
+      margin-bottom: 16px; overflow: hidden;
     }
     .section-header {
-      background: rgba(59, 130, 246, 0.08);
+      background: rgba(59,130,246,.08);
       border-bottom: 1px solid var(--border);
       padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      display: flex; align-items: center; gap: 10px;
     }
     .section-header .icon { font-size: 18px; }
-    .section-header h3 {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-    }
+    .section-header h3 { font-size: 14px; font-weight: 600; color: var(--text); }
     .section-body { padding: 20px; }
 
-    /* MARCOS TABLE */
+    /* Marco rows */
     .marco-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 14px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid rgba(30, 58, 95, 0.5);
+      margin-bottom: 18px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(30,58,95,.5);
     }
     .marco-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+    .marco-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
     .marco-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--cyan);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding-top: 8px;
+      font-size: 13px; font-weight: 600; color: var(--cyan);
+      display: flex; align-items: center; gap: 8px;
     }
     .marco-label .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--cyan);
-      flex-shrink: 0;
+      width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
     }
 
-    /* INPUTS */
+    /* GPS button + status */
+    .gps-btn {
+      background: rgba(16,185,129,.15);
+      border: 1px solid var(--success);
+      color: var(--success);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      transition: background .2s;
+      white-space: nowrap;
+    }
+    .gps-btn:active { background: rgba(16,185,129,.3); }
+    .gps-btn.loading {
+      background: rgba(245,158,11,.15);
+      border-color: var(--warning);
+      color: var(--warning);
+      cursor: wait;
+    }
+    .gps-status {
+      margin-top: 8px;
+      font-size: 12px;
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .gps-status.ok {
+      background: rgba(16,185,129,.1);
+      border: 1px solid rgba(16,185,129,.3);
+      color: var(--success);
+    }
+    .gps-status.err {
+      background: rgba(239,68,68,.1);
+      border: 1px solid rgba(239,68,68,.3);
+      color: var(--danger);
+    }
+    .gps-map-link {
+      color: var(--cyan);
+      font-size: 11px;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-left: 8px;
+    }
+    .gps-map-link:hover { text-decoration: underline; }
+
+    .marco-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
     .field-group { display: flex; flex-direction: column; gap: 4px; }
     .field-group label {
-      font-size: 11px;
-      text-transform: uppercase;
-      color: var(--muted);
-      letter-spacing: 0.5px;
+      font-size: 11px; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px;
     }
     input[type="datetime-local"],
     input[type="number"],
@@ -208,77 +180,59 @@
       color: var(--text);
       border-radius: 8px;
       padding: 10px 12px;
-      font-size: 14px;
-      width: 100%;
+      font-size: 14px; width: 100%;
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color .2s;
       -webkit-appearance: none;
     }
-    input:focus {
-      border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-    }
+    input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
     input[type="number"] { -moz-appearance: textfield; }
+    input[type="hidden"] {}
 
-    /* PEDAGIO */
-    .input-prefix {
-      display: flex;
-      align-items: center;
-      gap: 0;
+    /* Mapa embutido */
+    .mini-map {
+      margin-top: 10px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      height: 160px;
+      background: #0d1b2a;
+      display: none;
     }
+    .mini-map iframe { width: 100%; height: 100%; border: none; }
+
+    /* Pedágio */
+    .input-prefix { display: flex; align-items: center; }
     .prefix-label {
       background: #1a2a40;
-      border: 1px solid var(--border);
-      border-right: none;
+      border: 1px solid var(--border); border-right: none;
       border-radius: 8px 0 0 8px;
-      padding: 10px 12px;
-      font-size: 13px;
-      color: var(--muted);
-      white-space: nowrap;
+      padding: 10px 12px; font-size: 13px; color: var(--muted); white-space: nowrap;
     }
-    .input-prefix input {
-      border-radius: 0 8px 8px 0;
-    }
+    .input-prefix input { border-radius: 0 8px 8px 0; }
 
-    /* SUBMIT */
     .btn-submit {
       width: 100%;
       background: linear-gradient(135deg, var(--blue), var(--blue-dark));
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      padding: 16px;
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s;
+      color: #fff; border: none; border-radius: 12px;
+      padding: 16px; font-size: 16px; font-weight: 700;
+      letter-spacing: .5px; cursor: pointer;
+      transition: opacity .2s, transform .1s;
       margin-top: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
     }
-    .btn-submit:active { transform: scale(0.98); opacity: 0.9; }
+    .btn-submit:active { transform: scale(.98); opacity: .9; }
 
-    /* FOOTER */
-    .footer {
-      text-align: center;
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 30px;
-    }
+    .footer { text-align: center; font-size: 12px; color: var(--muted); margin-top: 30px; }
 
     @media (max-width: 480px) {
-      .marco-row { grid-template-columns: 1fr; }
-      .marco-label { padding-top: 0; }
+      .marco-fields { grid-template-columns: 1fr; }
       .os-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
   <div class="header">
     <div class="header-logo">🛡️</div>
     <div class="header-info">
@@ -304,61 +258,25 @@
     <div class="os-info-card">
       <h2>📋 Informações da Operação</h2>
       <div class="os-grid">
-        <div class="os-field">
-          <label>Cliente</label>
-          <p>{{ os.cliente }}</p>
-        </div>
-        <div class="os-field">
-          <label>Status</label>
-          <p><span class="status-badge">⚡ {{ os.get_status_display }}</span></p>
-        </div>
-        <div class="os-field">
-          <label>Origem</label>
-          <p>{{ os.cidade_origem }}/{{ os.uf_origem }}</p>
-        </div>
-        <div class="os-field">
-          <label>Destino</label>
-          <p>{{ os.cidade_destino }}/{{ os.uf_destino }}</p>
-        </div>
-        <div class="os-field">
-          <label>Tipo</label>
-          <p>{{ os.get_tipo_viagem_display }}</p>
-        </div>
-        <div class="os-field">
-          <label>Previsão Início</label>
-          <p>{{ os.previsao_inicio|date:"d/m/Y H:i" }}</p>
-        </div>
-        {% if os.snap_agente1_nome %}
-        <div class="os-field">
-          <label>Agente 1</label>
-          <p>{{ os.snap_agente1_nome }}</p>
-        </div>
-        {% endif %}
-        {% if os.snap_agente2_nome %}
-        <div class="os-field">
-          <label>Agente 2</label>
-          <p>{{ os.snap_agente2_nome }}</p>
-        </div>
-        {% endif %}
-        {% if os.snap_viatura_placa %}
-        <div class="os-field">
-          <label>Viatura</label>
-          <p>{{ os.snap_viatura_modelo }} — {{ os.snap_viatura_placa }}</p>
-        </div>
-        {% endif %}
+        <div class="os-field"><label>Cliente</label><p>{{ os.cliente }}</p></div>
+        <div class="os-field"><label>Status</label><p><span class="status-badge">⚡ {{ os.get_status_display }}</span></p></div>
+        <div class="os-field"><label>Origem</label><p>{{ os.cidade_origem }}/{{ os.uf_origem }}</p></div>
+        <div class="os-field"><label>Destino</label><p>{{ os.cidade_destino }}/{{ os.uf_destino }}</p></div>
+        <div class="os-field"><label>Tipo</label><p>{{ os.get_tipo_viagem_display }}</p></div>
+        <div class="os-field"><label>Previsão Início</label><p>{{ os.previsao_inicio|date:"d/m/Y H:i" }}</p></div>
+        {% if os.snap_agente1_nome %}<div class="os-field"><label>Agente 1</label><p>{{ os.snap_agente1_nome }}</p></div>{% endif %}
+        {% if os.snap_agente2_nome %}<div class="os-field"><label>Agente 2</label><p>{{ os.snap_agente2_nome }}</p></div>{% endif %}
+        {% if os.snap_viatura_placa %}<div class="os-field"><label>Viatura</label><p>{{ os.snap_viatura_modelo }} — {{ os.snap_viatura_placa }}</p></div>{% endif %}
       </div>
     </div>
 
     <!-- FORMULÁRIO -->
-    <form method="POST">
+    <form method="POST" id="fieldForm">
       {% csrf_token %}
 
       <!-- Nº FOLHA -->
       <div class="section-card">
-        <div class="section-header">
-          <span class="icon">📄</span>
-          <h3>Número da Folha</h3>
-        </div>
+        <div class="section-header"><span class="icon">📄</span><h3>Número da Folha</h3></div>
         <div class="section-body">
           <div class="field-group">
             <label>Nº Folha</label>
@@ -369,89 +287,181 @@
 
       <!-- MARCOS -->
       <div class="section-card">
-        <div class="section-header">
-          <span class="icon">🕐</span>
-          <h3>Marcos de Execução</h3>
-        </div>
+        <div class="section-header"><span class="icon">🕐</span><h3>Marcos de Execução</h3></div>
         <div class="section-body">
 
-          <!-- Início de Viagem -->
+          <!-- ── INÍCIO DE VIAGEM ── -->
           <div class="marco-row">
-            <div class="marco-label">
-              <span class="dot" style="background:#3b82f6"></span>
-              Início de Viagem
+            <div class="marco-top">
+              <div class="marco-label">
+                <span class="dot" style="background:#3b82f6"></span>Início de Viagem
+              </div>
+              <button type="button" class="gps-btn" onclick="captureGPS('inicio_viagem', this)">
+                📍 Capturar Localização
+              </button>
             </div>
-            <div class="field-group">
-              <label>Data / Hora</label>
-              <input type="datetime-local" name="inicio_viagem" value="{{ fmt.inicio_viagem }}">
+            <div class="marco-fields">
+              <div class="field-group">
+                <label>Data / Hora</label>
+                <input type="datetime-local" name="inicio_viagem" value="{{ fmt.inicio_viagem }}">
+              </div>
+              <div class="field-group">
+                <label>KM Hodômetro</label>
+                <input type="number" name="km_inicio_viagem" value="{{ op.km_inicio_viagem|default_if_none:'' }}" placeholder="Ex: 79710">
+              </div>
             </div>
-            <div class="field-group">
-              <label>KM Hodômetro</label>
-              <input type="number" name="km_inicio_viagem" value="{{ op.km_inicio_viagem|default_if_none:'' }}" placeholder="Ex: 79710">
+            <input type="hidden" name="gps_inicio_viagem_lat" id="gps_inicio_viagem_lat" value="{{ op.gps_inicio_viagem_lat|default_if_none:'' }}">
+            <input type="hidden" name="gps_inicio_viagem_lng" id="gps_inicio_viagem_lng" value="{{ op.gps_inicio_viagem_lng|default_if_none:'' }}">
+            <div id="gps_status_inicio_viagem">
+              {% if gps.inicio_viagem %}
+              <div class="gps-status ok">
+                📍 {{ op.gps_inicio_viagem_lat }}, {{ op.gps_inicio_viagem_lng }}
+                <a class="gps-map-link" href="{{ gps.inicio_viagem.url }}" target="_blank">🗺 Ver no mapa</a>
+              </div>
+              <div class="mini-map" id="map_inicio_viagem" style="display:block">
+                <iframe src="https://www.google.com/maps?q={{ op.gps_inicio_viagem_lat }},{{ op.gps_inicio_viagem_lng }}&z=15&output=embed" loading="lazy"></iframe>
+              </div>
+              {% endif %}
             </div>
           </div>
 
-          <!-- Chegada Operação -->
+          <!-- ── CHEGADA OPERAÇÃO ── -->
           <div class="marco-row">
-            <div class="marco-label">
-              <span class="dot" style="background:#06b6d4"></span>
-              Chegada Operação
+            <div class="marco-top">
+              <div class="marco-label">
+                <span class="dot" style="background:#06b6d4"></span>Chegada Operação
+              </div>
+              <button type="button" class="gps-btn" onclick="captureGPS('chegada_operacao', this)">
+                📍 Capturar Localização
+              </button>
             </div>
-            <div class="field-group">
-              <label>Data / Hora</label>
-              <input type="datetime-local" name="chegada_operacao" value="{{ fmt.chegada_operacao }}">
+            <div class="marco-fields">
+              <div class="field-group">
+                <label>Data / Hora</label>
+                <input type="datetime-local" name="chegada_operacao" value="{{ fmt.chegada_operacao }}">
+              </div>
+              <div class="field-group">
+                <label>KM Hodômetro</label>
+                <input type="number" name="km_chegada_operacao" value="{{ op.km_chegada_operacao|default_if_none:'' }}" placeholder="Ex: 79786">
+              </div>
             </div>
-            <div class="field-group">
-              <label>KM Hodômetro</label>
-              <input type="number" name="km_chegada_operacao" value="{{ op.km_chegada_operacao|default_if_none:'' }}" placeholder="Ex: 79786">
+            <input type="hidden" name="gps_chegada_operacao_lat" id="gps_chegada_operacao_lat" value="{{ op.gps_chegada_operacao_lat|default_if_none:'' }}">
+            <input type="hidden" name="gps_chegada_operacao_lng" id="gps_chegada_operacao_lng" value="{{ op.gps_chegada_operacao_lng|default_if_none:'' }}">
+            <div id="gps_status_chegada_operacao">
+              {% if gps.chegada_operacao %}
+              <div class="gps-status ok">
+                📍 {{ op.gps_chegada_operacao_lat }}, {{ op.gps_chegada_operacao_lng }}
+                <a class="gps-map-link" href="{{ gps.chegada_operacao.url }}" target="_blank">🗺 Ver no mapa</a>
+              </div>
+              <div class="mini-map" id="map_chegada_operacao" style="display:block">
+                <iframe src="https://www.google.com/maps?q={{ op.gps_chegada_operacao_lat }},{{ op.gps_chegada_operacao_lng }}&z=15&output=embed" loading="lazy"></iframe>
+              </div>
+              {% endif %}
             </div>
           </div>
 
-          <!-- Início Operação -->
+          <!-- ── INÍCIO OPERAÇÃO ── -->
           <div class="marco-row">
-            <div class="marco-label">
-              <span class="dot" style="background:#8b5cf6"></span>
-              Início Operação
+            <div class="marco-top">
+              <div class="marco-label">
+                <span class="dot" style="background:#8b5cf6"></span>Início Operação
+              </div>
+              <button type="button" class="gps-btn" onclick="captureGPS('inicio_operacao', this)">
+                📍 Capturar Localização
+              </button>
             </div>
-            <div class="field-group">
-              <label>Data / Hora</label>
-              <input type="datetime-local" name="inicio_operacao" value="{{ fmt.inicio_operacao }}">
+            <div class="marco-fields">
+              <div class="field-group">
+                <label>Data / Hora</label>
+                <input type="datetime-local" name="inicio_operacao" value="{{ fmt.inicio_operacao }}">
+              </div>
+              <div class="field-group">
+                <label>KM Hodômetro</label>
+                <input type="number" name="km_inicio_operacao" value="{{ op.km_inicio_operacao|default_if_none:'' }}" placeholder="Ex: 79786">
+              </div>
             </div>
-            <div class="field-group">
-              <label>KM Hodômetro</label>
-              <input type="number" name="km_inicio_operacao" value="{{ op.km_inicio_operacao|default_if_none:'' }}" placeholder="Ex: 79786">
+            <input type="hidden" name="gps_inicio_operacao_lat" id="gps_inicio_operacao_lat" value="{{ op.gps_inicio_operacao_lat|default_if_none:'' }}">
+            <input type="hidden" name="gps_inicio_operacao_lng" id="gps_inicio_operacao_lng" value="{{ op.gps_inicio_operacao_lng|default_if_none:'' }}">
+            <div id="gps_status_inicio_operacao">
+              {% if gps.inicio_operacao %}
+              <div class="gps-status ok">
+                📍 {{ op.gps_inicio_operacao_lat }}, {{ op.gps_inicio_operacao_lng }}
+                <a class="gps-map-link" href="{{ gps.inicio_operacao.url }}" target="_blank">🗺 Ver no mapa</a>
+              </div>
+              <div class="mini-map" id="map_inicio_operacao" style="display:block">
+                <iframe src="https://www.google.com/maps?q={{ op.gps_inicio_operacao_lat }},{{ op.gps_inicio_operacao_lng }}&z=15&output=embed" loading="lazy"></iframe>
+              </div>
+              {% endif %}
             </div>
           </div>
 
-          <!-- Término Operação -->
+          <!-- ── TÉRMINO OPERAÇÃO ── -->
           <div class="marco-row">
-            <div class="marco-label">
-              <span class="dot" style="background:#f59e0b"></span>
-              Término Operação
+            <div class="marco-top">
+              <div class="marco-label">
+                <span class="dot" style="background:#f59e0b"></span>Término Operação
+              </div>
+              <button type="button" class="gps-btn" onclick="captureGPS('termino_operacao', this)">
+                📍 Capturar Localização
+              </button>
             </div>
-            <div class="field-group">
-              <label>Data / Hora</label>
-              <input type="datetime-local" name="termino_operacao" value="{{ fmt.termino_operacao }}">
+            <div class="marco-fields">
+              <div class="field-group">
+                <label>Data / Hora</label>
+                <input type="datetime-local" name="termino_operacao" value="{{ fmt.termino_operacao }}">
+              </div>
+              <div class="field-group">
+                <label>KM Hodômetro</label>
+                <input type="number" name="km_termino_operacao" value="{{ op.km_termino_operacao|default_if_none:'' }}" placeholder="Ex: 80578">
+              </div>
             </div>
-            <div class="field-group">
-              <label>KM Hodômetro</label>
-              <input type="number" name="km_termino_operacao" value="{{ op.km_termino_operacao|default_if_none:'' }}" placeholder="Ex: 80578">
+            <input type="hidden" name="gps_termino_operacao_lat" id="gps_termino_operacao_lat" value="{{ op.gps_termino_operacao_lat|default_if_none:'' }}">
+            <input type="hidden" name="gps_termino_operacao_lng" id="gps_termino_operacao_lng" value="{{ op.gps_termino_operacao_lng|default_if_none:'' }}">
+            <div id="gps_status_termino_operacao">
+              {% if gps.termino_operacao %}
+              <div class="gps-status ok">
+                📍 {{ op.gps_termino_operacao_lat }}, {{ op.gps_termino_operacao_lng }}
+                <a class="gps-map-link" href="{{ gps.termino_operacao.url }}" target="_blank">🗺 Ver no mapa</a>
+              </div>
+              <div class="mini-map" id="map_termino_operacao" style="display:block">
+                <iframe src="https://www.google.com/maps?q={{ op.gps_termino_operacao_lat }},{{ op.gps_termino_operacao_lng }}&z=15&output=embed" loading="lazy"></iframe>
+              </div>
+              {% endif %}
             </div>
           </div>
 
-          <!-- Término de Viagem -->
+          <!-- ── TÉRMINO DE VIAGEM ── -->
           <div class="marco-row">
-            <div class="marco-label">
-              <span class="dot" style="background:#10b981"></span>
-              Término de Viagem
+            <div class="marco-top">
+              <div class="marco-label">
+                <span class="dot" style="background:#10b981"></span>Término de Viagem
+              </div>
+              <button type="button" class="gps-btn" onclick="captureGPS('termino_viagem', this)">
+                📍 Capturar Localização
+              </button>
             </div>
-            <div class="field-group">
-              <label>Data / Hora</label>
-              <input type="datetime-local" name="termino_viagem" value="{{ fmt.termino_viagem }}">
+            <div class="marco-fields">
+              <div class="field-group">
+                <label>Data / Hora</label>
+                <input type="datetime-local" name="termino_viagem" value="{{ fmt.termino_viagem }}">
+              </div>
+              <div class="field-group">
+                <label>KM Hodômetro</label>
+                <input type="number" name="km_termino_viagem" value="{{ op.km_termino_viagem|default_if_none:'' }}" placeholder="Ex: 80578">
+              </div>
             </div>
-            <div class="field-group">
-              <label>KM Hodômetro</label>
-              <input type="number" name="km_termino_viagem" value="{{ op.km_termino_viagem|default_if_none:'' }}" placeholder="Ex: 80578">
+            <input type="hidden" name="gps_termino_viagem_lat" id="gps_termino_viagem_lat" value="{{ op.gps_termino_viagem_lat|default_if_none:'' }}">
+            <input type="hidden" name="gps_termino_viagem_lng" id="gps_termino_viagem_lng" value="{{ op.gps_termino_viagem_lng|default_if_none:'' }}">
+            <div id="gps_status_termino_viagem">
+              {% if gps.termino_viagem %}
+              <div class="gps-status ok">
+                📍 {{ op.gps_termino_viagem_lat }}, {{ op.gps_termino_viagem_lng }}
+                <a class="gps-map-link" href="{{ gps.termino_viagem.url }}" target="_blank">🗺 Ver no mapa</a>
+              </div>
+              <div class="mini-map" id="map_termino_viagem" style="display:block">
+                <iframe src="https://www.google.com/maps?q={{ op.gps_termino_viagem_lat }},{{ op.gps_termino_viagem_lng }}&z=15&output=embed" loading="lazy"></iframe>
+              </div>
+              {% endif %}
             </div>
           </div>
 
@@ -460,10 +470,7 @@
 
       <!-- PEDÁGIO -->
       <div class="section-card">
-        <div class="section-header">
-          <span class="icon">🚦</span>
-          <h3>Pedágio</h3>
-        </div>
+        <div class="section-header"><span class="icon">🚦</span><h3>Pedágio</h3></div>
         <div class="section-body">
           <div class="field-group">
             <label>Valor do Pedágio</label>
@@ -477,17 +484,81 @@
         </div>
       </div>
 
-      <!-- SUBMIT -->
       <button type="submit" class="btn-submit">
         <span>💾</span> Salvar e Atualizar OS
       </button>
-
     </form>
 
     <div class="footer">
       🔒 Acesso seguro — OS-{{ os.numero }} &nbsp;|&nbsp; Demark Segurança © 2026
     </div>
-
   </div>
+
+  <script>
+    function captureGPS(marco, btn) {
+      if (!navigator.geolocation) {
+        showGPSStatus(marco, 'err', '❌ Seu dispositivo não suporta GPS.');
+        return;
+      }
+
+      btn.classList.add('loading');
+      btn.innerHTML = '⏳ Obtendo localização…';
+      btn.disabled = true;
+
+      navigator.geolocation.getCurrentPosition(
+        function(pos) {
+          const lat = pos.coords.latitude.toFixed(7);
+          const lng = pos.coords.longitude.toFixed(7);
+          const acc = Math.round(pos.coords.accuracy);
+
+          // Preenche os campos hidden
+          document.getElementById('gps_' + marco + '_lat').value = lat;
+          document.getElementById('gps_' + marco + '_lng').value = lng;
+
+          // Mostra status + mapa
+          const mapUrl = `https://www.google.com/maps?q=${lat},${lng}&z=16&output=embed`;
+          const mapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+
+          showGPSStatus(marco, 'ok',
+            `📍 ${lat}, ${lng} <span style="color:var(--muted);font-size:11px">(±${acc}m)</span>
+             <a class="gps-map-link" href="${mapsLink}" target="_blank">🗺 Ver no mapa</a>`,
+            mapUrl
+          );
+
+          btn.classList.remove('loading');
+          btn.innerHTML = '✅ Localização Salva';
+          btn.style.background = 'rgba(16,185,129,.2)';
+          btn.style.borderColor = 'var(--success)';
+          btn.style.color = 'var(--success)';
+        },
+        function(err) {
+          let msg = '❌ Não foi possível obter a localização.';
+          if (err.code === 1) msg = '❌ Permissão de localização negada. Habilite o GPS nas configurações do navegador.';
+          if (err.code === 2) msg = '❌ Localização indisponível. Verifique o GPS do dispositivo.';
+          if (err.code === 3) msg = '❌ Tempo esgotado. Tente novamente.';
+          showGPSStatus(marco, 'err', msg);
+
+          btn.classList.remove('loading');
+          btn.innerHTML = '📍 Tentar Novamente';
+          btn.disabled = false;
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      );
+    }
+
+    function showGPSStatus(marco, type, html, mapUrl) {
+      const container = document.getElementById('gps_status_' + marco);
+      container.innerHTML = `<div class="gps-status ${type}">${html}</div>`;
+
+      if (mapUrl) {
+        const mapDiv = document.createElement('div');
+        mapDiv.className = 'mini-map';
+        mapDiv.id = 'map_' + marco;
+        mapDiv.style.display = 'block';
+        mapDiv.innerHTML = `<iframe src="${mapUrl}" loading="lazy"></iframe>`;
+        container.appendChild(mapDiv);
+      }
+    }
+  </script>
 </body>
 </html>
