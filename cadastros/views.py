@@ -1403,9 +1403,9 @@ def usuario_list(request):
     q = request.GET.get('q', '')
     qs = User.objects.select_related('perfil').order_by('username')
 
-    # Sempre ocultar o usuário demark para quem não é o próprio demark
-    if request.user.username != 'demark':
-        qs = qs.exclude(username='demark')
+    # Sempre ocultar o usuário demark para quem não é o próprio demark (case-insensitive)
+    if request.user.username.lower() != 'demark':
+        qs = qs.exclude(username__iexact='demark')
 
     if q:
         qs = qs.filter(
@@ -1514,7 +1514,7 @@ def usuario_edit(request, pk):
     sou_admin = _is_admin_or_developer(request.user)
 
     # Proteger o usuário demark: só o próprio demark pode editar seu perfil
-    if u.username == 'demark' and request.user.username != 'demark':
+    if u.username.lower() == 'demark' and request.user.username.lower() != 'demark':
         messages.error(request, 'Sem permissão.')
         return redirect('usuario_list')
 
@@ -1592,7 +1592,7 @@ def usuario_senha(request, pk):
     sou_admin = _is_admin_or_developer(request.user)
 
     # Proteger demark: só o próprio demark altera sua senha
-    if u.username == 'demark' and request.user.username != 'demark':
+    if u.username.lower() == 'demark' and request.user.username.lower() != 'demark':
         messages.error(request, 'Sem permissão.')
         return redirect('usuario_list')
 
@@ -1651,7 +1651,7 @@ def usuario_delete(request, pk):
         messages.error(request, 'Você não pode excluir sua própria conta.')
         return redirect('usuario_list')
 
-    if u.username == 'demark':
+    if u.username.lower() == 'demark':
         messages.error(request, 'Este usuário não pode ser excluído.')
         return redirect('usuario_list')
 
