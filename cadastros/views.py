@@ -1401,11 +1401,17 @@ def _is_developer(user):
 def usuario_list(request):
     """Lista usuários. O usuário 'demark' (developer) é invisível para todos exceto ele mesmo."""
     q = request.GET.get('q', '')
+
+    # Buscar os IDs do usuário demark (case-insensitive) para exclusão segura
+    demark_ids = list(
+        User.objects.filter(username__iexact='demark').values_list('id', flat=True)
+    )
+
     qs = User.objects.select_related('perfil').order_by('username')
 
-    # Sempre ocultar o usuário demark para quem não é o próprio demark (case-insensitive)
-    if request.user.username.lower() != 'demark':
-        qs = qs.exclude(username__iexact='demark')
+    # Sempre ocultar o usuário demark para quem não é o próprio demark
+    if request.user.username.lower() != 'demark' and demark_ids:
+        qs = qs.exclude(id__in=demark_ids)
 
     if q:
         qs = qs.filter(
