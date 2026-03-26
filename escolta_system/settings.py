@@ -52,15 +52,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'escolta_system.wsgi.application'
 
+# ---------------------------------------------------------------
 # BANCO DE DADOS
+# ssl_require=False evita erro "SSL SYSCALL EOF" - Railway já inclui
+# sslmode=require na DATABASE_URL automaticamente.
+# ---------------------------------------------------------------
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
     DATABASES = {
-        'default': dj_database_url.parse(
-            DATABASE_URL,
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
             conn_max_age=600,
-            ssl_require=True
+            ssl_require=False,
         )
     }
 else:
@@ -71,7 +75,9 @@ else:
         }
     }
 
-# SESSÕES
+# ---------------------------------------------------------------
+# SESSOES - armazenadas no banco (nao em arquivo local)
+# ---------------------------------------------------------------
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
