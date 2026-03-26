@@ -485,30 +485,42 @@ def os_nova(request):
     UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG',
            'PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
     if request.method == 'POST':
-        request.session['os_draft'] = {
-            'cliente_id':        request.POST.get('cliente'),
+        from urllib.parse import urlencode
+        params = urlencode({
+            'cliente_id':        request.POST.get('cliente', ''),
             'solicitante':       request.POST.get('solicitante', ''),
-            'forma_solicitacao': request.POST.get('forma_solicitacao'),
-            'tipo_viagem':       request.POST.get('tipo_viagem'),
-            'previsao_inicio':   request.POST.get('previsao_inicio'),
+            'forma_solicitacao': request.POST.get('forma_solicitacao', ''),
+            'tipo_viagem':       request.POST.get('tipo_viagem', ''),
+            'previsao_inicio':   request.POST.get('previsao_inicio', ''),
             'previsao_retorno':  request.POST.get('previsao_retorno', ''),
             'imediata':          request.POST.get('imediata', ''),
             'cidade_origem':     request.POST.get('cidade_origem', ''),
             'uf_origem':         request.POST.get('uf_origem', 'GO'),
             'cidade_destino':    request.POST.get('cidade_destino', ''),
             'uf_destino':        request.POST.get('uf_destino', 'GO'),
-        }
-        request.session.modified = True
-        request.session.save()
-        return redirect('os_detalhe_novo')
+        })
+        return redirect(f'/operacional/os/nova/detalhe/?{params}')
     return render(request, 'cadastros/os_nova.html', {'clientes': clientes, 'ufs': UFS})
 
 
 @login_required
 def os_detalhe_novo(request):
     """Passo 2 — detalhe completo da OS com equipe"""
-    draft = request.session.get('os_draft')
-    if not draft:
+    # Lê dados do GET (passados pelo passo 1 via query string, sem session)
+    draft = {
+        'cliente_id':        request.GET.get('cliente_id', ''),
+        'solicitante':       request.GET.get('solicitante', ''),
+        'forma_solicitacao': request.GET.get('forma_solicitacao', ''),
+        'tipo_viagem':       request.GET.get('tipo_viagem', ''),
+        'previsao_inicio':   request.GET.get('previsao_inicio', ''),
+        'previsao_retorno':  request.GET.get('previsao_retorno', ''),
+        'imediata':          request.GET.get('imediata', ''),
+        'cidade_origem':     request.GET.get('cidade_origem', ''),
+        'uf_origem':         request.GET.get('uf_origem', 'GO'),
+        'cidade_destino':    request.GET.get('cidade_destino', ''),
+        'uf_destino':        request.GET.get('uf_destino', 'GO'),
+    }
+    if not draft.get('cliente_id') and request.method != 'POST':
         return redirect('os_nova')
 
     clientes = Cliente.objects.all().order_by('razao_social')
@@ -555,7 +567,6 @@ def os_detalhe_novo(request):
                 status            = 'aberta',
             )
             os.save()
-            del request.session['os_draft']
             messages.success(request, f'OS {os.numero} aberta com sucesso!')
             return redirect('os_detalhe', pk=os.pk)
         except Exception as e:
