@@ -4,3 +4,5 @@ gunicorn
 psycopg2-binary
 dj-database-url
 whitenoise
+reportlab>=4.0
+openpyxl>=3.1
