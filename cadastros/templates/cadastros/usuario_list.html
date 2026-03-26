@@ -4,10 +4,12 @@
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> › Configurações › Usuários{% endblock %}
 
 {% block topbar_actions %}
+{% if pode_gerenciar %}
 <a href="{% url 'usuario_create' %}" class="btn btn-primary">
   <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><line x1="7" y1="1" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
   Novo Usuário
 </a>
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -27,7 +29,7 @@
   <div class="stat-card">
     <div class="stat-label">Administradores</div>
     <div class="stat-value" style="color:var(--blue-light)">{{ admins }}</div>
-    <div class="stat-sub">nível admin ou developer</div>
+    <div class="stat-sub">nível administrador</div>
   </div>
 </div>
 
@@ -74,11 +76,7 @@
           <td>{{ u.get_full_name|default:"—" }}</td>
           <td style="color:var(--text2)">{{ u.email|default:"—" }}</td>
           <td>
-            {% if u.is_superuser %}
-              <span class="badge badge-amber">Superusuário</span>
-            {% elif u.perfil.nivel == 'developer' %}
-              <span class="badge badge-blue">Developer</span>
-            {% elif u.perfil.nivel == 'admin' %}
+            {% if u.perfil.nivel == 'admin' %}
               <span class="badge badge-green">Administrador</span>
             {% else %}
               <span class="badge badge-gray">Operador</span>
@@ -100,17 +98,28 @@
           </td>
           <td>
             <div style="display:flex;gap:6px;justify-content:flex-end">
+
+              {# Editar: admin/developer podem editar qualquer um; operador só a si mesmo #}
+              {% if pode_gerenciar or u == request.user %}
               <a href="{% url 'usuario_edit' u.pk %}" class="btn-icon" title="Editar">
                 <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><path d="M2 10.5V12h1.5l5.4-5.4-1.5-1.5L2 10.5zm7.8-7.8a1 1 0 000-1.4l-1.1-1.1a1 1 0 00-1.4 0L6.2 1.3l2.5 2.5 1.1-1.1z" fill="currentColor"/></svg>
               </a>
+              {% endif %}
+
+              {# Alterar senha: admin/developer podem alterar qualquer uma; operador só a sua #}
+              {% if pode_gerenciar or u == request.user %}
               <a href="{% url 'usuario_senha' u.pk %}" class="btn-icon" title="Alterar senha" style="color:var(--amber)">
                 <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><rect x="2" y="6" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 6V4a2.5 2.5 0 015 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="7" cy="9.5" r="1" fill="currentColor"/></svg>
               </a>
-              {% if u != request.user %}
+              {% endif %}
+
+              {# Excluir: apenas admin/developer, e não pode excluir a si mesmo #}
+              {% if pode_gerenciar and u != request.user %}
               <a href="{% url 'usuario_delete' u.pk %}" class="btn-icon" title="Excluir" style="color:var(--red)">
                 <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><path d="M2 3.5h10M5.5 3.5V2.5h3v1M6 6v4M8 6v4M3.5 3.5l.5 8h6l.5-8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </a>
               {% endif %}
+
             </div>
           </td>
         </tr>
