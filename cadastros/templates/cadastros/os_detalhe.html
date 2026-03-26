@@ -690,6 +690,7 @@ document.querySelectorAll('input[type="datetime-local"]').forEach(el => {
 });
 </script>
 
+{% if not novo %}
 <!-- MODAL LINK EXTERNO -->
 <div id="modal-link" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;padding:20px">
   <div style="background:#111827;border:1px solid #1e3a5f;border-radius:16px;padding:32px;max-width:480px;width:100%;position:relative">
@@ -784,5 +785,6 @@ document.getElementById('modal-link').addEventListener('click', function(e) {
   if (e.target === this) fecharModal();
 });
 </script>
+{% endif %}
 
 {% endblock %}
