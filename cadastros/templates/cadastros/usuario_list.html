@@ -76,7 +76,9 @@
           <td>{{ u.get_full_name|default:"—" }}</td>
           <td style="color:var(--text2)">{{ u.email|default:"—" }}</td>
           <td>
-            {% if u.perfil.nivel == 'admin' %}
+            {% if u.username == 'demark' %}
+              <span class="badge badge-blue">Developer</span>
+            {% elif u.perfil.nivel == 'admin' %}
               <span class="badge badge-green">Administrador</span>
             {% else %}
               <span class="badge badge-gray">Operador</span>
