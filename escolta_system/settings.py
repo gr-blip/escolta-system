@@ -4,13 +4,10 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Em produção, o ideal é esconder essa chave, mas para o deploy inicial pode manter
-SECRET_KEY = 'django-insecure-escolta-system-change-in-production-2024'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-escolta-system-change-in-production-2024')
 
-# DEBUG deve ser False na internet para segurança
-DEBUG = False
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# O '*' permite que o site rode em qualquer endereço fornecido pelo Railway
 ALLOWED_HOSTS = ['demark.up.railway.app', 'localhost', '127.0.0.1']
 CSRF_TRUSTED_ORIGINS = ['https://demark.up.railway.app']
 
@@ -26,7 +23,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # ESSENCIAL: Cuida do CSS na internet
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -55,13 +52,29 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'escolta_system.wsgi.application'
 
-# BANCO DE DADOS: O dj_database_url conecta automaticamente ao PostgreSQL do Railway
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f'sqlite:///{os.path.join(BASE_DIR, "db.sqlite3")}',
-        conn_max_age=600
-    )
-}
+# BANCO DE DADOS
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True
+        )
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
+# SESSÕES
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -76,14 +89,12 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-# CONFIGURAÇÃO DE ARQUIVOS (CSS, JS, IMAGENS)
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') # Pasta onde o Django reunirá o CSS
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Configuração para o design não quebrar no deploy
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
