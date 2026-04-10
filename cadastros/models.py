@@ -135,6 +135,7 @@ class Armamento(models.Model):
 
 class Cliente(models.Model):
     razao_social = models.CharField(max_length=200, verbose_name='Razao Social')
+    nome_fantasia = models.CharField(max_length=200, blank=True, verbose_name='Nome Fantasia')
     cnpj = models.CharField(max_length=18, unique=True, verbose_name='CNPJ')
     inscricao_estadual = models.CharField(max_length=30, blank=True, verbose_name='IE / IM')
     endereco = models.CharField(max_length=300, blank=True, verbose_name='Endereco')
