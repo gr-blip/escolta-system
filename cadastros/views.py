@@ -763,6 +763,20 @@ def os_operacional_save(request, pk):
             os_obj.status = 'aberta'
         os_obj.save(update_fields=['status'])
 
+    status_atual = os_obj.status
+    if status_atual != 'cancelada':
+        if op.termino_viagem:
+            os_obj.status = 'concluida'
+        elif op.termino_operacao:
+            os_obj.status = 'encerrando'
+        elif op.chegada_operacao or op.inicio_operacao:
+            os_obj.status = 'em_operacao'
+        elif op.inicio_viagem:
+            os_obj.status = 'em_viagem'
+        else:
+            os_obj.status = 'aberta'
+        os_obj.save(update_fields=['status'])
+
     messages.success(request, 'Dados operacionais salvos com sucesso!')
     return redirect('os_detalhe', pk=pk)
 
