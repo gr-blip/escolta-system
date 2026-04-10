@@ -8,8 +8,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-escolta-system-change
 
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['demark.up.railway.app', 'localhost', '127.0.0.1']
-CSRF_TRUSTED_ORIGINS = ['https://demark.up.railway.app']
+ALLOWED_HOSTS = ['grupojr.up.railway.app', 'localhost', '127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://grupojr.up.railway.app']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
