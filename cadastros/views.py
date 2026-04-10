@@ -195,10 +195,13 @@ def armamento_delete(request, pk):
 @login_required
 def cliente_list(request):
     q = request.GET.get('q', '')
-    clientes = Cliente.objects.all()
+    mostrar_inativos = request.GET.get('inativos') == '1'
+    clientes = Cliente.objects.all() if mostrar_inativos else Cliente.objects.filter(ativo=True)
     if q:
         clientes = clientes.filter(Q(razao_social__icontains=q) | Q(cnpj__icontains=q))
-    return render(request, 'cadastros/cliente_list.html', {'clientes': clientes, 'q': q})
+    return render(request, 'cadastros/cliente_list.html', {
+        'clientes': clientes, 'q': q, 'mostrar_inativos': mostrar_inativos
+    })
 
 
 @login_required
@@ -223,13 +226,15 @@ def cliente_edit(request, pk):
 
 
 @login_required
-def cliente_delete(request, pk):
+def cliente_inativar(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
     if request.method == 'POST':
-        cliente.delete()
-        messages.success(request, 'Cliente removido.')
+        cliente.ativo = not cliente.ativo
+        cliente.save()
+        status = 'reativado' if cliente.ativo else 'inativado'
+        messages.success(request, f'Cliente {status} com sucesso.')
         return redirect('cliente_list')
-    return render(request, 'cadastros/confirm_delete.html', {'obj': cliente, 'tipo': 'Cliente'})
+    return render(request, 'cadastros/cliente_inativar.html', {'obj': cliente})
 
 
 # ── COLETES ───────────────────────────────────────────────────────────────────
