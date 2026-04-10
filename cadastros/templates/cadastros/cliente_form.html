@@ -1,9 +1,8 @@
-{% extends 'cadastros/base.html' %}
+﻿{% extends 'cadastros/base.html' %}
 {% block title %}{{ titulo }}{% endblock %}
 {% block page_title %}{{ titulo }}{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / <a href="{% url 'cliente_list' %}">Clientes</a> / {{ titulo }}{% endblock %}
-{% block topbar_actions %}<a href="{% url 'cliente_list' %}" class="btn btn-secondary">← Voltar</a>{% endblock %}
-
+{% block topbar_actions %}<a href="{% url 'cliente_list' %}" class="btn btn-secondary"> Voltar</a>{% endblock %}
 {% block content %}
 <form method="post">
   {% csrf_token %}
@@ -13,24 +12,82 @@
       Dados da empresa contratante
     </div>
     <div class="form-grid form-grid-2">
-      <div class="field field-full"><label>Razão Social *</label>{{ form.razao_social }}</div>
-      <div class="field"><label>CNPJ *</label>{{ form.cnpj }}</div>
+      <div class="field">
+        <label>CNPJ *</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          {{ form.cnpj }}
+          <button type="button" id="btn-buscar-cnpj" class="btn btn-secondary" style="white-space:nowrap;min-width:110px;">
+             Buscar CNPJ
+          </button>
+        </div>
+        <div id="cnpj-status" style="font-size:12px;margin-top:4px;"></div>
+      </div>
       <div class="field"><label>IE / IM</label>{{ form.inscricao_estadual }}</div>
+      <div class="field field-full"><label>Razão Social *</label>{{ form.razao_social }}</div>
       <div class="field field-full"><label>Endereço</label>{{ form.endereco }}</div>
       <div class="field"><label>Cidade / UF</label>{{ form.cidade_uf }}</div>
       <div class="field"><label>CEP</label>{{ form.cep }}</div>
     </div>
   </div>
-
   {% if form.errors %}
   <div style="background:var(--red-bg);border:1px solid #3a1515;color:var(--red);border-radius:8px;padding:12px;margin-top:16px;font-size:13px">
     {% for field in form %}{% for error in field.errors %}<div>{{ field.label }}: {{ error }}</div>{% endfor %}{% endfor %}
   </div>
   {% endif %}
-
   <div style="display:flex;gap:10px;margin-top:16px">
     <button type="submit" class="btn btn-primary">Salvar Cliente</button>
     <a href="{% url 'cliente_list' %}" class="btn btn-secondary">Cancelar</a>
   </div>
 </form>
+<script>
+document.getElementById('btn-buscar-cnpj').addEventListener('click', async function () {
+  const cnpjInput = document.getElementById('id_cnpj');
+  const status    = document.getElementById('cnpj-status');
+  const cnpj = cnpjInput.value.replace(/\D/g, '');
+  if (cnpj.length !== 14) {
+    status.style.color = '#e05252';
+    status.textContent = 'Digite um CNPJ válido com 14 dígitos antes de buscar.';
+    return;
+  }
+  status.style.color = '#999';
+  status.textContent = 'Buscando dados do CNPJ...';
+  this.disabled = true;
+  try {
+    const resp = await fetch(`https://publica.cnpj.ws/cnpj/${cnpj}`);
+    if (!resp.ok) {
+      status.style.color = '#e05252';
+      status.textContent = resp.status === 404 ? 'CNPJ não encontrado na Receita Federal.' : 'Erro ao consultar CNPJ. Tente novamente.';
+      return;
+    }
+    const data = await resp.json();
+    document.getElementById('id_razao_social').value = data.razao_social || '';
+    const end = data.estabelecimento || {};
+    let enderecoStr = end.logradouro || '';
+    if (end.numero)      enderecoStr += `, ${end.numero}`;
+    if (end.complemento) enderecoStr += ` ${end.complemento}`;
+    if (end.bairro)      enderecoStr += `, ${end.bairro}`;
+    document.getElementById('id_endereco').value = enderecoStr;
+    const cidade = end.cidade ? end.cidade.nome : '';
+    const uf     = end.estado ? end.estado.sigla : '';
+    if (cidade || uf) document.getElementById('id_cidade_uf').value = `${cidade} / ${uf}`;
+    const cep = (end.cep || '').replace(/\D/g, '');
+    if (cep.length === 8) document.getElementById('id_cep').value = cep.replace(/(\d{5})(\d{3})/, '$1-$2');
+    status.style.color = '#4caf7d';
+    status.textContent = 'Dados preenchidos com sucesso!';
+  } catch (err) {
+    status.style.color = '#e05252';
+    status.textContent = 'Erro de conexão. Verifique sua internet e tente novamente.';
+  } finally {
+    this.disabled = false;
+  }
+});
+document.getElementById('id_cnpj').addEventListener('input', function () {
+  let v = this.value.replace(/\D/g, '').slice(0, 14);
+  if (v.length > 12) v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})/, '$1.$2.$3/$4-$5');
+  else if (v.length > 8) v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{0,4})/, '$1.$2.$3/$4');
+  else if (v.length > 5) v = v.replace(/(\d{2})(\d{3})(\d{0,3})/, '$1.$2.$3');
+  else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,3})/, '$1.$2');
+  this.value = v;
+});
+</script>
 {% endblock %}
