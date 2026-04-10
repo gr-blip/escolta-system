@@ -792,7 +792,7 @@ function copiarLink() {
 
 function compartilharLink() {
   const url = document.getElementById('link-url').value;
-  const texto = `🛡️ *Demark Segurança — OS-{{ os.numero }}*\n\nOlá! Segue o link para preenchimento dos dados de campo da operação:\n\n${url}\n\n_Preencha os horários e KM conforme a execução._`;
+  const texto = `🛡️ *GRUPO JR Segurança — OS-{{ os.numero }}*\n\nOlá! Segue o link para preenchimento dos dados de campo da operação:\n\n${url}\n\n_Preencha os horários e KM conforme a execução._`;
   if (navigator.share) {
     navigator.share({ title: 'OS-{{ os.numero }} — Preenchimento de Campo', text: texto, url: url });
   } else {
