@@ -1,4 +1,4 @@
-{% extends 'cadastros/base.html' %}
+﻿{% extends 'cadastros/base.html' %}
 {% block title %}{% if novo %}Nova OS — Detalhes{% else %}OS-{{ os.numero }}{% endif %}{% endblock %}
 {% block page_title %}{% if novo %}Abrir Ordem de Serviço{% else %}OS-{{ os.numero }}{% endif %}{% endblock %}
 {% block breadcrumb %}
@@ -683,3 +683,4 @@ document.querySelectorAll('input[type="datetime-local"]').forEach(el => {
 });
 </script>
 {% endblock %}
+

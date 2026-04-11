@@ -1,4 +1,4 @@
-{% extends 'cadastros/base.html' %}
+﻿{% extends 'cadastros/base.html' %}
 {% block title %}{% if obj.ativo %}Inativar{% else %}Reativar{% endif %} Cliente{% endblock %}
 {% block page_title %}{% if obj.ativo %}Inativar{% else %}Reativar{% endif %} Cliente{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / <a href="{% url 'cliente_list' %}">Clientes</a> / {% if obj.ativo %}Inativar{% else %}Reativar{% endif %}{% endblock %}
@@ -32,3 +32,4 @@
   </form>
 </div>
 {% endblock %}
+

@@ -1,4 +1,4 @@
-{% extends 'cadastros/base.html' %}
+﻿{% extends 'cadastros/base.html' %}
 {% block title %}Boletim OS-{{ os.numero }}{% endblock %}
 {% block page_title %}Boletim de Medição — OS-{{ os.numero }}{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / <a href="{% url 'boletim_list' %}">Boletim de Medição</a> / OS-{{ os.numero }}{% endblock %}
@@ -213,3 +213,4 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
+
