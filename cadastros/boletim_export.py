@@ -1,4 +1,4 @@
-"""
+﻿"""
 cadastros/boletim_export.py
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Sistema de Gestão de Escolta – DEMARK SEGURANÇA
@@ -456,3 +456,4 @@ def gerar_xlsx_bytes(cliente: str, periodo: str, missoes: list, totais: dict) ->
     buf = io.BytesIO()
     wb.save(buf)
     return buf.getvalue()
+
