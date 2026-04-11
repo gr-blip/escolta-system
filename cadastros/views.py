@@ -1866,7 +1866,8 @@ def _base64_to_file(data_url, nome_base='assinatura'):
 # FOTOS DE MARCOS — upload AJAX
 # ────────────────────────────────────────────────────────────
 def os_field_foto_marco(request, token):
-    """Recebe upload de foto de um marco via POST AJAX (multipart)."""
+    """Recebe upload de foto de um marco via POST AJAX (multipart).
+    Permite apenas UMA foto por marco: se já existir, substitui a antiga."""
     from .models import FotoMarco, OSOperacional
     op = get_object_or_404(OSOperacional, token=token)
     if not op.link_ativo:
@@ -1885,18 +1886,32 @@ def os_field_foto_marco(request, token):
     if marco not in MARCOS_VALIDOS or not foto:
         return JsonResponse({'ok': False, 'erro': 'Dados inválidos.'}, status=400)
 
-    obj = FotoMarco.objects.create(
-        os=op.os,
-        marco=marco,
-        foto=foto,
-        latitude=lat,
-        longitude=lng,
-    )
+    # Se já existe foto para este marco, apaga o arquivo físico e reutiliza o registro
+    existente = FotoMarco.objects.filter(os=op.os, marco=marco).first()
+    if existente:
+        existente.foto.delete(save=False)   # remove arquivo físico do storage
+        existente.foto      = foto
+        existente.latitude  = lat
+        existente.longitude = lng
+        existente.save()
+        obj = existente
+        substituida = True
+    else:
+        obj = FotoMarco.objects.create(
+            os=op.os,
+            marco=marco,
+            foto=foto,
+            latitude=lat,
+            longitude=lng,
+        )
+        substituida = False
+
     return JsonResponse({
         'ok': True,
         'id': obj.pk,
         'url': obj.foto.url,
         'marco': marco,
+        'substituida': substituida,
     })
 
 
