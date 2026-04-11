@@ -1,546 +1,1014 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OS-{{ os.numero }} — Preenchimento de Campo</title>
+  <title>OS-{{ os.numero }} — Campo</title>
   <style>
     :root {
-      --bg: #0a0f1e;
-      --card: #111827;
-      --border: #1e3a5f;
-      --blue: #3b82f6;
-      --blue-dark: #1d4ed8;
-      --cyan: #06b6d4;
-      --text: #e2e8f0;
-      --muted: #64748b;
-      --success: #10b981;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --input-bg: #1e2d40;
+      --bg: #0a0f1e; --card: #111827; --border: #1e3a5f;
+      --blue: #3b82f6; --blue-dark: #1d4ed8; --cyan: #06b6d4;
+      --text: #e2e8f0; --muted: #64748b; --success: #10b981;
+      --danger: #ef4444; --warning: #f59e0b; --input-bg: #1e2d40;
+      --purple: #8b5cf6; --orange: #f97316;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding-bottom: 40px;
-    }
-    .header {
-      background: linear-gradient(135deg, #0d1b35 0%, #0a1628 100%);
-      border-bottom: 2px solid var(--border);
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .header-logo {
-      width: 42px; height: 42px;
-      background: linear-gradient(135deg, var(--blue), var(--cyan));
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px; flex-shrink: 0;
-    }
-    .header-info h1 { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: 0.5px; }
-    .header-info p { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .os-badge {
-      margin-left: auto;
-      background: var(--blue);
-      color: #fff;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 13px; font-weight: 700; letter-spacing: 1px;
-    }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px 16px; }
-    .alert-success {
-      background: rgba(16,185,129,.15);
-      border: 1px solid var(--success);
-      border-radius: 12px;
-      padding: 16px 20px; margin-bottom: 20px;
-      display: flex; align-items: center; gap: 12px;
-    }
-    .alert-success .icon { font-size: 24px; }
-    .alert-success h3 { font-size: 15px; color: var(--success); }
-    .alert-success p { font-size: 13px; color: var(--muted); margin-top: 4px; }
-    .os-info-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px 20px; margin-bottom: 20px;
-    }
-    .os-info-card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--cyan); margin-bottom: 12px; }
-    .os-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .os-field label { font-size: 11px; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; }
-    .os-field p { font-size: 14px; font-weight: 600; color: var(--text); margin-top: 2px; }
-    .status-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
-      background: rgba(59,130,246,.2); color: var(--blue); border: 1px solid rgba(59,130,246,.4);
-    }
-    .section-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      margin-bottom: 16px; overflow: hidden;
-    }
-    .section-header {
-      background: rgba(59,130,246,.08);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 20px;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .section-header .icon { font-size: 18px; }
-    .section-header h3 { font-size: 14px; font-weight: 600; color: var(--text); }
-    .section-body { padding: 20px; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 60px; }
 
-    /* Marco rows */
-    .marco-row {
-      margin-bottom: 18px;
-      padding-bottom: 18px;
-      border-bottom: 1px solid rgba(30,58,95,.5);
-    }
-    .marco-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    /* HEADER */
+    .header { background: linear-gradient(135deg,#0d1b35,#0a1628); border-bottom: 2px solid var(--border); padding: 14px 16px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 200; }
+    .header-logo { width: 38px; height: 38px; background: linear-gradient(135deg,var(--blue),var(--cyan)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .header-info h1 { font-size: 15px; font-weight: 700; }
+    .header-info p { font-size: 11px; color: var(--muted); }
+    .os-badge { margin-left: auto; background: var(--blue); color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
 
-    .marco-top {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 10px;
-    }
-    .marco-label {
-      font-size: 13px; font-weight: 600; color: var(--cyan);
-      display: flex; align-items: center; gap: 8px;
-    }
-    .marco-label .dot {
-      width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
-    }
+    /* TABS */
+    .tabs { display: flex; overflow-x: auto; background: #0d1523; border-bottom: 1px solid var(--border); gap: 0; scrollbar-width: none; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn { flex-shrink: 0; padding: 12px 16px; font-size: 12px; font-weight: 600; color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; transition: color .2s, border-color .2s; }
+    .tab-btn.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
 
-    /* GPS button + status */
-    .gps-btn {
-      background: rgba(16,185,129,.15);
-      border: 1px solid var(--success);
-      color: var(--success);
-      border-radius: 8px;
-      padding: 6px 12px;
-      font-size: 12px; font-weight: 600;
-      cursor: pointer;
-      display: flex; align-items: center; gap: 6px;
-      transition: background .2s;
-      white-space: nowrap;
-    }
-    .gps-btn:active { background: rgba(16,185,129,.3); }
-    .gps-btn.loading {
-      background: rgba(245,158,11,.15);
-      border-color: var(--warning);
-      color: var(--warning);
-      cursor: wait;
-    }
-    .gps-status {
-      margin-top: 8px;
-      font-size: 12px;
-      border-radius: 8px;
-      padding: 8px 12px;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .gps-status.ok {
-      background: rgba(16,185,129,.1);
-      border: 1px solid rgba(16,185,129,.3);
-      color: var(--success);
-    }
-    .gps-status.err {
-      background: rgba(239,68,68,.1);
-      border: 1px solid rgba(239,68,68,.3);
-      color: var(--danger);
-    }
-    .gps-map-link {
-      color: var(--cyan);
-      font-size: 11px;
-      text-decoration: none;
-      display: inline-flex; align-items: center; gap: 4px;
-      margin-left: 8px;
-    }
-    .gps-map-link:hover { text-decoration: underline; }
+    /* CONTAINER */
+    .container { max-width: 640px; margin: 0 auto; padding: 16px; }
 
-    .marco-fields {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+    /* ALERTS */
+    .alert { border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px; }
+    .alert-success { background: rgba(16,185,129,.12); border: 1px solid var(--success); }
+    .alert-success .icon { font-size: 20px; }
+    .alert-success h3 { font-size: 14px; color: var(--success); }
+    .alert-success p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .alert-error { background: rgba(239,68,68,.1); border: 1px solid var(--danger); color: var(--danger); font-size: 13px; }
+
+    /* CARDS */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 14px; overflow: hidden; }
+    .card-header { background: rgba(59,130,246,.07); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .card-header-left { display: flex; align-items: center; gap: 8px; }
+    .card-header .icon { font-size: 16px; }
+    .card-header h3 { font-size: 13px; font-weight: 600; }
+    .card-body { padding: 16px; }
+
+    /* GRID / FIELDS */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid-1 { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+    .field p { font-size: 13px; font-weight: 600; }
+    input[type="datetime-local"], input[type="number"], input[type="text"],
+    input[type="date"], textarea, select {
+      background: var(--input-bg); border: 1px solid var(--border); color: var(--text);
+      border-radius: 8px; padding: 9px 12px; font-size: 13px; width: 100%;
+      outline: none; transition: border-color .2s; -webkit-appearance: none;
+      font-family: inherit;
     }
-    .field-group { display: flex; flex-direction: column; gap: 4px; }
-    .field-group label {
-      font-size: 11px; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px;
-    }
-    input[type="datetime-local"],
-    input[type="number"],
-    input[type="text"] {
-      background: var(--input-bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 8px;
-      padding: 10px 12px;
-      font-size: 14px; width: 100%;
-      outline: none;
-      transition: border-color .2s;
-      -webkit-appearance: none;
-    }
-    input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+    textarea { resize: vertical; min-height: 70px; }
+    select { cursor: pointer; }
+    input:focus, textarea:focus, select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,.13); }
     input[type="number"] { -moz-appearance: textfield; }
-    input[type="hidden"] {}
-
-    /* Mapa embutido */
-    .mini-map {
-      margin-top: 10px;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      height: 160px;
-      background: #0d1b2a;
-      display: none;
-    }
-    .mini-map iframe { width: 100%; height: 100%; border: none; }
-
-    /* Pedágio */
-    .input-prefix { display: flex; align-items: center; }
-    .prefix-label {
-      background: #1a2a40;
-      border: 1px solid var(--border); border-right: none;
-      border-radius: 8px 0 0 8px;
-      padding: 10px 12px; font-size: 13px; color: var(--muted); white-space: nowrap;
-    }
+    .input-prefix { display: flex; align-items: stretch; }
+    .prefix-lbl { background: #1a2a40; border: 1px solid var(--border); border-right: none; border-radius: 8px 0 0 8px; padding: 9px 10px; font-size: 12px; color: var(--muted); white-space: nowrap; display: flex; align-items: center; }
     .input-prefix input { border-radius: 0 8px 8px 0; }
 
-    .btn-submit {
-      width: 100%;
-      background: linear-gradient(135deg, var(--blue), var(--blue-dark));
-      color: #fff; border: none; border-radius: 12px;
-      padding: 16px; font-size: 16px; font-weight: 700;
-      letter-spacing: .5px; cursor: pointer;
-      transition: opacity .2s, transform .1s;
-      margin-top: 8px;
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-    }
-    .btn-submit:active { transform: scale(.98); opacity: .9; }
+    /* BUTTONS */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: opacity .2s, transform .1s; white-space: nowrap; }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .btn-primary:hover { opacity: .88; }
+    .btn-success { background: rgba(16,185,129,.15); color: var(--success); border-color: var(--success); }
+    .btn-danger  { background: rgba(239,68,68,.12); color: var(--danger);  border-color: var(--danger);  }
+    .btn-warning { background: rgba(245,158,11,.12); color: var(--warning); border-color: var(--warning); }
+    .btn-ghost   { background: rgba(255,255,255,.05); color: var(--muted); border-color: var(--border); }
+    .btn-submit-full { width: 100%; justify-content: center; padding: 14px; font-size: 15px; border-radius: 12px; margin-top: 6px; }
+    .btn.loading { opacity: .6; pointer-events: none; }
 
-    .footer { text-align: center; font-size: 12px; color: var(--muted); margin-top: 30px; }
+    /* GPS */
+    .gps-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .gps-status { margin-top: 6px; font-size: 11px; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 6px; }
+    .gps-status.ok  { background: rgba(16,185,129,.1);  border: 1px solid rgba(16,185,129,.3);  color: var(--success); }
+    .gps-status.err { background: rgba(239,68,68,.1);   border: 1px solid rgba(239,68,68,.3);   color: var(--danger);  }
+    .gps-link { color: var(--cyan); font-size: 11px; text-decoration: none; margin-left: 6px; }
+
+    /* MARCOS */
+    .marco-row { padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid rgba(30,58,95,.5); }
+    .marco-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .marco-label { font-size: 13px; font-weight: 600; color: var(--cyan); display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
+    .marco-label .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* FOTOS */
+    .foto-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(80px,1fr)); gap: 8px; margin-top: 10px; }
+    .foto-thumb { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: #0d1b2a; }
+    .foto-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .foto-thumb .del-btn { position: absolute; top: 3px; right: 3px; background: rgba(0,0,0,.7); border: none; color: #fff; width: 20px; height: 20px; border-radius: 50%; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .foto-upload-btn { aspect-ratio: 1; border: 1.5px dashed var(--border); border-radius: 8px; background: rgba(30,58,95,.2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; font-size: 10px; color: var(--muted); transition: border-color .2s; }
+    .foto-upload-btn:hover { border-color: var(--blue); color: var(--blue); }
+    .foto-upload-btn span { font-size: 20px; }
+    input[type="file"] { display: none; }
+
+    /* LISTAS (paradas, incidentes, despesas) */
+    .list-item { background: rgba(30,58,95,.3); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .list-item-info { flex: 1; min-width: 0; }
+    .list-item-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+    .list-item-sub   { font-size: 11px; color: var(--muted); }
+    .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; letter-spacing: .4px; margin-left: 6px; }
+    .badge-media    { background: rgba(245,158,11,.2); color: var(--warning); }
+    .badge-alta     { background: rgba(239,68,68,.2);  color: var(--danger); }
+    .badge-baixa    { background: rgba(16,185,129,.15); color: var(--success); }
+    .badge-critica  { background: rgba(239,68,68,.35); color: #fff; }
+    .badge-credito  { background: rgba(16,185,129,.15); color: var(--success); }
+    .badge-despesa  { background: rgba(239,68,68,.12);  color: var(--danger); }
+
+    /* ASSINATURA CANVAS */
+    .canvas-wrap { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: #fff; margin-top: 8px; touch-action: none; }
+    canvas.sig { display: block; width: 100%; cursor: crosshair; }
+    .canvas-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .sig-preview { margin-top: 10px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: #fff; }
+    .sig-preview img { display: block; width: 100%; max-height: 100px; object-fit: contain; }
+
+    /* MODAL */
+    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 500; display: none; align-items: center; justify-content: center; padding: 16px; }
+    .modal-bg.open { display: flex; }
+    .modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+    .modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-header h3 { font-size: 15px; font-weight: 700; }
+    .modal-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; }
+    .modal-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+    .modal-footer { padding: 12px 20px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+
+    /* FOOTER */
+    .footer { text-align: center; font-size: 11px; color: var(--muted); margin-top: 32px; }
 
     @media (max-width: 480px) {
-      .marco-fields { grid-template-columns: 1fr; }
-      .os-grid { grid-template-columns: 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <div class="header-logo">🛡️</div>
-    <div class="header-info">
-      <h1>JR SEGURANÇA SEGURANÇA</h1>
-      <p>Preenchimento de Campo</p>
+<div class="header">
+  <div class="header-logo">🛡️</div>
+  <div class="header-info">
+    <h1>JR SEGURANÇA</h1>
+    <p>Preenchimento de Campo</p>
+  </div>
+  <span class="os-badge">OS-{{ os.numero }}</span>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('marcos', this)">⏱ Marcos</button>
+  <button class="tab-btn" onclick="switchTab('paradas', this)">🅿️ Paradas</button>
+  <button class="tab-btn" onclick="switchTab('incidentes', this)">⚠️ Incidentes</button>
+  <button class="tab-btn" onclick="switchTab('veiculos', this)">🚛 Veículos</button>
+  <button class="tab-btn" onclick="switchTab('trocas', this)">🔄 Motoristas</button>
+  <button class="tab-btn" onclick="switchTab('despesas', this)">💰 Despesas</button>
+  <button class="tab-btn" onclick="switchTab('assinaturas', this)">✍️ Assinaturas</button>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB: MARCOS                                -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="tab-panel active" id="tab-marcos">
+<div class="container">
+
+  {% if sucesso %}
+  <div class="alert alert-success">
+    <span class="icon">✅</span>
+    <div><h3>Dados salvos!</h3><p>OS atualizada em tempo real.</p></div>
+  </div>
+  {% endif %}
+
+  <!-- Info da OS -->
+  <div class="card">
+    <div class="card-header"><div class="card-header-left"><span class="icon">📋</span><h3>Operação</h3></div></div>
+    <div class="card-body">
+      <div class="grid-2">
+        <div class="field"><label>Cliente</label><p>{{ os.cliente }}</p></div>
+        <div class="field"><label>Status</label><p>{{ os.get_status_display }}</p></div>
+        <div class="field"><label>Origem</label><p>{{ os.cidade_origem }}/{{ os.uf_origem }}</p></div>
+        <div class="field"><label>Destino</label><p>{{ os.cidade_destino }}/{{ os.uf_destino }}</p></div>
+        {% if os.snap_agente1_nome %}<div class="field"><label>Agente 1</label><p>{{ os.snap_agente1_nome }}</p></div>{% endif %}
+        {% if os.snap_agente2_nome %}<div class="field"><label>Agente 2</label><p>{{ os.snap_agente2_nome }}</p></div>{% endif %}
+        {% if os.snap_viatura_placa %}<div class="field"><label>Viatura</label><p>{{ os.snap_viatura_modelo }} · {{ os.snap_viatura_placa }}</p></div>{% endif %}
+      </div>
     </div>
-    <span class="os-badge">OS-{{ os.numero }}</span>
   </div>
 
-  <div class="container">
+  <!-- Form marcos -->
+  <form method="POST" id="formMarcos" enctype="multipart/form-data">
+    {% csrf_token %}
 
-    {% if sucesso %}
-    <div class="alert-success">
-      <span class="icon">✅</span>
+    <div class="card">
+      <div class="card-header"><div class="card-header-left"><span class="icon">📄</span><h3>Número da Folha</h3></div></div>
+      <div class="card-body">
+        <div class="field">
+          <label>Nº Folha</label>
+          <input type="text" name="numero_folha" value="{{ op.numero_folha }}" placeholder="Ex: 675">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-header-left"><span class="icon">🕐</span><h3>Marcos de Execução</h3></div></div>
+      <div class="card-body">
+
+        {% with marcos=forloop %}
+        <!-- INÍCIO DE VIAGEM -->
+        <div class="marco-row">
+          <div class="marco-label"><span class="dot" style="background:#3b82f6"></span>Início de Viagem</div>
+          <div class="gps-row">
+            <small style="color:var(--muted);font-size:11px">Data, hora e KM</small>
+            <button type="button" class="btn btn-success" onclick="captureGPS('inicio_viagem',this)">📍 Capturar GPS</button>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Data / Hora</label><input type="datetime-local" name="inicio_viagem" value="{{ fmt.inicio_viagem }}"></div>
+            <div class="field"><label>KM Hodômetro</label><input type="number" name="km_inicio_viagem" value="{{ op.km_inicio_viagem|default_if_none:'' }}" placeholder="Ex: 79710"></div>
+          </div>
+          <input type="hidden" name="gps_inicio_viagem_lat" id="gps_inicio_viagem_lat" value="{{ op.gps_inicio_viagem_lat|default_if_none:'' }}">
+          <input type="hidden" name="gps_inicio_viagem_lng" id="gps_inicio_viagem_lng" value="{{ op.gps_inicio_viagem_lng|default_if_none:'' }}">
+          <div id="gps_status_inicio_viagem">
+            {% if gps.inicio_viagem %}<div class="gps-status ok">📍 {{ op.gps_inicio_viagem_lat }}, {{ op.gps_inicio_viagem_lng }}<a class="gps-link" href="{{ gps.inicio_viagem.url }}" target="_blank">🗺 Mapa</a></div>{% endif %}
+          </div>
+          <!-- Fotos do marco -->
+          <div style="margin-top:10px">
+            <small style="color:var(--muted);font-size:11px">Fotos do marco</small>
+            <div class="foto-grid" id="fotos_inicio_viagem">
+              {% for f in op.os.fotos_marcos.all %}{% if f.marco == 'inicio_viagem' %}
+              <div class="foto-thumb" id="fmarco_{{ f.pk }}">
+                <img src="{{ f.foto.url }}" alt="">
+                <button type="button" class="del-btn" onclick="deleteFotoMarco('{{ op.token }}', {{ f.pk }}, 'fmarco_{{ f.pk }}')">✕</button>
+              </div>
+              {% endif %}{% endfor %}
+              <label class="foto-upload-btn" for="file_inicio_viagem"><span>📷</span>Foto</label>
+              <input type="file" id="file_inicio_viagem" accept="image/*" capture="environment" onchange="uploadFotoMarco(this,'inicio_viagem','fotos_inicio_viagem','{{ op.token }}')">
+            </div>
+          </div>
+        </div>
+
+        <!-- CHEGADA OPERAÇÃO -->
+        <div class="marco-row">
+          <div class="marco-label"><span class="dot" style="background:#06b6d4"></span>Chegada Operação</div>
+          <div class="gps-row"><small style="color:var(--muted);font-size:11px">Data, hora e KM</small><button type="button" class="btn btn-success" onclick="captureGPS('chegada_operacao',this)">📍 Capturar GPS</button></div>
+          <div class="grid-2">
+            <div class="field"><label>Data / Hora</label><input type="datetime-local" name="chegada_operacao" value="{{ fmt.chegada_operacao }}"></div>
+            <div class="field"><label>KM Hodômetro</label><input type="number" name="km_chegada_operacao" value="{{ op.km_chegada_operacao|default_if_none:'' }}" placeholder="Ex: 79786"></div>
+          </div>
+          <input type="hidden" name="gps_chegada_operacao_lat" id="gps_chegada_operacao_lat" value="{{ op.gps_chegada_operacao_lat|default_if_none:'' }}">
+          <input type="hidden" name="gps_chegada_operacao_lng" id="gps_chegada_operacao_lng" value="{{ op.gps_chegada_operacao_lng|default_if_none:'' }}">
+          <div id="gps_status_chegada_operacao">{% if gps.chegada_operacao %}<div class="gps-status ok">📍 {{ op.gps_chegada_operacao_lat }}, {{ op.gps_chegada_operacao_lng }}<a class="gps-link" href="{{ gps.chegada_operacao.url }}" target="_blank">🗺 Mapa</a></div>{% endif %}</div>
+          <div style="margin-top:10px"><small style="color:var(--muted);font-size:11px">Fotos do marco</small>
+            <div class="foto-grid" id="fotos_chegada_operacao">
+              {% for f in op.os.fotos_marcos.all %}{% if f.marco == 'chegada_operacao' %}<div class="foto-thumb" id="fmarco_{{ f.pk }}"><img src="{{ f.foto.url }}"><button type="button" class="del-btn" onclick="deleteFotoMarco('{{ op.token }}', {{ f.pk }}, 'fmarco_{{ f.pk }}')">✕</button></div>{% endif %}{% endfor %}
+              <label class="foto-upload-btn" for="file_chegada_operacao"><span>📷</span>Foto</label>
+              <input type="file" id="file_chegada_operacao" accept="image/*" capture="environment" onchange="uploadFotoMarco(this,'chegada_operacao','fotos_chegada_operacao','{{ op.token }}')">
+            </div>
+          </div>
+        </div>
+
+        <!-- INÍCIO OPERAÇÃO -->
+        <div class="marco-row">
+          <div class="marco-label"><span class="dot" style="background:#8b5cf6"></span>Início Operação</div>
+          <div class="gps-row"><small style="color:var(--muted);font-size:11px">Data, hora e KM</small><button type="button" class="btn btn-success" onclick="captureGPS('inicio_operacao',this)">📍 Capturar GPS</button></div>
+          <div class="grid-2">
+            <div class="field"><label>Data / Hora</label><input type="datetime-local" name="inicio_operacao" value="{{ fmt.inicio_operacao }}"></div>
+            <div class="field"><label>KM Hodômetro</label><input type="number" name="km_inicio_operacao" value="{{ op.km_inicio_operacao|default_if_none:'' }}" placeholder="Ex: 79786"></div>
+          </div>
+          <input type="hidden" name="gps_inicio_operacao_lat" id="gps_inicio_operacao_lat" value="{{ op.gps_inicio_operacao_lat|default_if_none:'' }}">
+          <input type="hidden" name="gps_inicio_operacao_lng" id="gps_inicio_operacao_lng" value="{{ op.gps_inicio_operacao_lng|default_if_none:'' }}">
+          <div id="gps_status_inicio_operacao">{% if gps.inicio_operacao %}<div class="gps-status ok">📍 {{ op.gps_inicio_operacao_lat }}, {{ op.gps_inicio_operacao_lng }}<a class="gps-link" href="{{ gps.inicio_operacao.url }}" target="_blank">🗺 Mapa</a></div>{% endif %}</div>
+          <div style="margin-top:10px"><small style="color:var(--muted);font-size:11px">Fotos do marco</small>
+            <div class="foto-grid" id="fotos_inicio_operacao">
+              {% for f in op.os.fotos_marcos.all %}{% if f.marco == 'inicio_operacao' %}<div class="foto-thumb" id="fmarco_{{ f.pk }}"><img src="{{ f.foto.url }}"><button type="button" class="del-btn" onclick="deleteFotoMarco('{{ op.token }}', {{ f.pk }}, 'fmarco_{{ f.pk }}')">✕</button></div>{% endif %}{% endfor %}
+              <label class="foto-upload-btn" for="file_inicio_operacao"><span>📷</span>Foto</label>
+              <input type="file" id="file_inicio_operacao" accept="image/*" capture="environment" onchange="uploadFotoMarco(this,'inicio_operacao','fotos_inicio_operacao','{{ op.token }}')">
+            </div>
+          </div>
+        </div>
+
+        <!-- TÉRMINO OPERAÇÃO -->
+        <div class="marco-row">
+          <div class="marco-label"><span class="dot" style="background:#f59e0b"></span>Término Operação</div>
+          <div class="gps-row"><small style="color:var(--muted);font-size:11px">Data, hora e KM</small><button type="button" class="btn btn-success" onclick="captureGPS('termino_operacao',this)">📍 Capturar GPS</button></div>
+          <div class="grid-2">
+            <div class="field"><label>Data / Hora</label><input type="datetime-local" name="termino_operacao" value="{{ fmt.termino_operacao }}"></div>
+            <div class="field"><label>KM Hodômetro</label><input type="number" name="km_termino_operacao" value="{{ op.km_termino_operacao|default_if_none:'' }}" placeholder="Ex: 80578"></div>
+          </div>
+          <input type="hidden" name="gps_termino_operacao_lat" id="gps_termino_operacao_lat" value="{{ op.gps_termino_operacao_lat|default_if_none:'' }}">
+          <input type="hidden" name="gps_termino_operacao_lng" id="gps_termino_operacao_lng" value="{{ op.gps_termino_operacao_lng|default_if_none:'' }}">
+          <div id="gps_status_termino_operacao">{% if gps.termino_operacao %}<div class="gps-status ok">📍 {{ op.gps_termino_operacao_lat }}, {{ op.gps_termino_operacao_lng }}<a class="gps-link" href="{{ gps.termino_operacao.url }}" target="_blank">🗺 Mapa</a></div>{% endif %}</div>
+          <div style="margin-top:10px"><small style="color:var(--muted);font-size:11px">Fotos do marco</small>
+            <div class="foto-grid" id="fotos_termino_operacao">
+              {% for f in op.os.fotos_marcos.all %}{% if f.marco == 'termino_operacao' %}<div class="foto-thumb" id="fmarco_{{ f.pk }}"><img src="{{ f.foto.url }}"><button type="button" class="del-btn" onclick="deleteFotoMarco('{{ op.token }}', {{ f.pk }}, 'fmarco_{{ f.pk }}')">✕</button></div>{% endif %}{% endfor %}
+              <label class="foto-upload-btn" for="file_termino_operacao"><span>📷</span>Foto</label>
+              <input type="file" id="file_termino_operacao" accept="image/*" capture="environment" onchange="uploadFotoMarco(this,'termino_operacao','fotos_termino_operacao','{{ op.token }}')">
+            </div>
+          </div>
+        </div>
+
+        <!-- TÉRMINO VIAGEM -->
+        <div class="marco-row">
+          <div class="marco-label"><span class="dot" style="background:#10b981"></span>Término de Viagem</div>
+          <div class="gps-row"><small style="color:var(--muted);font-size:11px">Data, hora e KM</small><button type="button" class="btn btn-success" onclick="captureGPS('termino_viagem',this)">📍 Capturar GPS</button></div>
+          <div class="grid-2">
+            <div class="field"><label>Data / Hora</label><input type="datetime-local" name="termino_viagem" value="{{ fmt.termino_viagem }}"></div>
+            <div class="field"><label>KM Hodômetro</label><input type="number" name="km_termino_viagem" value="{{ op.km_termino_viagem|default_if_none:'' }}" placeholder="Ex: 80578"></div>
+          </div>
+          <input type="hidden" name="gps_termino_viagem_lat" id="gps_termino_viagem_lat" value="{{ op.gps_termino_viagem_lat|default_if_none:'' }}">
+          <input type="hidden" name="gps_termino_viagem_lng" id="gps_termino_viagem_lng" value="{{ op.gps_termino_viagem_lng|default_if_none:'' }}">
+          <div id="gps_status_termino_viagem">{% if gps.termino_viagem %}<div class="gps-status ok">📍 {{ op.gps_termino_viagem_lat }}, {{ op.gps_termino_viagem_lng }}<a class="gps-link" href="{{ gps.termino_viagem.url }}" target="_blank">🗺 Mapa</a></div>{% endif %}</div>
+          <div style="margin-top:10px"><small style="color:var(--muted);font-size:11px">Fotos do marco</small>
+            <div class="foto-grid" id="fotos_termino_viagem">
+              {% for f in op.os.fotos_marcos.all %}{% if f.marco == 'termino_viagem' %}<div class="foto-thumb" id="fmarco_{{ f.pk }}"><img src="{{ f.foto.url }}"><button type="button" class="del-btn" onclick="deleteFotoMarco('{{ op.token }}', {{ f.pk }}, 'fmarco_{{ f.pk }}')">✕</button></div>{% endif %}{% endfor %}
+              <label class="foto-upload-btn" for="file_termino_viagem"><span>📷</span>Foto</label>
+              <input type="file" id="file_termino_viagem" accept="image/*" capture="environment" onchange="uploadFotoMarco(this,'termino_viagem','fotos_termino_viagem','{{ op.token }}')">
+            </div>
+          </div>
+        </div>
+        {% endwith %}
+
+      </div>
+    </div>
+
+    <!-- PEDÁGIO -->
+    <div class="card">
+      <div class="card-header"><div class="card-header-left"><span class="icon">🚦</span><h3>Pedágio</h3></div></div>
+      <div class="card-body">
+        <div class="field">
+          <label>Valor Total Pedágio</label>
+          <div class="input-prefix"><span class="prefix-lbl">R$</span><input type="text" name="pedagio" value="{{ op.pedagio|default_if_none:'' }}" placeholder="0,00" inputmode="decimal"></div>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-submit-full">💾 Salvar Marcos</button>
+  </form>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB: PARADAS                               -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-paradas">
+<div class="container">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+    <button class="btn btn-primary" onclick="openModal('modalParada')">+ Nova Parada</button>
+  </div>
+  <div id="listaParadas">
+    {% for p in os.paradas.all %}
+    <div class="list-item" id="parada_{{ p.pk }}">
+      <div class="list-item-info">
+        <div class="list-item-title">{{ p.get_motivo_display }}
+          {% if p.duracao_minutos %}<span class="badge badge-baixa">{{ p.duracao_minutos }}min</span>{% endif %}
+        </div>
+        <div class="list-item-sub">{{ p.inicio|date:"d/m/Y H:i" }}{% if p.fim %} → {{ p.fim|date:"H:i" }}{% endif %}{% if p.descricao %} · {{ p.descricao|truncatechars:40 }}{% endif %}</div>
+        {% if p.fotos.exists %}<div class="foto-grid" style="margin-top:6px">{% for f in p.fotos.all %}<div class="foto-thumb"><img src="{{ f.foto.url }}"></div>{% endfor %}</div>{% endif %}
+      </div>
+      <button class="btn btn-danger" style="flex-shrink:0;padding:6px 10px" onclick="deleteItem('{{ op.token }}','parada',{{ p.pk }},'parada_{{ p.pk }}')">✕</button>
+    </div>
+    {% empty %}
+    <p style="color:var(--muted);font-size:13px;text-align:center;padding:24px 0">Nenhuma parada registrada.</p>
+    {% endfor %}
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB: INCIDENTES                            -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-incidentes">
+<div class="container">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+    <button class="btn btn-warning" onclick="openModal('modalIncidente')">+ Registrar Incidente</button>
+  </div>
+  <div id="listaIncidentes">
+    {% for inc in os.incidentes.all %}
+    <div class="list-item" id="incidente_{{ inc.pk }}">
+      <div class="list-item-info">
+        <div class="list-item-title">{{ inc.get_tipo_display }}<span class="badge badge-{{ inc.gravidade }}">{{ inc.get_gravidade_display }}</span></div>
+        <div class="list-item-sub">{{ inc.ocorrido_em|date:"d/m/Y H:i" }} · {{ inc.descricao|truncatechars:60 }}</div>
+        {% if inc.fotos.exists %}<div class="foto-grid" style="margin-top:6px">{% for f in inc.fotos.all %}<div class="foto-thumb"><img src="{{ f.foto.url }}"></div>{% endfor %}</div>{% endif %}
+      </div>
+      <button class="btn btn-danger" style="flex-shrink:0;padding:6px 10px" onclick="deleteItem('{{ op.token }}','incidente',{{ inc.pk }},'incidente_{{ inc.pk }}')">✕</button>
+    </div>
+    {% empty %}
+    <p style="color:var(--muted);font-size:13px;text-align:center;padding:24px 0">Nenhum incidente registrado.</p>
+    {% endfor %}
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB: VEÍCULOS ESCOLTADOS                   -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-veiculos">
+<div class="container">
+  {% for v in os.veiculos.all %}
+  <div class="card">
+    <div class="card-header"><div class="card-header-left"><span class="icon">🚛</span><h3>{{ v.placa_cavalo|default:v.veiculo }} · {{ v.motorista }}</h3></div></div>
+    <div class="card-body">
+      {% if v.placa_carreta %}<p style="font-size:12px;color:var(--muted);margin-bottom:8px">Carreta: {{ v.placa_carreta }}{% if v.placa_carreta2 %} / {{ v.placa_carreta2 }}{% endif %}</p>{% endif %}
+      <p style="font-size:12px;color:var(--cyan);margin-bottom:8px">Fotos antes da escolta</p>
+      <div class="foto-grid" id="fotos_veiculo_antes_{{ v.pk }}">
+        {% for f in v.fotos.all %}{% if f.momento == 'antes' %}<div class="foto-thumb" id="fveic_{{ f.pk }}"><img src="{{ f.foto.url }}"><button type="button" class="del-btn" onclick="deleteFotoVeiculo('{{ op.token }}',{{ f.pk }},'fveic_{{ f.pk }}')">✕</button></div>{% endif %}{% endfor %}
+        <label class="foto-upload-btn" for="fvantes_{{ v.pk }}"><span>📷</span>Antes</label>
+        <input type="file" id="fvantes_{{ v.pk }}" accept="image/*" capture="environment" onchange="uploadFotoVeiculo(this,{{ v.pk }},'antes','fotos_veiculo_antes_{{ v.pk }}','{{ op.token }}')">
+      </div>
+      <p style="font-size:12px;color:var(--cyan);margin:10px 0 8px">Fotos após a escolta</p>
+      <div class="foto-grid" id="fotos_veiculo_depois_{{ v.pk }}">
+        {% for f in v.fotos.all %}{% if f.momento == 'depois' %}<div class="foto-thumb" id="fveic_{{ f.pk }}"><img src="{{ f.foto.url }}"><button type="button" class="del-btn" onclick="deleteFotoVeiculo('{{ op.token }}',{{ f.pk }},'fveic_{{ f.pk }}')">✕</button></div>{% endif %}{% endfor %}
+        <label class="foto-upload-btn" for="fvdepois_{{ v.pk }}"><span>📷</span>Após</label>
+        <input type="file" id="fvdepois_{{ v.pk }}" accept="image/*" capture="environment" onchange="uploadFotoVeiculo(this,{{ v.pk }},'depois','fotos_veiculo_depois_{{ v.pk }}','{{ op.token }}')">
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p style="color:var(--muted);font-size:13px;text-align:center;padding:24px 0">Nenhum veículo escoltado cadastrado na OS.</p>
+  {% endfor %}
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB: TROCA DE MOTORISTAS                   -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-trocas">
+<div class="container">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+    <button class="btn btn-ghost" onclick="openModal('modalTroca')">+ Registrar Troca</button>
+  </div>
+  <div id="listaTrocas">
+    {% for t in os.trocas_motorista.all %}
+    <div class="list-item" id="troca_{{ t.pk }}">
+      <div class="list-item-info">
+        <div class="list-item-title">{{ t.motorista_saindo }} → {{ t.motorista_entrando }}</div>
+        <div class="list-item-sub">{{ t.ocorrido_em|date:"d/m/Y H:i" }}{% if t.motivo %} · {{ t.motivo|truncatechars:40 }}{% endif %}</div>
+        {% if t.fotos.exists %}<div class="foto-grid" style="margin-top:6px">{% for f in t.fotos.all %}<div class="foto-thumb"><img src="{{ f.foto.url }}"></div>{% endfor %}</div>{% endif %}
+      </div>
+      <button class="btn btn-danger" style="flex-shrink:0;padding:6px 10px" onclick="deleteItem('{{ op.token }}','troca-motorista',{{ t.pk }},'troca_{{ t.pk }}')">✕</button>
+    </div>
+    {% empty %}
+    <p style="color:var(--muted);font-size:13px;text-align:center;padding:24px 0">Nenhuma troca de motorista registrada.</p>
+    {% endfor %}
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB: DESPESAS                              -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-despesas">
+<div class="container">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+    <button class="btn btn-primary" onclick="openModal('modalDespesa')">+ Nova Despesa</button>
+  </div>
+  <div id="listaDespesas">
+    {% for d in os.despesas.all %}
+    <div class="list-item" id="despesa_{{ d.pk }}">
+      <div class="list-item-info">
+        <div class="list-item-title">{{ d.get_tipo_display }}<span class="badge badge-{{ d.natureza }}">{% if d.natureza == 'credito' %}Crédito{% else %}Despesa{% endif %}</span></div>
+        <div class="list-item-sub">{{ d.ocorrido_em|date:"d/m/Y H:i" }} · R$ {{ d.valor }}{% if d.descricao %} · {{ d.descricao|truncatechars:30 }}{% endif %}</div>
+      </div>
+      <button class="btn btn-danger" style="flex-shrink:0;padding:6px 10px" onclick="deleteItem('{{ op.token }}','despesa',{{ d.pk }},'despesa_{{ d.pk }}')">✕</button>
+    </div>
+    {% empty %}
+    <p style="color:var(--muted);font-size:13px;text-align:center;padding:24px 0">Nenhuma despesa registrada.</p>
+    {% endfor %}
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB: ASSINATURAS                           -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-assinaturas">
+<div class="container">
+
+  {% for tipo_val, tipo_label in assinatura_tipos %}
+  {% with ass=assinaturas_dict|default:None %}
+  <div class="card">
+    <div class="card-header"><div class="card-header-left"><span class="icon">✍️</span><h3>{{ tipo_label }}</h3></div></div>
+    <div class="card-body">
+      <div class="field" style="margin-bottom:10px">
+        <label>Nome do Signatário</label>
+        <input type="text" id="nome_ass_{{ tipo_val }}" placeholder="Nome completo">
+      </div>
+      <!-- Preview assinatura existente -->
+      <div id="preview_ass_{{ tipo_val }}">
+        {% for a in os.assinaturas.all %}{% if a.tipo == tipo_val %}
+        <div class="sig-preview"><img src="{{ a.imagem.url }}" alt="Assinatura de {{ a.nome }}"></div>
+        <p style="font-size:11px;color:var(--muted);margin-top:4px">✅ {{ a.nome }} — {{ a.criado_em|date:"d/m/Y H:i" }}</p>
+        {% endif %}{% endfor %}
+      </div>
+      <div class="canvas-wrap">
+        <canvas class="sig" id="canvas_{{ tipo_val }}" height="140"></canvas>
+      </div>
+      <div class="canvas-actions">
+        <button type="button" class="btn btn-ghost" onclick="clearCanvas('canvas_{{ tipo_val }}')">🗑 Limpar</button>
+        <button type="button" class="btn btn-primary" onclick="salvarAssinatura('{{ tipo_val }}','{{ op.token }}')">💾 Salvar Assinatura</button>
+      </div>
+    </div>
+  </div>
+  {% endwith %}
+  {% endfor %}
+
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- MODAIS                                     -->
+<!-- ═══════════════════════════════════════════ -->
+
+<!-- Modal Parada -->
+<div class="modal-bg" id="modalParada">
+  <div class="modal">
+    <div class="modal-header"><h3>🅿️ Nova Parada</h3><button class="modal-close" onclick="closeModal('modalParada')">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Motivo</label>
+        <select id="p_motivo">
+          <option value="abastecimento">Abastecimento</option>
+          <option value="refeicao">Refeição</option>
+          <option value="banheiro">Banheiro</option>
+          <option value="mecanica">Mecânica / Pane</option>
+          <option value="fiscal">Fiscalização / Barreira</option>
+          <option value="aguardando">Aguardando Instruções</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label>Início</label><input type="datetime-local" id="p_inicio"></div>
+        <div class="field"><label>Fim (opcional)</label><input type="datetime-local" id="p_fim"></div>
+      </div>
+      <div class="field"><label>Descrição</label><textarea id="p_descricao" placeholder="Observações sobre a parada..."></textarea></div>
       <div>
-        <h3>Dados salvos com sucesso!</h3>
-        <p>As informações foram atualizadas no sistema em tempo real.</p>
+        <label style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Fotos (opcional)</label>
+        <div class="foto-grid" id="p_fotos_preview" style="margin-top:8px"></div>
+        <label class="foto-upload-btn" for="p_fotos_input" style="max-width:80px;margin-top:4px;aspect-ratio:1"><span>📷</span>Foto</label>
+        <input type="file" id="p_fotos_input" accept="image/*" capture="environment" multiple onchange="previewFotos(this,'p_fotos_preview')">
+      </div>
+      <div class="field">
+        <label>GPS (opcional)</label>
+        <button type="button" class="btn btn-success" onclick="captureGPSModal('p_lat','p_lng','p_gps_status')">📍 Capturar Localização</button>
+        <div id="p_gps_status"></div>
+        <input type="hidden" id="p_lat"><input type="hidden" id="p_lng">
       </div>
     </div>
-    {% endif %}
-
-    <!-- INFO DA OS -->
-    <div class="os-info-card">
-      <h2>📋 Informações da Operação</h2>
-      <div class="os-grid">
-        <div class="os-field"><label>Cliente</label><p>{{ os.cliente }}</p></div>
-        <div class="os-field"><label>Status</label><p><span class="status-badge">⚡ {{ os.get_status_display }}</span></p></div>
-        <div class="os-field"><label>Origem</label><p>{{ os.cidade_origem }}/{{ os.uf_origem }}</p></div>
-        <div class="os-field"><label>Destino</label><p>{{ os.cidade_destino }}/{{ os.uf_destino }}</p></div>
-        <div class="os-field"><label>Tipo</label><p>{{ os.get_tipo_viagem_display }}</p></div>
-        <div class="os-field"><label>Previsão Início</label><p>{{ os.previsao_inicio|date:"d/m/Y H:i" }}</p></div>
-        {% if os.snap_agente1_nome %}<div class="os-field"><label>Agente 1</label><p>{{ os.snap_agente1_nome }}</p></div>{% endif %}
-        {% if os.snap_agente2_nome %}<div class="os-field"><label>Agente 2</label><p>{{ os.snap_agente2_nome }}</p></div>{% endif %}
-        {% if os.snap_viatura_placa %}<div class="os-field"><label>Viatura</label><p>{{ os.snap_viatura_modelo }} — {{ os.snap_viatura_placa }}</p></div>{% endif %}
-      </div>
-    </div>
-
-    <!-- FORMULÁRIO -->
-    <form method="POST" id="fieldForm">
-      {% csrf_token %}
-
-      <!-- Nº FOLHA -->
-      <div class="section-card">
-        <div class="section-header"><span class="icon">📄</span><h3>Número da Folha</h3></div>
-        <div class="section-body">
-          <div class="field-group">
-            <label>Nº Folha</label>
-            <input type="text" name="numero_folha" value="{{ op.numero_folha }}" placeholder="Ex: 675">
-          </div>
-        </div>
-      </div>
-
-      <!-- MARCOS -->
-      <div class="section-card">
-        <div class="section-header"><span class="icon">🕐</span><h3>Marcos de Execução</h3></div>
-        <div class="section-body">
-
-          <!-- ── INÍCIO DE VIAGEM ── -->
-          <div class="marco-row">
-            <div class="marco-top">
-              <div class="marco-label">
-                <span class="dot" style="background:#3b82f6"></span>Início de Viagem
-              </div>
-              <button type="button" class="gps-btn" onclick="captureGPS('inicio_viagem', this)">
-                📍 Capturar Localização
-              </button>
-            </div>
-            <div class="marco-fields">
-              <div class="field-group">
-                <label>Data / Hora</label>
-                <input type="datetime-local" name="inicio_viagem" value="{{ fmt.inicio_viagem }}">
-              </div>
-              <div class="field-group">
-                <label>KM Hodômetro</label>
-                <input type="number" name="km_inicio_viagem" value="{{ op.km_inicio_viagem|default_if_none:'' }}" placeholder="Ex: 79710">
-              </div>
-            </div>
-            <input type="hidden" name="gps_inicio_viagem_lat" id="gps_inicio_viagem_lat" value="{{ op.gps_inicio_viagem_lat|default_if_none:'' }}">
-            <input type="hidden" name="gps_inicio_viagem_lng" id="gps_inicio_viagem_lng" value="{{ op.gps_inicio_viagem_lng|default_if_none:'' }}">
-            <div id="gps_status_inicio_viagem">
-              {% if gps.inicio_viagem %}
-              <div class="gps-status ok">
-                📍 {{ op.gps_inicio_viagem_lat }}, {{ op.gps_inicio_viagem_lng }}
-                <a class="gps-map-link" href="{{ gps.inicio_viagem.url }}" target="_blank">🗺 Ver no mapa</a>
-              </div>
-
-              {% endif %}
-            </div>
-          </div>
-
-          <!-- ── CHEGADA OPERAÇÃO ── -->
-          <div class="marco-row">
-            <div class="marco-top">
-              <div class="marco-label">
-                <span class="dot" style="background:#06b6d4"></span>Chegada Operação
-              </div>
-              <button type="button" class="gps-btn" onclick="captureGPS('chegada_operacao', this)">
-                📍 Capturar Localização
-              </button>
-            </div>
-            <div class="marco-fields">
-              <div class="field-group">
-                <label>Data / Hora</label>
-                <input type="datetime-local" name="chegada_operacao" value="{{ fmt.chegada_operacao }}">
-              </div>
-              <div class="field-group">
-                <label>KM Hodômetro</label>
-                <input type="number" name="km_chegada_operacao" value="{{ op.km_chegada_operacao|default_if_none:'' }}" placeholder="Ex: 79786">
-              </div>
-            </div>
-            <input type="hidden" name="gps_chegada_operacao_lat" id="gps_chegada_operacao_lat" value="{{ op.gps_chegada_operacao_lat|default_if_none:'' }}">
-            <input type="hidden" name="gps_chegada_operacao_lng" id="gps_chegada_operacao_lng" value="{{ op.gps_chegada_operacao_lng|default_if_none:'' }}">
-            <div id="gps_status_chegada_operacao">
-              {% if gps.chegada_operacao %}
-              <div class="gps-status ok">
-                📍 {{ op.gps_chegada_operacao_lat }}, {{ op.gps_chegada_operacao_lng }}
-                <a class="gps-map-link" href="{{ gps.chegada_operacao.url }}" target="_blank">🗺 Ver no mapa</a>
-              </div>
-
-              {% endif %}
-            </div>
-          </div>
-
-          <!-- ── INÍCIO OPERAÇÃO ── -->
-          <div class="marco-row">
-            <div class="marco-top">
-              <div class="marco-label">
-                <span class="dot" style="background:#8b5cf6"></span>Início Operação
-              </div>
-              <button type="button" class="gps-btn" onclick="captureGPS('inicio_operacao', this)">
-                📍 Capturar Localização
-              </button>
-            </div>
-            <div class="marco-fields">
-              <div class="field-group">
-                <label>Data / Hora</label>
-                <input type="datetime-local" name="inicio_operacao" value="{{ fmt.inicio_operacao }}">
-              </div>
-              <div class="field-group">
-                <label>KM Hodômetro</label>
-                <input type="number" name="km_inicio_operacao" value="{{ op.km_inicio_operacao|default_if_none:'' }}" placeholder="Ex: 79786">
-              </div>
-            </div>
-            <input type="hidden" name="gps_inicio_operacao_lat" id="gps_inicio_operacao_lat" value="{{ op.gps_inicio_operacao_lat|default_if_none:'' }}">
-            <input type="hidden" name="gps_inicio_operacao_lng" id="gps_inicio_operacao_lng" value="{{ op.gps_inicio_operacao_lng|default_if_none:'' }}">
-            <div id="gps_status_inicio_operacao">
-              {% if gps.inicio_operacao %}
-              <div class="gps-status ok">
-                📍 {{ op.gps_inicio_operacao_lat }}, {{ op.gps_inicio_operacao_lng }}
-                <a class="gps-map-link" href="{{ gps.inicio_operacao.url }}" target="_blank">🗺 Ver no mapa</a>
-              </div>
-
-              {% endif %}
-            </div>
-          </div>
-
-          <!-- ── TÉRMINO OPERAÇÃO ── -->
-          <div class="marco-row">
-            <div class="marco-top">
-              <div class="marco-label">
-                <span class="dot" style="background:#f59e0b"></span>Término Operação
-              </div>
-              <button type="button" class="gps-btn" onclick="captureGPS('termino_operacao', this)">
-                📍 Capturar Localização
-              </button>
-            </div>
-            <div class="marco-fields">
-              <div class="field-group">
-                <label>Data / Hora</label>
-                <input type="datetime-local" name="termino_operacao" value="{{ fmt.termino_operacao }}">
-              </div>
-              <div class="field-group">
-                <label>KM Hodômetro</label>
-                <input type="number" name="km_termino_operacao" value="{{ op.km_termino_operacao|default_if_none:'' }}" placeholder="Ex: 80578">
-              </div>
-            </div>
-            <input type="hidden" name="gps_termino_operacao_lat" id="gps_termino_operacao_lat" value="{{ op.gps_termino_operacao_lat|default_if_none:'' }}">
-            <input type="hidden" name="gps_termino_operacao_lng" id="gps_termino_operacao_lng" value="{{ op.gps_termino_operacao_lng|default_if_none:'' }}">
-            <div id="gps_status_termino_operacao">
-              {% if gps.termino_operacao %}
-              <div class="gps-status ok">
-                📍 {{ op.gps_termino_operacao_lat }}, {{ op.gps_termino_operacao_lng }}
-                <a class="gps-map-link" href="{{ gps.termino_operacao.url }}" target="_blank">🗺 Ver no mapa</a>
-              </div>
-
-              {% endif %}
-            </div>
-          </div>
-
-          <!-- ── TÉRMINO DE VIAGEM ── -->
-          <div class="marco-row">
-            <div class="marco-top">
-              <div class="marco-label">
-                <span class="dot" style="background:#10b981"></span>Término de Viagem
-              </div>
-              <button type="button" class="gps-btn" onclick="captureGPS('termino_viagem', this)">
-                📍 Capturar Localização
-              </button>
-            </div>
-            <div class="marco-fields">
-              <div class="field-group">
-                <label>Data / Hora</label>
-                <input type="datetime-local" name="termino_viagem" value="{{ fmt.termino_viagem }}">
-              </div>
-              <div class="field-group">
-                <label>KM Hodômetro</label>
-                <input type="number" name="km_termino_viagem" value="{{ op.km_termino_viagem|default_if_none:'' }}" placeholder="Ex: 80578">
-              </div>
-            </div>
-            <input type="hidden" name="gps_termino_viagem_lat" id="gps_termino_viagem_lat" value="{{ op.gps_termino_viagem_lat|default_if_none:'' }}">
-            <input type="hidden" name="gps_termino_viagem_lng" id="gps_termino_viagem_lng" value="{{ op.gps_termino_viagem_lng|default_if_none:'' }}">
-            <div id="gps_status_termino_viagem">
-              {% if gps.termino_viagem %}
-              <div class="gps-status ok">
-                📍 {{ op.gps_termino_viagem_lat }}, {{ op.gps_termino_viagem_lng }}
-                <a class="gps-map-link" href="{{ gps.termino_viagem.url }}" target="_blank">🗺 Ver no mapa</a>
-              </div>
-
-              {% endif %}
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- PEDÁGIO -->
-      <div class="section-card">
-        <div class="section-header"><span class="icon">🚦</span><h3>Pedágio</h3></div>
-        <div class="section-body">
-          <div class="field-group">
-            <label>Valor do Pedágio</label>
-            <div class="input-prefix">
-              <span class="prefix-label">R$</span>
-              <input type="text" name="pedagio"
-                     value="{{ op.pedagio|default_if_none:'' }}"
-                     placeholder="0,00" inputmode="decimal">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <button type="submit" class="btn-submit">
-        <span>💾</span> Salvar e Atualizar OS
-      </button>
-    </form>
-
-    <div class="footer">
-      🔒 Acesso seguro — OS-{{ os.numero }} &nbsp;|&nbsp; JR SEGURANÇA Segurança © 2026
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalParada')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarParada('{{ op.token }}')">Salvar Parada</button>
     </div>
   </div>
+</div>
 
-  <script>
-    function captureGPS(marco, btn) {
-      if (!navigator.geolocation) {
-        showGPSStatus(marco, 'err', '❌ Seu dispositivo não suporta GPS.');
-        return;
-      }
+<!-- Modal Incidente -->
+<div class="modal-bg" id="modalIncidente">
+  <div class="modal">
+    <div class="modal-header"><h3>⚠️ Registrar Incidente</h3><button class="modal-close" onclick="closeModal('modalIncidente')">✕</button></div>
+    <div class="modal-body">
+      <div class="grid-2">
+        <div class="field"><label>Tipo</label>
+          <select id="i_tipo">
+            <option value="acidente">Acidente de Trânsito</option>
+            <option value="tentativa_roubo">Tentativa de Roubo</option>
+            <option value="avaria_carga">Avaria na Carga</option>
+            <option value="pane_viatura">Pane Mecânica</option>
+            <option value="atividade_suspeita">Atividade Suspeita</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div class="field"><label>Gravidade</label>
+          <select id="i_gravidade">
+            <option value="baixa">Baixa</option>
+            <option value="media" selected>Média</option>
+            <option value="alta">Alta</option>
+            <option value="critica">Crítica</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Data / Hora</label><input type="datetime-local" id="i_ocorrido"></div>
+      <div class="field"><label>Descrição *</label><textarea id="i_descricao" placeholder="Descreva o que aconteceu..."></textarea></div>
+      <div class="field"><label>Nº Boletim de Ocorrência</label><input type="text" id="i_bo" placeholder="BO 000/2026 (se houver)"></div>
+      <div>
+        <label style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Fotos (opcional)</label>
+        <div class="foto-grid" id="i_fotos_preview" style="margin-top:8px"></div>
+        <label class="foto-upload-btn" for="i_fotos_input" style="max-width:80px;margin-top:4px;aspect-ratio:1"><span>📷</span>Foto</label>
+        <input type="file" id="i_fotos_input" accept="image/*" capture="environment" multiple onchange="previewFotos(this,'i_fotos_preview')">
+      </div>
+      <div class="field">
+        <button type="button" class="btn btn-success" onclick="captureGPSModal('i_lat','i_lng','i_gps_status')">📍 GPS do Local</button>
+        <div id="i_gps_status"></div>
+        <input type="hidden" id="i_lat"><input type="hidden" id="i_lng">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalIncidente')">Cancelar</button>
+      <button class="btn btn-warning" onclick="salvarIncidente('{{ op.token }}')">Registrar</button>
+    </div>
+  </div>
+</div>
 
-      btn.classList.add('loading');
-      btn.innerHTML = '⏳ Obtendo localização…';
-      btn.disabled = true;
+<!-- Modal Troca de Motorista -->
+<div class="modal-bg" id="modalTroca">
+  <div class="modal">
+    <div class="modal-header"><h3>🔄 Troca de Motorista</h3><button class="modal-close" onclick="closeModal('modalTroca')">✕</button></div>
+    <div class="modal-body">
+      {% if os.veiculos.exists %}
+      <div class="field"><label>Veículo (opcional)</label>
+        <select id="t_veiculo">
+          <option value="">— Selecionar —</option>
+          {% for v in os.veiculos.all %}<option value="{{ v.pk }}">{{ v.placa_cavalo|default:v.veiculo }}</option>{% endfor %}
+        </select>
+      </div>
+      {% endif %}
+      <div class="field"><label>Motorista Saindo *</label><input type="text" id="t_saindo" placeholder="Nome completo"></div>
+      <div class="field"><label>Motorista Entrando *</label><input type="text" id="t_entrando" placeholder="Nome completo"></div>
+      <div class="field"><label>Data / Hora *</label><input type="datetime-local" id="t_ocorrido"></div>
+      <div class="field"><label>Motivo</label><input type="text" id="t_motivo" placeholder="Motivo da troca (opcional)"></div>
+      <div>
+        <label style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Fotos (CNH, rosto — opcional)</label>
+        <div class="foto-grid" id="t_fotos_preview" style="margin-top:8px"></div>
+        <label class="foto-upload-btn" for="t_fotos_input" style="max-width:80px;margin-top:4px;aspect-ratio:1"><span>📷</span>Foto</label>
+        <input type="file" id="t_fotos_input" accept="image/*" capture="environment" multiple onchange="previewFotos(this,'t_fotos_preview')">
+      </div>
+      <div class="field">
+        <button type="button" class="btn btn-success" onclick="captureGPSModal('t_lat','t_lng','t_gps_status')">📍 GPS Local</button>
+        <div id="t_gps_status"></div>
+        <input type="hidden" id="t_lat"><input type="hidden" id="t_lng">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalTroca')">Cancelar</button>
+      <button class="btn btn-ghost" onclick="salvarTroca('{{ op.token }}')">Registrar</button>
+    </div>
+  </div>
+</div>
 
-      navigator.geolocation.getCurrentPosition(
-        function(pos) {
-          const lat = pos.coords.latitude.toFixed(7);
-          const lng = pos.coords.longitude.toFixed(7);
-          const acc = Math.round(pos.coords.accuracy);
+<!-- Modal Despesa -->
+<div class="modal-bg" id="modalDespesa">
+  <div class="modal">
+    <div class="modal-header"><h3>💰 Nova Despesa / Crédito</h3><button class="modal-close" onclick="closeModal('modalDespesa')">✕</button></div>
+    <div class="modal-body">
+      <div class="grid-2">
+        <div class="field"><label>Tipo</label>
+          <select id="d_tipo">
+            <option value="combustivel">Combustível</option>
+            <option value="refeicao">Refeição</option>
+            <option value="hospedagem">Hospedagem</option>
+            <option value="pedagio">Pedágio Avulso</option>
+            <option value="estacionamento">Estacionamento</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div class="field"><label>Natureza</label>
+          <select id="d_natureza">
+            <option value="despesa">Despesa</option>
+            <option value="credito">Crédito / Reembolso</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label>Valor (R$) *</label><input type="text" id="d_valor" placeholder="0,00" inputmode="decimal"></div>
+        <div class="field"><label>Data / Hora *</label><input type="datetime-local" id="d_ocorrido"></div>
+      </div>
+      <div class="field"><label>Descrição</label><input type="text" id="d_descricao" placeholder="Detalhes (opcional)"></div>
+      <div>
+        <label style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Comprovante (foto)</label>
+        <div class="foto-grid" id="d_foto_preview" style="margin-top:8px"></div>
+        <label class="foto-upload-btn" for="d_foto_input" style="max-width:80px;margin-top:4px;aspect-ratio:1"><span>📷</span>Foto</label>
+        <input type="file" id="d_foto_input" accept="image/*" capture="environment" onchange="previewFotos(this,'d_foto_preview')">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalDespesa')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarDespesa('{{ op.token }}')">Salvar</button>
+    </div>
+  </div>
+</div>
 
-          // Preenche os campos hidden
-          document.getElementById('gps_' + marco + '_lat').value = lat;
-          document.getElementById('gps_' + marco + '_lng').value = lng;
+<div class="footer">🔒 OS-{{ os.numero }} · JR Segurança © 2026</div>
 
-          // Mostra status + mapa
-              const mapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+<script>
+const CSRF = '{{ csrf_token }}';
 
-          showGPSStatus(marco, 'ok',
-            `📍 ${lat}, ${lng} <span style="color:var(--muted);font-size:11px">(±${acc}m)</span>
-             <a class="gps-map-link" href="${mapsLink}" target="_blank">🗺 Ver no mapa</a>`
-          );
+/* ── TABS ── */
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
 
-          btn.classList.remove('loading');
-          btn.innerHTML = '✅ Localização Salva';
-          btn.style.background = 'rgba(16,185,129,.2)';
-          btn.style.borderColor = 'var(--success)';
-          btn.style.color = 'var(--success)';
-        },
-        function(err) {
-          let msg = '❌ Não foi possível obter a localização.';
-          if (err.code === 1) msg = '❌ Permissão de localização negada. Habilite o GPS nas configurações do navegador.';
-          if (err.code === 2) msg = '❌ Localização indisponível. Verifique o GPS do dispositivo.';
-          if (err.code === 3) msg = '❌ Tempo esgotado. Tente novamente.';
-          showGPSStatus(marco, 'err', msg);
+/* ── MODAIS ── */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-          btn.classList.remove('loading');
-          btn.innerHTML = '📍 Tentar Novamente';
-          btn.disabled = false;
-        },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-      );
+/* ── GPS ── */
+function captureGPS(marco, btn) {
+  if (!navigator.geolocation) { alert('GPS não disponível.'); return; }
+  btn.classList.add('loading'); btn.textContent = '⏳ Obtendo…';
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude.toFixed(7), lng = pos.coords.longitude.toFixed(7);
+      document.getElementById('gps_' + marco + '_lat').value = lat;
+      document.getElementById('gps_' + marco + '_lng').value = lng;
+      const url = `https://www.google.com/maps?q=${lat},${lng}`;
+      document.getElementById('gps_status_' + marco).innerHTML =
+        `<div class="gps-status ok">📍 ${lat}, ${lng} <a class="gps-link" href="${url}" target="_blank">🗺 Mapa</a></div>`;
+      btn.classList.remove('loading'); btn.textContent = '✅ GPS Salvo';
+      btn.style.cssText = 'background:rgba(16,185,129,.2);border-color:var(--success);color:var(--success)';
+    },
+    err => {
+      btn.classList.remove('loading'); btn.textContent = '📍 Tentar Novamente';
+      const msgs = {1:'Permissão negada.',2:'Indisponível.',3:'Tempo esgotado.'};
+      document.getElementById('gps_status_' + marco).innerHTML =
+        `<div class="gps-status err">❌ ${msgs[err.code] || 'Erro.'}</div>`;
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+  );
+}
+
+function captureGPSModal(latId, lngId, statusId) {
+  if (!navigator.geolocation) { alert('GPS não disponível.'); return; }
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude.toFixed(7), lng = pos.coords.longitude.toFixed(7);
+      document.getElementById(latId).value = lat;
+      document.getElementById(lngId).value = lng;
+      const url = `https://www.google.com/maps?q=${lat},${lng}`;
+      document.getElementById(statusId).innerHTML =
+        `<div class="gps-status ok" style="margin-top:6px">📍 ${lat}, ${lng} <a class="gps-link" href="${url}" target="_blank">🗺 Mapa</a></div>`;
+    },
+    err => {
+      document.getElementById(statusId).innerHTML =
+        `<div class="gps-status err" style="margin-top:6px">❌ Erro ao obter GPS.</div>`;
+    },
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+  );
+}
+
+/* ── UPLOAD FOTO MARCO (AJAX) ── */
+async function uploadFotoMarco(input, marco, gridId, token) {
+  if (!input.files.length) return;
+  const fd = new FormData();
+  fd.append('marco', marco);
+  fd.append('foto', input.files[0]);
+  fd.append('csrfmiddlewaretoken', CSRF);
+  const r = await fetch(`/os/field/${token}/foto-marco/`, { method:'POST', body: fd });
+  const d = await r.json();
+  if (d.ok) {
+    const grid = document.getElementById(gridId);
+    const div = document.createElement('div');
+    div.className = 'foto-thumb'; div.id = 'fmarco_' + d.id;
+    div.innerHTML = `<img src="${d.url}"><button type="button" class="del-btn" onclick="deleteFotoMarco('${token}',${d.id},'fmarco_${d.id}')">✕</button>`;
+    grid.insertBefore(div, grid.querySelector('label'));
+  }
+  input.value = '';
+}
+
+async function deleteFotoMarco(token, pk, elId) {
+  if (!confirm('Remover foto?')) return;
+  const r = await fetch(`/os/field/${token}/foto-marco/${pk}/delete/`, { method:'POST', headers:{'X-CSRFToken':CSRF} });
+  const d = await r.json();
+  if (d.ok) document.getElementById(elId)?.remove();
+}
+
+/* ── UPLOAD FOTO VEÍCULO ── */
+async function uploadFotoVeiculo(input, veiculoPk, momento, gridId, token) {
+  if (!input.files.length) return;
+  const fd = new FormData();
+  fd.append('veiculo_pk', veiculoPk);
+  fd.append('momento', momento);
+  fd.append('foto', input.files[0]);
+  fd.append('csrfmiddlewaretoken', CSRF);
+  const r = await fetch(`/os/field/${token}/foto-veiculo/`, { method:'POST', body: fd });
+  const d = await r.json();
+  if (d.ok) {
+    const grid = document.getElementById(gridId);
+    const div = document.createElement('div');
+    div.className = 'foto-thumb'; div.id = 'fveic_' + d.id;
+    div.innerHTML = `<img src="${d.url}"><button type="button" class="del-btn" onclick="deleteFotoVeiculo('${token}',${d.id},'fveic_${d.id}')">✕</button>`;
+    grid.insertBefore(div, grid.querySelector('label'));
+  }
+  input.value = '';
+}
+
+async function deleteFotoVeiculo(token, pk, elId) {
+  if (!confirm('Remover foto?')) return;
+  const r = await fetch(`/os/field/${token}/foto-veiculo/${pk}/delete/`, { method:'POST', headers:{'X-CSRFToken':CSRF} });
+  const d = await r.json();
+  if (d.ok) document.getElementById(elId)?.remove();
+}
+
+/* ── PREVIEW FOTOS DE MODAL ── */
+function previewFotos(input, gridId) {
+  const grid = document.getElementById(gridId);
+  Array.from(input.files).forEach(f => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const div = document.createElement('div');
+      div.className = 'foto-thumb';
+      div.innerHTML = `<img src="${e.target.result}">`;
+      grid.appendChild(div);
+    };
+    reader.readAsDataURL(f);
+  });
+}
+
+/* ── SALVAR PARADA ── */
+async function salvarParada(token) {
+  const fd = new FormData();
+  fd.append('csrfmiddlewaretoken', CSRF);
+  fd.append('motivo',    document.getElementById('p_motivo').value);
+  fd.append('descricao', document.getElementById('p_descricao').value);
+  fd.append('inicio',    document.getElementById('p_inicio').value);
+  fd.append('fim',       document.getElementById('p_fim').value);
+  fd.append('lat',       document.getElementById('p_lat').value);
+  fd.append('lng',       document.getElementById('p_lng').value);
+  const fotos = document.getElementById('p_fotos_input').files;
+  Array.from(fotos).forEach(f => fd.append('fotos', f));
+
+  const r = await fetch(`/os/field/${token}/parada/salvar/`, { method:'POST', body: fd });
+  const d = await r.json();
+  if (d.ok) {
+    const lista = document.getElementById('listaParadas');
+    const p = lista.querySelector('p[style]');
+    if (p) p.remove();
+    const div = document.createElement('div');
+    div.className = 'list-item'; div.id = 'parada_' + d.pk;
+    div.innerHTML = `<div class="list-item-info"><div class="list-item-title">${d.motivo_display}${d.duracao ? `<span class="badge badge-baixa">${d.duracao}min</span>` : ''}</div><div class="list-item-sub">${d.inicio}</div></div><button class="btn btn-danger" style="flex-shrink:0;padding:6px 10px" onclick="deleteItem('${token}','parada',${d.pk},'parada_${d.pk}')">✕</button>`;
+    lista.appendChild(div);
+    closeModal('modalParada');
+    document.getElementById('p_descricao').value = '';
+    document.getElementById('p_inicio').value = '';
+    document.getElementById('p_fim').value = '';
+    document.getElementById('p_fotos_input').value = '';
+    document.getElementById('p_fotos_preview').innerHTML = '';
+  } else {
+    alert(d.erro || 'Erro ao salvar.');
+  }
+}
+
+/* ── SALVAR INCIDENTE ── */
+async function salvarIncidente(token) {
+  const fd = new FormData();
+  fd.append('csrfmiddlewaretoken', CSRF);
+  fd.append('tipo',       document.getElementById('i_tipo').value);
+  fd.append('gravidade',  document.getElementById('i_gravidade').value);
+  fd.append('descricao',  document.getElementById('i_descricao').value);
+  fd.append('ocorrido_em',document.getElementById('i_ocorrido').value);
+  fd.append('bo_numero',  document.getElementById('i_bo').value);
+  fd.append('lat',        document.getElementById('i_lat').value);
+  fd.append('lng',        document.getElementById('i_lng').value);
+  const fotos = document.getElementById('i_fotos_input').files;
+  Array.from(fotos).forEach(f => fd.append('fotos', f));
+
+  const r = await fetch(`/os/field/${token}/incidente/salvar/`, { method:'POST', body: fd });
+  const d = await r.json();
+  if (d.ok) {
+    const lista = document.getElementById('listaIncidentes');
+    const p = lista.querySelector('p[style]');
+    if (p) p.remove();
+    const div = document.createElement('div');
+    div.className = 'list-item'; div.id = 'incidente_' + d.pk;
+    div.innerHTML = `<div class="list-item-info"><div class="list-item-title">${d.tipo_display}<span class="badge badge-${d.gravidade}">${d.gravidade}</span></div><div class="list-item-sub">${d.ocorrido}</div></div><button class="btn btn-danger" style="flex-shrink:0;padding:6px 10px" onclick="deleteItem('${token}','incidente',${d.pk},'incidente_${d.pk}')">✕</button>`;
+    lista.appendChild(div);
+    closeModal('modalIncidente');
+    document.getElementById('i_descricao').value = '';
+    document.getElementById('i_ocorrido').value = '';
+    document.getElementById('i_fotos_input').value = '';
+    document.getElementById('i_fotos_preview').innerHTML = '';
+  } else {
+    alert(d.erro || 'Erro ao registrar incidente.');
+  }
+}
+
+/* ── SALVAR TROCA MOTORISTA ── */
+async function salvarTroca(token) {
+  const fd = new FormData();
+  fd.append('csrfmiddlewaretoken', CSRF);
+  const vEl = document.getElementById('t_veiculo');
+  if (vEl) fd.append('veiculo_pk', vEl.value);
+  fd.append('motorista_saindo',   document.getElementById('t_saindo').value);
+  fd.append('motorista_entrando', document.getElementById('t_entrando').value);
+  fd.append('ocorrido_em',        document.getElementById('t_ocorrido').value);
+  fd.append('motivo',             document.getElementById('t_motivo').value);
+  fd.append('lat',                document.getElementById('t_lat').value);
+  fd.append('lng',                document.getElementById('t_lng').value);
+  const fotos = document.getElementById('t_fotos_input').files;
+  Array.from(fotos).forEach(f => fd.append('fotos', f));
+
+  const r = await fetch(`/os/field/${token}/troca-motorista/salvar/`, { method:'POST', body: fd });
+  const d = await r.json();
+  if (d.ok) {
+    const lista = document.getElementById('listaTrocas');
+    const p = lista.querySelector('p[style]');
+    if (p) p.remove();
+    const div = document.createElement('div');
+    div.className = 'list-item'; div.id = 'troca_' + d.pk;
+    div.innerHTML = `<div class="list-item-info"><div class="list-item-title">${d.saindo} → ${d.entrando}</div><div class="list-item-sub">${d.ocorrido}</div></div><button class="btn btn-danger" style="flex-shrink:0;padding:6px 10px" onclick="deleteItem('${token}','troca-motorista',${d.pk},'troca_${d.pk}')">✕</button>`;
+    lista.appendChild(div);
+    closeModal('modalTroca');
+  } else {
+    alert(d.erro || 'Erro ao registrar troca.');
+  }
+}
+
+/* ── SALVAR DESPESA ── */
+async function salvarDespesa(token) {
+  const fd = new FormData();
+  fd.append('csrfmiddlewaretoken', CSRF);
+  fd.append('tipo',       document.getElementById('d_tipo').value);
+  fd.append('natureza',   document.getElementById('d_natureza').value);
+  fd.append('valor',      document.getElementById('d_valor').value);
+  fd.append('descricao',  document.getElementById('d_descricao').value);
+  fd.append('ocorrido_em',document.getElementById('d_ocorrido').value);
+  const foto = document.getElementById('d_foto_input').files[0];
+  if (foto) fd.append('comprovante', foto);
+  fd.append('csrfmiddlewaretoken', CSRF);
+
+  const r = await fetch(`/os/field/${token}/despesa/salvar/`, { method:'POST', body: fd });
+  const d = await r.json();
+  if (d.ok) {
+    const lista = document.getElementById('listaDespesas');
+    const p = lista.querySelector('p[style]');
+    if (p) p.remove();
+    const div = document.createElement('div');
+    div.className = 'list-item'; div.id = 'despesa_' + d.pk;
+    div.innerHTML = `<div class="list-item-info"><div class="list-item-title">${d.tipo_display}<span class="badge badge-${d.natureza}">${d.natureza === 'credito' ? 'Crédito' : 'Despesa'}</span></div><div class="list-item-sub">${d.ocorrido} · R$ ${d.valor}</div></div><button class="btn btn-danger" style="flex-shrink:0;padding:6px 10px" onclick="deleteItem('${token}','despesa',${d.pk},'despesa_${d.pk}')">✕</button>`;
+    lista.appendChild(div);
+    closeModal('modalDespesa');
+    document.getElementById('d_valor').value = '';
+    document.getElementById('d_descricao').value = '';
+    document.getElementById('d_foto_input').value = '';
+    document.getElementById('d_foto_preview').innerHTML = '';
+  } else {
+    alert(d.erro || 'Erro ao salvar despesa.');
+  }
+}
+
+/* ── DELETE GENÉRICO ── */
+async function deleteItem(token, tipo, pk, elId) {
+  if (!confirm('Confirmar exclusão?')) return;
+  const url = `/os/field/${token}/${tipo}/${pk}/delete/`;
+  const r = await fetch(url, { method:'POST', headers:{'X-CSRFToken':CSRF} });
+  const d = await r.json();
+  if (d.ok) document.getElementById(elId)?.remove();
+  else alert('Erro ao excluir.');
+}
+
+/* ── ASSINATURA CANVAS ── */
+(function initCanvases() {
+  document.querySelectorAll('canvas.sig').forEach(canvas => {
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth;
+    let drawing = false, lastX = 0, lastY = 0;
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches ? e.touches[0] : e;
+      return [touch.clientX - rect.left, touch.clientY - rect.top];
     }
-
-    function showGPSStatus(marco, type, html) {
-      const container = document.getElementById('gps_status_' + marco);
-      container.innerHTML = `<div class="gps-status ${type}">${html}</div>`;
-
-
+    function start(e) { e.preventDefault(); drawing = true; [lastX, lastY] = getPos(e); }
+    function move(e) {
+      e.preventDefault(); if (!drawing) return;
+      const [x, y] = getPos(e);
+      ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2.5;
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
+      [lastX, lastY] = [x, y];
     }
-  </script>
+    function stop() { drawing = false; }
+    canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move);
+    canvas.addEventListener('mouseup', stop);    canvas.addEventListener('mouseleave', stop);
+    canvas.addEventListener('touchstart', start, {passive:false});
+    canvas.addEventListener('touchmove',  move,  {passive:false});
+    canvas.addEventListener('touchend',   stop);
+  });
+})();
+
+function clearCanvas(id) {
+  const canvas = document.getElementById(id);
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+}
+
+async function salvarAssinatura(tipo, token) {
+  const canvas = document.getElementById('canvas_' + tipo);
+  const nome   = document.getElementById('nome_ass_' + tipo).value.trim();
+  if (!nome) { alert('Informe o nome do signatário.'); return; }
+  const dataUrl = canvas.toDataURL('image/png');
+  const r = await fetch(`/os/field/${token}/assinatura/`, {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ tipo, nome, assinatura: dataUrl }),
+  });
+  const d = await r.json();
+  if (d.ok) {
+    document.getElementById('preview_ass_' + tipo).innerHTML =
+      `<div class="sig-preview"><img src="${d.url}" alt="Assinatura"></div><p style="font-size:11px;color:var(--muted);margin-top:4px">✅ ${d.nome}</p>`;
+    clearCanvas('canvas_' + tipo);
+    alert('Assinatura salva com sucesso!');
+  } else {
+    alert(d.erro || 'Erro ao salvar assinatura.');
+  }
+}
+</script>
 </body>
 </html>
-
