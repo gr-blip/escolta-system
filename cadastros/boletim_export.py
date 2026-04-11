@@ -1,7 +1,7 @@
 ﻿"""
 cadastros/boletim_export.py
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Sistema de Gestão de Escolta – DEMARK SEGURANÇA
+Sistema de Gestão de Escolta  JR SEGURANÇA
 Geração de Boletim de Medição em PDF e XLSX
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
@@ -9,7 +9,7 @@ Geração de Boletim de Medição em PDF e XLSX
 import io
 from datetime import datetime
 
-EMPRESA_NOME   = "DEMARK SEGURANÇA PRIVADA LTDA – DEPTO. DE ESCOLTA ARMADA"
+EMPRESA_NOME   = "JR SEGURANÇA"
 SISTEMA_MODELO = "BoletimMedicao.BoletimMedicao21"
 
 _AZUL_ESC  = "1A3A5C"
