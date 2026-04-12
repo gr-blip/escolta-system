@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
+{% load cadastros_extras %}
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
@@ -496,6 +497,82 @@ body{
           <div class="val bold" style="color:#22c55e">R$ {{ op.pedagio }}</div>
         </div>
       </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ── FOTOS DOS MARCOS ── -->
+  {% if op and fotos_marco %}
+  <div class="card">
+    <div class="card-header">
+      <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><rect x="1" y="3" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.3"/><circle cx="7" cy="7.5" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="10.5" cy="4.5" r=".8" fill="currentColor"/></svg>
+      Fotos dos Marcos
+    </div>
+    <div class="card-body" style="padding:0;overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;min-width:600px">
+        <!-- Cabeçalho dos marcos -->
+        <thead>
+          <tr style="background:var(--bg3);border-bottom:1px solid var(--border2)">
+            <th style="padding:8px 10px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;text-align:center;border-right:1px solid var(--border)">Início de Viagem</th>
+            <th style="padding:8px 10px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;text-align:center;border-right:1px solid var(--border)">Chegada Operação</th>
+            <th style="padding:8px 10px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;text-align:center;border-right:1px solid var(--border)">Início Operação</th>
+            <th style="padding:8px 10px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;text-align:center;border-right:1px solid var(--border)">Término Operação</th>
+            <th style="padding:8px 10px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;text-align:center">Término de Viagem</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Linha de data/hora e KM -->
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:6px 10px;text-align:center;font-size:11px;color:var(--text2);border-right:1px solid var(--border)">
+              {% if op.inicio_viagem %}{{ op.inicio_viagem|date:"d/m/Y H:i" }}<br><span style="color:var(--text3)">KM: {{ op.km_inicio_viagem|default:"—" }}</span>{% else %}—{% endif %}
+            </td>
+            <td style="padding:6px 10px;text-align:center;font-size:11px;color:var(--text2);border-right:1px solid var(--border)">
+              {% if op.chegada_operacao %}{{ op.chegada_operacao|date:"d/m/Y H:i" }}<br><span style="color:var(--text3)">KM: {{ op.km_chegada_operacao|default:"—" }}</span>{% else %}—{% endif %}
+            </td>
+            <td style="padding:6px 10px;text-align:center;font-size:11px;color:var(--text2);border-right:1px solid var(--border)">
+              {% if op.inicio_operacao %}{{ op.inicio_operacao|date:"d/m/Y H:i" }}<br><span style="color:var(--text3)">KM: {{ op.km_inicio_operacao|default:"—" }}</span>{% else %}—{% endif %}
+            </td>
+            <td style="padding:6px 10px;text-align:center;font-size:11px;color:var(--text2);border-right:1px solid var(--border)">
+              {% if op.termino_operacao %}{{ op.termino_operacao|date:"d/m/Y H:i" }}<br><span style="color:var(--text3)">KM: {{ op.km_termino_operacao|default:"—" }}</span>{% else %}—{% endif %}
+            </td>
+            <td style="padding:6px 10px;text-align:center;font-size:11px;color:var(--text2)">
+              {% if op.termino_viagem %}{{ op.termino_viagem|date:"d/m/Y H:i" }}<br><span style="color:var(--text3)">KM: {{ op.km_termino_viagem|default:"—" }}</span>{% else %}—{% endif %}
+            </td>
+          </tr>
+          <!-- Linha das fotos -->
+          <tr style="border-bottom:1px solid var(--border)">
+            {% for marco_key, marco_label in fotos_marco_lista %}
+            <td style="padding:8px;text-align:center;vertical-align:middle;height:130px;{% if not forloop.last %}border-right:1px solid var(--border);{% endif %}">
+              {% if marco_key in fotos_marco %}
+                <a href="{{ fotos_marco|get_item:marco_key }}" target="_blank">
+                  <img src="{{ fotos_marco|get_item:marco_key }}"
+                       alt="Foto {{ marco_label }}"
+                       style="max-height:120px;max-width:100%;border-radius:6px;object-fit:cover;box-shadow:0 1px 4px rgba(0,0,0,.15)">
+                </a>
+              {% else %}
+                <span style="color:var(--text3);font-size:11px">Sem foto</span>
+              {% endif %}
+            </td>
+            {% endfor %}
+          </tr>
+          <!-- Linha de tempos e distâncias -->
+          <tr>
+            <td style="padding:6px 10px;text-align:center;font-size:10px;color:var(--text3);border-right:1px solid var(--border)">—</td>
+            <td style="padding:6px 10px;text-align:center;font-size:10px;color:var(--text3);border-right:1px solid var(--border)">
+              Tempo: {{ op.tempo_chegada|default:"—" }}<br>Dist.: {{ op.km_trecho_chegada|default:"0" }} km
+            </td>
+            <td style="padding:6px 10px;text-align:center;font-size:10px;color:var(--text3);border-right:1px solid var(--border)">
+              Tempo: {{ op.tempo_inicio_op|default:"—" }}<br>Dist.: 0 km
+            </td>
+            <td style="padding:6px 10px;text-align:center;font-size:10px;color:var(--text3);border-right:1px solid var(--border)">
+              Tempo: {{ op.tempo_termino_op|default:"—" }}<br>Dist.: {{ op.km_trecho_termino_op|default:"0" }} km
+            </td>
+            <td style="padding:6px 10px;text-align:center;font-size:10px;color:var(--text3)">
+              Tempo: {{ op.tempo_termino_viagem|default:"—" }}<br>Dist.: {{ op.km_total|default:"0" }} km
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
   {% endif %}

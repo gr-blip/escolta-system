@@ -682,6 +682,20 @@ def os_detalhe(request, pk):
             'motorista':    v.motorista    if v else '',
         })
 
+    # Fotos dos marcos operacionais
+    MARCOS_LISTA = [
+        ('inicio_viagem',     'Início de Viagem'),
+        ('chegada_operacao',  'Chegada Operação'),
+        ('inicio_operacao',   'Início Operação'),
+        ('termino_operacao',  'Término Operação'),
+        ('termino_viagem',    'Término de Viagem'),
+    ]
+    fotos_marco = {}
+    op_obj = getattr(os, 'operacional', None)
+    if op_obj:
+        for foto in FotoMarco.objects.filter(os=os):
+            fotos_marco[foto.marco] = foto.foto.url
+
     return render(request, 'cadastros/os_detalhe.html', {
         'os': os,
         'clientes': clientes,
@@ -692,6 +706,8 @@ def os_detalhe(request, pk):
         'operacional': getattr(os, 'operacional', None),
         'veiculos': veiculos_qs,
         'veiculo_slots': veiculo_slots,
+        'fotos_marco': fotos_marco,
+        'fotos_marco_lista': MARCOS_LISTA,
     })
 
 
@@ -832,8 +848,26 @@ def os_print(request, pk):
         rastreador_viatura = Rastreador.objects.filter(
             numero_serie=os_obj.equipe.viatura.mct_id
         ).first()
+
+    # Fotos dos marcos operacionais
+    MARCOS_LISTA = [
+        ('inicio_viagem',     'Início de Viagem'),
+        ('chegada_operacao',  'Chegada Operação'),
+        ('inicio_operacao',   'Início Operação'),
+        ('termino_operacao',  'Término Operação'),
+        ('termino_viagem',    'Término de Viagem'),
+    ]
+    fotos_marco = {}
+    if op:
+        for foto in FotoMarco.objects.filter(os=os_obj):
+            fotos_marco[foto.marco] = foto.foto.url
+
     return render(request, 'cadastros/os_print.html', {
-        'os': os_obj, 'op': op, 'rastreador_viatura': rastreador_viatura
+        'os': os_obj,
+        'op': op,
+        'rastreador_viatura': rastreador_viatura,
+        'fotos_marco': fotos_marco,
+        'fotos_marco_lista': MARCOS_LISTA,
     })
 
 
