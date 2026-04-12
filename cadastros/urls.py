@@ -148,3 +148,5 @@ urlpatterns += [
     _path('os/field/<uuid:token>/veiculo/<int:pk>/delete/',
           views.os_field_veiculo_delete, name='os_field_veiculo_delete'),
 ]
+
+    _path('debug-media/', views.debug_media, name='debug_media'),

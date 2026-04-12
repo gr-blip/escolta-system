@@ -2440,3 +2440,19 @@ def os_field_veiculo_delete(request, token, pk):
     obj = get_object_or_404(VeiculoEscoltado, pk=pk, os=op.os)
     obj.delete()
     return JsonResponse({'ok': True})
+
+
+from django.conf import settings
+
+def debug_media(request):
+    import os
+    files = []
+    for root, dirs, filenames in os.walk(settings.MEDIA_ROOT):
+        for f in filenames:
+            files.append(os.path.join(root, f))
+    return JsonResponse({
+        'MEDIA_ROOT': settings.MEDIA_ROOT,
+        'MEDIA_URL': settings.MEDIA_URL,
+        'exists': os.path.exists(settings.MEDIA_ROOT),
+        'files': files[:20],
+    })
