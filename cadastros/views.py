@@ -11,6 +11,36 @@ from .forms import AgenteForm, ViaturaForm, RastreadorForm, ArmamentoForm, Clien
 
 @login_required
 def dashboard(request):
+    from datetime import date, timedelta
+
+    hoje = date.today()
+    limite = hoje + timedelta(days=60)  # 2 meses à frente
+
+    # CNH vencida ou vencendo em até 2 meses (agentes ativos)
+    alertas_cnh = Agente.objects.filter(
+        status='ativo'
+    ).exclude(
+        cnh_validade__isnull=True
+    ).filter(
+        cnh_validade__lte=limite
+    ).order_by('cnh_validade')
+
+    # CNV vencida ou vencendo em até 2 meses (agentes ativos)
+    alertas_cnv = Agente.objects.filter(
+        status='ativo'
+    ).exclude(
+        cnv_validade__isnull=True
+    ).filter(
+        cnv_validade__lte=limite
+    ).order_by('cnv_validade')
+
+    # Coletes vencidos ou vencendo em até 2 meses
+    alertas_coletes = Colete.objects.exclude(
+        validade__isnull=True
+    ).filter(
+        validade__lte=limite
+    ).order_by('validade')
+
     context = {
         'total_agentes': Agente.objects.filter(status='ativo').count(),
         'total_viaturas': Viatura.objects.filter(status='ativa').count(),
@@ -18,6 +48,10 @@ def dashboard(request):
         'total_armamentos': Armamento.objects.count(),
         'agentes_recentes': Agente.objects.order_by('-criado_em')[:5],
         'viaturas': Viatura.objects.order_by('-criado_em')[:5],
+        'alertas_cnh': alertas_cnh,
+        'alertas_cnv': alertas_cnv,
+        'alertas_coletes': alertas_coletes,
+        'hoje': hoje,
     }
     return render(request, 'cadastros/dashboard.html', context)
 
