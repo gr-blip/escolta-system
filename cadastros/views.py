@@ -2347,3 +2347,62 @@ def os_field_despesa_delete(request, token, pk):
         desp.delete()
         return JsonResponse({'ok': True})
     return JsonResponse({'ok': False}, status=405)
+# ─────────────────────────────────────────────────────────────────────────────
+# ADICIONAR ao final de cadastros/views.py
+# ─────────────────────────────────────────────────────────────────────────────
+
+def os_field_veiculo_salvar(request, token):
+    """Cria ou edita um VeiculoEscoltado via AJAX (link externo do agente)."""
+    from .models import VeiculoEscoltado, OSOperacional
+    op = get_object_or_404(OSOperacional, token=token)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+
+    pk          = request.POST.get('pk') or None          # se preenchido → edita
+    veiculo     = request.POST.get('veiculo', '').strip()
+    placa_cav   = request.POST.get('placa_cavalo', '').strip().upper()
+    placa_car   = request.POST.get('placa_carreta', '').strip().upper()
+    placa_car2  = request.POST.get('placa_carreta2', '').strip().upper()
+    motorista   = request.POST.get('motorista', '').strip()
+
+    if not (veiculo or placa_cav or motorista):
+        return JsonResponse({'ok': False, 'erro': 'Preencha ao menos tipo, placa ou motorista.'})
+
+    if pk:
+        obj = get_object_or_404(VeiculoEscoltado, pk=pk, os=op.os)
+    else:
+        # ordem = próximo disponível
+        ultima = op.os.veiculos.order_by('-ordem').first()
+        obj = VeiculoEscoltado(os=op.os, ordem=(ultima.ordem + 1 if ultima else 1))
+
+    obj.veiculo       = veiculo
+    obj.placa_cavalo  = placa_cav
+    obj.placa_carreta = placa_car
+    obj.placa_carreta2 = placa_car2
+    obj.motorista     = motorista
+    obj.save()
+
+    return JsonResponse({
+        'ok': True,
+        'pk': obj.pk,
+        'label': obj.placa_cavalo or obj.veiculo or f'Veículo {obj.pk}',
+        'motorista': obj.motorista,
+        'placa_carreta': obj.placa_carreta,
+        'placa_carreta2': obj.placa_carreta2,
+        'veiculo': obj.veiculo,
+    })
+
+
+def os_field_veiculo_delete(request, token, pk):
+    """Deleta um VeiculoEscoltado via AJAX (link externo do agente)."""
+    from .models import VeiculoEscoltado, OSOperacional
+    op = get_object_or_404(OSOperacional, token=token)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+    obj = get_object_or_404(VeiculoEscoltado, pk=pk, os=op.os)
+    obj.delete()
+    return JsonResponse({'ok': True})

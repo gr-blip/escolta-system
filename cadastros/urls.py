@@ -141,3 +141,10 @@ urlpatterns += [
     _path('os/field/<uuid:token>/despesa/<int:pk>/delete/',
           views.os_field_despesa_delete, name='os_field_despesa_delete'),
 ]
+urlpatterns += [
+    # Veículos escoltados (cadastro pelo agente no campo)
+    _path('os/field/<uuid:token>/veiculo/salvar/',
+          views.os_field_veiculo_salvar, name='os_field_veiculo_salvar'),
+    _path('os/field/<uuid:token>/veiculo/<int:pk>/delete/',
+          views.os_field_veiculo_delete, name='os_field_veiculo_delete'),
+]

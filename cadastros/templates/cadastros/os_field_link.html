@@ -403,32 +403,295 @@
 <!-- ═══════════════════════════════════════════ -->
 <!-- TAB: VEÍCULOS ESCOLTADOS                   -->
 <!-- ═══════════════════════════════════════════ -->
+<!--   <div class="tab-panel" id="tab-veiculos">                            -->
+<!-- até o próximo:                                                         -->
+<!--   <!-- ═══ TAB: TROCA DE MOTORISTAS ═══ -->                            -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
 <div class="tab-panel" id="tab-veiculos">
 <div class="container">
-  {% for v in os.veiculos.all %}
-  <div class="card">
-    <div class="card-header"><div class="card-header-left"><span class="icon">🚛</span><h3>{{ v.placa_cavalo|default:v.veiculo }} · {{ v.motorista }}</h3></div></div>
-    <div class="card-body">
-      {% if v.placa_carreta %}<p style="font-size:12px;color:var(--muted);margin-bottom:8px">Carreta: {{ v.placa_carreta }}{% if v.placa_carreta2 %} / {{ v.placa_carreta2 }}{% endif %}</p>{% endif %}
-      <p style="font-size:12px;color:var(--cyan);margin-bottom:8px">Fotos antes da escolta</p>
-      <div class="foto-grid" id="fotos_veiculo_antes_{{ v.pk }}">
-        {% for f in v.fotos.all %}{% if f.momento == 'antes' %}<div class="foto-thumb" id="fveic_{{ f.pk }}"><img src="{{ f.foto.url }}"><button type="button" class="del-btn" onclick="deleteFotoVeiculo('{{ op.token }}',{{ f.pk }},'fveic_{{ f.pk }}')">✕</button></div>{% endif %}{% endfor %}
-        <label class="foto-upload-btn" for="fvantes_{{ v.pk }}"><span>📷</span>Antes</label>
-        <input type="file" id="fvantes_{{ v.pk }}" accept="image/*" capture="environment" onchange="uploadFotoVeiculo(this,{{ v.pk }},'antes','fotos_veiculo_antes_{{ v.pk }}','{{ op.token }}')">
+
+  <!-- Botão para abrir formulário de novo veículo -->
+  <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+    <button class="btn btn-primary" onclick="openModal('modalVeiculo');limparFormVeiculo()">+ Adicionar Veículo</button>
+  </div>
+
+  <!-- Lista de veículos já cadastrados -->
+  <div id="listaVeiculos">
+    {% for v in os.veiculos.all %}
+    <div class="card" id="veiculo_{{ v.pk }}">
+      <div class="card-header">
+        <div class="card-header-left">
+          <span class="icon">🚛</span>
+          <h3>{{ v.placa_cavalo|default:v.veiculo }} · {{ v.motorista }}</h3>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-warning" style="padding:5px 10px;font-size:11px"
+            onclick="editarVeiculo({{ v.pk }},'{{ v.veiculo|escapejs }}','{{ v.placa_cavalo|escapejs }}','{{ v.placa_carreta|escapejs }}','{{ v.placa_carreta2|escapejs }}','{{ v.motorista|escapejs }}')">
+            ✏️ Editar
+          </button>
+          <button class="btn btn-danger" style="padding:5px 10px;font-size:11px"
+            onclick="deletarVeiculo('{{ op.token }}',{{ v.pk }},'veiculo_{{ v.pk }}')">
+            ✕
+          </button>
+        </div>
       </div>
-      <p style="font-size:12px;color:var(--cyan);margin:10px 0 8px">Fotos após a escolta</p>
-      <div class="foto-grid" id="fotos_veiculo_depois_{{ v.pk }}">
-        {% for f in v.fotos.all %}{% if f.momento == 'depois' %}<div class="foto-thumb" id="fveic_{{ f.pk }}"><img src="{{ f.foto.url }}"><button type="button" class="del-btn" onclick="deleteFotoVeiculo('{{ op.token }}',{{ f.pk }},'fveic_{{ f.pk }}')">✕</button></div>{% endif %}{% endfor %}
-        <label class="foto-upload-btn" for="fvdepois_{{ v.pk }}"><span>📷</span>Após</label>
-        <input type="file" id="fvdepois_{{ v.pk }}" accept="image/*" capture="environment" onchange="uploadFotoVeiculo(this,{{ v.pk }},'depois','fotos_veiculo_depois_{{ v.pk }}','{{ op.token }}')">
+      <div class="card-body">
+        {% if v.veiculo %}<p style="font-size:12px;color:var(--muted);margin-bottom:4px">Tipo/Desc.: {{ v.veiculo }}</p>{% endif %}
+        {% if v.placa_carreta %}<p style="font-size:12px;color:var(--muted);margin-bottom:4px">Carreta: {{ v.placa_carreta }}{% if v.placa_carreta2 %} / {{ v.placa_carreta2 }}{% endif %}</p>{% endif %}
+
+        <!-- Fotos antes/depois (funcionalidade existente mantida) -->
+        <p style="font-size:12px;color:var(--cyan);margin-bottom:8px">Fotos antes da escolta</p>
+        <div class="foto-grid" id="fotos_veiculo_antes_{{ v.pk }}">
+          {% for f in v.fotos.all %}{% if f.momento == 'antes' %}
+          <div class="foto-thumb" id="fveic_{{ f.pk }}">
+            <img src="{{ f.foto.url }}">
+            <button type="button" class="del-btn"
+              onclick="deleteFotoVeiculo('{{ op.token }}',{{ f.pk }},'fveic_{{ f.pk }}')">✕</button>
+          </div>
+          {% endif %}{% endfor %}
+          <label class="foto-upload-btn" for="fvantes_{{ v.pk }}"><span>📷</span>Antes</label>
+          <input type="file" id="fvantes_{{ v.pk }}" accept="image/*" capture="environment"
+            onchange="uploadFotoVeiculo(this,{{ v.pk }},'antes','fotos_veiculo_antes_{{ v.pk }}','{{ op.token }}')">
+        </div>
+
+        <p style="font-size:12px;color:var(--cyan);margin:10px 0 8px">Fotos após a escolta</p>
+        <div class="foto-grid" id="fotos_veiculo_depois_{{ v.pk }}">
+          {% for f in v.fotos.all %}{% if f.momento == 'depois' %}
+          <div class="foto-thumb" id="fveic_{{ f.pk }}">
+            <img src="{{ f.foto.url }}">
+            <button type="button" class="del-btn"
+              onclick="deleteFotoVeiculo('{{ op.token }}',{{ f.pk }},'fveic_{{ f.pk }}')">✕</button>
+          </div>
+          {% endif %}{% endfor %}
+          <label class="foto-upload-btn" for="fvdepois_{{ v.pk }}"><span>📷</span>Após</label>
+          <input type="file" id="fvdepois_{{ v.pk }}" accept="image/*" capture="environment"
+            onchange="uploadFotoVeiculo(this,{{ v.pk }},'depois','fotos_veiculo_depois_{{ v.pk }}','{{ op.token }}')">
+        </div>
       </div>
     </div>
+    {% empty %}
+    <p id="veiculosVazio" style="color:var(--muted);font-size:13px;text-align:center;padding:24px 0">
+      Nenhum veículo escoltado cadastrado na OS.
+    </p>
+    {% endfor %}
   </div>
-  {% empty %}
-  <p style="color:var(--muted);font-size:13px;text-align:center;padding:24px 0">Nenhum veículo escoltado cadastrado na OS.</p>
-  {% endfor %}
+
 </div>
+</div><!-- fim tab-veiculos -->
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- MODAL: CADASTRO / EDIÇÃO DE VEÍCULO        -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="modal-bg" id="modalVeiculo">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalVeiculoTitulo">Adicionar Veículo Escoltado</h3>
+      <button class="modal-close" onclick="closeModal('modalVeiculo')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="veiculoPk" value="">
+
+      <div class="field">
+        <label>Tipo / Descrição do Veículo</label>
+        <input type="text" id="veiculoTipo" placeholder="Ex: Caminhão Baú, Carreta Tanque…">
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Placa Cavalo</label>
+          <input type="text" id="veiculoPlacaCav" placeholder="AAA-0000" style="text-transform:uppercase">
+        </div>
+        <div class="field">
+          <label>Motorista</label>
+          <input type="text" id="veiculoMotorista" placeholder="Nome completo">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Placa Carreta</label>
+          <input type="text" id="veiculoPlacaCar" placeholder="AAA-0000" style="text-transform:uppercase">
+        </div>
+        <div class="field">
+          <label>Placa Carreta 2</label>
+          <input type="text" id="veiculoPlacaCar2" placeholder="AAA-0000" style="text-transform:uppercase">
+        </div>
+      </div>
+
+      <div id="veiculoErro" style="display:none" class="alert alert-error" role="alert"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalVeiculo')">Cancelar</button>
+      <button class="btn btn-primary" id="btnSalvarVeiculo" onclick="salvarVeiculo('{{ op.token }}')">Salvar</button>
+    </div>
+  </div>
 </div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- JS: funções de veículo                     -->
+<!-- Adicione dentro do bloco <script> existente-->
+<!-- ═══════════════════════════════════════════ -->
+<script>
+/* ──────────────────────────────────────────────────────────────
+   VEÍCULOS ESCOLTADOS — funções AJAX
+   ────────────────────────────────────────────────────────────── */
+
+function limparFormVeiculo() {
+  document.getElementById('veiculoPk').value        = '';
+  document.getElementById('veiculoTipo').value      = '';
+  document.getElementById('veiculoPlacaCav').value  = '';
+  document.getElementById('veiculoPlacaCar').value  = '';
+  document.getElementById('veiculoPlacaCar2').value = '';
+  document.getElementById('veiculoMotorista').value = '';
+  document.getElementById('veiculoErro').style.display = 'none';
+  document.getElementById('modalVeiculoTitulo').textContent = 'Adicionar Veículo Escoltado';
+}
+
+function editarVeiculo(pk, tipo, placaCav, placaCar, placaCar2, motorista) {
+  document.getElementById('veiculoPk').value        = pk;
+  document.getElementById('veiculoTipo').value      = tipo;
+  document.getElementById('veiculoPlacaCav').value  = placaCav;
+  document.getElementById('veiculoPlacaCar').value  = placaCar;
+  document.getElementById('veiculoPlacaCar2').value = placaCar2;
+  document.getElementById('veiculoMotorista').value = motorista;
+  document.getElementById('veiculoErro').style.display = 'none';
+  document.getElementById('modalVeiculoTitulo').textContent = 'Editar Veículo Escoltado';
+  openModal('modalVeiculo');
+}
+
+function salvarVeiculo(token) {
+  const pk         = document.getElementById('veiculoPk').value;
+  const tipo       = document.getElementById('veiculoTipo').value.trim();
+  const placaCav   = document.getElementById('veiculoPlacaCav').value.trim().toUpperCase();
+  const placaCar   = document.getElementById('veiculoPlacaCar').value.trim().toUpperCase();
+  const placaCar2  = document.getElementById('veiculoPlacaCar2').value.trim().toUpperCase();
+  const motorista  = document.getElementById('veiculoMotorista').value.trim();
+
+  if (!tipo && !placaCav && !motorista) {
+    const el = document.getElementById('veiculoErro');
+    el.textContent = 'Preencha ao menos tipo, placa do cavalo ou motorista.';
+    el.style.display = 'flex';
+    return;
+  }
+
+  const btn = document.getElementById('btnSalvarVeiculo');
+  btn.classList.add('loading');
+
+  const fd = new FormData();
+  fd.append('pk',            pk);
+  fd.append('veiculo',       tipo);
+  fd.append('placa_cavalo',  placaCav);
+  fd.append('placa_carreta', placaCar);
+  fd.append('placa_carreta2',placaCar2);
+  fd.append('motorista',     motorista);
+  fd.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+
+  fetch(`/os/field/${token}/veiculo/salvar/`, { method: 'POST', body: fd })
+    .then(r => r.json())
+    .then(data => {
+      btn.classList.remove('loading');
+      if (!data.ok) {
+        const el = document.getElementById('veiculoErro');
+        el.textContent = data.erro || 'Erro ao salvar.';
+        el.style.display = 'flex';
+        return;
+      }
+      closeModal('modalVeiculo');
+
+      if (pk) {
+        // Edição: atualiza o card existente
+        const card = document.getElementById(`veiculo_${pk}`);
+        if (card) {
+          card.querySelector('.card-header h3').textContent =
+            `${data.label} · ${data.motorista}`;
+          // Atualiza atributos do botão editar
+          card.querySelector('.btn-warning').setAttribute(
+            'onclick',
+            `editarVeiculo(${pk},'${escJs(data.veiculo)}','${escJs(data.label)}','${escJs(data.placa_carreta)}','${escJs(data.placa_carreta2)}','${escJs(data.motorista)}')`
+          );
+        }
+      } else {
+        // Novo: insere card no DOM
+        const vazio = document.getElementById('veiculosVazio');
+        if (vazio) vazio.remove();
+
+        const lista = document.getElementById('listaVeiculos');
+        const tpl = `
+        <div class="card" id="veiculo_${data.pk}">
+          <div class="card-header">
+            <div class="card-header-left">
+              <span class="icon">🚛</span>
+              <h3>${escHtml(data.label)} · ${escHtml(data.motorista)}</h3>
+            </div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-warning" style="padding:5px 10px;font-size:11px"
+                onclick="editarVeiculo(${data.pk},'${escJs(data.veiculo)}','${escJs(data.label)}','${escJs(data.placa_carreta)}','${escJs(data.placa_carreta2)}','${escJs(data.motorista)}')">
+                ✏️ Editar
+              </button>
+              <button class="btn btn-danger" style="padding:5px 10px;font-size:11px"
+                onclick="deletarVeiculo('${token}',${data.pk},'veiculo_${data.pk}')">
+                ✕
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            ${data.veiculo ? `<p style="font-size:12px;color:var(--muted);margin-bottom:4px">Tipo/Desc.: ${escHtml(data.veiculo)}</p>` : ''}
+            ${data.placa_carreta ? `<p style="font-size:12px;color:var(--muted);margin-bottom:4px">Carreta: ${escHtml(data.placa_carreta)}${data.placa_carreta2 ? ' / ' + escHtml(data.placa_carreta2) : ''}</p>` : ''}
+            <p style="font-size:12px;color:var(--cyan);margin-bottom:8px">Fotos antes da escolta</p>
+            <div class="foto-grid" id="fotos_veiculo_antes_${data.pk}">
+              <label class="foto-upload-btn" for="fvantes_${data.pk}"><span>📷</span>Antes</label>
+              <input type="file" id="fvantes_${data.pk}" accept="image/*" capture="environment"
+                onchange="uploadFotoVeiculo(this,${data.pk},'antes','fotos_veiculo_antes_${data.pk}','${token}')">
+            </div>
+            <p style="font-size:12px;color:var(--cyan);margin:10px 0 8px">Fotos após a escolta</p>
+            <div class="foto-grid" id="fotos_veiculo_depois_${data.pk}">
+              <label class="foto-upload-btn" for="fvdepois_${data.pk}"><span>📷</span>Após</label>
+              <input type="file" id="fvdepois_${data.pk}" accept="image/*" capture="environment"
+                onchange="uploadFotoVeiculo(this,${data.pk},'depois','fotos_veiculo_depois_${data.pk}','${token}')">
+            </div>
+          </div>
+        </div>`;
+        lista.insertAdjacentHTML('beforeend', tpl);
+      }
+    })
+    .catch(() => {
+      btn.classList.remove('loading');
+      const el = document.getElementById('veiculoErro');
+      el.textContent = 'Erro de comunicação. Tente novamente.';
+      el.style.display = 'flex';
+    });
+}
+
+function deletarVeiculo(token, pk, cardId) {
+  if (!confirm('Remover este veículo escoltado?')) return;
+  const fd = new FormData();
+  fd.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+  fetch(`/os/field/${token}/veiculo/${pk}/delete/`, { method: 'POST', body: fd })
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) {
+        const el = document.getElementById(cardId);
+        if (el) el.remove();
+        if (!document.querySelector('#listaVeiculos .card')) {
+          document.getElementById('listaVeiculos').insertAdjacentHTML(
+            'beforeend',
+            '<p id="veiculosVazio" style="color:var(--muted);font-size:13px;text-align:center;padding:24px 0">Nenhum veículo escoltado cadastrado na OS.</p>'
+          );
+        }
+      } else {
+        alert(data.erro || 'Erro ao remover.');
+      }
+    });
+}
+
+/* helpers de escape */
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escJs(s) {
+  return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
+</script>
+
 
 <!-- ═══════════════════════════════════════════ -->
 <!-- TAB: TROCA DE MOTORISTAS                   -->
