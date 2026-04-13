@@ -1,10 +1,12 @@
-﻿from django.db import migrations, models
+from django.db import migrations, models
 import django.db.models.deletion
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ('cadastros', '0022_despesaos_trocamotorista_parada_incidente_and_more'),
     ]
+
     operations = [
         migrations.AddField(
             model_name='despesaos',
@@ -14,8 +16,7 @@ class Migration(migrations.Migration):
                 related_name='despesas',
                 to='cadastros.ordemservico',
                 verbose_name='OS',
-                default=1,
+                null=True,
             ),
-            preserve_default=False,
         ),
     ]
