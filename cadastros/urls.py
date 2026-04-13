@@ -149,4 +149,7 @@ urlpatterns += [
           views.os_field_veiculo_delete, name='os_field_veiculo_delete'),
 ]
 
+
+urlpatterns += [
     _path('debug-media/', views.debug_media, name='debug_media'),
+]
