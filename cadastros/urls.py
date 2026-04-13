@@ -150,10 +150,4 @@ urlpatterns += [
 ]
 
 
-urlpatterns += [
-    _path('debug-media/', views.debug_media, name='debug_media'),
-]
 
-urlpatterns += [
-    _path('debug-op/', views.debug_op, name='debug_op'),
-]

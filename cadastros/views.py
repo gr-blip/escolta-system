@@ -2458,15 +2458,7 @@ def debug_media(request):
         'MEDIA_URL': settings.MEDIA_URL,
         'exists': os.path.exists(settings.MEDIA_ROOT),
         'files': files[:20],
-    })
-from django.http import JsonResponse
-from cadastros.models import OSOperacional
-
-def debug_op(request):
-    op = OSOperacional.objects.select_related('os').first()
-    if not op:
-        return JsonResponse({'erro': 'nenhum OSOperacional encontrado'})
-    return JsonResponse({
+    })    return JsonResponse({
         'os': str(op.os),
         'inicio_viagem': str(op.inicio_viagem),
         'km_inicio_viagem': op.km_inicio_viagem,
