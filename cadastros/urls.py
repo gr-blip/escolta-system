@@ -80,4 +80,11 @@ urlpatterns += [
     path('faturamento/boletim/export/pdf/',  views.boletim_export_pdf,  name='boletim_export_pdf'),
     path('faturamento/boletim/export/xlsx/', views.boletim_export_xlsx, name='boletim_export_xlsx'),
     path('faturamento/boletim/<int:pk>/', views.boletim_detalhe, name='boletim_detalhe'),
+
+    # Usuarios
+    path('usuarios/', views.usuario_list, name='usuario_list'),
+    path('usuarios/novo/', views.usuario_create, name='usuario_create'),
+    path('usuarios/<int:pk>/editar/', views.usuario_edit, name='usuario_edit'),
+    path('usuarios/<int:pk>/senha/', views.usuario_senha, name='usuario_senha'),
+    path('usuarios/<int:pk>/excluir/', views.usuario_delete, name='usuario_delete'),
 ]
