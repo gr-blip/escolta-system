@@ -1,3 +1,5 @@
+# Outras importações...
+from .models_perfil import PerfilUsuario
 from django.db import models
 
 
@@ -133,7 +135,9 @@ class Armamento(models.Model):
 
 class Cliente(models.Model):
     razao_social = models.CharField(max_length=200, verbose_name='Razao Social')
+    nome_fantasia = models.CharField(max_length=200, blank=True, verbose_name='Nome Fantasia')
     cnpj = models.CharField(max_length=18, unique=True, verbose_name='CNPJ')
+    ativo = models.BooleanField(default=True, verbose_name='Ativo')
     inscricao_estadual = models.CharField(max_length=30, blank=True, verbose_name='IE / IM')
     endereco = models.CharField(max_length=300, blank=True, verbose_name='Endereco')
     cidade_uf = models.CharField(max_length=100, blank=True, verbose_name='Cidade / UF')
@@ -290,9 +294,12 @@ class OrdemServico(models.Model):
 
 class OSOperacional(models.Model):
     """Dados operacionais de execução da OS — tempos, KM e folha"""
+    import uuid as _uuid
     os = models.OneToOneField('OrdemServico', on_delete=models.CASCADE,
                               related_name='operacional', verbose_name='OS')
     numero_folha      = models.CharField(max_length=20, blank=True, verbose_name='Nº Folha')
+    token      = models.UUIDField(default=_uuid.uuid4, unique=True, editable=False, verbose_name='Token de Acesso Externo')
+    link_ativo = models.BooleanField(default=True, verbose_name='Link Externo Ativo')
 
     # Marcos de data/hora
     inicio_viagem     = models.DateTimeField(null=True, blank=True, verbose_name='Início de Viagem')
@@ -308,6 +315,18 @@ class OSOperacional(models.Model):
     km_termino_operacao = models.PositiveIntegerField(null=True, blank=True, verbose_name='KM Término Operação')
     km_termino_viagem   = models.PositiveIntegerField(null=True, blank=True, verbose_name='KM Término Viagem')
     pedagio             = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Pedágio (R$)')
+
+    # Localização GPS de cada marco (lat/lng capturados pelo dispositivo do agente)
+    gps_inicio_viagem_lat     = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    gps_inicio_viagem_lng     = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    gps_chegada_operacao_lat  = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    gps_chegada_operacao_lng  = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    gps_inicio_operacao_lat   = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    gps_inicio_operacao_lng   = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    gps_termino_operacao_lat  = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    gps_termino_operacao_lng  = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    gps_termino_viagem_lat    = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    gps_termino_viagem_lng    = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
 
     criado_em     = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
@@ -514,3 +533,313 @@ class BoletimMedicao(models.Model):
             Decimal(str(self.acrescimo)) - Decimal(str(self.desconto))
         ).quantize(Decimal('0.01'))
         self.save()
+# No final do seu cadastros/models.py
+from .models_perfil import PerfilUsuario# ============================================================
+# ADICIONAR ao final de cadastros/models.py
+# ============================================================
+# Cole este bloco inteiro após a última linha do models.py
+# (após a linha: from .models_perfil import PerfilUsuario)
+# ============================================================
+
+import uuid as _uuid_mod
+import os as _os_mod
+
+
+def _foto_upload_path(instance, filename):
+    """Salva fotos em media/os_fotos/<numero_os>/<tipo>/<filename>"""
+    ext = filename.rsplit('.', 1)[-1].lower()
+    novo_nome = f"{_uuid_mod.uuid4().hex}.{ext}"
+    os_num = getattr(getattr(instance, 'operacional', None), 'os', None)
+    if os_num is None:
+        os_num = getattr(instance, 'os', None)
+    numero = getattr(os_num, 'numero', 'sem_os') if os_num else 'sem_os'
+    tipo = instance.__class__.__name__.lower()
+    return _os_mod.path.join('os_fotos', numero, tipo, novo_nome)
+
+
+# ────────────────────────────────────────────────
+# FOTOS DOS MARCOS OPERACIONAIS
+# ────────────────────────────────────────────────
+class FotoMarco(models.Model):
+    """Foto tirada pelo agente em cada marco da OS (inicio_viagem, chegada_operacao, etc.)"""
+    MARCO_CHOICES = [
+        ('inicio_viagem',    'Início de Viagem'),
+        ('chegada_operacao', 'Chegada Operação'),
+        ('inicio_operacao',  'Início Operação'),
+        ('termino_operacao', 'Término Operação'),
+        ('termino_viagem',   'Término de Viagem'),
+    ]
+
+    os           = models.ForeignKey('OrdemServico', on_delete=models.CASCADE,
+                                     related_name='fotos_marcos', verbose_name='OS')
+    marco        = models.CharField(max_length=30, choices=MARCO_CHOICES, verbose_name='Marco')
+    foto         = models.ImageField(upload_to=_foto_upload_path, verbose_name='Foto')
+    latitude     = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    longitude    = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    criado_em    = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Foto de Marco'
+        verbose_name_plural = 'Fotos de Marcos'
+        ordering = ['marco', 'criado_em']
+
+    def __str__(self):
+        return f'{self.get_marco_display()} — OS-{self.os.numero}'
+
+
+# ────────────────────────────────────────────────
+# PARADAS
+# ────────────────────────────────────────────────
+class Parada(models.Model):
+    """Parada registrada durante a OS — com motivo, duração e fotos."""
+    MOTIVO_CHOICES = [
+        ('abastecimento',  'Abastecimento'),
+        ('refeicao',       'Refeição'),
+        ('banheiro',       'Banheiro'),
+        ('mecanica',       'Mecânica / Pane'),
+        ('fiscal',         'Fiscalização / Barreira'),
+        ('aguardando',     'Aguardando Instruções'),
+        ('outro',          'Outro'),
+    ]
+
+    os          = models.ForeignKey('OrdemServico', on_delete=models.CASCADE,
+                                    related_name='paradas', verbose_name='OS')
+    motivo      = models.CharField(max_length=20, choices=MOTIVO_CHOICES, verbose_name='Motivo')
+    descricao   = models.TextField(blank=True, verbose_name='Descrição / Observações')
+    inicio      = models.DateTimeField(verbose_name='Início da Parada')
+    fim         = models.DateTimeField(null=True, blank=True, verbose_name='Fim da Parada')
+    latitude    = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True, verbose_name='Latitude')
+    longitude   = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True, verbose_name='Longitude')
+    criado_em   = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Parada'
+        verbose_name_plural = 'Paradas'
+        ordering = ['inicio']
+
+    def __str__(self):
+        return f'{self.get_motivo_display()} — OS-{self.os.numero}'
+
+    @property
+    def duracao_minutos(self):
+        if self.inicio and self.fim:
+            return int((self.fim - self.inicio).total_seconds() // 60)
+        return None
+
+
+class FotoParada(models.Model):
+    """Fotos vinculadas a uma parada."""
+    parada    = models.ForeignKey('Parada', on_delete=models.CASCADE,
+                                  related_name='fotos', verbose_name='Parada')
+    foto      = models.ImageField(upload_to=_foto_upload_path, verbose_name='Foto')
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    # Propriedade auxiliar para _foto_upload_path encontrar o número da OS
+    @property
+    def os(self):
+        return self.parada.os
+
+    class Meta:
+        verbose_name = 'Foto de Parada'
+        verbose_name_plural = 'Fotos de Parada'
+
+
+# ────────────────────────────────────────────────
+# INCIDENTES
+# ────────────────────────────────────────────────
+class Incidente(models.Model):
+    """Registro de ocorrência/incidente durante a OS."""
+    TIPO_CHOICES = [
+        ('acidente',       'Acidente de Trânsito'),
+        ('tentativa_roubo','Tentativa de Roubo'),
+        ('avaria_carga',   'Avaria na Carga'),
+        ('pane_viatura',   'Pane / Defeito Mecânico'),
+        ('atividade_suspeita', 'Atividade Suspeita'),
+        ('outro',          'Outro'),
+    ]
+    GRAVIDADE_CHOICES = [
+        ('baixa',  'Baixa'),
+        ('media',  'Média'),
+        ('alta',   'Alta'),
+        ('critica','Crítica'),
+    ]
+
+    os          = models.ForeignKey('OrdemServico', on_delete=models.CASCADE,
+                                    related_name='incidentes', verbose_name='OS')
+    tipo        = models.CharField(max_length=30, choices=TIPO_CHOICES, verbose_name='Tipo')
+    gravidade   = models.CharField(max_length=10, choices=GRAVIDADE_CHOICES,
+                                   default='media', verbose_name='Gravidade')
+    descricao   = models.TextField(verbose_name='Descrição do Incidente')
+    ocorrido_em = models.DateTimeField(verbose_name='Data / Hora do Incidente')
+    latitude    = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    longitude   = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    bo_numero   = models.CharField(max_length=50, blank=True, verbose_name='Nº Boletim de Ocorrência')
+    criado_em   = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Incidente'
+        verbose_name_plural = 'Incidentes'
+        ordering = ['ocorrido_em']
+
+    def __str__(self):
+        return f'{self.get_tipo_display()} ({self.get_gravidade_display()}) — OS-{self.os.numero}'
+
+
+class FotoIncidente(models.Model):
+    """Fotos vinculadas a um incidente."""
+    incidente = models.ForeignKey('Incidente', on_delete=models.CASCADE,
+                                  related_name='fotos', verbose_name='Incidente')
+    foto      = models.ImageField(upload_to=_foto_upload_path, verbose_name='Foto')
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def os(self):
+        return self.incidente.os
+
+    class Meta:
+        verbose_name = 'Foto de Incidente'
+        verbose_name_plural = 'Fotos de Incidente'
+
+
+# ────────────────────────────────────────────────
+# FOTOS DOS VEÍCULOS ESCOLTADOS
+# ────────────────────────────────────────────────
+class FotoVeiculoEscoltado(models.Model):
+    """Fotos do veículo escoltado (antes/depois da escolta)."""
+    MOMENTO_CHOICES = [
+        ('antes',  'Antes da Escolta'),
+        ('depois', 'Após a Escolta'),
+        ('outro',  'Outro'),
+    ]
+
+    veiculo   = models.ForeignKey('VeiculoEscoltado', on_delete=models.CASCADE,
+                                  related_name='fotos', verbose_name='Veículo')
+    momento   = models.CharField(max_length=10, choices=MOMENTO_CHOICES, default='antes')
+    foto      = models.ImageField(upload_to=_foto_upload_path, verbose_name='Foto')
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def os(self):
+        return self.veiculo.os
+
+    class Meta:
+        verbose_name = 'Foto de Veículo Escoltado'
+        verbose_name_plural = 'Fotos de Veículos Escoltados'
+
+
+# ────────────────────────────────────────────────
+# TROCA DE MOTORISTAS
+# ────────────────────────────────────────────────
+class TrocaMotorista(models.Model):
+    """Registro de troca de motorista durante a OS."""
+    os               = models.ForeignKey('OrdemServico', on_delete=models.CASCADE,
+                                         related_name='trocas_motorista', verbose_name='OS')
+    veiculo_escoltado= models.ForeignKey('VeiculoEscoltado', on_delete=models.SET_NULL,
+                                         null=True, blank=True,
+                                         related_name='trocas', verbose_name='Veículo')
+    motorista_saindo = models.CharField(max_length=200, verbose_name='Motorista Saindo')
+    motorista_entrando= models.CharField(max_length=200, verbose_name='Motorista Entrando')
+    ocorrido_em      = models.DateTimeField(verbose_name='Data / Hora da Troca')
+    motivo           = models.TextField(blank=True, verbose_name='Motivo')
+    latitude         = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    longitude        = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    criado_em        = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Troca de Motorista'
+        verbose_name_plural = 'Trocas de Motorista'
+        ordering = ['ocorrido_em']
+
+    def __str__(self):
+        return f'Troca: {self.motorista_saindo} → {self.motorista_entrando} (OS-{self.os.numero})'
+
+
+class FotoTrocaMotorista(models.Model):
+    """Fotos da troca de motorista (CNH, rosto, etc.)."""
+    troca     = models.ForeignKey('TrocaMotorista', on_delete=models.CASCADE,
+                                  related_name='fotos', verbose_name='Troca')
+    foto      = models.ImageField(upload_to=_foto_upload_path, verbose_name='Foto')
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def os(self):
+        return self.troca.os
+
+    class Meta:
+        verbose_name = 'Foto de Troca de Motorista'
+        verbose_name_plural = 'Fotos de Troca de Motorista'
+
+
+# ────────────────────────────────────────────────
+# ASSINATURAS DIGITAIS
+# ────────────────────────────────────────────────
+class AssinaturaOS(models.Model):
+    """Assinatura digital capturada via canvas no link do agente."""
+    TIPO_CHOICES = [
+        ('agente1',    'Agente 1'),
+        ('agente2',    'Agente 2'),
+        ('motorista',  'Motorista Escoltado'),
+        ('supervisor', 'Supervisor'),
+    ]
+
+    os        = models.ForeignKey('OrdemServico', on_delete=models.CASCADE,
+                                  related_name='assinaturas', verbose_name='OS')
+    tipo      = models.CharField(max_length=20, choices=TIPO_CHOICES, verbose_name='Tipo')
+    nome      = models.CharField(max_length=200, verbose_name='Nome do Signatário')
+    # Imagem PNG gerada do canvas (base64 → arquivo)
+    imagem    = models.ImageField(upload_to=_foto_upload_path, verbose_name='Assinatura')
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Assinatura'
+        verbose_name_plural = 'Assinaturas'
+        unique_together = [('os', 'tipo')]
+        ordering = ['tipo']
+
+    def __str__(self):
+        return f'{self.get_tipo_display()} — OS-{self.os.numero}'
+
+
+# ────────────────────────────────────────────────
+# CRÉDITOS E DESPESAS
+# ────────────────────────────────────────────────
+class DespesaOS(models.Model):
+    """Despesas e créditos registrados pelo agente durante a OS."""
+    TIPO_CHOICES = [
+        ('combustivel',  'Combustível'),
+        ('refeicao',     'Refeição'),
+        ('hospedagem',   'Hospedagem'),
+        ('pedagio',      'Pedágio Avulso'),
+        ('estacionamento','Estacionamento'),
+        ('outro',        'Outro'),
+    ]
+    NATUREZA_CHOICES = [
+        ('despesa',  'Despesa'),
+        ('credito',  'Crédito / Reembolso'),
+    ]
+
+    os        = models.ForeignKey('OrdemServico', on_delete=models.CASCADE,
+                                  related_name='despesas', verbose_name='OS')
+    tipo      = models.CharField(max_length=20, choices=TIPO_CHOICES, verbose_name='Tipo')
+    natureza  = models.CharField(max_length=10, choices=NATUREZA_CHOICES,
+                                 default='despesa', verbose_name='Natureza')
+    descricao = models.CharField(max_length=300, blank=True, verbose_name='Descrição')
+    valor     = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Valor (R$)')
+    comprovante = models.ImageField(upload_to=_foto_upload_path, null=True, blank=True,
+                                    verbose_name='Comprovante (foto)')
+    ocorrido_em = models.DateTimeField(verbose_name='Data / Hora')
+    criado_em   = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Despesa / Crédito'
+        verbose_name_plural = 'Despesas / Créditos'
+        ordering = ['ocorrido_em']
+
+    def __str__(self):
+        return f'{self.get_tipo_display()} R${self.valor} — OS-{self.os.numero}'
+
+    @property
+    def os(self):  # alias para _foto_upload_path funcionar no comprovante
+        return self.__class__.objects.get(pk=self.pk).os if self.pk else None
