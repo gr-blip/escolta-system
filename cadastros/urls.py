@@ -94,4 +94,33 @@ urlpatterns += [
     path('os/field/<uuid:token>/despesa/<int:pk>/delete/', views.os_field_despesa_delete, name='os_field_despesa_delete'),
     path('os/field/<uuid:token>/veiculo/salvar/', views.os_field_veiculo_salvar, name='os_field_veiculo_salvar'),
     path('os/field/<uuid:token>/veiculo/<int:pk>/delete/', views.os_field_veiculo_delete, name='os_field_veiculo_delete'),
+
+    # Equipes
+    path('operacional/equipes/', views.equipe_list, name='equipe_list'),
+    path('operacional/equipes/nova/', views.equipe_create, name='equipe_create'),
+    path('operacional/equipes/<int:pk>/editar/', views.equipe_edit, name='equipe_edit'),
+    path('operacional/equipes/<int:pk>/excluir/', views.equipe_delete, name='equipe_delete'),
+    path('operacional/equipes/<int:pk>/finalizar/', views.equipe_finalizar, name='equipe_finalizar'),
+
+    # OS
+    path('operacional/os/', views.os_list, name='os_list'),
+    path('operacional/os/nova/', views.os_nova, name='os_nova'),
+    path('operacional/os/<int:pk>/', views.os_detalhe, name='os_detalhe'),
+    path('operacional/os/<int:pk>/excluir/', views.os_delete, name='os_delete'),
+    path('operacional/os/<int:pk>/finalizar/', views.os_finalizar, name='os_finalizar'),
+    path('operacional/os/<int:pk>/salvar/', views.os_operacional_save, name='os_operacional_save'),
+    path('operacional/os/<int:pk>/print/', views.os_print, name='os_print'),
+    path('operacional/os/<int:pk>/email/', views.os_email_html, name='os_email_html'),
+
+    # Tabela de Precos
+    path('tabelas-preco/', views.tabela_preco_list, name='tabela_preco_list'),
+    path('tabelas-preco/nova/', views.tabela_preco_create, name='tabela_preco_create'),
+    path('tabelas-preco/<int:pk>/editar/', views.tabela_preco_edit, name='tabela_preco_edit'),
+    path('tabelas-preco/<int:pk>/excluir/', views.tabela_preco_delete, name='tabela_preco_delete'),
+
+    # Boletim
+    path('boletim/', views.boletim_list, name='boletim_list'),
+    path('boletim/<int:pk>/', views.boletim_detalhe, name='boletim_detalhe'),
+    path('boletim/export/pdf/', views.boletim_export_pdf, name='boletim_export_pdf'),
+    path('boletim/export/xlsx/', views.boletim_export_xlsx, name='boletim_export_xlsx'),
 ]
