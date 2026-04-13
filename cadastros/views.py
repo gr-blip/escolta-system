@@ -862,12 +862,24 @@ def os_print(request, pk):
         for foto in FotoMarco.objects.filter(os=os_obj):
             fotos_marco[foto.marco] = foto.foto.url
 
+    # Assinaturas digitais
+    assinaturas = {a.tipo: a for a in AssinaturaOS.objects.filter(os=os_obj)}
+
+    # Despesas / Creditos
+    despesas = DespesaOS.objects.filter(os=os_obj).order_by('ocorrido_em')
+
     return render(request, 'cadastros/os_print.html', {
         'os': os_obj,
         'op': op,
         'rastreador_viatura': rastreador_viatura,
         'fotos_marco': fotos_marco,
         'fotos_marco_lista': MARCOS_LISTA,
+        'assinaturas': assinaturas,
+        'assinatura_tipos_lista': [
+            ('agente1', 'Agente 1'), ('agente2', 'Agente 2'),
+            ('motorista', 'Motorista Escoltado'), ('supervisor', 'Supervisor'),
+        ],
+        'despesas': despesas,
     })
 
 
