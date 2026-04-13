@@ -380,7 +380,7 @@
       <div class="card-body">
         <div class="field">
           <label>Valor Total Pedágio</label>
-          <div class="input-prefix"><span class="prefix-lbl">R$</span><input type="text" id="input_pedagio" name="pedagio" value="{{ op.pedagio|default_if_none:' }}" placeholder="0,00" inputmode="decimal"></div>
+          <div class="input-prefix"><span class="prefix-lbl">R$</span><input type="text" id="input_pedagio" name="pedagio" value="{{ op.pedagio|default_if_none:0 }}" placeholder="0,00" inputmode="decimal"></div>
         </div>
       </div>
     </div>
