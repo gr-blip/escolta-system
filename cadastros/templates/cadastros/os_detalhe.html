@@ -9,6 +9,13 @@
 
 {% block topbar_actions %}
   {% if not novo %}
+
+  <!-- BOTÃO GERAR LINK EXTERNO -->
+  <button id="btn-gerar-link" onclick="gerarLinkExterno()" class="btn btn-secondary" style="color:#06b6d4;border-color:#06b6d4;gap:6px">
+    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Link Externo
+  </button>
+
   <a href="{% url 'os_delete' os.pk %}" class="btn btn-secondary" style="color:var(--red)">
     <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M2 4h10M5 4V2.5h4V4M5.5 6.5v4M8.5 6.5v4M3 4l.7 7.5h6.6L11 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
     Excluir OS
@@ -370,6 +377,7 @@
             <th style="text-align:center;padding:8px 10px;color:var(--text3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em;width:90px">Tempo</th>
             <th style="text-align:center;padding:8px 10px;color:var(--text3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em;width:110px">KM</th>
             <th style="text-align:center;padding:8px 10px;color:var(--text3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em;width:90px">Distância</th>
+            <th style="text-align:center;padding:8px 10px;color:var(--text3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em;width:60px">GPS</th>
           </tr>
         </thead>
         <tbody id="op-tbody">
@@ -388,6 +396,11 @@
                 style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:90px;text-align:center">
             </td>
             <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--text3)" id="d-inicio">0</td>
+            <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border)">
+              {% if op and op.gps_inicio_viagem_lat %}
+              <a href="https://www.google.com/maps?q={{ op.gps_inicio_viagem_lat }},{{ op.gps_inicio_viagem_lng }}" target="_blank" title="Ver no Google Maps" style="color:#10b981;font-size:18px;text-decoration:none">📍</a>
+              {% else %}<span style="color:var(--text3)">—</span>{% endif %}
+            </td>
           </tr>
           <tr class="op-row" data-row="chegada_operacao">
             <td style="padding:7px 10px;color:var(--text2);border-bottom:1px solid var(--border)">Chegada Operação:</td>
@@ -403,6 +416,11 @@
                 style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:90px;text-align:center">
             </td>
             <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--text2);font-weight:600" id="d-chegada">{{ op.km_trecho_chegada|default:"0" }}</td>
+            <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border)">
+              {% if op and op.gps_chegada_operacao_lat %}
+              <a href="https://www.google.com/maps?q={{ op.gps_chegada_operacao_lat }},{{ op.gps_chegada_operacao_lng }}" target="_blank" title="Ver no Google Maps" style="color:#10b981;font-size:18px;text-decoration:none">📍</a>
+              {% else %}<span style="color:var(--text3)">—</span>{% endif %}
+            </td>
           </tr>
           <tr class="op-row" data-row="inicio_operacao">
             <td style="padding:7px 10px;color:var(--text2);border-bottom:1px solid var(--border)">Início Operação:</td>
@@ -418,6 +436,11 @@
                 style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:90px;text-align:center">
             </td>
             <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--text3)" id="d-inicio-op">0</td>
+            <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border)">
+              {% if op and op.gps_inicio_operacao_lat %}
+              <a href="https://www.google.com/maps?q={{ op.gps_inicio_operacao_lat }},{{ op.gps_inicio_operacao_lng }}" target="_blank" title="Ver no Google Maps" style="color:#10b981;font-size:18px;text-decoration:none">📍</a>
+              {% else %}<span style="color:var(--text3)">—</span>{% endif %}
+            </td>
           </tr>
           <tr class="op-row" data-row="termino_operacao">
             <td style="padding:7px 10px;color:var(--text2);border-bottom:1px solid var(--border)">Término Operação:</td>
@@ -433,6 +456,11 @@
                 style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:90px;text-align:center">
             </td>
             <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--text2);font-weight:600" id="d-termino-op">{{ op.km_trecho_termino_op|default:"0" }}</td>
+            <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border)">
+              {% if op and op.gps_termino_operacao_lat %}
+              <a href="https://www.google.com/maps?q={{ op.gps_termino_operacao_lat }},{{ op.gps_termino_operacao_lng }}" target="_blank" title="Ver no Google Maps" style="color:#10b981;font-size:18px;text-decoration:none">📍</a>
+              {% else %}<span style="color:var(--text3)">—</span>{% endif %}
+            </td>
           </tr>
           <tr class="op-row" data-row="termino_viagem">
             <td style="padding:7px 10px;color:var(--text2)">Término de Viagem:</td>
@@ -448,6 +476,11 @@
                 style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:90px;text-align:center">
             </td>
             <td style="padding:7px 10px;text-align:center;color:var(--blue-light);font-weight:700" id="d-total">{{ op.km_total|default:"0" }}</td>
+            <td style="padding:7px 10px;text-align:center">
+              {% if op and op.gps_termino_viagem_lat %}
+              <a href="https://www.google.com/maps?q={{ op.gps_termino_viagem_lat }},{{ op.gps_termino_viagem_lng }}" target="_blank" title="Ver no Google Maps" style="color:#10b981;font-size:18px;text-decoration:none">📍</a>
+              {% else %}<span style="color:var(--text3)">—</span>{% endif %}
+            </td>
           </tr>
           {% endwith %}
         </tbody>
@@ -682,5 +715,103 @@ document.querySelectorAll('input[type="datetime-local"]').forEach(el => {
   }
 });
 </script>
+
+{% if not novo %}
+<!-- MODAL LINK EXTERNO -->
+<div id="modal-link" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#111827;border:1px solid #1e3a5f;border-radius:16px;padding:32px;max-width:480px;width:100%;position:relative">
+    <button onclick="fecharModal()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:#64748b;font-size:20px;cursor:pointer">✕</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <div style="width:42px;height:42px;background:linear-gradient(135deg,#3b82f6,#06b6d4);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🔗</div>
+      <div>
+        <h3 style="font-size:16px;font-weight:700;color:#e2e8f0">Link de Preenchimento Externo</h3>
+        <p style="font-size:12px;color:#64748b;margin-top:2px">OS-{{ os.numero }} — Envie para o agente de campo</p>
+      </div>
+    </div>
+    <div style="background:#0a0f1e;border:1px solid #1e3a5f;border-radius:10px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:10px">
+      <input id="link-url" type="text" readonly
+        style="background:none;border:none;color:#06b6d4;font-size:13px;width:100%;outline:none;font-family:monospace"
+        value="">
+      <button onclick="copiarLink()" id="btn-copiar"
+        style="background:#1e3a5f;border:none;border-radius:8px;color:#e2e8f0;padding:8px 14px;cursor:pointer;font-size:12px;white-space:nowrap;transition:background 0.2s">
+        📋 Copiar
+      </button>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button onclick="compartilharLink()"
+        style="flex:1;background:linear-gradient(135deg,#25d366,#128c7e);border:none;border-radius:10px;color:#fff;padding:12px;cursor:pointer;font-size:14px;font-weight:600">
+        📱 Compartilhar / WhatsApp
+      </button>
+      <button onclick="desativarLink()"
+        style="background:#1e2d40;border:1px solid #ef4444;border-radius:10px;color:#ef4444;padding:12px 16px;cursor:pointer;font-size:13px">
+        🚫 Desativar
+      </button>
+    </div>
+    <p style="font-size:11px;color:#475569;margin-top:14px;text-align:center">
+      ⚠️ Qualquer pessoa com este link pode preencher os dados da OS. Desative quando não for mais necessário.
+    </p>
+  </div>
+</div>
+
+<script>
+async function gerarLinkExterno() {
+  try {
+    const btn = document.getElementById('btn-gerar-link');
+    btn.disabled = true;
+    btn.textContent = 'Gerando...';
+
+    const resp = await fetch("{% url 'os_gerar_link' os.pk %}", {
+      headers: {'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''}
+    });
+    const data = await resp.json();
+
+    document.getElementById('link-url').value = data.url;
+    const modal = document.getElementById('modal-link');
+    modal.style.display = 'flex';
+
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Link Externo`;
+  } catch(e) {
+    alert('Erro ao gerar link. Tente novamente.');
+  }
+}
+
+function fecharModal() {
+  document.getElementById('modal-link').style.display = 'none';
+}
+
+function copiarLink() {
+  const input = document.getElementById('link-url');
+  navigator.clipboard.writeText(input.value).then(() => {
+    const btn = document.getElementById('btn-copiar');
+    btn.textContent = '✅ Copiado!';
+    btn.style.background = '#065f46';
+    setTimeout(() => { btn.textContent = '📋 Copiar'; btn.style.background = '#1e3a5f'; }, 2000);
+  });
+}
+
+function compartilharLink() {
+  const url = document.getElementById('link-url').value;
+  const texto = `🛡️ *JR SEGURANÇA Segurança — OS-{{ os.numero }}*\n\nOlá! Segue o link para preenchimento dos dados de campo da operação:\n\n${url}\n\n_Preencha os horários e KM conforme a execução._`;
+  if (navigator.share) {
+    navigator.share({ title: 'OS-{{ os.numero }} — Preenchimento de Campo', text: texto, url: url });
+  } else {
+    const wa = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+    window.open(wa, '_blank');
+  }
+}
+
+function desativarLink() {
+  if (!confirm('Deseja desativar o link externo desta OS?\nO agente não conseguirá mais preencher pelo link.')) return;
+  window.location.href = "{% url 'os_desativar_link' os.pk %}";
+}
+
+// Fechar modal clicando fora
+document.getElementById('modal-link').addEventListener('click', function(e) {
+  if (e.target === this) fecharModal();
+});
+</script>
+{% endif %}
+
 {% endblock %}
 

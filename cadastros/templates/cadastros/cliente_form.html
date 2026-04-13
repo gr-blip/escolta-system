@@ -13,9 +13,22 @@
       Dados da empresa contratante
     </div>
     <div class="form-grid form-grid-2">
-      <div class="field field-full"><label>Razão Social *</label>{{ form.razao_social }}</div>
-      <div class="field"><label>CNPJ *</label>{{ form.cnpj }}</div>
+
+      <!-- CNPJ com botão buscar -->
+      <div class="field">
+        <label>CNPJ *</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          {{ form.cnpj }}
+          <button type="button" id="btn-buscar-cnpj" class="btn btn-secondary" style="white-space:nowrap">
+            Buscar CNPJ
+          </button>
+        </div>
+        <span id="cnpj-status" style="font-size:12px;margin-top:4px;display:block"></span>
+      </div>
+
       <div class="field"><label>IE / IM</label>{{ form.inscricao_estadual }}</div>
+      <div class="field field-full"><label>Razão Social *</label>{{ form.razao_social }}</div>
+      <div class="field field-full"><label>Nome Fantasia</label>{{ form.nome_fantasia }}</div>
       <div class="field field-full"><label>Endereço</label>{{ form.endereco }}</div>
       <div class="field"><label>Cidade / UF</label>{{ form.cidade_uf }}</div>
       <div class="field"><label>CEP</label>{{ form.cep }}</div>
@@ -33,5 +46,93 @@
     <a href="{% url 'cliente_list' %}" class="btn btn-secondary">Cancelar</a>
   </div>
 </form>
+
+<script>
+  // Formata o CNPJ enquanto digita: 00.000.000/0000-00
+  const cnpjInput = document.getElementById('id_cnpj');
+  const statusEl  = document.getElementById('cnpj-status');
+
+  cnpjInput.addEventListener('input', function () {
+    let v = this.value.replace(/\D/g, '').slice(0, 14);
+    if (v.length > 12) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})/, '$1.$2.$3/$4-$5');
+    else if (v.length > 8) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{0,4})/, '$1.$2.$3/$4');
+    else if (v.length > 5) v = v.replace(/^(\d{2})(\d{3})(\d{0,3})/, '$1.$2.$3');
+    else if (v.length > 2) v = v.replace(/^(\d{2})(\d{0,3})/, '$1.$2');
+    this.value = v;
+  });
+
+  // Busca ao clicar no botão
+  document.getElementById('btn-buscar-cnpj').addEventListener('click', buscarCNPJ);
+
+  // Busca também ao sair do campo com CNPJ completo
+  cnpjInput.addEventListener('blur', function () {
+    const digits = this.value.replace(/\D/g, '');
+    if (digits.length === 14) buscarCNPJ();
+  });
+
+  async function buscarCNPJ() {
+    const digits = cnpjInput.value.replace(/\D/g, '');
+    if (digits.length !== 14) {
+      setStatus('Digite um CNPJ completo (14 dígitos).', 'error');
+      return;
+    }
+
+    setStatus('Buscando...', 'info');
+    document.getElementById('btn-buscar-cnpj').disabled = true;
+
+    try {
+      const res  = await fetch(`https://publica.cnpj.ws/cnpj/${digits}`);
+      const data = await res.json();
+
+      if (!res.ok || data.status === 'ERROR') {
+        setStatus('CNPJ não encontrado ou inválido.', 'error');
+        return;
+      }
+
+      // Razão Social
+      const razao = data.razao_social || '';
+      document.getElementById('id_razao_social').value = razao;
+
+      // Nome Fantasia
+      const fantasia = data.estabelecimento?.nome_fantasia || '';
+      const nfField = document.getElementById('id_nome_fantasia');
+      if (nfField) nfField.value = fantasia;
+
+      // Endereço
+      const est = data.estabelecimento || {};
+      const logradouro  = est.logradouro  || '';
+      const numero      = est.numero      || '';
+      const bairro      = est.bairro      || '';
+      const complemento = est.complemento || '';
+      let endereco = logradouro;
+      if (numero)      endereco += `, ${numero}`;
+      if (complemento) endereco += ` ${complemento}`;
+      if (bairro)      endereco += ` - ${bairro}`;
+      document.getElementById('id_endereco').value = endereco;
+
+      // Cidade / UF
+      const cidade = est.cidade?.nome  || '';
+      const uf     = est.estado?.sigla || '';
+      document.getElementById('id_cidade_uf').value = cidade && uf ? `${cidade} / ${uf}` : '';
+
+      // CEP
+      const cep = (est.cep || '').replace(/^(\d{5})(\d{3})$/, '$1-$2');
+      document.getElementById('id_cep').value = cep;
+
+      setStatus('✔ Dados preenchidos com sucesso!', 'success');
+
+    } catch (err) {
+      setStatus('Erro ao consultar CNPJ. Tente novamente.', 'error');
+    } finally {
+      document.getElementById('btn-buscar-cnpj').disabled = false;
+    }
+  }
+
+  function setStatus(msg, type) {
+    const colors = { info: 'var(--text2)', success: 'var(--green, #22c55e)', error: 'var(--red)' };
+    statusEl.textContent = msg;
+    statusEl.style.color = colors[type] || 'var(--text2)';
+  }
+</script>
 {% endblock %}
 
