@@ -231,6 +231,23 @@ def cliente_delete(request, pk):
     return render(request, 'cadastros/confirm_delete.html', {'obj': cliente, 'tipo': 'Cliente'})
 
 
+@login_required
+def cliente_inativar(request, pk):
+    cliente = get_object_or_404(Cliente, pk=pk)
+    if request.method == 'POST':
+        cliente.ativo = not cliente.ativo
+        cliente.save()
+        status = 'reativado' if cliente.ativo else 'inativado'
+        messages.success(request, f'Cliente {status} com sucesso!')
+        return redirect('cliente_list')
+    return render(request, 'cadastros/confirm_delete.html', {
+        'obj': cliente,
+        'tipo': 'Cliente',
+        'acao': 'Reativar' if not cliente.ativo else 'Inativar',
+        'mensagem': f'Deseja {"reativar" if not cliente.ativo else "inativar"} o cliente "{cliente}"?',
+    })
+
+
 # ── COLETES ───────────────────────────────────────────────────────────────────
 
 from .forms import ColeteForm
@@ -635,6 +652,7 @@ def os_detalhe(request, pk):
         'novo': False,
         'forma_choices': OrdemServico.FORMA_CHOICES,
         'operacional': getattr(os, 'operacional', None),
+        'op': getattr(os, 'operacional', None),
         'veiculos': veiculos_qs,
         'veiculo_slots': veiculo_slots,
     })
@@ -1347,3 +1365,700 @@ def boletim_export_xlsx(request):
     response   = HttpResponse(xlsx_bytes, content_type=ct)
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
+
+
+# ── LINK EXTERNO DO AGENTE DE CAMPO ──────────────────────────────────────────
+
+def os_field_link(request, token):
+    """Página pública para agente externo preencher dados operacionais da OS."""
+    from datetime import datetime
+    from .models import FotoMarco, Parada, FotoParada, Incidente, FotoIncidente, \
+        FotoVeiculoEscoltado, AssinaturaOS
+    op = get_object_or_404(OSOperacional, token=token)
+    os_obj = op.os
+    if not op.link_ativo:
+        return render(request, 'cadastros/os_field_desativado.html', {'os': os_obj})
+    if os_obj.status == 'finalizada':
+        return render(request, 'cadastros/os_field_desativado.html', {'os': os_obj, 'finalizada': True})
+
+    erro = None
+    sucesso = False
+
+    if request.method == 'POST':
+        def parse_dt(val):
+            if not val:
+                return None
+            for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
+                try:
+                    return datetime.strptime(val, fmt)
+                except ValueError:
+                    continue
+            return None
+
+        def parse_int(val):
+            try:
+                return int(val) if val else None
+            except (ValueError, TypeError):
+                return None
+
+        def parse_dec(val):
+            try:
+                return float(val) if val and val.strip() else None
+            except (ValueError, TypeError):
+                return None
+
+        op.numero_folha        = request.POST.get('numero_folha', '')
+        op.inicio_viagem       = parse_dt(request.POST.get('inicio_viagem'))
+        op.chegada_operacao    = parse_dt(request.POST.get('chegada_operacao'))
+        op.inicio_operacao     = parse_dt(request.POST.get('inicio_operacao'))
+        op.termino_operacao    = parse_dt(request.POST.get('termino_operacao'))
+        op.termino_viagem      = parse_dt(request.POST.get('termino_viagem'))
+        op.km_inicio_viagem    = parse_int(request.POST.get('km_inicio_viagem'))
+        op.km_chegada_operacao = parse_int(request.POST.get('km_chegada_operacao'))
+        op.km_inicio_operacao  = parse_int(request.POST.get('km_inicio_operacao'))
+        op.km_termino_operacao = parse_int(request.POST.get('km_termino_operacao'))
+        op.km_termino_viagem   = parse_int(request.POST.get('km_termino_viagem'))
+
+        op.gps_inicio_viagem_lat    = parse_dec(request.POST.get('gps_inicio_viagem_lat'))
+        op.gps_inicio_viagem_lng    = parse_dec(request.POST.get('gps_inicio_viagem_lng'))
+        op.gps_chegada_operacao_lat = parse_dec(request.POST.get('gps_chegada_operacao_lat'))
+        op.gps_chegada_operacao_lng = parse_dec(request.POST.get('gps_chegada_operacao_lng'))
+        op.gps_inicio_operacao_lat  = parse_dec(request.POST.get('gps_inicio_operacao_lat'))
+        op.gps_inicio_operacao_lng  = parse_dec(request.POST.get('gps_inicio_operacao_lng'))
+        op.gps_termino_operacao_lat = parse_dec(request.POST.get('gps_termino_operacao_lat'))
+        op.gps_termino_operacao_lng = parse_dec(request.POST.get('gps_termino_operacao_lng'))
+        op.gps_termino_viagem_lat   = parse_dec(request.POST.get('gps_termino_viagem_lat'))
+        op.gps_termino_viagem_lng   = parse_dec(request.POST.get('gps_termino_viagem_lng'))
+        op.save()
+
+        if os_obj.status != 'cancelada':
+            if op.termino_viagem:
+                os_obj.status = 'concluida'
+            elif op.termino_operacao:
+                os_obj.status = 'encerrando'
+            elif op.chegada_operacao or op.inicio_operacao:
+                os_obj.status = 'em_operacao'
+            elif op.inicio_viagem:
+                os_obj.status = 'em_viagem'
+            os_obj.save(update_fields=['status'])
+
+        sucesso = True
+
+    def fmt_dt(val):
+        if not val:
+            return ''
+        try:
+            import pytz
+            from django.conf import settings as dj_settings
+            tz = pytz.timezone(dj_settings.TIME_ZONE)
+            if hasattr(val, 'astimezone'):
+                val = val.astimezone(tz)
+            return val.strftime('%Y-%m-%dT%H:%M')
+        except Exception:
+            return str(val)[:16]
+
+    def fmt_gps(lat, lng):
+        if lat and lng:
+            return f'https://www.google.com/maps?q={lat},{lng}'
+        return ''
+
+    MARCOS_LISTA = [
+        ('inicio_viagem',    'Início de Viagem'),
+        ('chegada_operacao', 'Chegada Operação'),
+        ('inicio_operacao',  'Início Operação'),
+        ('termino_operacao', 'Término Operação'),
+        ('termino_viagem',   'Término de Viagem'),
+    ]
+
+    from .models import FotoMarco, Parada, Incidente, FotoVeiculoEscoltado, AssinaturaOS
+    fotos_marco = {}
+    for marco_key, _ in MARCOS_LISTA:
+        foto_qs = FotoMarco.objects.filter(os=os_obj, marco=marco_key).first()
+        if foto_qs:
+            fotos_marco[marco_key] = foto_qs.foto.url
+
+    paradas    = Parada.objects.filter(os=os_obj).prefetch_related('fotos')
+    incidentes = Incidente.objects.filter(os=os_obj).prefetch_related('fotos')
+    veiculos_campo = VeiculoEscoltado.objects.filter(os=os_obj).prefetch_related('fotos')
+
+    assinatura_tipos = AssinaturaOS.TIPO_CHOICES if hasattr(AssinaturaOS, 'TIPO_CHOICES') else [
+        ('agente1', 'Agente 1'), ('agente2', 'Agente 2'),
+        ('motorista', 'Motorista'), ('supervisor', 'Supervisor'),
+    ]
+    assinaturas_dict = {a.tipo: a for a in AssinaturaOS.objects.filter(os=os_obj)}
+
+    return render(request, 'cadastros/os_field_link.html', {
+        'os':            os_obj,
+        'op':            op,
+        'sucesso':       sucesso,
+        'erro':          erro,
+        'fmt': {
+            'inicio_viagem':    fmt_dt(op.inicio_viagem),
+            'chegada_operacao': fmt_dt(op.chegada_operacao),
+            'inicio_operacao':  fmt_dt(op.inicio_operacao),
+            'termino_operacao': fmt_dt(op.termino_operacao),
+            'termino_viagem':   fmt_dt(op.termino_viagem),
+        },
+        'gps': {
+            'inicio_viagem':    fmt_gps(op.gps_inicio_viagem_lat,    op.gps_inicio_viagem_lng),
+            'chegada_operacao': fmt_gps(op.gps_chegada_operacao_lat, op.gps_chegada_operacao_lng),
+            'inicio_operacao':  fmt_gps(op.gps_inicio_operacao_lat,  op.gps_inicio_operacao_lng),
+            'termino_operacao': fmt_gps(op.gps_termino_operacao_lat, op.gps_termino_operacao_lng),
+            'termino_viagem':   fmt_gps(op.gps_termino_viagem_lat,   op.gps_termino_viagem_lng),
+        },
+        'fotos_marco':       fotos_marco,
+        'fotos_marco_lista': MARCOS_LISTA,
+        'paradas':           paradas,
+        'incidentes':        incidentes,
+        'veiculos_campo':    veiculos_campo,
+        'assinatura_tipos':  assinatura_tipos,
+        'assinaturas_dict':  assinaturas_dict,
+    })
+
+
+@login_required
+def os_gerar_link(request, pk):
+    """Garante que existe um OSOperacional com token e retorna JSON com o link."""
+    os_obj = get_object_or_404(OrdemServico, pk=pk)
+    op, _ = OSOperacional.objects.get_or_create(os=os_obj)
+    op.link_ativo = True
+    op.save(update_fields=['link_ativo'])
+    url = request.build_absolute_uri(f'/os/field/{op.token}/')
+    return JsonResponse({'url': url, 'token': str(op.token)})
+
+
+@login_required
+def os_desativar_link(request, pk):
+    """Desativa o link externo da OS."""
+    os_obj = get_object_or_404(OrdemServico, pk=pk)
+    op = getattr(os_obj, 'operacional', None)
+    if op:
+        op.link_ativo = False
+        op.save(update_fields=['link_ativo'])
+        messages.success(request, 'Link externo desativado com sucesso.')
+    return redirect('os_detalhe', pk=pk)
+
+
+# ── FOTOS DOS MARCOS ──────────────────────────────────────────────────────────
+
+def os_field_foto_marco_upload(request, token, marco):
+    """Recebe upload de foto de marco via AJAX."""
+    from .models import FotoMarco
+    op = get_object_or_404(OSOperacional, token=token)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+    foto = request.FILES.get('foto')
+    if not foto:
+        return JsonResponse({'ok': False, 'erro': 'Nenhuma foto enviada.'}, status=400)
+
+    substituida = False
+    obj_existente = FotoMarco.objects.filter(os=op.os, marco=marco).first()
+    if obj_existente:
+        obj_existente.foto.delete(save=False)
+        obj_existente.delete()
+        substituida = True
+
+    obj = FotoMarco.objects.create(os=op.os, marco=marco, foto=foto)
+    return JsonResponse({
+        'ok':          True,
+        'url':         obj.foto.url,
+        'marco':       marco,
+        'substituida': substituida,
+    })
+
+
+def os_field_foto_marco_delete(request, token, foto_pk):
+    """Remove uma foto de marco."""
+    from .models import FotoMarco
+    op  = get_object_or_404(OSOperacional, token=token)
+    obj = get_object_or_404(FotoMarco, pk=foto_pk, os=op.os)
+    if request.method == 'POST':
+        obj.foto.delete(save=False)
+        obj.delete()
+        return JsonResponse({'ok': True})
+    return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+
+
+# ── PARADAS ───────────────────────────────────────────────────────────────────
+
+def os_field_parada_salvar(request, token):
+    """Cria ou edita uma Parada via AJAX."""
+    from .models import Parada
+    from datetime import datetime
+    op = get_object_or_404(OSOperacional, token=token)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+
+    def parse_dt(val):
+        if not val:
+            return None
+        for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
+            try:
+                return datetime.strptime(val, fmt)
+            except ValueError:
+                continue
+        return None
+
+    pk_val  = request.POST.get('pk') or None
+    cidade  = request.POST.get('cidade', '').strip()
+    motivo  = request.POST.get('motivo', '').strip()
+    chegada = parse_dt(request.POST.get('chegada'))
+    saida   = parse_dt(request.POST.get('saida'))
+
+    if pk_val:
+        obj = get_object_or_404(Parada, pk=pk_val, os=op.os)
+        obj.cidade  = cidade
+        obj.motivo  = motivo
+        obj.chegada = chegada
+        obj.saida   = saida
+        obj.save()
+    else:
+        obj = Parada.objects.create(
+            os=op.os, cidade=cidade, motivo=motivo,
+            chegada=chegada, saida=saida,
+        )
+    return JsonResponse({'ok': True, 'pk': obj.pk})
+
+
+def os_field_parada_delete(request, token, pk):
+    """Deleta uma Parada via AJAX."""
+    from .models import Parada
+    op  = get_object_or_404(OSOperacional, token=token)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+    obj = get_object_or_404(Parada, pk=pk, os=op.os)
+    obj.delete()
+    return JsonResponse({'ok': True})
+
+
+def os_field_foto_parada_upload(request, token, parada_pk):
+    """Upload de foto de parada via AJAX."""
+    from .models import FotoParada, Parada
+    op     = get_object_or_404(OSOperacional, token=token)
+    parada = get_object_or_404(Parada, pk=parada_pk, os=op.os)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+    foto = request.FILES.get('foto')
+    if not foto:
+        return JsonResponse({'ok': False, 'erro': 'Nenhuma foto enviada.'}, status=400)
+    obj = FotoParada.objects.create(parada=parada, foto=foto)
+    return JsonResponse({'ok': True, 'url': obj.foto.url, 'pk': obj.pk})
+
+
+def os_field_foto_parada_delete(request, token, foto_pk):
+    """Remove foto de parada via AJAX."""
+    from .models import FotoParada
+    op  = get_object_or_404(OSOperacional, token=token)
+    obj = get_object_or_404(FotoParada, pk=foto_pk, parada__os=op.os)
+    if request.method == 'POST':
+        obj.foto.delete(save=False)
+        obj.delete()
+        return JsonResponse({'ok': True})
+    return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+
+
+# ── INCIDENTES ────────────────────────────────────────────────────────────────
+
+def os_field_incidente_salvar(request, token):
+    """Cria ou edita um Incidente via AJAX."""
+    from .models import Incidente
+    from datetime import datetime
+    op = get_object_or_404(OSOperacional, token=token)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+
+    def parse_dt(val):
+        if not val:
+            return None
+        for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
+            try:
+                return datetime.strptime(val, fmt)
+            except ValueError:
+                continue
+        return None
+
+    pk_val      = request.POST.get('pk') or None
+    tipo        = request.POST.get('tipo', '').strip()
+    descricao   = request.POST.get('descricao', '').strip()
+    ocorrido_em = parse_dt(request.POST.get('ocorrido_em'))
+
+    if pk_val:
+        obj = get_object_or_404(Incidente, pk=pk_val, os=op.os)
+        obj.tipo        = tipo
+        obj.descricao   = descricao
+        obj.ocorrido_em = ocorrido_em
+        obj.save()
+    else:
+        obj = Incidente.objects.create(
+            os=op.os, tipo=tipo,
+            descricao=descricao, ocorrido_em=ocorrido_em,
+        )
+    return JsonResponse({'ok': True, 'pk': obj.pk})
+
+
+def os_field_incidente_delete(request, token, pk):
+    """Deleta um Incidente via AJAX."""
+    from .models import Incidente
+    op  = get_object_or_404(OSOperacional, token=token)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+    obj = get_object_or_404(Incidente, pk=pk, os=op.os)
+    obj.delete()
+    return JsonResponse({'ok': True})
+
+
+def os_field_foto_incidente_upload(request, token, incidente_pk):
+    """Upload de foto de incidente via AJAX."""
+    from .models import FotoIncidente, Incidente
+    op        = get_object_or_404(OSOperacional, token=token)
+    incidente = get_object_or_404(Incidente, pk=incidente_pk, os=op.os)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+    foto = request.FILES.get('foto')
+    if not foto:
+        return JsonResponse({'ok': False, 'erro': 'Nenhuma foto enviada.'}, status=400)
+    obj = FotoIncidente.objects.create(incidente=incidente, foto=foto)
+    return JsonResponse({'ok': True, 'url': obj.foto.url, 'pk': obj.pk})
+
+
+def os_field_foto_incidente_delete(request, token, foto_pk):
+    """Remove foto de incidente via AJAX."""
+    from .models import FotoIncidente
+    op  = get_object_or_404(OSOperacional, token=token)
+    obj = get_object_or_404(FotoIncidente, pk=foto_pk, incidente__os=op.os)
+    if request.method == 'POST':
+        obj.foto.delete(save=False)
+        obj.delete()
+        return JsonResponse({'ok': True})
+    return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+
+
+# ── VEÍCULOS ESCOLTADOS (campo) ───────────────────────────────────────────────
+
+def os_field_veiculo_salvar(request, token):
+    """Cria ou edita um VeiculoEscoltado via AJAX (link externo do agente)."""
+    op = get_object_or_404(OSOperacional, token=token)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+
+    pk_val      = request.POST.get('pk') or None
+    veiculo     = request.POST.get('veiculo', '').strip()
+    placa_cav   = request.POST.get('placa_cavalo', '').strip().upper()
+    placa_car   = request.POST.get('placa_carreta', '').strip().upper()
+    placa_car2  = request.POST.get('placa_carreta2', '').strip().upper()
+    motorista   = request.POST.get('motorista', '').strip()
+
+    if pk_val:
+        obj = get_object_or_404(VeiculoEscoltado, pk=pk_val, os=op.os)
+        obj.veiculo        = veiculo
+        obj.placa_cavalo   = placa_cav
+        obj.placa_carreta  = placa_car
+        obj.placa_carreta2 = placa_car2
+        obj.motorista      = motorista
+        obj.save()
+    else:
+        max_ordem = VeiculoEscoltado.objects.filter(os=op.os).count()
+        obj = VeiculoEscoltado.objects.create(
+            os=op.os,
+            ordem=max_ordem + 1,
+            veiculo=veiculo,
+            placa_cavalo=placa_cav,
+            placa_carreta=placa_car,
+            placa_carreta2=placa_car2,
+            motorista=motorista,
+        )
+    return JsonResponse({'ok': True, 'pk': obj.pk})
+
+
+def os_field_veiculo_foto_upload(request, token, veiculo_pk):
+    """Upload de foto de veículo escoltado via AJAX."""
+    from .models import FotoVeiculoEscoltado
+    op      = get_object_or_404(OSOperacional, token=token)
+    veiculo = get_object_or_404(VeiculoEscoltado, pk=veiculo_pk, os=op.os)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+    foto    = request.FILES.get('foto')
+    momento = request.POST.get('momento', 'antes')
+    if not foto:
+        return JsonResponse({'ok': False, 'erro': 'Nenhuma foto enviada.'}, status=400)
+    obj = FotoVeiculoEscoltado.objects.create(veiculo=veiculo, momento=momento, foto=foto)
+    return JsonResponse({'ok': True, 'url': obj.foto.url, 'pk': obj.pk})
+
+
+def os_field_foto_veiculo_delete(request, token, foto_pk):
+    """Remove foto de veículo escoltado via AJAX."""
+    from .models import FotoVeiculoEscoltado
+    op  = get_object_or_404(OSOperacional, token=token)
+    obj = get_object_or_404(FotoVeiculoEscoltado, pk=foto_pk, veiculo__os=op.os)
+    if request.method == 'POST':
+        obj.foto.delete(save=False)
+        obj.delete()
+        return JsonResponse({'ok': True})
+    return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+
+
+def os_field_veiculo_delete(request, token, pk):
+    """Deleta um VeiculoEscoltado via AJAX (link externo do agente)."""
+    op = get_object_or_404(OSOperacional, token=token)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+    obj = get_object_or_404(VeiculoEscoltado, pk=pk, os=op.os)
+    obj.delete()
+    return JsonResponse({'ok': True})
+
+
+# ── os_detalhe: adiciona 'op' no contexto ────────────────────────────────────
+# NOTA: a view os_detalhe acima já passa 'operacional', mas o template usa 'op'.
+# O fix foi aplicado diretamente na view os_detalhe — certifique-se de que o
+# contexto contém: 'op': getattr(os, 'operacional', None)
+
+
+
+# ── USUÁRIOS ──────────────────────────────────────────────────────────────────
+
+@login_required
+def usuario_list(request):
+    from django.contrib.auth.models import User
+    usuarios = User.objects.all().order_by('username')
+    return render(request, 'cadastros/usuario_list.html', {'usuarios': usuarios})
+
+
+@login_required
+def usuario_create(request):
+    from django.contrib.auth.models import User
+    from django.contrib.auth.forms import UserCreationForm
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        email    = request.POST.get('email', '').strip()
+        password = request.POST.get('password1', '')
+        is_staff = bool(request.POST.get('is_staff'))
+        erros = []
+        if not username:
+            erros.append('Nome de usuário é obrigatório.')
+        if User.objects.filter(username=username).exists():
+            erros.append('Nome de usuário já existe.')
+        if not password:
+            erros.append('Senha é obrigatória.')
+        if erros:
+            return render(request, 'cadastros/usuario_form.html', {'erros': erros, 'values': request.POST})
+        u = User.objects.create_user(username=username, email=email, password=password)
+        u.is_staff = is_staff
+        u.save()
+        messages.success(request, f'Usuário {username} criado com sucesso.')
+        return redirect('usuario_list')
+    return render(request, 'cadastros/usuario_form.html', {})
+
+
+@login_required
+def usuario_edit(request, pk):
+    from django.contrib.auth.models import User
+    u = get_object_or_404(User, pk=pk)
+    if request.method == 'POST':
+        u.username = request.POST.get('username', u.username).strip()
+        u.email    = request.POST.get('email', u.email).strip()
+        u.is_staff = bool(request.POST.get('is_staff'))
+        u.save()
+        messages.success(request, 'Usuário atualizado.')
+        return redirect('usuario_list')
+    return render(request, 'cadastros/usuario_form.html', {'usuario': u})
+
+
+@login_required
+def usuario_senha(request, pk):
+    from django.contrib.auth.models import User
+    u = get_object_or_404(User, pk=pk)
+    if request.method == 'POST':
+        senha = request.POST.get('password1', '')
+        if senha:
+            u.set_password(senha)
+            u.save()
+            messages.success(request, 'Senha alterada com sucesso.')
+        else:
+            messages.error(request, 'Senha não pode ser vazia.')
+        return redirect('usuario_list')
+    return render(request, 'cadastros/usuario_senha_form.html', {'usuario': u})
+
+
+@login_required
+def usuario_delete(request, pk):
+    from django.contrib.auth.models import User
+    u = get_object_or_404(User, pk=pk)
+    if request.method == 'POST':
+        u.delete()
+        messages.success(request, 'Usuário removido.')
+        return redirect('usuario_list')
+    return render(request, 'cadastros/confirm_delete.html', {'obj': u, 'tipo': 'Usuário'})
+
+
+# ── ALIASES para compatibilidade com urls.py ──────────────────────────────────
+
+def os_field_foto_marco(request, token):
+    """Alias — o urls.py usa este nome para upload de foto de marco."""
+    marco = request.POST.get('marco') or request.GET.get('marco', '')
+    return os_field_foto_marco_upload(request, token, marco)
+
+
+def os_field_foto_veiculo(request, token):
+    """Alias — o urls.py usa este nome para upload de foto de veículo."""
+    veiculo_pk = request.POST.get('veiculo_pk') or request.GET.get('veiculo_pk')
+    return os_field_veiculo_foto_upload(request, token, veiculo_pk)
+
+
+# ── TROCA DE MOTORISTAS ───────────────────────────────────────────────────────
+
+def os_field_troca_motorista(request, token):
+    """Cria ou edita uma TrocaMotorista via AJAX."""
+    from .models import TrocaMotorista
+    from datetime import datetime
+    op = get_object_or_404(OSOperacional, token=token)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+
+    def parse_dt(val):
+        if not val:
+            return None
+        for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
+            try:
+                return datetime.strptime(val, fmt)
+            except ValueError:
+                continue
+        return None
+
+    pk_val        = request.POST.get('pk') or None
+    motorista_ant = request.POST.get('motorista_anterior', '').strip()
+    motorista_nov = request.POST.get('motorista_novo', '').strip()
+    ocorrido_em   = parse_dt(request.POST.get('ocorrido_em'))
+    motivo        = request.POST.get('motivo', '').strip()
+
+    if pk_val:
+        obj = get_object_or_404(TrocaMotorista, pk=pk_val, os=op.os)
+        obj.motorista_anterior = motorista_ant
+        obj.motorista_novo     = motorista_nov
+        obj.ocorrido_em        = ocorrido_em
+        obj.motivo             = motivo
+        obj.save()
+    else:
+        obj = TrocaMotorista.objects.create(
+            os=op.os,
+            motorista_anterior=motorista_ant,
+            motorista_novo=motorista_nov,
+            ocorrido_em=ocorrido_em,
+            motivo=motivo,
+        )
+    return JsonResponse({'ok': True, 'pk': obj.pk})
+
+
+def os_field_troca_motorista_delete(request, token, pk):
+    """Deleta uma TrocaMotorista via AJAX."""
+    from .models import TrocaMotorista
+    op  = get_object_or_404(OSOperacional, token=token)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+    obj = get_object_or_404(TrocaMotorista, pk=pk, os=op.os)
+    obj.delete()
+    return JsonResponse({'ok': True})
+
+
+# ── ASSINATURAS DIGITAIS ──────────────────────────────────────────────────────
+
+def os_field_assinatura(request, token):
+    """Salva assinatura digital (base64 PNG) via AJAX."""
+    from .models import AssinaturaOS
+    import base64
+    from django.core.files.base import ContentFile
+    op = get_object_or_404(OSOperacional, token=token)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+
+    tipo      = request.POST.get('tipo', '').strip()
+    nome      = request.POST.get('nome', '').strip()
+    dados_b64 = request.POST.get('assinatura', '')
+
+    if not tipo or not dados_b64:
+        return JsonResponse({'ok': False, 'erro': 'Tipo e assinatura são obrigatórios.'}, status=400)
+
+    try:
+        if ',' in dados_b64:
+            dados_b64 = dados_b64.split(',', 1)[1]
+        img_bytes = base64.b64decode(dados_b64)
+        img_file  = ContentFile(img_bytes, name=f'assinatura_{tipo}.png')
+    except Exception:
+        return JsonResponse({'ok': False, 'erro': 'Dados de assinatura inválidos.'}, status=400)
+
+    obj, _ = AssinaturaOS.objects.get_or_create(os=op.os, tipo=tipo)
+    obj.nome = nome
+    obj.assinatura.save(f'assinatura_{tipo}.png', img_file, save=True)
+    return JsonResponse({'ok': True, 'url': obj.assinatura.url})
+
+
+# ── DESPESAS / CRÉDITOS ───────────────────────────────────────────────────────
+
+def os_field_despesa_salvar(request, token):
+    """Cria ou edita uma DespesaOS via AJAX."""
+    from .models import DespesaOS
+    op = get_object_or_404(OSOperacional, token=token)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+
+    pk_val    = request.POST.get('pk') or None
+    tipo      = request.POST.get('tipo', '').strip()
+    descricao = request.POST.get('descricao', '').strip()
+    valor_str = request.POST.get('valor', '').strip().replace(',', '.')
+    try:
+        valor = float(valor_str) if valor_str else 0
+    except ValueError:
+        valor = 0
+
+    if pk_val:
+        obj = get_object_or_404(DespesaOS, pk=pk_val, os=op.os)
+        obj.tipo      = tipo
+        obj.descricao = descricao
+        obj.valor     = valor
+        obj.save()
+    else:
+        obj = DespesaOS.objects.create(
+            os=op.os, tipo=tipo, descricao=descricao, valor=valor,
+        )
+    return JsonResponse({'ok': True, 'pk': obj.pk})
+
+
+def os_field_despesa_delete(request, token, pk):
+    """Deleta uma DespesaOS via AJAX."""
+    from .models import DespesaOS
+    op  = get_object_or_404(OSOperacional, token=token)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+    obj = get_object_or_404(DespesaOS, pk=pk, os=op.os)
+    obj.delete()
+    return JsonResponse({'ok': True})
+
