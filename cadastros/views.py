@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from .models import Agente, Viatura, Rastreador, Armamento, Cliente, Colete, Equipe, \
     FotoMarco, Parada, FotoParada, Incidente, FotoIncidente, FotoVeiculoEscoltado, \
-    TrocaMotorista, FotoTrocaMotorista, AssinaturaOS, DespesaOS
+    TrocaMotorista, FotoTrocaMotorista, AssinaturaOS, DespesaOS, OrdemServico
 from .forms import AgenteForm, ViaturaForm, RastreadorForm, ArmamentoForm, ClienteForm
 
 
