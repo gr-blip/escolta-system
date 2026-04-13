@@ -16,7 +16,8 @@ class Migration(migrations.Migration):
                 related_name='despesas',
                 to='cadastros.ordemservico',
                 verbose_name='OS',
-                null=True,
+                default=1,
             ),
+            preserve_default=False,
         ),
     ]
