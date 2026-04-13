@@ -121,7 +121,7 @@
 
     /* ASSINATURA CANVAS */
     .canvas-wrap { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: #fff; margin-top: 8px; touch-action: none; }
-    canvas.sig { display: block; width: 100%; cursor: crosshair; height: 180px; touch-action: none; }
+    canvas.sig { display: block; width: 100%; cursor: crosshair; }
     .canvas-actions { display: flex; gap: 8px; margin-top: 8px; }
     .sig-preview { margin-top: 10px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: #fff; }
     .sig-preview img { display: block; width: 100%; max-height: 100px; object-fit: contain; }
@@ -1290,8 +1290,7 @@ async function deleteItem(token, tipo, pk, elId) {
 (function initCanvases() {
   document.querySelectorAll('canvas.sig').forEach(canvas => {
     const ctx = canvas.getContext('2d');
-    canvas.width  = canvas.offsetWidth  || 320;
-    canvas.height = canvas.offsetHeight || 180;
+    canvas.width = canvas.offsetWidth;
     let drawing = false, lastX = 0, lastY = 0;
 
     function getPos(e) {
