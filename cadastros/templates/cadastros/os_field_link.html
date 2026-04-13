@@ -530,7 +530,21 @@
 <!-- JS: funções de veículo                     -->
 <!-- Adicione dentro do bloco <script> existente-->
 <!-- ═══════════════════════════════════════════ -->
-<script>
+<script>const token = "{{ op.token }}";
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    for (const cookie of document.cookie.split(';')) {
+      const c = cookie.trim();
+      if (c.startsWith(name + '=')) {
+        cookieValue = decodeURIComponent(c.slice(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
 /* ──────────────────────────────────────────────────────────────
    VEÍCULOS ESCOLTADOS — funções AJAX
    ────────────────────────────────────────────────────────────── */
