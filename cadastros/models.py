@@ -514,4 +514,3 @@ class BoletimMedicao(models.Model):
             Decimal(str(self.acrescimo)) - Decimal(str(self.desconto))
         ).quantize(Decimal('0.01'))
         self.save()
-# force-redeploy
