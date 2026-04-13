@@ -440,8 +440,6 @@
         {% if v.veiculo %}<p style="font-size:12px;color:var(--muted);margin-bottom:4px">Tipo/Desc.: {{ v.veiculo }}</p>{% endif %}
         {% if v.placa_carreta %}<p style="font-size:12px;color:var(--muted);margin-bottom:4px">Carreta: {{ v.placa_carreta }}{% if v.placa_carreta2 %} / {{ v.placa_carreta2 }}{% endif %}</p>{% endif %}
 
-        <!-- Fotos antes/depois (funcionalidade existente mantida) -->
-        <p style="font-size:12px;color:var(--cyan);margin-bottom:8px">Fotos antes da escolta</p>
         <div class="foto-grid" id="fotos_veiculo_antes_{{ v.pk }}">
           {% for f in v.fotos.all %}{% if f.momento == 'antes' %}
           <div class="foto-thumb" id="fveic_{{ f.pk }}">
@@ -450,23 +448,9 @@
               onclick="deleteFotoVeiculo('{{ op.token }}',{{ f.pk }},'fveic_{{ f.pk }}')">✕</button>
           </div>
           {% endif %}{% endfor %}
-          <label class="foto-upload-btn" for="fvantes_{{ v.pk }}"><span>📷</span>Antes</label>
+          <label class="foto-upload-btn" for="fvantes_{{ v.pk }}"><span>📷</span>Foto</label>
           <input type="file" id="fvantes_{{ v.pk }}" accept="image/*" capture="environment"
             onchange="uploadFotoVeiculo(this,{{ v.pk }},'antes','fotos_veiculo_antes_{{ v.pk }}','{{ op.token }}')">
-        </div>
-
-        <p style="font-size:12px;color:var(--cyan);margin:10px 0 8px">Fotos após a escolta</p>
-        <div class="foto-grid" id="fotos_veiculo_depois_{{ v.pk }}">
-          {% for f in v.fotos.all %}{% if f.momento == 'depois' %}
-          <div class="foto-thumb" id="fveic_{{ f.pk }}">
-            <img src="{{ f.foto.url }}">
-            <button type="button" class="del-btn"
-              onclick="deleteFotoVeiculo('{{ op.token }}',{{ f.pk }},'fveic_{{ f.pk }}')">✕</button>
-          </div>
-          {% endif %}{% endfor %}
-          <label class="foto-upload-btn" for="fvdepois_{{ v.pk }}"><span>📷</span>Após</label>
-          <input type="file" id="fvdepois_{{ v.pk }}" accept="image/*" capture="environment"
-            onchange="uploadFotoVeiculo(this,{{ v.pk }},'depois','fotos_veiculo_depois_{{ v.pk }}','{{ op.token }}')">
         </div>
       </div>
     </div>
@@ -499,7 +483,7 @@
       <div class="grid-2">
         <div class="field">
           <label>Placa Cavalo</label>
-          <input type="text" id="veiculoPlacaCav" placeholder="AAA-0000" style="text-transform:uppercase">
+          <input type="text" id="veiculoPlacaCav" placeholder="AAA-0000" style="text-transform:uppercase" oninput="mascaraPlaca(this)" maxlength="8">
         </div>
         <div class="field">
           <label>Motorista</label>
@@ -509,11 +493,11 @@
       <div class="grid-2">
         <div class="field">
           <label>Placa Carreta</label>
-          <input type="text" id="veiculoPlacaCar" placeholder="AAA-0000" style="text-transform:uppercase">
+          <input type="text" id="veiculoPlacaCar" placeholder="AAA-0000" style="text-transform:uppercase" oninput="mascaraPlaca(this)" maxlength="8">
         </div>
         <div class="field">
           <label>Placa Carreta 2</label>
-          <input type="text" id="veiculoPlacaCar2" placeholder="AAA-0000" style="text-transform:uppercase">
+          <input type="text" id="veiculoPlacaCar2" placeholder="AAA-0000" style="text-transform:uppercase" oninput="mascaraPlaca(this)" maxlength="8">
         </div>
       </div>
 
@@ -543,6 +527,11 @@ function getCookie(name) {
     }
   }
   return cookieValue;
+}
+function mascaraPlaca(el) {
+  let v = el.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (v.length > 3) v = v.slice(0,3) + '-' + v.slice(3,7);
+  el.value = v;
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -650,17 +639,10 @@ function salvarVeiculo(token) {
           <div class="card-body">
             ${data.veiculo ? `<p style="font-size:12px;color:var(--muted);margin-bottom:4px">Tipo/Desc.: ${escHtml(data.veiculo)}</p>` : ''}
             ${data.placa_carreta ? `<p style="font-size:12px;color:var(--muted);margin-bottom:4px">Carreta: ${escHtml(data.placa_carreta)}${data.placa_carreta2 ? ' / ' + escHtml(data.placa_carreta2) : ''}</p>` : ''}
-            <p style="font-size:12px;color:var(--cyan);margin-bottom:8px">Fotos antes da escolta</p>
             <div class="foto-grid" id="fotos_veiculo_antes_${data.pk}">
-              <label class="foto-upload-btn" for="fvantes_${data.pk}"><span>📷</span>Antes</label>
+              <label class="foto-upload-btn" for="fvantes_${data.pk}"><span>📷</span>Foto</label>
               <input type="file" id="fvantes_${data.pk}" accept="image/*" capture="environment"
                 onchange="uploadFotoVeiculo(this,${data.pk},'antes','fotos_veiculo_antes_${data.pk}','${token}')">
-            </div>
-            <p style="font-size:12px;color:var(--cyan);margin:10px 0 8px">Fotos após a escolta</p>
-            <div class="foto-grid" id="fotos_veiculo_depois_${data.pk}">
-              <label class="foto-upload-btn" for="fvdepois_${data.pk}"><span>📷</span>Após</label>
-              <input type="file" id="fvdepois_${data.pk}" accept="image/*" capture="environment"
-                onchange="uploadFotoVeiculo(this,${data.pk},'depois','fotos_veiculo_depois_${data.pk}','${token}')">
             </div>
           </div>
         </div>`;
