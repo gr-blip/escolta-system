@@ -2439,7 +2439,12 @@ def os_field_veiculo_delete(request, token, pk):
         return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
     obj = get_object_or_404(VeiculoEscoltado, pk=pk, os=op.os)
     obj.delete()
-   from django.conf import settings
+    obj.delete()
+    return JsonResponse({'ok': True})
+
+
+from django.conf import settings
+
 def debug_media(request):
     import os
     files = []
@@ -2451,4 +2456,4 @@ def debug_media(request):
         'MEDIA_URL': settings.MEDIA_URL,
         'exists': os.path.exists(settings.MEDIA_ROOT),
         'files': files[:20],
-    }) return JsonResponse({'ok': True})
+    })
