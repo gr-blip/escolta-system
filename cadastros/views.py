@@ -1867,9 +1867,13 @@ def os_field_link(request, token):
         op.km_termino_operacao = parse_int(request.POST.get('km_termino_operacao'))
         op.km_termino_viagem   = parse_int(request.POST.get('km_termino_viagem'))
 
-        # Pedágio
+        # Pedagio
         pedagio_raw = request.POST.get('pedagio', '').strip().replace(',', '.')
-        op.pedagio = float(pedagio_raw) if pedagio_raw else None
+        try:
+            op.pedagio = float(pedagio_raw) if pedagio_raw else None
+        except ValueError:
+            op.pedagio = None
+
 
         # GPS — capturado pelo browser do agente
         def parse_dec(val):
@@ -2503,4 +2507,5 @@ def os_field_veiculo_delete(request, token, pk):
     obj = get_object_or_404(VeiculoEscoltado, pk=pk, os=op.os)
     obj.delete()
     return JsonResponse({'ok': True})
+
 
