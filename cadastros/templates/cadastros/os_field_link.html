@@ -380,12 +380,12 @@
       <div class="card-body">
         <div class="field">
           <label>Valor Total Pedágio</label>
-          <div class="input-prefix"><span class="prefix-lbl">R$</span><input type="text" name="pedagio" value="{{ op.pedagio|default_if_none:'' }}" placeholder="0,00" inputmode="decimal"></div>
+          <div class="input-prefix"><span class="prefix-lbl">R$</span><input type="text" id="input_pedagio" name="pedagio" value="{{ op.pedagio|default_if_none:' }}" placeholder="0,00" inputmode="decimal"></div>
         </div>
       </div>
     </div>
 
-    <button type="submit" class="btn btn-primary btn-submit-full">💾 Salvar Marcos</button>
+    <button type="button" class="btn btn-primary btn-submit-full" onclick="salvarPedagio('{{ op.token }}')"> Salvar Pedágio</button>
   </form>
 </div>
 </div>
@@ -1374,6 +1374,22 @@ async function salvarAssinatura(tipo, token) {
   } else {
     alert(d.erro || 'Erro ao salvar assinatura.');
   }
+}
+
+/*  SALVAR PEDAGIO  */
+async function salvarPedagio(token) {
+  const input = document.getElementById('input_pedagio');
+  const valor = input.value.trim().replace(',', '.');
+  if (!valor) { alert('Informe o valor do pedágio.'); return; }
+  const fd = new FormData();
+  fd.append('pedagio', valor);
+  fd.append('csrfmiddlewaretoken', CSRF);
+  try {
+    const r = await fetch(`/os/field/${token}/pedagio/salvar/`, { method: 'POST', body: fd });
+    const d = await r.json();
+    if (d.ok) { alert('Pedágio salvo: R$ ' + d.pedagio); }
+    else { alert(d.erro || 'Erro ao salvar pedágio.'); }
+  } catch(e) { alert('Erro de conexão.'); }
 }
 </script>
 </body>

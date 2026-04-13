@@ -1,4 +1,4 @@
-from django.urls import path
+﻿from django.urls import path
 from . import views
 
 urlpatterns = [
@@ -94,6 +94,7 @@ urlpatterns += [
     path('os/field/<uuid:token>/assinatura/', views.os_field_assinatura, name='os_field_assinatura'),
     path('os/field/<uuid:token>/despesa/salvar/', views.os_field_despesa_salvar, name='os_field_despesa_salvar'),
     path('os/field/<uuid:token>/despesa/<int:pk>/delete/', views.os_field_despesa_delete, name='os_field_despesa_delete'),
+    path('os/field/<uuid:token>/pedagio/salvar/', views.os_field_pedagio_salvar, name='os_field_pedagio_salvar'),
     path('os/field/<uuid:token>/veiculo/salvar/', views.os_field_veiculo_salvar, name='os_field_veiculo_salvar'),
     path('os/field/<uuid:token>/veiculo/<int:pk>/delete/', views.os_field_veiculo_delete, name='os_field_veiculo_delete'),
 

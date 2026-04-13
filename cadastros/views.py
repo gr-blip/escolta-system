@@ -2448,6 +2448,23 @@ def os_field_despesa_delete(request, token, pk):
         desp.delete()
         return JsonResponse({'ok': True})
     return JsonResponse({'ok': False}, status=405)
+
+@csrf_exempt
+def os_field_pedagio_salvar(request, token):
+    """Salva o valor do pedagio via AJAX (link externo do agente)."""
+    from .models import OSOperacional
+    op = get_object_or_404(OSOperacional, token=token)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method == 'POST':
+        pedagio_raw = request.POST.get('pedagio', '').strip().replace(',', '.')
+        try:
+            op.pedagio = float(pedagio_raw) if pedagio_raw else None
+        except ValueError:
+            return JsonResponse({'ok': False, 'erro': 'Valor inválido.'})
+        op.save(update_fields=['pedagio'])
+        return JsonResponse({'ok': True, 'pedagio': str(op.pedagio)})
+    return JsonResponse({'ok': False}, status=405)
 # ─────────────────────────────────────────────────────────────────────────────
 # ADICIONAR ao final de cadastros/views.py
 # ─────────────────────────────────────────────────────────────────────────────
