@@ -874,7 +874,7 @@ def os_print(request, pk):
         'rastreador_viatura': rastreador_viatura,
         'fotos_marco': fotos_marco,
         'fotos_marco_lista': MARCOS_LISTA,
-        'assinaturas': assinaturas,
+        'assinaturas_lista': list(AssinaturaOS.objects.filter(os=os_obj).order_by('tipo')),
         'assinatura_tipos_lista': [
             ('agente1', 'Agente 1'), ('agente2', 'Agente 2'),
             ('motorista', 'Motorista Escoltado'), ('supervisor', 'Supervisor'),
