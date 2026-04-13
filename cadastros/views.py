@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+﻿from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
@@ -14,9 +14,9 @@ def dashboard(request):
     from datetime import date, timedelta
 
     hoje = date.today()
-    limite = hoje + timedelta(days=60)  # 2 meses à frente
+    limite = hoje + timedelta(days=60)  # 2 meses ├á frente
 
-    # CNH vencida ou vencendo em até 2 meses (agentes ativos)
+    # CNH vencida ou vencendo em at├® 2 meses (agentes ativos)
     alertas_cnh = Agente.objects.filter(
         status='ativo'
     ).exclude(
@@ -25,7 +25,7 @@ def dashboard(request):
         cnh_validade__lte=limite
     ).order_by('cnh_validade')
 
-    # CNV vencida ou vencendo em até 2 meses (agentes ativos)
+    # CNV vencida ou vencendo em at├® 2 meses (agentes ativos)
     alertas_cnv = Agente.objects.filter(
         status='ativo'
     ).exclude(
@@ -34,7 +34,7 @@ def dashboard(request):
         cnv_validade__lte=limite
     ).order_by('cnv_validade')
 
-    # Coletes vencidos ou vencendo em até 2 meses
+    # Coletes vencidos ou vencendo em at├® 2 meses
     alertas_coletes = Colete.objects.exclude(
         validade__isnull=True
     ).filter(
@@ -56,7 +56,7 @@ def dashboard(request):
     return render(request, 'cadastros/dashboard.html', context)
 
 
-# ── AGENTES ──────────────────────────────────────────────────────────────────
+# ÔöÇÔöÇ AGENTES ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 
 @login_required
 def agente_list(request):
@@ -98,7 +98,7 @@ def agente_delete(request, pk):
     return render(request, 'cadastros/confirm_delete.html', {'obj': agente, 'tipo': 'Agente'})
 
 
-# ── VIATURAS ─────────────────────────────────────────────────────────────────
+# ÔöÇÔöÇ VIATURAS ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 
 @login_required
 def viatura_list(request):
@@ -142,7 +142,7 @@ def viatura_delete(request, pk):
     return render(request, 'cadastros/confirm_delete.html', {'obj': viatura, 'tipo': 'Viatura'})
 
 
-# ── RASTREADORES ──────────────────────────────────────────────────────────────
+# ÔöÇÔöÇ RASTREADORES ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 
 @login_required
 def rastreador_list(request):
@@ -184,7 +184,7 @@ def rastreador_delete(request, pk):
     return render(request, 'cadastros/confirm_delete.html', {'obj': rastreador, 'tipo': 'Rastreador'})
 
 
-# ── ARMAMENTO ─────────────────────────────────────────────────────────────────
+# ÔöÇÔöÇ ARMAMENTO ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 
 @login_required
 def armamento_list(request):
@@ -226,7 +226,7 @@ def armamento_delete(request, pk):
     return render(request, 'cadastros/confirm_delete.html', {'obj': armamento, 'tipo': 'Armamento'})
 
 
-# ── CLIENTES ──────────────────────────────────────────────────────────────────
+# ÔöÇÔöÇ CLIENTES ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 
 @login_required
 def cliente_list(request):
@@ -273,7 +273,7 @@ def cliente_inativar(request, pk):
     return render(request, 'cadastros/cliente_inativar.html', {'obj': cliente})
 
 
-# ── COLETES ───────────────────────────────────────────────────────────────────
+# ÔöÇÔöÇ COLETES ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 
 from .forms import ColeteForm
 
@@ -317,7 +317,7 @@ def colete_delete(request, pk):
     return render(request, 'cadastros/confirm_delete.html', {'obj': colete, 'tipo': 'Colete'})
 
 
-# ── EQUIPES ───────────────────────────────────────────────────────────────────
+# ÔöÇÔöÇ EQUIPES ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 
 @login_required
 def equipe_list(request):
@@ -354,8 +354,8 @@ def equipe_finalizar(request, pk):
         'obj': equipe,
         'tipo': 'Equipe',
         'acao': 'Finalizar',
-        'msg': 'Ao finalizar, a equipe não aparecerá mais na listagem padrão. Os dados das Ordens de Serviço vinculadas serão preservados.',
-        'btn_label': 'Confirmar Finalização',
+        'msg': 'Ao finalizar, a equipe n├úo aparecer├í mais na listagem padr├úo. Os dados das Ordens de Servi├ºo vinculadas ser├úo preservados.',
+        'btn_label': 'Confirmar Finaliza├º├úo',
         'btn_class': 'btn-warning',
     })
 
@@ -437,11 +437,11 @@ def equipe_edit(request, pk):
 @login_required
 def equipe_delete(request, pk):
     equipe = get_object_or_404(Equipe, pk=pk)
-    # Bloqueia exclusão se houver OS abertas vinculadas
+    # Bloqueia exclus├úo se houver OS abertas vinculadas
     STATUS_ABERTOS = ['aberta', 'em_viagem', 'em_operacao', 'encerrando', 'concluida']
     os_abertas = OrdemServico.objects.filter(equipe=equipe, status__in=STATUS_ABERTOS)
     if os_abertas.exists():
-        messages.error(request, f'Não é possível excluir: equipe vinculada a {os_abertas.count()} OS em aberto. Finalize as OS antes de excluir.')
+        messages.error(request, f'N├úo ├® poss├¡vel excluir: equipe vinculada a {os_abertas.count()} OS em aberto. Finalize as OS antes de excluir.')
         return redirect('equipe_list')
     if request.method == 'POST':
         equipe.delete()
@@ -450,7 +450,7 @@ def equipe_delete(request, pk):
     return render(request, 'cadastros/confirm_delete.html', {'obj': equipe, 'tipo': 'Equipe'})
 
 
-# ── ORDENS DE SERVIÇO ─────────────────────────────────────────────────────────
+# ÔöÇÔöÇ ORDENS DE SERVI├çO ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 
 from .models import OrdemServico
 
@@ -472,7 +472,7 @@ def os_finalizar(request, pk):
     from django.utils import timezone
     os_obj = get_object_or_404(OrdemServico, pk=pk)
     if os_obj.status == 'finalizada':
-        messages.warning(request, 'Esta OS já está finalizada.')
+        messages.warning(request, 'Esta OS j├í est├í finalizada.')
         return redirect('os_list')
     if request.method == 'POST':
         os_obj.status = 'finalizada'
@@ -507,21 +507,21 @@ def os_finalizar(request, pk):
                 os_obj.snap_viatura_frota  = v.frota or ''
                 os_obj.snap_viatura_mct    = v.mct_id or ''
         os_obj.save()
-        messages.success(request, f'OS-{os_obj.numero} finalizada com sucesso. Dados bloqueados para edição.')
+        messages.success(request, f'OS-{os_obj.numero} finalizada com sucesso. Dados bloqueados para edi├º├úo.')
         return redirect('os_list')
     return render(request, 'cadastros/confirm_delete.html', {
         'obj': os_obj,
-        'tipo': 'Ordem de Serviço',
+        'tipo': 'Ordem de Servi├ºo',
         'acao': 'Finalizar',
-        'msg': 'Ao finalizar, todos os dados desta OS serão bloqueados e não poderão ser alterados.',
-        'btn_label': 'Confirmar Finalização',
+        'msg': 'Ao finalizar, todos os dados desta OS ser├úo bloqueados e n├úo poder├úo ser alterados.',
+        'btn_label': 'Confirmar Finaliza├º├úo',
         'btn_class': 'btn-warning',
     })
 
 
 @login_required
 def os_nova(request):
-    """Passo 1 — formulário rápido de abertura"""
+    """Passo 1 ÔÇö formul├írio r├ípido de abertura"""
     clientes = Cliente.objects.all().order_by('razao_social')
     UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG',
            'PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
@@ -546,8 +546,8 @@ def os_nova(request):
 
 @login_required
 def os_detalhe_novo(request):
-    """Passo 2 — detalhe completo da OS com equipe"""
-    # Lê dados do GET (passados pelo passo 1 via query string, sem session)
+    """Passo 2 ÔÇö detalhe completo da OS com equipe"""
+    # L├¬ dados do GET (passados pelo passo 1 via query string, sem session)
     draft = {
         'cliente_id':        request.GET.get('cliente_id', ''),
         'solicitante':       request.GET.get('solicitante', ''),
@@ -635,7 +635,7 @@ def os_detalhe(request, pk):
 
     if request.method == 'POST':
         if os.status == 'finalizada':
-            messages.error(request, 'Esta OS está finalizada e não pode ser alterada.')
+            messages.error(request, 'Esta OS est├í finalizada e n├úo pode ser alterada.')
             return redirect('os_detalhe', pk=os.pk)
         from datetime import datetime
         def parse_dt(val):
@@ -684,11 +684,11 @@ def os_detalhe(request, pk):
 
     # Fotos dos marcos operacionais
     MARCOS_LISTA = [
-        ('inicio_viagem',     'Início de Viagem'),
-        ('chegada_operacao',  'Chegada Operação'),
-        ('inicio_operacao',   'Início Operação'),
-        ('termino_operacao',  'Término Operação'),
-        ('termino_viagem',    'Término de Viagem'),
+        ('inicio_viagem',     'In├¡cio de Viagem'),
+        ('chegada_operacao',  'Chegada Opera├º├úo'),
+        ('inicio_operacao',   'In├¡cio Opera├º├úo'),
+        ('termino_operacao',  'T├®rmino Opera├º├úo'),
+        ('termino_viagem',    'T├®rmino de Viagem'),
     ]
     fotos_marco = {}
     op_obj = getattr(os, 'operacional', None)
@@ -705,7 +705,6 @@ def os_detalhe(request, pk):
         'forma_choices': OrdemServico.FORMA_CHOICES,
         'operacional': getattr(os, 'operacional', None),
         'op': getattr(os, 'operacional', None),
-        'op': getattr(os, 'operacional', None),
         'veiculos': veiculos_qs,
         'veiculo_slots': veiculo_slots,
         'fotos_marco': fotos_marco,
@@ -720,21 +719,21 @@ def os_delete(request, pk):
         os.delete()
         messages.success(request, 'OS removida.')
         return redirect('os_list')
-    return render(request, 'cadastros/confirm_delete.html', {'obj': os, 'tipo': 'Ordem de Serviço'})
+    return render(request, 'cadastros/confirm_delete.html', {'obj': os, 'tipo': 'Ordem de Servi├ºo'})
 
 
-# ── OS OPERACIONAL + VEÍCULOS ─────────────────────────────────────────────────
+# ÔöÇÔöÇ OS OPERACIONAL + VE├ìCULOS ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 
 from .models import OSOperacional, VeiculoEscoltado
 
 @login_required
 def os_operacional_save(request, pk):
-    """Salva dados operacionais (tempos/km) e veículos escoltados via POST"""
+    """Salva dados operacionais (tempos/km) e ve├¡culos escoltados via POST"""
     os_obj = get_object_or_404(OrdemServico, pk=pk)
     if request.method != 'POST':
         return redirect('os_detalhe', pk=pk)
     if os_obj.status == 'finalizada':
-        messages.error(request, 'Esta OS está finalizada e não pode ser alterada.')
+        messages.error(request, 'Esta OS est├í finalizada e n├úo pode ser alterada.')
         return redirect('os_detalhe', pk=pk)
 
     from datetime import datetime
@@ -767,7 +766,7 @@ def os_operacional_save(request, pk):
     op.km_inicio_operacao  = parse_int(request.POST.get('km_inicio_operacao'))
     op.km_termino_operacao = parse_int(request.POST.get('km_termino_operacao'))
     op.km_termino_viagem   = parse_int(request.POST.get('km_termino_viagem'))
-    # Pedágio
+    # Ped├ígio
     pedagio_val = request.POST.get('pedagio', '').strip().replace(',', '.')
     try:
         op.pedagio = float(pedagio_val) if pedagio_val else None
@@ -775,7 +774,7 @@ def os_operacional_save(request, pk):
         op.pedagio = None
     op.save()
 
-    # Salvar veículos escoltados (máx 4)
+    # Salvar ve├¡culos escoltados (m├íx 4)
     os_obj.veiculos.all().delete()
     for i in range(1, 5):
         placa = request.POST.get(f'placa_cavalo_{i}', '').strip()
@@ -853,11 +852,11 @@ def os_print(request, pk):
 
     # Fotos dos marcos operacionais
     MARCOS_LISTA = [
-        ('inicio_viagem',     'Início de Viagem'),
-        ('chegada_operacao',  'Chegada Operação'),
-        ('inicio_operacao',   'Início Operação'),
-        ('termino_operacao',  'Término Operação'),
-        ('termino_viagem',    'Término de Viagem'),
+        ('inicio_viagem',     'In├¡cio de Viagem'),
+        ('chegada_operacao',  'Chegada Opera├º├úo'),
+        ('inicio_operacao',   'In├¡cio Opera├º├úo'),
+        ('termino_operacao',  'T├®rmino Opera├º├úo'),
+        ('termino_viagem',    'T├®rmino de Viagem'),
     ]
     fotos_marco = {}
     if op:
@@ -892,9 +891,9 @@ def os_email_html(request, pk):
 
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# FATURAMENTO — Tabela de Precos
-# ══════════════════════════════════════════════════════════════════════════════
+# ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+# FATURAMENTO ÔÇö Tabela de Precos
+# ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
 
 from .models import TabelaPreco, BoletimMedicao
 
@@ -985,9 +984,9 @@ def tabela_preco_delete(request, pk):
     return render(request, 'cadastros/confirm_delete.html', {'obj': tabela, 'tipo': 'Tabela de Preco'})
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# FATURAMENTO — Boletim de Medicao
-# ══════════════════════════════════════════════════════════════════════════════
+# ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+# FATURAMENTO ÔÇö Boletim de Medicao
+# ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
 
 @login_required
 def boletim_list(request):
@@ -1062,7 +1061,7 @@ def boletim_detalhe(request, pk):
         boletim.observacoes  = request.POST.get('observacoes', '')
         action = request.POST.get('action', 'salvar')
         if action == 'calcular' and boletim.tabela_preco_id:
-            # Salva o pedágio manual antes de calcular para não ser sobrescrito
+            # Salva o ped├ígio manual antes de calcular para n├úo ser sobrescrito
             boletim.save()
             boletim.calcular()
             messages.success(request, 'Valores calculados com sucesso!')
@@ -1076,7 +1075,7 @@ def boletim_detalhe(request, pk):
             messages.success(request, 'Boletim salvo!')
         return redirect('boletim_detalhe', pk=pk)
 
-    # Pré-preenche pedágio da OS se o boletim ainda não tiver valor
+    # Pr├®-preenche ped├ígio da OS se o boletim ainda n├úo tiver valor
     pedagio_sugerido = boletim.valor_pedagio
     if pedagio_sugerido == 0 and op and op.pedagio:
         pedagio_sugerido = op.pedagio
@@ -1087,9 +1086,9 @@ def boletim_detalhe(request, pk):
     })
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# FATURAMENTO — Tabela de Precos
-# ══════════════════════════════════════════════════════════════════════════════
+# ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+# FATURAMENTO ÔÇö Tabela de Precos
+# ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
 
 from .models import TabelaPreco, BoletimMedicao
 
@@ -1180,9 +1179,9 @@ def tabela_preco_delete(request, pk):
     return render(request, 'cadastros/confirm_delete.html', {'obj': tabela, 'tipo': 'Tabela de Preco'})
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# FATURAMENTO — Boletim de Medicao
-# ══════════════════════════════════════════════════════════════════════════════
+# ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+# FATURAMENTO ÔÇö Boletim de Medicao
+# ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
 
 @login_required
 def clientes_json(request):
@@ -1220,7 +1219,7 @@ def boletim_detalhe(request, pk):
         boletim.observacoes  = request.POST.get('observacoes', '')
         action = request.POST.get('action', 'salvar')
         if action == 'calcular' and boletim.tabela_preco_id:
-            # Salva o pedágio manual antes de calcular para não ser sobrescrito
+            # Salva o ped├ígio manual antes de calcular para n├úo ser sobrescrito
             boletim.save()
             boletim.calcular()
             messages.success(request, 'Valores calculados com sucesso!')
@@ -1234,7 +1233,7 @@ def boletim_detalhe(request, pk):
             messages.success(request, 'Boletim salvo!')
         return redirect('boletim_detalhe', pk=pk)
 
-    # Pré-preenche pedágio da OS se o boletim ainda não tiver valor
+    # Pr├®-preenche ped├ígio da OS se o boletim ainda n├úo tiver valor
     pedagio_sugerido = boletim.valor_pedagio
     if pedagio_sugerido == 0 and op and op.pedagio:
         pedagio_sugerido = op.pedagio
@@ -1245,9 +1244,9 @@ def boletim_detalhe(request, pk):
     })
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# EXPORTAÇÃO — Boletim de Medição (PDF e XLSX)
-# ══════════════════════════════════════════════════════════════════════════════
+# ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+# EXPORTA├ç├âO ÔÇö Boletim de Medi├º├úo (PDF e XLSX)
+# ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
 
 def _boletim_queryset(request):
     """Aplica os mesmos filtros da boletim_list e retorna (qs, cliente_label, periodo_label)."""
@@ -1287,11 +1286,11 @@ def _boletim_queryset(request):
         except ValueError:
             pass
 
-    # Labels de cabeçalho
+    # Labels de cabe├ºalho
     if clientes_filtro and len(clientes_filtro) == 1:
         try:
             c = Cliente.objects.get(pk=clientes_filtro[0])
-            cliente_label = f"{c.razao_social} — {c.cnpj}"
+            cliente_label = f"{c.razao_social} ÔÇö {c.cnpj}"
         except Exception:
             cliente_label = "Todos os Clientes"
     else:
@@ -1302,18 +1301,18 @@ def _boletim_queryset(request):
         fim_fmt = dt.strptime(data_fim, '%Y-%m-%d').strftime('%d/%m/%Y') if data_fim else '...'
         periodo_label = f"{ini_fmt} a {fim_fmt}"
     else:
-        periodo_label = "Período não informado"
+        periodo_label = "Per├¡odo n├úo informado"
 
     return boletins, cliente_label, periodo_label
 
 
 def _boletim_to_missao(idx, b):
-    """Converte um BoletimMedicao em dict compatível com o exportador."""
+    """Converte um BoletimMedicao em dict compat├¡vel com o exportador."""
     os_obj = b.os
     op     = getattr(os_obj, 'operacional', None)
     tab    = b.tabela_preco
 
-    # ── Agentes: dois agentes separados por " / " ──────────────────────────
+    # ÔöÇÔöÇ Agentes: dois agentes separados por " / " ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
     equipe = os_obj.equipe
     if equipe:
         nomes = []
@@ -1326,13 +1325,13 @@ def _boletim_to_missao(idx, b):
         # fallback: snapshot do nome da equipe se equipe foi deletada
         agentes_str = os_obj.snap_equipe_nome or '---'
 
-    # ── Viatura: placa da viatura da equipe ────────────────────────────────
+    # ÔöÇÔöÇ Viatura: placa da viatura da equipe ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
     if equipe and equipe.viatura:
         viatura_str = equipe.viatura.placa or os_obj.snap_viatura_placa or '---'
     else:
         viatura_str = os_obj.snap_viatura_placa or '---'
 
-    # ── Veículos escoltados (concatena placas) ─────────────────────────────
+    # ÔöÇÔöÇ Ve├¡culos escoltados (concatena placas) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
     veiculos = os_obj.veiculos.all()
     escoltados = ', '.join(
         v.placa_cavalo for v in veiculos if v.placa_cavalo
@@ -1429,7 +1428,7 @@ def _calcular_totais(boletins_list):
 
 @login_required
 def boletim_export_pdf(request):
-    """Gera o Boletim de Medição em PDF com os filtros ativos da listagem."""
+    """Gera o Boletim de Medi├º├úo em PDF com os filtros ativos da listagem."""
     from django.http import HttpResponse
     from datetime import datetime
     from .boletim_export import gerar_pdf_bytes
@@ -1448,7 +1447,7 @@ def boletim_export_pdf(request):
 
 @login_required
 def boletim_export_xlsx(request):
-    """Gera o Boletim de Medição em XLSX com os filtros ativos da listagem."""
+    """Gera o Boletim de Medi├º├úo em XLSX com os filtros ativos da listagem."""
     from django.http import HttpResponse
     from datetime import datetime
     from .boletim_export import gerar_xlsx_bytes
@@ -1466,14 +1465,14 @@ def boletim_export_xlsx(request):
     return response
 
 
-# ── CONFIGURAÇÃO DE USUÁRIOS ─────────────────────────────────────────────────
+# ÔöÇÔöÇ CONFIGURA├ç├âO DE USU├üRIOS ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 
 from django.contrib.auth.models import User
 from django.db.models import Q as QUser
 
 
 def _get_nivel(user):
-    """Retorna o nível do perfil. O usuário 'demark' é sempre developer."""
+    """Retorna o n├¡vel do perfil. O usu├írio 'demark' ├® sempre developer."""
     if user.username.lower() == 'demark':
         return 'developer'
     try:
@@ -1490,17 +1489,17 @@ def _is_developer(user):
 
 @login_required
 def usuario_list(request):
-    """Lista usuários. O usuário 'demark' (developer) é invisível para todos exceto ele mesmo."""
+    """Lista usu├írios. O usu├írio 'demark' (developer) ├® invis├¡vel para todos exceto ele mesmo."""
     q = request.GET.get('q', '')
 
-    # Buscar os IDs do usuário demark (case-insensitive) para exclusão segura
+    # Buscar os IDs do usu├írio demark (case-insensitive) para exclus├úo segura
     demark_ids = list(
         User.objects.filter(username__iexact='demark').values_list('id', flat=True)
     )
 
     qs = User.objects.select_related('perfil').order_by('username')
 
-    # Sempre ocultar o usuário demark para quem não é o próprio demark
+    # Sempre ocultar o usu├írio demark para quem n├úo ├® o pr├│prio demark
     if request.user.username.lower() != 'demark' and demark_ids:
         qs = qs.exclude(id__in=demark_ids)
 
@@ -1528,9 +1527,9 @@ def usuario_list(request):
 
 @login_required
 def usuario_create(request):
-    """Cria um novo usuário. Apenas admin e developer podem criar usuários."""
+    """Cria um novo usu├írio. Apenas admin e developer podem criar usu├írios."""
     if not _is_admin_or_developer(request.user):
-        messages.error(request, 'Você não tem permissão para criar usuários.')
+        messages.error(request, 'Voc├¬ n├úo tem permiss├úo para criar usu├írios.')
         return redirect('usuario_list')
 
     from django.contrib.auth import get_user_model
@@ -1555,25 +1554,25 @@ def usuario_create(request):
         nivel = request.POST.get('nivel', 'operador')
         is_active = request.POST.get('is_active') == '1'
 
-        # Ninguém pode criar outro developer (apenas demark pode ser developer)
+        # Ningu├®m pode criar outro developer (apenas demark pode ser developer)
         if nivel == 'developer':
             nivel = 'operador'
 
         # Proteger username 'demark'
         if username.lower() == 'demark':
-            errors['username'] = ['Este nome de usuário é reservado.']
+            errors['username'] = ['Este nome de usu├írio ├® reservado.']
 
         if not username:
-            errors['username'] = ['Nome de usuário é obrigatório.']
+            errors['username'] = ['Nome de usu├írio ├® obrigat├│rio.']
         elif not errors.get('username') and User.objects.filter(username=username).exists():
-            errors['username'] = ['Este nome de usuário já está em uso.']
+            errors['username'] = ['Este nome de usu├írio j├í est├í em uso.']
 
         if not password1:
-            errors['password1'] = ['Senha é obrigatória.']
+            errors['password1'] = ['Senha ├® obrigat├│ria.']
         elif len(password1) < 8:
-            errors['password1'] = ['A senha deve ter no mínimo 8 caracteres.']
+            errors['password1'] = ['A senha deve ter no m├¡nimo 8 caracteres.']
         elif password1 != password2:
-            errors['password2'] = ['As senhas não conferem.']
+            errors['password2'] = ['As senhas n├úo conferem.']
 
         if not errors:
             user = User.objects.create_user(
@@ -1590,7 +1589,7 @@ def usuario_create(request):
             except Exception:
                 pass
 
-            messages.success(request, f'Usuário "{username}" criado com sucesso!')
+            messages.success(request, f'Usu├írio "{username}" criado com sucesso!')
             return redirect('usuario_list')
 
         form = FakeForm(request.POST)
@@ -1605,19 +1604,19 @@ def usuario_create(request):
 
 @login_required
 def usuario_edit(request, pk):
-    """Edita dados de um usuário. Admin/developer podem editar qualquer um. Outros só a si mesmos."""
+    """Edita dados de um usu├írio. Admin/developer podem editar qualquer um. Outros s├│ a si mesmos."""
     u = get_object_or_404(User, pk=pk)
     eu_mesmo = (request.user.pk == u.pk)
     sou_admin = _is_admin_or_developer(request.user)
 
-    # Proteger o usuário demark: só o próprio demark pode editar seu perfil
+    # Proteger o usu├írio demark: s├│ o pr├│prio demark pode editar seu perfil
     if u.username.lower() == 'demark' and request.user.username.lower() != 'demark':
-        messages.error(request, 'Sem permissão.')
+        messages.error(request, 'Sem permiss├úo.')
         return redirect('usuario_list')
 
-    # Operador só pode editar a si mesmo
+    # Operador s├│ pode editar a si mesmo
     if not sou_admin and not eu_mesmo:
-        messages.error(request, 'Você só pode editar sua própria conta.')
+        messages.error(request, 'Voc├¬ s├│ pode editar sua pr├│pria conta.')
         return redirect('usuario_list')
 
     class FakeForm:
@@ -1645,9 +1644,9 @@ def usuario_edit(request, pk):
         errors = {}
 
         if not username:
-            errors['username'] = ['Nome de usuário é obrigatório.']
+            errors['username'] = ['Nome de usu├írio ├® obrigat├│rio.']
         elif User.objects.filter(username=username).exclude(pk=pk).exists():
-            errors['username'] = ['Este nome de usuário já está em uso.']
+            errors['username'] = ['Este nome de usu├írio j├í est├í em uso.']
 
         if not errors:
             u.username = username
@@ -1655,11 +1654,11 @@ def usuario_edit(request, pk):
             u.last_name = request.POST.get('last_name', '').strip()
             u.email = request.POST.get('email', '').strip()
 
-            # Só admin pode mudar is_active e nivel
+            # S├│ admin pode mudar is_active e nivel
             if sou_admin:
                 u.is_active = request.POST.get('is_active') == '1'
                 nivel = request.POST.get('nivel', 'operador')
-                # Ninguém pode promover outro a developer
+                # Ningu├®m pode promover outro a developer
                 if nivel == 'developer' and u.username != 'demark':
                     nivel = 'operador'
                 try:
@@ -1669,7 +1668,7 @@ def usuario_edit(request, pk):
                     pass
 
             u.save()
-            messages.success(request, f'Usuário "{u.username}" atualizado com sucesso!')
+            messages.success(request, f'Usu├írio "{u.username}" atualizado com sucesso!')
             return redirect('usuario_list')
 
         form = FakeForm(request.POST, u)
@@ -1683,19 +1682,19 @@ def usuario_edit(request, pk):
 
 @login_required
 def usuario_senha(request, pk):
-    """Altera senha. Cada usuário pode alterar a própria. Admin/developer podem alterar de qualquer um."""
+    """Altera senha. Cada usu├írio pode alterar a pr├│pria. Admin/developer podem alterar de qualquer um."""
     u = get_object_or_404(User, pk=pk)
     eu_mesmo = (request.user.pk == u.pk)
     sou_admin = _is_admin_or_developer(request.user)
 
-    # Proteger demark: só o próprio demark altera sua senha
+    # Proteger demark: s├│ o pr├│prio demark altera sua senha
     if u.username.lower() == 'demark' and request.user.username.lower() != 'demark':
-        messages.error(request, 'Sem permissão.')
+        messages.error(request, 'Sem permiss├úo.')
         return redirect('usuario_list')
 
-    # Operador só pode alterar a própria senha
+    # Operador s├│ pode alterar a pr├│pria senha
     if not sou_admin and not eu_mesmo:
-        messages.error(request, 'Você só pode alterar sua própria senha.')
+        messages.error(request, 'Voc├¬ s├│ pode alterar sua pr├│pria senha.')
         return redirect('usuario_list')
 
     class FakeForm:
@@ -1711,22 +1710,22 @@ def usuario_senha(request, pk):
         errors = False
 
         if not password1 or len(password1) < 8:
-            form.password1.errors = ['A senha deve ter no mínimo 8 caracteres.']
+            form.password1.errors = ['A senha deve ter no m├¡nimo 8 caracteres.']
             errors = True
         elif password1 != password2:
-            form.password2.errors = ['As senhas não conferem.']
+            form.password2.errors = ['As senhas n├úo conferem.']
             errors = True
 
         if not errors:
             u.set_password(password1)
             u.save()
-            # Se alterou a própria senha, mantém logado
+            # Se alterou a pr├│pria senha, mant├®m logado
             if eu_mesmo:
                 from django.contrib.auth import update_session_auth_hash
                 update_session_auth_hash(request, u)
                 messages.success(request, 'Sua senha foi alterada com sucesso!')
             else:
-                messages.success(request, f'Senha do usuário "{u.username}" alterada com sucesso!')
+                messages.success(request, f'Senha do usu├írio "{u.username}" alterada com sucesso!')
             return redirect('usuario_list')
 
         return render(request, 'cadastros/usuario_senha.html', {'form': form, 'obj': u})
@@ -1737,36 +1736,36 @@ def usuario_senha(request, pk):
 
 @login_required
 def usuario_delete(request, pk):
-    """Exclui um usuário. Apenas admin/developer podem excluir. Não pode excluir demark ou a si mesmo."""
+    """Exclui um usu├írio. Apenas admin/developer podem excluir. N├úo pode excluir demark ou a si mesmo."""
     u = get_object_or_404(User, pk=pk)
 
     if not _is_admin_or_developer(request.user):
-        messages.error(request, 'Você não tem permissão para excluir usuários.')
+        messages.error(request, 'Voc├¬ n├úo tem permiss├úo para excluir usu├írios.')
         return redirect('usuario_list')
 
     if u == request.user:
-        messages.error(request, 'Você não pode excluir sua própria conta.')
+        messages.error(request, 'Voc├¬ n├úo pode excluir sua pr├│pria conta.')
         return redirect('usuario_list')
 
     if u.username.lower() == 'demark':
-        messages.error(request, 'Este usuário não pode ser excluído.')
+        messages.error(request, 'Este usu├írio n├úo pode ser exclu├¡do.')
         return redirect('usuario_list')
 
     if request.method == 'POST':
         nome = u.username
         u.delete()
-        messages.success(request, f'Usuário "{nome}" removido com sucesso.')
+        messages.success(request, f'Usu├írio "{nome}" removido com sucesso.')
         return redirect('usuario_list')
 
     return render(request, 'cadastros/usuario_delete.html', {'obj': u})
 
 
 # ==============================================================================
-# LINK EXTERNO — Agente de campo preenche OS sem login
+# LINK EXTERNO ÔÇö Agente de campo preenche OS sem login
 # ==============================================================================
 
 def os_field_link(request, token):
-    """Página pública para agente externo preencher dados operacionais da OS."""
+    """P├ígina p├║blica para agente externo preencher dados operacionais da OS."""
     from datetime import datetime
 
     op = get_object_or_404(OSOperacional, token=token)
@@ -1810,7 +1809,7 @@ def os_field_link(request, token):
         op.km_termino_operacao = parse_int(request.POST.get('km_termino_operacao'))
         op.km_termino_viagem   = parse_int(request.POST.get('km_termino_viagem'))
 
-        # GPS — capturado pelo browser do agente
+        # GPS ÔÇö capturado pelo browser do agente
         def parse_dec(val):
             try:
                 return float(val) if val and val.strip() else None
@@ -1910,7 +1909,7 @@ def os_desativar_link(request, pk):
 # ============================================================
 # ADICIONAR ao final de cadastros/views.py
 # ============================================================
-# Também adicione este import no TOPO do views.py, junto com os outros:
+# Tamb├®m adicione este import no TOPO do views.py, junto com os outros:
 #   from .models import (... FotoMarco, Parada, FotoParada,
 #       Incidente, FotoIncidente, FotoVeiculoEscoltado,
 #       TrocaMotorista, FotoTrocaMotorista, AssinaturaOS, DespesaOS)
@@ -1921,23 +1920,23 @@ import io
 from django.core.files.base import ContentFile
 
 
-# ────────────────────────────────────────────────────────────
+# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 # HELPER: salvar foto base64 (assinaturas enviadas via canvas)
-# ────────────────────────────────────────────────────────────
+# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 def _base64_to_file(data_url, nome_base='assinatura'):
-    """Converte data:image/png;base64,... → ContentFile para salvar no ImageField."""
+    """Converte data:image/png;base64,... ÔåÆ ContentFile para salvar no ImageField."""
     if not data_url or not data_url.startswith('data:'):
         return None
     header, encoded = data_url.split(',', 1)
     return ContentFile(base64.b64decode(encoded), name=f'{nome_base}.png')
 
 
-# ────────────────────────────────────────────────────────────
-# FOTOS DE MARCOS — upload AJAX
-# ────────────────────────────────────────────────────────────
+# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+# FOTOS DE MARCOS ÔÇö upload AJAX
+# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 def os_field_foto_marco(request, token):
     """Recebe upload de foto de um marco via POST AJAX (multipart).
-    Permite apenas UMA foto por marco: se já existir, substitui a antiga."""
+    Permite apenas UMA foto por marco: se j├í existir, substitui a antiga."""
     from .models import FotoMarco, OSOperacional
     op = get_object_or_404(OSOperacional, token=token)
     if not op.link_ativo:
@@ -1954,12 +1953,12 @@ def os_field_foto_marco(request, token):
     MARCOS_VALIDOS = {'inicio_viagem','chegada_operacao','inicio_operacao',
                       'termino_operacao','termino_viagem'}
     if marco not in MARCOS_VALIDOS or not foto:
-        return JsonResponse({'ok': False, 'erro': 'Dados inválidos.'}, status=400)
+        return JsonResponse({'ok': False, 'erro': 'Dados inv├ílidos.'}, status=400)
 
-    # Se já existe foto para este marco, apaga o arquivo físico e reutiliza o registro
+    # Se j├í existe foto para este marco, apaga o arquivo f├¡sico e reutiliza o registro
     existente = FotoMarco.objects.filter(os=op.os, marco=marco).first()
     if existente:
-        existente.foto.delete(save=False)   # remove arquivo físico do storage
+        existente.foto.delete(save=False)   # remove arquivo f├¡sico do storage
         existente.foto      = foto
         existente.latitude  = lat
         existente.longitude = lng
@@ -1997,9 +1996,9 @@ def os_field_foto_marco_delete(request, token, foto_pk):
     return JsonResponse({'ok': False}, status=405)
 
 
-# ────────────────────────────────────────────────────────────
+# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 # PARADAS
-# ────────────────────────────────────────────────────────────
+# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 def os_field_parada_salvar(request, token):
     """Cria ou atualiza uma parada."""
     from .models import Parada, FotoParada, OSOperacional
@@ -2030,7 +2029,7 @@ def os_field_parada_salvar(request, token):
     lng     = request.POST.get('lng', '').strip() or None
 
     if not inicio:
-        return JsonResponse({'ok': False, 'erro': 'Informe a data/hora de início.'}, status=400)
+        return JsonResponse({'ok': False, 'erro': 'Informe a data/hora de in├¡cio.'}, status=400)
 
     if pk:
         parada = get_object_or_404(Parada, pk=pk, os=op.os)
@@ -2047,7 +2046,7 @@ def os_field_parada_salvar(request, token):
             inicio=inicio, fim=fim, latitude=lat, longitude=lng,
         )
 
-    # Salvar fotos (múltiplas, campo name="fotos")
+    # Salvar fotos (m├║ltiplas, campo name="fotos")
     for foto in request.FILES.getlist('fotos'):
         FotoParada.objects.create(parada=parada, foto=foto)
 
@@ -2073,9 +2072,9 @@ def os_field_parada_delete(request, token, pk):
     return JsonResponse({'ok': False}, status=405)
 
 
-# ────────────────────────────────────────────────────────────
+# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 # INCIDENTES
-# ────────────────────────────────────────────────────────────
+# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 def os_field_incidente_salvar(request, token):
     """Cria ou atualiza um incidente."""
     from .models import Incidente, FotoIncidente, OSOperacional
@@ -2107,7 +2106,7 @@ def os_field_incidente_salvar(request, token):
     lng       = request.POST.get('lng', '').strip() or None
 
     if not descricao or not ocorrido:
-        return JsonResponse({'ok': False, 'erro': 'Informe a descrição e a data/hora.'}, status=400)
+        return JsonResponse({'ok': False, 'erro': 'Informe a descri├º├úo e a data/hora.'}, status=400)
 
     if pk:
         inc = get_object_or_404(Incidente, pk=pk, os=op.os)
@@ -2146,11 +2145,11 @@ def os_field_incidente_delete(request, token, pk):
     return JsonResponse({'ok': False}, status=405)
 
 
-# ────────────────────────────────────────────────────────────
-# FOTOS DE VEÍCULOS ESCOLTADOS
-# ────────────────────────────────────────────────────────────
+# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+# FOTOS DE VE├ìCULOS ESCOLTADOS
+# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 def os_field_foto_veiculo(request, token):
-    """Salva foto de um veículo escoltado."""
+    """Salva foto de um ve├¡culo escoltado."""
     from .models import FotoVeiculoEscoltado, VeiculoEscoltado, OSOperacional
     op = get_object_or_404(OSOperacional, token=token)
     if not op.link_ativo:
@@ -2163,7 +2162,7 @@ def os_field_foto_veiculo(request, token):
     foto       = request.FILES.get('foto')
 
     if not foto or not veiculo_pk:
-        return JsonResponse({'ok': False, 'erro': 'Dados inválidos.'}, status=400)
+        return JsonResponse({'ok': False, 'erro': 'Dados inv├ílidos.'}, status=400)
 
     veiculo = get_object_or_404(VeiculoEscoltado, pk=veiculo_pk, os=op.os)
     obj = FotoVeiculoEscoltado.objects.create(veiculo=veiculo, momento=momento, foto=foto)
@@ -2171,7 +2170,7 @@ def os_field_foto_veiculo(request, token):
 
 
 def os_field_foto_veiculo_delete(request, token, foto_pk):
-    """Remove uma foto de veículo escoltado."""
+    """Remove uma foto de ve├¡culo escoltado."""
     from .models import FotoVeiculoEscoltado, OSOperacional
     op  = get_object_or_404(OSOperacional, token=token)
     obj = get_object_or_404(FotoVeiculoEscoltado, pk=foto_pk, veiculo__os=op.os)
@@ -2182,9 +2181,9 @@ def os_field_foto_veiculo_delete(request, token, foto_pk):
     return JsonResponse({'ok': False}, status=405)
 
 
-# ────────────────────────────────────────────────────────────
+# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 # TROCA DE MOTORISTAS
-# ────────────────────────────────────────────────────────────
+# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 def os_field_troca_motorista(request, token):
     """Registra troca de motorista."""
     from .models import TrocaMotorista, FotoTrocaMotorista, VeiculoEscoltado, OSOperacional
@@ -2257,9 +2256,9 @@ def os_field_troca_motorista_delete(request, token, pk):
     return JsonResponse({'ok': False}, status=405)
 
 
-# ────────────────────────────────────────────────────────────
+# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 # ASSINATURAS DIGITAIS
-# ────────────────────────────────────────────────────────────
+# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 def os_field_assinatura(request, token):
     """Salva assinatura digital (base64 PNG vindo do canvas)."""
     from .models import AssinaturaOS, OSOperacional
@@ -2282,18 +2281,18 @@ def os_field_assinatura(request, token):
 
     TIPOS = {c[0] for c in AssinaturaOS.TIPO_CHOICES}
     if tipo not in TIPOS or not nome or not data_url:
-        return JsonResponse({'ok': False, 'erro': 'Dados inválidos.'}, status=400)
+        return JsonResponse({'ok': False, 'erro': 'Dados inv├ílidos.'}, status=400)
 
     arquivo = _base64_to_file(data_url, nome_base=f'ass_{tipo}')
     if not arquivo:
-        return JsonResponse({'ok': False, 'erro': 'Assinatura inválida.'}, status=400)
+        return JsonResponse({'ok': False, 'erro': 'Assinatura inv├ílida.'}, status=400)
 
     obj, created = AssinaturaOS.objects.get_or_create(
         os=op.os, tipo=tipo,
         defaults={'nome': nome}
     )
     if not created:
-        # Atualiza — apaga a imagem anterior
+        # Atualiza ÔÇö apaga a imagem anterior
         if obj.imagem:
             obj.imagem.delete(save=False)
         obj.nome = nome
@@ -2308,11 +2307,11 @@ def os_field_assinatura(request, token):
     })
 
 
-# ────────────────────────────────────────────────────────────
-# DESPESAS / CRÉDITOS
-# ────────────────────────────────────────────────────────────
+# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+# DESPESAS / CR├ëDITOS
+# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 def os_field_despesa_salvar(request, token):
-    """Cria uma despesa/crédito."""
+    """Cria uma despesa/cr├®dito."""
     from .models import DespesaOS, OSOperacional
     from datetime import datetime
     from decimal import Decimal, InvalidOperation
@@ -2345,7 +2344,7 @@ def os_field_despesa_salvar(request, token):
         if valor <= 0:
             raise ValueError
     except (InvalidOperation, ValueError):
-        return JsonResponse({'ok': False, 'erro': 'Valor inválido.'}, status=400)
+        return JsonResponse({'ok': False, 'erro': 'Valor inv├ílido.'}, status=400)
 
     if not ocorrido:
         return JsonResponse({'ok': False, 'erro': 'Informe a data/hora.'}, status=400)
@@ -2383,9 +2382,9 @@ def os_field_despesa_delete(request, token, pk):
         desp.delete()
         return JsonResponse({'ok': True})
     return JsonResponse({'ok': False}, status=405)
-# ─────────────────────────────────────────────────────────────────────────────
+# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 # ADICIONAR ao final de cadastros/views.py
-# ─────────────────────────────────────────────────────────────────────────────
+# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 
 def os_field_veiculo_salvar(request, token):
     """Cria ou edita um VeiculoEscoltado via AJAX (link externo do agente)."""
@@ -2394,9 +2393,9 @@ def os_field_veiculo_salvar(request, token):
     if not op.link_ativo:
         return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
     if request.method != 'POST':
-        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+        return JsonResponse({'ok': False, 'erro': 'M├®todo inv├ílido.'}, status=405)
 
-    pk          = request.POST.get('pk') or None          # se preenchido → edita
+    pk          = request.POST.get('pk') or None          # se preenchido ÔåÆ edita
     veiculo     = request.POST.get('veiculo', '').strip()
     placa_cav   = request.POST.get('placa_cavalo', '').strip().upper()
     placa_car   = request.POST.get('placa_carreta', '').strip().upper()
@@ -2409,7 +2408,7 @@ def os_field_veiculo_salvar(request, token):
     if pk:
         obj = get_object_or_404(VeiculoEscoltado, pk=pk, os=op.os)
     else:
-        # ordem = próximo disponível
+        # ordem = pr├│ximo dispon├¡vel
         ultima = op.os.veiculos.order_by('-ordem').first()
         obj = VeiculoEscoltado(os=op.os, ordem=(ultima.ordem + 1 if ultima else 1))
 
@@ -2423,7 +2422,7 @@ def os_field_veiculo_salvar(request, token):
     return JsonResponse({
         'ok': True,
         'pk': obj.pk,
-        'label': obj.placa_cavalo or obj.veiculo or f'Veículo {obj.pk}',
+        'label': obj.placa_cavalo or obj.veiculo or f'Ve├¡culo {obj.pk}',
         'motorista': obj.motorista,
         'placa_carreta': obj.placa_carreta,
         'placa_carreta2': obj.placa_carreta2,
@@ -2438,30 +2437,7 @@ def os_field_veiculo_delete(request, token, pk):
     if not op.link_ativo:
         return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
     if request.method != 'POST':
-        return JsonResponse({'ok': False, 'erro': 'Método inválido.'}, status=405)
+        return JsonResponse({'ok': False, 'erro': 'M├®todo inv├ílido.'}, status=405)
     obj = get_object_or_404(VeiculoEscoltado, pk=pk, os=op.os)
     obj.delete()
-    obj.delete()
     return JsonResponse({'ok': True})
-
-
-from django.conf import settings
-
-def debug_media(request):
-    import os
-    files = []
-    for root, dirs, filenames in os.walk(settings.MEDIA_ROOT):
-        for f in filenames:
-            files.append(os.path.join(root, f))
-    return JsonResponse({
-        'MEDIA_ROOT': settings.MEDIA_ROOT,
-        'MEDIA_URL': settings.MEDIA_URL,
-        'exists': os.path.exists(settings.MEDIA_ROOT),
-        'files': files[:20],
-    })    return JsonResponse({
-        'os': str(op.os),
-        'inicio_viagem': str(op.inicio_viagem),
-        'km_inicio_viagem': op.km_inicio_viagem,
-        'chegada_operacao': str(op.chegada_operacao),
-        'token': str(op.token),
-    })
