@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+﻿from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
@@ -1867,6 +1867,10 @@ def os_field_link(request, token):
         op.km_termino_operacao = parse_int(request.POST.get('km_termino_operacao'))
         op.km_termino_viagem   = parse_int(request.POST.get('km_termino_viagem'))
 
+        # Pedágio
+        pedagio_raw = request.POST.get('pedagio', '').strip().replace(',', '.')
+        op.pedagio = float(pedagio_raw) if pedagio_raw else None
+
         # GPS — capturado pelo browser do agente
         def parse_dec(val):
             try:
@@ -2499,3 +2503,4 @@ def os_field_veiculo_delete(request, token, pk):
     obj = get_object_or_404(VeiculoEscoltado, pk=pk, os=op.os)
     obj.delete()
     return JsonResponse({'ok': True})
+
