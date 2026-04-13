@@ -866,7 +866,7 @@ def os_print(request, pk):
     assinaturas = {a.tipo: a for a in AssinaturaOS.objects.filter(os=os_obj)}
 
     # Despesas / Creditos
-    despesas = DespesaOS.objects.filter(os_id=os_obj.pk).order_by('ocorrido_em')
+    despesas = DespesaOS.objects.filter(os=os_obj).order_by('ocorrido_em')
 
     return render(request, 'cadastros/os_print.html', {
         'os': os_obj,
