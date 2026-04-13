@@ -1764,6 +1764,63 @@ def usuario_delete(request, pk):
 # LINK EXTERNO — Agente de campo preenche OS sem login
 # ==============================================================================
 
+
+@login_required
+def os_field_marco_salvar(request, token):
+    """Salva um marco individual (data + km + gps + foto) via AJAX do link do agente."""
+    from django.http import JsonResponse
+    from datetime import datetime
+
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Metodo invalido.'})
+
+    try:
+        op = OSOperacional.objects.get(token=token, link_ativo=True)
+    except OSOperacional.DoesNotExist:
+        return JsonResponse({'ok': False, 'erro': 'Link invalido ou inativo.'})
+
+    marco = request.POST.get('marco', '').strip()
+    campos_validos = ['inicio_viagem', 'chegada_operacao', 'inicio_operacao', 'termino_operacao', 'termino_viagem']
+    if marco not in campos_validos:
+        return JsonResponse({'ok': False, 'erro': 'Marco invalido.'})
+
+    dt_val  = request.POST.get('dt',  '').strip()
+    km_val  = request.POST.get('km',  '').strip()
+    lat_val = request.POST.get('lat', '').strip()
+    lng_val = request.POST.get('lng', '').strip()
+
+    def parse_dt(val):
+        if not val: return None
+        for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
+            try: return datetime.strptime(val, fmt)
+            except ValueError: continue
+        return None
+
+    def parse_float(val):
+        try: return float(val) if val else None
+        except (ValueError, TypeError): return None
+
+    def parse_int(val):
+        try: return int(val) if val else None
+        except (ValueError, TypeError): return None
+
+    setattr(op, marco,           parse_dt(dt_val))
+    setattr(op, f'km_{marco}',   parse_int(km_val))
+    setattr(op, f'gps_{marco}_lat', parse_float(lat_val))
+    setattr(op, f'gps_{marco}_lng', parse_float(lng_val))
+    op.save()
+
+    foto_id = None
+    foto_url = None
+    foto = request.FILES.get('foto')
+    if foto:
+        FotoMarco.objects.filter(os=op.os, marco=marco).delete()
+        fm = FotoMarco.objects.create(os=op.os, marco=marco, foto=foto)
+        foto_id = fm.pk
+        foto_url = fm.foto.url
+
+    return JsonResponse({'ok': True, 'foto_id': foto_id, 'foto_url': foto_url})
+
 def os_field_link(request, token):
     """Página pública para agente externo preencher dados operacionais da OS."""
     from datetime import datetime

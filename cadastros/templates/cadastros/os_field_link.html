@@ -198,136 +198,178 @@
   </div>
 
   <!-- Form marcos -->
-  <form method="POST" id="formMarcos" enctype="multipart/form-data">
-    {% csrf_token %}
-
-    <div class="card">
-      <div class="card-header"><div class="card-header-left"><span class="icon">📄</span><h3>Número da Folha</h3></div></div>
-      <div class="card-body">
-        <div class="field">
-          <label>Nº Folha</label>
-          <input type="text" name="numero_folha" value="{{ op.numero_folha }}" placeholder="Ex: 675">
+        <div id="secao-marcos">
+        <div class="marco-row" id="marco_block_inicio_viagem">
+          <div class="marco-label"><span class="dot" style="background:#3b82f6"></span>Início de Viagem</div>
+          <div id="marco_form_inicio_viagem">
+            <div class="gps-row">
+              <small style="color:var(--muted);font-size:11px">Data, hora e KM</small>
+              <button type="button" class="btn btn-success" onclick="captureGPS('inicio_viagem',this)">📍 Capturar GPS</button>
+            </div>
+            <div class="grid-2">
+              <div class="field"><label>Data / Hora</label><input type="datetime-local" id="dt_inicio_viagem" value="{% firstof fmt.inicio_viagem '' %}"></div>
+              <div class="field"><label>KM Hodômetro</label><input type="number" id="km_inicio_viagem" value="{{ op.km_inicio_viagem|default_if_none:'' }}" placeholder="Ex: 79710"></div>
+            </div>
+            <input type="hidden" id="gps_inicio_viagem_lat" value="{{ op.gps_inicio_viagem_lat|default_if_none:'' }}">
+            <input type="hidden" id="gps_inicio_viagem_lng" value="{{ op.gps_inicio_viagem_lng|default_if_none:'' }}">
+            <div id="gps_status_inicio_viagem">
+              {% if gps.inicio_viagem %}<div class="gps-status ok">📍 {{ op.gps_inicio_viagem_lat }}, {{ op.gps_inicio_viagem_lng }}<a class="gps-link" href="{{ gps.inicio_viagem.url }}" target="_blank">🗺 Mapa</a></div>{% endif %}
+            </div>
+            <div style="margin-top:10px">
+              <small style="color:var(--muted);font-size:11px">Foto do marco</small>
+              <div class="foto-grid" id="fotos_inicio_viagem">
+                {% for f in op.os.fotos_marcos.all %}{% if f.marco == 'inicio_viagem' %}
+                <div class="foto-thumb" id="fmarco_{{ f.pk }}">
+                  <img src="{{ f.foto.url }}" alt="">
+                  <button type="button" class="del-btn" onclick="deleteFotoMarco('{{ op.token }}', {{ f.pk }}, 'fmarco_{{ f.pk }}')">✕</button>
+                </div>
+                {% endif %}{% endfor %}
+                <label class="foto-upload-btn" for="file_inicio_viagem" id="label_file_inicio_viagem"><span>📷</span>Foto</label>
+                <input type="file" id="file_inicio_viagem" accept="image/*" capture="environment" onchange="selecionarFotoMarco(this,'inicio_viagem')">
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary btn-submit-full" style="margin-top:10px" id="btn_salvar_inicio_viagem" onclick="salvarMarco('inicio_viagem','{{ op.token }}')">
+              💾 Salvar Início de Viagem
+            </button>
+          </div>
+        </div>
+        <div class="marco-row" id="marco_block_chegada_operacao">
+          <div class="marco-label"><span class="dot" style="background:#06b6d4"></span>Chegada Operação</div>
+          <div id="marco_form_chegada_operacao">
+            <div class="gps-row">
+              <small style="color:var(--muted);font-size:11px">Data, hora e KM</small>
+              <button type="button" class="btn btn-success" onclick="captureGPS('chegada_operacao',this)">📍 Capturar GPS</button>
+            </div>
+            <div class="grid-2">
+              <div class="field"><label>Data / Hora</label><input type="datetime-local" id="dt_chegada_operacao" value="{% firstof fmt.chegada_operacao '' %}"></div>
+              <div class="field"><label>KM Hodômetro</label><input type="number" id="km_chegada_operacao" value="{{ op.km_chegada_operacao|default_if_none:'' }}" placeholder="Ex: 79710"></div>
+            </div>
+            <input type="hidden" id="gps_chegada_operacao_lat" value="{{ op.gps_chegada_operacao_lat|default_if_none:'' }}">
+            <input type="hidden" id="gps_chegada_operacao_lng" value="{{ op.gps_chegada_operacao_lng|default_if_none:'' }}">
+            <div id="gps_status_chegada_operacao">
+              {% if gps.chegada_operacao %}<div class="gps-status ok">📍 {{ op.gps_chegada_operacao_lat }}, {{ op.gps_chegada_operacao_lng }}<a class="gps-link" href="{{ gps.chegada_operacao.url }}" target="_blank">🗺 Mapa</a></div>{% endif %}
+            </div>
+            <div style="margin-top:10px">
+              <small style="color:var(--muted);font-size:11px">Foto do marco</small>
+              <div class="foto-grid" id="fotos_chegada_operacao">
+                {% for f in op.os.fotos_marcos.all %}{% if f.marco == 'chegada_operacao' %}
+                <div class="foto-thumb" id="fmarco_{{ f.pk }}">
+                  <img src="{{ f.foto.url }}" alt="">
+                  <button type="button" class="del-btn" onclick="deleteFotoMarco('{{ op.token }}', {{ f.pk }}, 'fmarco_{{ f.pk }}')">✕</button>
+                </div>
+                {% endif %}{% endfor %}
+                <label class="foto-upload-btn" for="file_chegada_operacao" id="label_file_chegada_operacao"><span>📷</span>Foto</label>
+                <input type="file" id="file_chegada_operacao" accept="image/*" capture="environment" onchange="selecionarFotoMarco(this,'chegada_operacao')">
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary btn-submit-full" style="margin-top:10px" id="btn_salvar_chegada_operacao" onclick="salvarMarco('chegada_operacao','{{ op.token }}')">
+              💾 Salvar Chegada Operação
+            </button>
+          </div>
+        </div>
+        <div class="marco-row" id="marco_block_inicio_operacao">
+          <div class="marco-label"><span class="dot" style="background:#8b5cf6"></span>Início Operação</div>
+          <div id="marco_form_inicio_operacao">
+            <div class="gps-row">
+              <small style="color:var(--muted);font-size:11px">Data, hora e KM</small>
+              <button type="button" class="btn btn-success" onclick="captureGPS('inicio_operacao',this)">📍 Capturar GPS</button>
+            </div>
+            <div class="grid-2">
+              <div class="field"><label>Data / Hora</label><input type="datetime-local" id="dt_inicio_operacao" value="{% firstof fmt.inicio_operacao '' %}"></div>
+              <div class="field"><label>KM Hodômetro</label><input type="number" id="km_inicio_operacao" value="{{ op.km_inicio_operacao|default_if_none:'' }}" placeholder="Ex: 79710"></div>
+            </div>
+            <input type="hidden" id="gps_inicio_operacao_lat" value="{{ op.gps_inicio_operacao_lat|default_if_none:'' }}">
+            <input type="hidden" id="gps_inicio_operacao_lng" value="{{ op.gps_inicio_operacao_lng|default_if_none:'' }}">
+            <div id="gps_status_inicio_operacao">
+              {% if gps.inicio_operacao %}<div class="gps-status ok">📍 {{ op.gps_inicio_operacao_lat }}, {{ op.gps_inicio_operacao_lng }}<a class="gps-link" href="{{ gps.inicio_operacao.url }}" target="_blank">🗺 Mapa</a></div>{% endif %}
+            </div>
+            <div style="margin-top:10px">
+              <small style="color:var(--muted);font-size:11px">Foto do marco</small>
+              <div class="foto-grid" id="fotos_inicio_operacao">
+                {% for f in op.os.fotos_marcos.all %}{% if f.marco == 'inicio_operacao' %}
+                <div class="foto-thumb" id="fmarco_{{ f.pk }}">
+                  <img src="{{ f.foto.url }}" alt="">
+                  <button type="button" class="del-btn" onclick="deleteFotoMarco('{{ op.token }}', {{ f.pk }}, 'fmarco_{{ f.pk }}')">✕</button>
+                </div>
+                {% endif %}{% endfor %}
+                <label class="foto-upload-btn" for="file_inicio_operacao" id="label_file_inicio_operacao"><span>📷</span>Foto</label>
+                <input type="file" id="file_inicio_operacao" accept="image/*" capture="environment" onchange="selecionarFotoMarco(this,'inicio_operacao')">
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary btn-submit-full" style="margin-top:10px" id="btn_salvar_inicio_operacao" onclick="salvarMarco('inicio_operacao','{{ op.token }}')">
+              💾 Salvar Início Operação
+            </button>
+          </div>
+        </div>
+        <div class="marco-row" id="marco_block_termino_operacao">
+          <div class="marco-label"><span class="dot" style="background:#f59e0b"></span>Término Operação</div>
+          <div id="marco_form_termino_operacao">
+            <div class="gps-row">
+              <small style="color:var(--muted);font-size:11px">Data, hora e KM</small>
+              <button type="button" class="btn btn-success" onclick="captureGPS('termino_operacao',this)">📍 Capturar GPS</button>
+            </div>
+            <div class="grid-2">
+              <div class="field"><label>Data / Hora</label><input type="datetime-local" id="dt_termino_operacao" value="{% firstof fmt.termino_operacao '' %}"></div>
+              <div class="field"><label>KM Hodômetro</label><input type="number" id="km_termino_operacao" value="{{ op.km_termino_operacao|default_if_none:'' }}" placeholder="Ex: 79710"></div>
+            </div>
+            <input type="hidden" id="gps_termino_operacao_lat" value="{{ op.gps_termino_operacao_lat|default_if_none:'' }}">
+            <input type="hidden" id="gps_termino_operacao_lng" value="{{ op.gps_termino_operacao_lng|default_if_none:'' }}">
+            <div id="gps_status_termino_operacao">
+              {% if gps.termino_operacao %}<div class="gps-status ok">📍 {{ op.gps_termino_operacao_lat }}, {{ op.gps_termino_operacao_lng }}<a class="gps-link" href="{{ gps.termino_operacao.url }}" target="_blank">🗺 Mapa</a></div>{% endif %}
+            </div>
+            <div style="margin-top:10px">
+              <small style="color:var(--muted);font-size:11px">Foto do marco</small>
+              <div class="foto-grid" id="fotos_termino_operacao">
+                {% for f in op.os.fotos_marcos.all %}{% if f.marco == 'termino_operacao' %}
+                <div class="foto-thumb" id="fmarco_{{ f.pk }}">
+                  <img src="{{ f.foto.url }}" alt="">
+                  <button type="button" class="del-btn" onclick="deleteFotoMarco('{{ op.token }}', {{ f.pk }}, 'fmarco_{{ f.pk }}')">✕</button>
+                </div>
+                {% endif %}{% endfor %}
+                <label class="foto-upload-btn" for="file_termino_operacao" id="label_file_termino_operacao"><span>📷</span>Foto</label>
+                <input type="file" id="file_termino_operacao" accept="image/*" capture="environment" onchange="selecionarFotoMarco(this,'termino_operacao')">
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary btn-submit-full" style="margin-top:10px" id="btn_salvar_termino_operacao" onclick="salvarMarco('termino_operacao','{{ op.token }}')">
+              💾 Salvar Término Operação
+            </button>
+          </div>
+        </div>
+        <div class="marco-row" id="marco_block_termino_viagem">
+          <div class="marco-label"><span class="dot" style="background:#10b981"></span>Término de Viagem</div>
+          <div id="marco_form_termino_viagem">
+            <div class="gps-row">
+              <small style="color:var(--muted);font-size:11px">Data, hora e KM</small>
+              <button type="button" class="btn btn-success" onclick="captureGPS('termino_viagem',this)">📍 Capturar GPS</button>
+            </div>
+            <div class="grid-2">
+              <div class="field"><label>Data / Hora</label><input type="datetime-local" id="dt_termino_viagem" value="{% firstof fmt.termino_viagem '' %}"></div>
+              <div class="field"><label>KM Hodômetro</label><input type="number" id="km_termino_viagem" value="{{ op.km_termino_viagem|default_if_none:'' }}" placeholder="Ex: 79710"></div>
+            </div>
+            <input type="hidden" id="gps_termino_viagem_lat" value="{{ op.gps_termino_viagem_lat|default_if_none:'' }}">
+            <input type="hidden" id="gps_termino_viagem_lng" value="{{ op.gps_termino_viagem_lng|default_if_none:'' }}">
+            <div id="gps_status_termino_viagem">
+              {% if gps.termino_viagem %}<div class="gps-status ok">📍 {{ op.gps_termino_viagem_lat }}, {{ op.gps_termino_viagem_lng }}<a class="gps-link" href="{{ gps.termino_viagem.url }}" target="_blank">🗺 Mapa</a></div>{% endif %}
+            </div>
+            <div style="margin-top:10px">
+              <small style="color:var(--muted);font-size:11px">Foto do marco</small>
+              <div class="foto-grid" id="fotos_termino_viagem">
+                {% for f in op.os.fotos_marcos.all %}{% if f.marco == 'termino_viagem' %}
+                <div class="foto-thumb" id="fmarco_{{ f.pk }}">
+                  <img src="{{ f.foto.url }}" alt="">
+                  <button type="button" class="del-btn" onclick="deleteFotoMarco('{{ op.token }}', {{ f.pk }}, 'fmarco_{{ f.pk }}')">✕</button>
+                </div>
+                {% endif %}{% endfor %}
+                <label class="foto-upload-btn" for="file_termino_viagem" id="label_file_termino_viagem"><span>📷</span>Foto</label>
+                <input type="file" id="file_termino_viagem" accept="image/*" capture="environment" onchange="selecionarFotoMarco(this,'termino_viagem')">
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary btn-submit-full" style="margin-top:10px" id="btn_salvar_termino_viagem" onclick="salvarMarco('termino_viagem','{{ op.token }}')">
+              💾 Salvar Término de Viagem
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header"><div class="card-header-left"><span class="icon">🕐</span><h3>Marcos de Execução</h3></div></div>
-      <div class="card-body">
-
-        {% with marcos=forloop %}
-        <!-- INÍCIO DE VIAGEM -->
-        <div class="marco-row">
-          <div class="marco-label"><span class="dot" style="background:#3b82f6"></span>Início de Viagem</div>
-          <div class="gps-row">
-            <small style="color:var(--muted);font-size:11px">Data, hora e KM</small>
-            <button type="button" class="btn btn-success" onclick="captureGPS('inicio_viagem',this)">📍 Capturar GPS</button>
-          </div>
-          <div class="grid-2">
-            <div class="field"><label>Data / Hora</label><input type="datetime-local" name="inicio_viagem" value="{{ fmt.inicio_viagem }}"></div>
-            <div class="field"><label>KM Hodômetro</label><input type="number" name="km_inicio_viagem" value="{{ op.km_inicio_viagem|default_if_none:'' }}" placeholder="Ex: 79710"></div>
-          </div>
-          <input type="hidden" name="gps_inicio_viagem_lat" id="gps_inicio_viagem_lat" value="{{ op.gps_inicio_viagem_lat|default_if_none:'' }}">
-          <input type="hidden" name="gps_inicio_viagem_lng" id="gps_inicio_viagem_lng" value="{{ op.gps_inicio_viagem_lng|default_if_none:'' }}">
-          <div id="gps_status_inicio_viagem">
-            {% if gps.inicio_viagem %}<div class="gps-status ok">📍 {{ op.gps_inicio_viagem_lat }}, {{ op.gps_inicio_viagem_lng }}<a class="gps-link" href="{{ gps.inicio_viagem.url }}" target="_blank">🗺 Mapa</a></div>{% endif %}
-          </div>
-          <!-- Fotos do marco -->
-          <div style="margin-top:10px">
-            <small style="color:var(--muted);font-size:11px">Fotos do marco</small>
-            <div class="foto-grid" id="fotos_inicio_viagem">
-              {% for f in op.os.fotos_marcos.all %}{% if f.marco == 'inicio_viagem' %}
-              <div class="foto-thumb" id="fmarco_{{ f.pk }}">
-                <img src="{{ f.foto.url }}" alt="">
-                <button type="button" class="del-btn" onclick="deleteFotoMarco('{{ op.token }}', {{ f.pk }}, 'fmarco_{{ f.pk }}')">✕</button>
-              </div>
-              {% endif %}{% endfor %}
-              <label class="foto-upload-btn" for="file_inicio_viagem"><span>📷</span>Foto</label>
-              <input type="file" id="file_inicio_viagem" accept="image/*" capture="environment" onchange="uploadFotoMarco(this,'inicio_viagem','fotos_inicio_viagem','{{ op.token }}')">
-            </div>
-          </div>
-        </div>
-
-        <!-- CHEGADA OPERAÇÃO -->
-        <div class="marco-row">
-          <div class="marco-label"><span class="dot" style="background:#06b6d4"></span>Chegada Operação</div>
-          <div class="gps-row"><small style="color:var(--muted);font-size:11px">Data, hora e KM</small><button type="button" class="btn btn-success" onclick="captureGPS('chegada_operacao',this)">📍 Capturar GPS</button></div>
-          <div class="grid-2">
-            <div class="field"><label>Data / Hora</label><input type="datetime-local" name="chegada_operacao" value="{{ fmt.chegada_operacao }}"></div>
-            <div class="field"><label>KM Hodômetro</label><input type="number" name="km_chegada_operacao" value="{{ op.km_chegada_operacao|default_if_none:'' }}" placeholder="Ex: 79786"></div>
-          </div>
-          <input type="hidden" name="gps_chegada_operacao_lat" id="gps_chegada_operacao_lat" value="{{ op.gps_chegada_operacao_lat|default_if_none:'' }}">
-          <input type="hidden" name="gps_chegada_operacao_lng" id="gps_chegada_operacao_lng" value="{{ op.gps_chegada_operacao_lng|default_if_none:'' }}">
-          <div id="gps_status_chegada_operacao">{% if gps.chegada_operacao %}<div class="gps-status ok">📍 {{ op.gps_chegada_operacao_lat }}, {{ op.gps_chegada_operacao_lng }}<a class="gps-link" href="{{ gps.chegada_operacao.url }}" target="_blank">🗺 Mapa</a></div>{% endif %}</div>
-          <div style="margin-top:10px"><small style="color:var(--muted);font-size:11px">Fotos do marco</small>
-            <div class="foto-grid" id="fotos_chegada_operacao">
-              {% for f in op.os.fotos_marcos.all %}{% if f.marco == 'chegada_operacao' %}<div class="foto-thumb" id="fmarco_{{ f.pk }}"><img src="{{ f.foto.url }}"><button type="button" class="del-btn" onclick="deleteFotoMarco('{{ op.token }}', {{ f.pk }}, 'fmarco_{{ f.pk }}')">✕</button></div>{% endif %}{% endfor %}
-              <label class="foto-upload-btn" for="file_chegada_operacao"><span>📷</span>Foto</label>
-              <input type="file" id="file_chegada_operacao" accept="image/*" capture="environment" onchange="uploadFotoMarco(this,'chegada_operacao','fotos_chegada_operacao','{{ op.token }}')">
-            </div>
-          </div>
-        </div>
-
-        <!-- INÍCIO OPERAÇÃO -->
-        <div class="marco-row">
-          <div class="marco-label"><span class="dot" style="background:#8b5cf6"></span>Início Operação</div>
-          <div class="gps-row"><small style="color:var(--muted);font-size:11px">Data, hora e KM</small><button type="button" class="btn btn-success" onclick="captureGPS('inicio_operacao',this)">📍 Capturar GPS</button></div>
-          <div class="grid-2">
-            <div class="field"><label>Data / Hora</label><input type="datetime-local" name="inicio_operacao" value="{{ fmt.inicio_operacao }}"></div>
-            <div class="field"><label>KM Hodômetro</label><input type="number" name="km_inicio_operacao" value="{{ op.km_inicio_operacao|default_if_none:'' }}" placeholder="Ex: 79786"></div>
-          </div>
-          <input type="hidden" name="gps_inicio_operacao_lat" id="gps_inicio_operacao_lat" value="{{ op.gps_inicio_operacao_lat|default_if_none:'' }}">
-          <input type="hidden" name="gps_inicio_operacao_lng" id="gps_inicio_operacao_lng" value="{{ op.gps_inicio_operacao_lng|default_if_none:'' }}">
-          <div id="gps_status_inicio_operacao">{% if gps.inicio_operacao %}<div class="gps-status ok">📍 {{ op.gps_inicio_operacao_lat }}, {{ op.gps_inicio_operacao_lng }}<a class="gps-link" href="{{ gps.inicio_operacao.url }}" target="_blank">🗺 Mapa</a></div>{% endif %}</div>
-          <div style="margin-top:10px"><small style="color:var(--muted);font-size:11px">Fotos do marco</small>
-            <div class="foto-grid" id="fotos_inicio_operacao">
-              {% for f in op.os.fotos_marcos.all %}{% if f.marco == 'inicio_operacao' %}<div class="foto-thumb" id="fmarco_{{ f.pk }}"><img src="{{ f.foto.url }}"><button type="button" class="del-btn" onclick="deleteFotoMarco('{{ op.token }}', {{ f.pk }}, 'fmarco_{{ f.pk }}')">✕</button></div>{% endif %}{% endfor %}
-              <label class="foto-upload-btn" for="file_inicio_operacao"><span>📷</span>Foto</label>
-              <input type="file" id="file_inicio_operacao" accept="image/*" capture="environment" onchange="uploadFotoMarco(this,'inicio_operacao','fotos_inicio_operacao','{{ op.token }}')">
-            </div>
-          </div>
-        </div>
-
-        <!-- TÉRMINO OPERAÇÃO -->
-        <div class="marco-row">
-          <div class="marco-label"><span class="dot" style="background:#f59e0b"></span>Término Operação</div>
-          <div class="gps-row"><small style="color:var(--muted);font-size:11px">Data, hora e KM</small><button type="button" class="btn btn-success" onclick="captureGPS('termino_operacao',this)">📍 Capturar GPS</button></div>
-          <div class="grid-2">
-            <div class="field"><label>Data / Hora</label><input type="datetime-local" name="termino_operacao" value="{{ fmt.termino_operacao }}"></div>
-            <div class="field"><label>KM Hodômetro</label><input type="number" name="km_termino_operacao" value="{{ op.km_termino_operacao|default_if_none:'' }}" placeholder="Ex: 80578"></div>
-          </div>
-          <input type="hidden" name="gps_termino_operacao_lat" id="gps_termino_operacao_lat" value="{{ op.gps_termino_operacao_lat|default_if_none:'' }}">
-          <input type="hidden" name="gps_termino_operacao_lng" id="gps_termino_operacao_lng" value="{{ op.gps_termino_operacao_lng|default_if_none:'' }}">
-          <div id="gps_status_termino_operacao">{% if gps.termino_operacao %}<div class="gps-status ok">📍 {{ op.gps_termino_operacao_lat }}, {{ op.gps_termino_operacao_lng }}<a class="gps-link" href="{{ gps.termino_operacao.url }}" target="_blank">🗺 Mapa</a></div>{% endif %}</div>
-          <div style="margin-top:10px"><small style="color:var(--muted);font-size:11px">Fotos do marco</small>
-            <div class="foto-grid" id="fotos_termino_operacao">
-              {% for f in op.os.fotos_marcos.all %}{% if f.marco == 'termino_operacao' %}<div class="foto-thumb" id="fmarco_{{ f.pk }}"><img src="{{ f.foto.url }}"><button type="button" class="del-btn" onclick="deleteFotoMarco('{{ op.token }}', {{ f.pk }}, 'fmarco_{{ f.pk }}')">✕</button></div>{% endif %}{% endfor %}
-              <label class="foto-upload-btn" for="file_termino_operacao"><span>📷</span>Foto</label>
-              <input type="file" id="file_termino_operacao" accept="image/*" capture="environment" onchange="uploadFotoMarco(this,'termino_operacao','fotos_termino_operacao','{{ op.token }}')">
-            </div>
-          </div>
-        </div>
-
-        <!-- TÉRMINO VIAGEM -->
-        <div class="marco-row">
-          <div class="marco-label"><span class="dot" style="background:#10b981"></span>Término de Viagem</div>
-          <div class="gps-row"><small style="color:var(--muted);font-size:11px">Data, hora e KM</small><button type="button" class="btn btn-success" onclick="captureGPS('termino_viagem',this)">📍 Capturar GPS</button></div>
-          <div class="grid-2">
-            <div class="field"><label>Data / Hora</label><input type="datetime-local" name="termino_viagem" value="{{ fmt.termino_viagem }}"></div>
-            <div class="field"><label>KM Hodômetro</label><input type="number" name="km_termino_viagem" value="{{ op.km_termino_viagem|default_if_none:'' }}" placeholder="Ex: 80578"></div>
-          </div>
-          <input type="hidden" name="gps_termino_viagem_lat" id="gps_termino_viagem_lat" value="{{ op.gps_termino_viagem_lat|default_if_none:'' }}">
-          <input type="hidden" name="gps_termino_viagem_lng" id="gps_termino_viagem_lng" value="{{ op.gps_termino_viagem_lng|default_if_none:'' }}">
-          <div id="gps_status_termino_viagem">{% if gps.termino_viagem %}<div class="gps-status ok">📍 {{ op.gps_termino_viagem_lat }}, {{ op.gps_termino_viagem_lng }}<a class="gps-link" href="{{ gps.termino_viagem.url }}" target="_blank">🗺 Mapa</a></div>{% endif %}</div>
-          <div style="margin-top:10px"><small style="color:var(--muted);font-size:11px">Fotos do marco</small>
-            <div class="foto-grid" id="fotos_termino_viagem">
-              {% for f in op.os.fotos_marcos.all %}{% if f.marco == 'termino_viagem' %}<div class="foto-thumb" id="fmarco_{{ f.pk }}"><img src="{{ f.foto.url }}"><button type="button" class="del-btn" onclick="deleteFotoMarco('{{ op.token }}', {{ f.pk }}, 'fmarco_{{ f.pk }}')">✕</button></div>{% endif %}{% endfor %}
-              <label class="foto-upload-btn" for="file_termino_viagem"><span>📷</span>Foto</label>
-              <input type="file" id="file_termino_viagem" accept="image/*" capture="environment" onchange="uploadFotoMarco(this,'termino_viagem','fotos_termino_viagem','{{ op.token }}')">
-            </div>
-          </div>
-        </div>
-        {% endwith %}
 
       </div>
     </div>
@@ -1010,31 +1052,77 @@ function captureGPSModal(latId, lngId, statusId) {
   );
 }
 
-/* ── UPLOAD FOTO MARCO (AJAX) — 1 foto por marco ── */
 
-async function uploadFotoMarco(input, marco, gridId, token) {
+/* ── FOTO MARCO - SELECIONAR (apenas preview, sem upload ainda) ── */
+const _fotoMarcoSelecionada = {};
+
+function selecionarFotoMarco(input, marco) {
   if (!input.files.length) return;
-  const fd = new FormData();
-  fd.append('marco', marco);
-  fd.append('foto', input.files[0]);
-  fd.append('csrfmiddlewaretoken', CSRF);
-  const r = await fetch(`/os/field/${token}/foto-marco/`, { method:'POST', body: fd });
-  const d = await r.json();
-  if (d.ok) {
-    const grid = document.getElementById(gridId);
-    // Remove miniatura(s) antiga(s) do mesmo marco antes de inserir a nova
-    grid.querySelectorAll('.foto-thumb').forEach(el => el.remove());
+  _fotoMarcoSelecionada[marco] = input.files[0];
+  const grid = document.getElementById('fotos_' + marco);
+  // remove thumbs pendentes anteriores
+  grid.querySelectorAll('.foto-thumb.pendente').forEach(el => el.remove());
+  const reader = new FileReader();
+  reader.onload = e => {
     const div = document.createElement('div');
-    div.className = 'foto-thumb'; div.id = 'fmarco_' + d.id;
-    div.innerHTML = `<img src="${d.url}"><button type="button" class="del-btn" onclick="deleteFotoMarco('${token}',${d.id},'fmarco_${d.id}')">✕</button>`;
+    div.className = 'foto-thumb pendente';
+    div.style.outline = '2px dashed var(--blue)';
+    div.innerHTML = `<img src="${e.target.result}" alt="">`;
     grid.insertBefore(div, grid.querySelector('label'));
-    // Atualiza label para "Substituir" após envio
-    const lbl = grid.querySelector('label');
-    if (lbl) lbl.innerHTML = '<span>📷</span>Substituir';
-  } else {
-    alert(d.erro || 'Erro ao enviar foto.');
+  };
+  reader.readAsDataURL(input.files[0]);
+  const lbl = document.getElementById('label_file_' + marco);
+  if (lbl) lbl.innerHTML = '<span>📷</span>Trocar';
+}
+
+/* ── SALVAR MARCO (data + km + gps + foto) ── */
+async function salvarMarco(marco, token) {
+  const btn = document.getElementById('btn_salvar_' + marco);
+  const dt  = document.getElementById('dt_' + marco)?.value || '';
+  const km  = document.getElementById('km_' + marco)?.value || '';
+  const lat = document.getElementById('gps_' + marco + '_lat')?.value || '';
+  const lng = document.getElementById('gps_' + marco + '_lng')?.value || '';
+
+  if (!dt) { alert('Preencha a data e hora antes de salvar.'); return; }
+
+  const fd = new FormData();
+  fd.append('csrfmiddlewaretoken', CSRF);
+  fd.append('marco', marco);
+  fd.append('dt', dt);
+  fd.append('km', km);
+  fd.append('lat', lat);
+  fd.append('lng', lng);
+  if (_fotoMarcoSelecionada[marco]) fd.append('foto', _fotoMarcoSelecionada[marco]);
+
+  btn.disabled = true; btn.textContent = '⏳ Salvando...';
+  try {
+    const r = await fetch(`/os/field/${token}/marco/salvar/`, { method: 'POST', body: fd });
+    const d = await r.json();
+    if (d.ok) {
+      btn.textContent = '✅ Salvo!';
+      btn.style.background = 'var(--green)';
+      // atualiza foto se retornou
+      if (d.foto_id && d.foto_url) {
+        const grid = document.getElementById('fotos_' + marco);
+        grid.querySelectorAll('.foto-thumb').forEach(el => el.remove());
+        const div = document.createElement('div');
+        div.className = 'foto-thumb'; div.id = 'fmarco_' + d.foto_id;
+        div.innerHTML = `<img src="${d.foto_url}"><button type="button" class="del-btn" onclick="deleteFotoMarco('${token}',${d.foto_id},'fmarco_${d.foto_id}')">✕</button>`;
+        grid.insertBefore(div, grid.querySelector('label'));
+      }
+      delete _fotoMarcoSelecionada[marco];
+      setTimeout(() => {
+        btn.textContent = '💾 Salvar';
+        btn.style.background = '';
+        btn.disabled = false;
+      }, 2000);
+    } else {
+      alert(d.erro || 'Erro ao salvar marco.');
+      btn.textContent = '💾 Salvar'; btn.disabled = false;
+    }
+  } catch(e) {
+    alert('Erro de conexão.'); btn.textContent = '💾 Salvar'; btn.disabled = false;
   }
-  input.value = '';
 }
 
 async function deleteFotoMarco(token, pk, elId) {

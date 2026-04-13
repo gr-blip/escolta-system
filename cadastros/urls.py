@@ -79,6 +79,8 @@ urlpatterns += [
 
     # OS - Link externo do agente
     path('os/field/<uuid:token>/', views.os_field_link, name='os_field_link'),
+    path('os/field/<uuid:token>/marco/salvar/', views.os_field_marco_salvar, name='os_field_marco_salvar'),
+
     path('os/field/<uuid:token>/foto-marco/', views.os_field_foto_marco, name='os_field_foto_marco'),
     path('os/field/<uuid:token>/foto-marco/<int:foto_pk>/delete/', views.os_field_foto_marco_delete, name='os_field_foto_marco_delete'),
     path('os/field/<uuid:token>/parada/salvar/', views.os_field_parada_salvar, name='os_field_parada_salvar'),
