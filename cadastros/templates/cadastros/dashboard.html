@@ -1,11 +1,9 @@
-{% extends 'cadastros/base.html' %}
-{% block title %}Painel de Avisos{% endblock %}
-{% block page_title %}Painel de Avisos{% endblock %}
+﻿{% extends 'cadastros/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a>{% endblock %}
 
 {% block content %}
-
-<!-- ── CARDS DE TOTAIS ── -->
 <div class="stats-grid">
   <div class="stat-card">
     <div class="stat-label">Agentes ativos</div>
@@ -29,113 +27,6 @@
   </div>
 </div>
 
-<!-- ── ALERTAS DE VENCIMENTO ── -->
-{% if alertas_cnh or alertas_cnv or alertas_coletes %}
-<div style="margin-bottom:20px">
-  <h2 style="font-size:14px;font-weight:700;color:var(--text1);margin-bottom:12px;display:flex;align-items:center;gap:8px">
-    <span style="font-size:18px">⚠️</span> Alertas de Vencimento
-    <span style="font-size:11px;font-weight:400;color:var(--text3)">(próximos 60 dias ou já vencidos)</span>
-  </h2>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px">
-
-    <!-- CNH -->
-    {% if alertas_cnh %}
-    <div class="card" style="border-left:3px solid #f59e0b">
-      <div class="card-title" style="color:#b45309">
-        🪪 CNH — Próximas a Vencer
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Agente</th><th>Validade</th><th>Situação</th></tr></thead>
-          <tbody>
-            {% for a in alertas_cnh %}
-            <tr>
-              <td><a href="{% url 'agente_edit' a.pk %}" style="color:var(--blue-light);text-decoration:none">{{ a.nome }}</a></td>
-              <td style="font-family:monospace;font-size:12px">{{ a.cnh_validade|date:"d/m/Y" }}</td>
-              <td>
-                {% if a.cnh_validade < hoje %}
-                  <span class="badge badge-red">Vencida</span>
-                {% else %}
-                  <span class="badge badge-amber">Vence em {{ a.cnh_validade|timeuntil:hoje }}</span>
-                {% endif %}
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-    {% endif %}
-
-    <!-- CNV -->
-    {% if alertas_cnv %}
-    <div class="card" style="border-left:3px solid #ef4444">
-      <div class="card-title" style="color:#b91c1c">
-        🔫 CNV — Próximas a Vencer
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Agente</th><th>Validade</th><th>Situação</th></tr></thead>
-          <tbody>
-            {% for a in alertas_cnv %}
-            <tr>
-              <td><a href="{% url 'agente_edit' a.pk %}" style="color:var(--blue-light);text-decoration:none">{{ a.nome }}</a></td>
-              <td style="font-family:monospace;font-size:12px">{{ a.cnv_validade|date:"d/m/Y" }}</td>
-              <td>
-                {% if a.cnv_validade < hoje %}
-                  <span class="badge badge-red">Vencida</span>
-                {% else %}
-                  <span class="badge badge-amber">Vence em {{ a.cnv_validade|timeuntil:hoje }}</span>
-                {% endif %}
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-    {% endif %}
-
-    <!-- COLETES -->
-    {% if alertas_coletes %}
-    <div class="card" style="border-left:3px solid #8b5cf6">
-      <div class="card-title" style="color:#6d28d9">
-        🦺 Coletes — Próximos a Vencer
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Marca</th><th>Numeração</th><th>Validade</th><th>Situação</th></tr></thead>
-          <tbody>
-            {% for c in alertas_coletes %}
-            <tr>
-              <td>{{ c.marca }}</td>
-              <td style="color:var(--text2)">{{ c.numeracao }}</td>
-              <td style="font-family:monospace;font-size:12px">{{ c.validade|date:"d/m/Y" }}</td>
-              <td>
-                {% if c.validade < hoje %}
-                  <span class="badge badge-red">Vencido</span>
-                {% else %}
-                  <span class="badge badge-amber">Vence em {{ c.validade|timeuntil:hoje }}</span>
-                {% endif %}
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-    {% endif %}
-
-  </div>
-</div>
-{% else %}
-<div style="background:rgba(5,150,105,.08);border:1px solid rgba(5,150,105,.3);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:10px">
-  <span style="font-size:20px">✅</span>
-  <span style="font-size:13px;color:#065f46;font-weight:500">Nenhum vencimento próximo nos próximos 60 dias. Tudo em dia!</span>
-</div>
-{% endif %}
-
-<!-- ── AGENTES E VIATURAS RECENTES ── -->
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
   <div class="card">
     <div class="card-title">
@@ -195,5 +86,5 @@
     {% endif %}
   </div>
 </div>
-
 {% endblock %}
+

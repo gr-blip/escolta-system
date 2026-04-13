@@ -5,6 +5,12 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+def _foto_upload_path(instance, filename):
+    return f'comprovantes/{filename}'
+
+
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -20,7 +26,7 @@ class Migration(migrations.Migration):
                 ('natureza', models.CharField(choices=[('despesa', 'Despesa'), ('credito', 'Crédito / Reembolso')], default='despesa', max_length=10, verbose_name='Natureza')),
                 ('descricao', models.CharField(blank=True, max_length=300, verbose_name='Descrição')),
                 ('valor', models.DecimalField(decimal_places=2, max_digits=10, verbose_name='Valor (R$)')),
-                ('comprovante', models.ImageField(blank=True, null=True, upload_to=cadastros.models._foto_upload_path, verbose_name='Comprovante (foto)')),
+                ('comprovante', models.ImageField(blank=True, null=True, upload_to=_foto_upload_path, verbose_name='Comprovante (foto)')),
                 ('ocorrido_em', models.DateTimeField(verbose_name='Data / Hora')),
                 ('criado_em', models.DateTimeField(auto_now_add=True)),
             ],
@@ -96,7 +102,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('momento', models.CharField(choices=[('antes', 'Antes da Escolta'), ('depois', 'Após a Escolta'), ('outro', 'Outro')], default='antes', max_length=10)),
-                ('foto', models.ImageField(upload_to=cadastros.models._foto_upload_path, verbose_name='Foto')),
+                ('foto', models.ImageField(upload_to=_foto_upload_path, verbose_name='Foto')),
                 ('criado_em', models.DateTimeField(auto_now_add=True)),
                 ('veiculo', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='fotos', to='cadastros.veiculoescoltado', verbose_name='Veículo')),
             ],
@@ -109,7 +115,7 @@ class Migration(migrations.Migration):
             name='FotoTrocaMotorista',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('foto', models.ImageField(upload_to=cadastros.models._foto_upload_path, verbose_name='Foto')),
+                ('foto', models.ImageField(upload_to=_foto_upload_path, verbose_name='Foto')),
                 ('criado_em', models.DateTimeField(auto_now_add=True)),
                 ('troca', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='fotos', to='cadastros.trocamotorista', verbose_name='Troca')),
             ],
@@ -122,7 +128,7 @@ class Migration(migrations.Migration):
             name='FotoParada',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('foto', models.ImageField(upload_to=cadastros.models._foto_upload_path, verbose_name='Foto')),
+                ('foto', models.ImageField(upload_to=_foto_upload_path, verbose_name='Foto')),
                 ('criado_em', models.DateTimeField(auto_now_add=True)),
                 ('parada', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='fotos', to='cadastros.parada', verbose_name='Parada')),
             ],
@@ -136,7 +142,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('marco', models.CharField(choices=[('inicio_viagem', 'Início de Viagem'), ('chegada_operacao', 'Chegada Operação'), ('inicio_operacao', 'Início Operação'), ('termino_operacao', 'Término Operação'), ('termino_viagem', 'Término de Viagem')], max_length=30, verbose_name='Marco')),
-                ('foto', models.ImageField(upload_to=cadastros.models._foto_upload_path, verbose_name='Foto')),
+                ('foto', models.ImageField(upload_to=_foto_upload_path, verbose_name='Foto')),
                 ('latitude', models.DecimalField(blank=True, decimal_places=7, max_digits=10, null=True)),
                 ('longitude', models.DecimalField(blank=True, decimal_places=7, max_digits=10, null=True)),
                 ('criado_em', models.DateTimeField(auto_now_add=True)),
@@ -152,7 +158,7 @@ class Migration(migrations.Migration):
             name='FotoIncidente',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('foto', models.ImageField(upload_to=cadastros.models._foto_upload_path, verbose_name='Foto')),
+                ('foto', models.ImageField(upload_to=_foto_upload_path, verbose_name='Foto')),
                 ('criado_em', models.DateTimeField(auto_now_add=True)),
                 ('incidente', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='fotos', to='cadastros.incidente', verbose_name='Incidente')),
             ],
@@ -167,7 +173,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('tipo', models.CharField(choices=[('agente1', 'Agente 1'), ('agente2', 'Agente 2'), ('motorista', 'Motorista Escoltado'), ('supervisor', 'Supervisor')], max_length=20, verbose_name='Tipo')),
                 ('nome', models.CharField(max_length=200, verbose_name='Nome do Signatário')),
-                ('imagem', models.ImageField(upload_to=cadastros.models._foto_upload_path, verbose_name='Assinatura')),
+                ('imagem', models.ImageField(upload_to=_foto_upload_path, verbose_name='Assinatura')),
                 ('criado_em', models.DateTimeField(auto_now_add=True)),
                 ('os', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assinaturas', to='cadastros.ordemservico', verbose_name='OS')),
             ],
