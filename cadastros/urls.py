@@ -33,7 +33,7 @@ urlpatterns = [
     path('clientes/json/', views.clientes_json, name='clientes_json'),
     path('clientes/novo/', views.cliente_create, name='cliente_create'),
     path('clientes/<int:pk>/editar/', views.cliente_edit, name='cliente_edit'),
-    path('clientes/<int:pk>/excluir/', views.cliente_delete, name='cliente_delete'),
+    path('clientes/<int:pk>/excluir/', views.cliente_inativar, name='cliente_delete'),
 ]
 
 # Coletes
