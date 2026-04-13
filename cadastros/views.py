@@ -1765,7 +1765,7 @@ def usuario_delete(request, pk):
 # ==============================================================================
 
 
-@login_required
+@csrf_exempt
 def os_field_marco_salvar(request, token):
     """Salva um marco individual (data + km + gps + foto) via AJAX do link do agente."""
     from django.http import JsonResponse
