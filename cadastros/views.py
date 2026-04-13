@@ -704,6 +704,7 @@ def os_detalhe(request, pk):
         'novo': False,
         'forma_choices': OrdemServico.FORMA_CHOICES,
         'operacional': getattr(os, 'operacional', None),
+        'op': getattr(os, 'operacional', None),
         'veiculos': veiculos_qs,
         'veiculo_slots': veiculo_slots,
         'fotos_marco': fotos_marco,
