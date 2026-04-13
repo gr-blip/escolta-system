@@ -1010,66 +1010,7 @@ function captureGPSModal(latId, lngId, statusId) {
   );
 }
 
-/* ── UPLOAD FOTO MARCO (AJAX) — 1 foto por marco, cooldown 2 min ── */
-const FOTO_MARCO_COOLDOWN_MS = 2 * 60 * 1000; // 120 segundos
-
-function _marcoLabelEl(marco) {
-  // Retorna o <label> do botão de foto do marco
-  return document.querySelector(`#file_${marco}`)?.previousElementSibling || null;
-}
-
-function _iniciarCooldownMarco(marco) {
-  const lbl = _marcoLabelEl(marco);
-  const inputEl = document.getElementById(`file_${marco}`);
-  if (!lbl || !inputEl) return;
-  const ts = Date.now();
-  sessionStorage.setItem(`foto_marco_ts_${marco}`, ts);
-  lbl.style.pointerEvents = 'none';
-  lbl.style.opacity = '0.5';
-  inputEl.disabled = true;
-  const iv = setInterval(() => {
-    const restante = Math.ceil((FOTO_MARCO_COOLDOWN_MS - (Date.now() - ts)) / 1000);
-    if (restante <= 0) {
-      clearInterval(iv);
-      lbl.innerHTML = '<span>📷</span>Substituir';
-      lbl.style.pointerEvents = '';
-      lbl.style.opacity = '';
-      inputEl.disabled = false;
-      sessionStorage.removeItem(`foto_marco_ts_${marco}`);
-    } else {
-      lbl.innerHTML = `<span>⏳</span>${restante}s`;
-    }
-  }, 1000);
-}
-
-// Restaura cooldowns em andamento ao carregar a página (ex: refresh rápido)
-document.addEventListener('DOMContentLoaded', () => {
-  ['inicio_viagem','chegada_operacao','inicio_operacao','termino_operacao','termino_viagem'].forEach(marco => {
-    const ts = parseInt(sessionStorage.getItem(`foto_marco_ts_${marco}`) || '0');
-    if (ts && (Date.now() - ts) < FOTO_MARCO_COOLDOWN_MS) _iniciarCooldownMarco._resume(marco, ts);
-  });
-});
-_iniciarCooldownMarco._resume = function(marco, ts) {
-  const lbl = _marcoLabelEl(marco);
-  const inputEl = document.getElementById(`file_${marco}`);
-  if (!lbl || !inputEl) return;
-  lbl.style.pointerEvents = 'none';
-  lbl.style.opacity = '0.5';
-  inputEl.disabled = true;
-  const iv = setInterval(() => {
-    const restante = Math.ceil((FOTO_MARCO_COOLDOWN_MS - (Date.now() - ts)) / 1000);
-    if (restante <= 0) {
-      clearInterval(iv);
-      lbl.innerHTML = '<span>📷</span>Substituir';
-      lbl.style.pointerEvents = '';
-      lbl.style.opacity = '';
-      inputEl.disabled = false;
-      sessionStorage.removeItem(`foto_marco_ts_${marco}`);
-    } else {
-      lbl.innerHTML = `<span>⏳</span>${restante}s`;
-    }
-  }, 1000);
-};
+/* ── UPLOAD FOTO MARCO (AJAX) — 1 foto por marco ── */
 
 async function uploadFotoMarco(input, marco, gridId, token) {
   if (!input.files.length) return;
@@ -1087,8 +1028,9 @@ async function uploadFotoMarco(input, marco, gridId, token) {
     div.className = 'foto-thumb'; div.id = 'fmarco_' + d.id;
     div.innerHTML = `<img src="${d.url}"><button type="button" class="del-btn" onclick="deleteFotoMarco('${token}',${d.id},'fmarco_${d.id}')">✕</button>`;
     grid.insertBefore(div, grid.querySelector('label'));
-    // Inicia cooldown de 2 minutos no botão de foto
-    _iniciarCooldownMarco(marco);
+    // Atualiza label para "Substituir" após envio
+    const lbl = grid.querySelector('label');
+    if (lbl) lbl.innerHTML = '<span>📷</span>Substituir';
   } else {
     alert(d.erro || 'Erro ao enviar foto.');
   }
