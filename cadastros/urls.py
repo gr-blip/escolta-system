@@ -87,4 +87,25 @@ urlpatterns += [
     path('usuarios/<int:pk>/editar/', views.usuario_edit, name='usuario_edit'),
     path('usuarios/<int:pk>/senha/', views.usuario_senha, name='usuario_senha'),
     path('usuarios/<int:pk>/excluir/', views.usuario_delete, name='usuario_delete'),
+
+    # OS - Gerar/Desativar link externo
+    path('operacional/os/<int:pk>/gerar-link/', views.os_gerar_link, name='os_gerar_link'),
+    path('operacional/os/<int:pk>/desativar-link/', views.os_desativar_link, name='os_desativar_link'),
+
+    # OS - Link externo do agente
+    path('os/field/<uuid:token>/', views.os_field_link, name='os_field_link'),
+    path('os/field/<uuid:token>/foto-marco/', views.os_field_foto_marco_upload, name='os_field_foto_marco_upload'),
+    path('os/field/<uuid:token>/foto-marco/<int:pk>/delete/', views.os_field_foto_marco_delete, name='os_field_foto_marco_delete'),
+    path('os/field/<uuid:token>/parada/salvar/', views.os_field_parada_salvar, name='os_field_parada_salvar'),
+    path('os/field/<uuid:token>/parada/<int:pk>/delete/', views.os_field_parada_delete, name='os_field_parada_delete'),
+    path('os/field/<uuid:token>/incidente/salvar/', views.os_field_incidente_salvar, name='os_field_incidente_salvar'),
+    path('os/field/<uuid:token>/incidente/<int:pk>/delete/', views.os_field_incidente_delete, name='os_field_incidente_delete'),
+    path('os/field/<uuid:token>/foto-veiculo/', views.os_field_foto_veiculo, name='os_field_foto_veiculo'),
+    path('os/field/<uuid:token>/foto-veiculo/<int:pk>/delete/', views.os_field_foto_veiculo_delete, name='os_field_foto_veiculo_delete'),
+    path('os/field/<uuid:token>/troca-motorista/salvar/', views.os_field_troca_motorista, name='os_field_troca_motorista'),
+    path('os/field/<uuid:token>/assinatura/', views.os_field_assinatura, name='os_field_assinatura'),
+    path('os/field/<uuid:token>/despesa/salvar/', views.os_field_despesa_salvar, name='os_field_despesa_salvar'),
+    path('os/field/<uuid:token>/despesa/<int:pk>/delete/', views.os_field_despesa_delete, name='os_field_despesa_delete'),
+    path('os/field/<uuid:token>/veiculo/salvar/', views.os_field_veiculo_salvar, name='os_field_veiculo_salvar'),
+    path('os/field/<uuid:token>/veiculo/<int:pk>/delete/', views.os_field_veiculo_delete, name='os_field_veiculo_delete'),
 ]
