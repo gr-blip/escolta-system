@@ -795,7 +795,7 @@ function escJs(s) {
     <div class="card-body">
       <div class="field" style="margin-bottom:10px">
         <label>Nome do Signatário</label>
-        <input type="text" id="nome_ass_agente1" placeholder="Nome completo">
+        <input type="text" id="nome_ass_agente1" value="{{ os.snap_agente1_nome }}" placeholder="Nome completo" readonly style="background:#f1f5f9;color:var(--muted);">
       </div>
       <div id="preview_ass_agente1">
         {% for a in os.assinaturas.all %}{% if a.tipo == 'agente1' %}
@@ -816,7 +816,7 @@ function escJs(s) {
     <div class="card-body">
       <div class="field" style="margin-bottom:10px">
         <label>Nome do Signatário</label>
-        <input type="text" id="nome_ass_agente2" placeholder="Nome completo">
+        <input type="text" id="nome_ass_agente2" value="{{ os.snap_agente2_nome }}" placeholder="Nome completo" readonly style="background:#f1f5f9;color:var(--muted);">
       </div>
       <div id="preview_ass_agente2">
         {% for a in os.assinaturas.all %}{% if a.tipo == 'agente2' %}
@@ -837,7 +837,7 @@ function escJs(s) {
     <div class="card-body">
       <div class="field" style="margin-bottom:10px">
         <label>Nome do Signatário</label>
-        <input type="text" id="nome_ass_motorista" placeholder="Nome completo">
+        <input type="text" id="nome_ass_motorista" value="{% firstof os.veiculos.all.0.motorista '' %}" placeholder="Nome completo">
       </div>
       <div id="preview_ass_motorista">
         {% for a in os.assinaturas.all %}{% if a.tipo == 'motorista' %}
