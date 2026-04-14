@@ -509,8 +509,8 @@
         <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Pedágio</span>
         <div style="display:flex;align-items:center;gap:6px">
           <span style="font-size:12px;color:var(--text3)">R$</span>
-          <input type="number" name="pedagio" min="0" step="0.01"
-            value="{{ operacional.pedagio|floatformat:2 }}" 
+          <input type="text" name="pedagio" inputmode="decimal"
+            value="{{ operacional.pedagio|default:'' }}" 
             placeholder="0,00"
             style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:14px;font-weight:600;font-family:inherit;outline:none;width:110px;text-align:right"
             onfocus="this.style.borderColor='var(--blue)'"
