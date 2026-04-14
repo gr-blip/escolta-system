@@ -765,7 +765,6 @@ function escJs(s) {
 <div class="container">
 
   {% for tipo_val, tipo_label in assinatura_tipos %}
-  {% with ass=assinaturas_dict|default:None %}
   <div class="card">
     <div class="card-header"><div class="card-header-left"><span class="icon">✍️</span><h3>{{ tipo_label }}</h3></div></div>
     <div class="card-body">
@@ -773,7 +772,6 @@ function escJs(s) {
         <label>Nome do Signatário</label>
         <input type="text" id="nome_ass_{{ tipo_val }}" placeholder="Nome completo">
       </div>
-      <!-- Preview assinatura existente -->
       <div id="preview_ass_{{ tipo_val }}">
         {% for a in os.assinaturas.all %}{% if a.tipo == tipo_val %}
         <div class="sig-preview"><img src="{{ a.imagem.url }}" alt="Assinatura de {{ a.nome }}"></div>
@@ -789,7 +787,72 @@ function escJs(s) {
       </div>
     </div>
   </div>
-  {% endwith %}
+  {% empty %}
+  <!-- Fallback: assinatura_tipos não veio da view — exibe cards fixos -->
+  {% for item in "agente1,agente2,motorista,cliente"|make_list %}{% endfor %}
+  <div class="card">
+    <div class="card-header"><div class="card-header-left"><span class="icon">✍️</span><h3>Agente 1</h3></div></div>
+    <div class="card-body">
+      <div class="field" style="margin-bottom:10px">
+        <label>Nome do Signatário</label>
+        <input type="text" id="nome_ass_agente1" placeholder="Nome completo">
+      </div>
+      <div id="preview_ass_agente1">
+        {% for a in os.assinaturas.all %}{% if a.tipo == 'agente1' %}
+        <div class="sig-preview"><img src="{{ a.imagem.url }}" alt="Assinatura"></div>
+        <p style="font-size:11px;color:var(--muted);margin-top:4px">✅ {{ a.nome }} — {{ a.criado_em|date:"d/m/Y H:i" }}</p>
+        {% endif %}{% endfor %}
+      </div>
+      <div class="canvas-wrap"><canvas class="sig" id="canvas_agente1" height="140"></canvas></div>
+      <div class="canvas-actions">
+        <button type="button" class="btn btn-ghost" onclick="clearCanvas('canvas_agente1')">🗑 Limpar</button>
+        <button type="button" class="btn btn-primary" onclick="salvarAssinatura('agente1','{{ op.token }}')">💾 Salvar Assinatura</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-header-left"><span class="icon">✍️</span><h3>Agente 2</h3></div></div>
+    <div class="card-body">
+      <div class="field" style="margin-bottom:10px">
+        <label>Nome do Signatário</label>
+        <input type="text" id="nome_ass_agente2" placeholder="Nome completo">
+      </div>
+      <div id="preview_ass_agente2">
+        {% for a in os.assinaturas.all %}{% if a.tipo == 'agente2' %}
+        <div class="sig-preview"><img src="{{ a.imagem.url }}" alt="Assinatura"></div>
+        <p style="font-size:11px;color:var(--muted);margin-top:4px">✅ {{ a.nome }} — {{ a.criado_em|date:"d/m/Y H:i" }}</p>
+        {% endif %}{% endfor %}
+      </div>
+      <div class="canvas-wrap"><canvas class="sig" id="canvas_agente2" height="140"></canvas></div>
+      <div class="canvas-actions">
+        <button type="button" class="btn btn-ghost" onclick="clearCanvas('canvas_agente2')">🗑 Limpar</button>
+        <button type="button" class="btn btn-primary" onclick="salvarAssinatura('agente2','{{ op.token }}')">💾 Salvar Assinatura</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-header-left"><span class="icon">✍️</span><h3>Motorista</h3></div></div>
+    <div class="card-body">
+      <div class="field" style="margin-bottom:10px">
+        <label>Nome do Signatário</label>
+        <input type="text" id="nome_ass_motorista" placeholder="Nome completo">
+      </div>
+      <div id="preview_ass_motorista">
+        {% for a in os.assinaturas.all %}{% if a.tipo == 'motorista' %}
+        <div class="sig-preview"><img src="{{ a.imagem.url }}" alt="Assinatura"></div>
+        <p style="font-size:11px;color:var(--muted);margin-top:4px">✅ {{ a.nome }} — {{ a.criado_em|date:"d/m/Y H:i" }}</p>
+        {% endif %}{% endfor %}
+      </div>
+      <div class="canvas-wrap"><canvas class="sig" id="canvas_motorista" height="140"></canvas></div>
+      <div class="canvas-actions">
+        <button type="button" class="btn btn-ghost" onclick="clearCanvas('canvas_motorista')">🗑 Limpar</button>
+        <button type="button" class="btn btn-primary" onclick="salvarAssinatura('motorista','{{ op.token }}')">💾 Salvar Assinatura</button>
+      </div>
+    </div>
+  </div>
+
   {% endfor %}
 
 </div>
