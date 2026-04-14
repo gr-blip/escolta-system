@@ -1,5 +1,5 @@
-{% load cadastros_extras %}
 <!DOCTYPE html>
+{% load cadastros_extras %}
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
@@ -143,34 +143,6 @@ body{
 .print-header-os{text-align:right}
 .print-header-os .os-num{font-size:22px;font-weight:800;color:#4d8df0}
 .print-header-os .os-status{font-size:11px;color:#8090b0;margin-top:2px}
-
-/* ── FOTO VEÍCULO ESCOLTADO ── */
-.veiculo-foto{
-  width:100%;max-width:340px;height:200px;
-  border:1px solid var(--border);border-radius:var(--radius);
-  background:var(--bg3);
-  display:flex;align-items:center;justify-content:center;
-  color:var(--text3);font-size:40px;overflow:hidden;margin-bottom:12px
-}
-.veiculo-foto img{width:100%;height:100%;object-fit:cover}
-
-/* ── ASSINATURAS ── */
-.assinatura-wrap{display:flex;gap:18px;flex-wrap:wrap;margin-top:6px}
-.assinatura-box{flex:1;min-width:160px;display:flex;flex-direction:column;align-items:center;gap:4px}
-.assinatura-canvas-wrap{
-  width:100%;height:90px;
-  border:1px solid var(--border);border-radius:var(--radius);
-  background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center;
-}
-.assinatura-canvas-wrap img{width:100%;height:100%;object-fit:contain}
-.assinatura-linha{width:100%;border-top:1px solid var(--text);margin-top:6px}
-.assinatura-nome{font-size:10px;color:var(--text2);font-weight:600;text-align:center}
-.assinatura-cargo{font-size:9px;color:var(--text3);text-align:center}
-@media print {
-  .veiculo-foto{background:#e8eaf2!important}
-  .assinatura-canvas-wrap{background:#fff!important;border-color:#d0d4e8!important}
-}
-
 </style>
 </head>
 <body>
@@ -400,6 +372,44 @@ body{
 
   {% endif %}
 
+  <!-- ── VEÍCULOS ESCOLTADOS ── -->
+  {% if os.veiculos.exists %}
+  <div class="card">
+    <div class="card-header">
+      <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><rect x="1" y="5" width="12" height="6" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 5V4a3.5 3.5 0 017 0v1" stroke="currentColor" stroke-width="1.3"/></svg>
+      Veículos Escoltados
+    </div>
+    <div class="card-body" style="padding:0">
+      <table class="op-table">
+        <thead>
+          <tr>
+            <th style="width:40px">#</th>
+            <th>Veículo</th>
+            <th>Cavalo</th>
+            <th>Carreta</th>
+            <th>Carreta 2</th>
+            <th>Motorista</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in os.veiculos.all %}
+          {% if v.placa_cavalo or v.veiculo or v.motorista %}
+          <tr>
+            <td class="center">{{ v.ordem }}</td>
+            <td>{{ v.veiculo|default:"—" }}</td>
+            <td class="num">{{ v.placa_cavalo|default:"—" }}</td>
+            <td class="num">{{ v.placa_carreta|default:"—" }}</td>
+            <td class="num">{{ v.placa_carreta2|default:"—" }}</td>
+            <td>{{ v.motorista|default:"—" }}</td>
+          </tr>
+          {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- ── OBSERVAÇÕES ── -->
   {% if os.observacoes %}
   <div class="card">
@@ -491,166 +501,144 @@ body{
   </div>
   {% endif %}
 
-
-  <!-- ── VEÍCULOS ESCOLTADOS ── -->
-  {% if veiculos_print %}
+  <!-- ── FOTOS DOS MARCOS ── -->
+  {% if op and fotos_marco %}
   <div class="card">
     <div class="card-header">
-      <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><rect x="1" y="5" width="12" height="6" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 5V4a3.5 3.5 0 017 0v1" stroke="currentColor" stroke-width="1.3"/></svg>
-      Veículos Escoltados
+      <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><rect x="1" y="3" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.3"/><circle cx="7" cy="7.5" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="10.5" cy="4.5" r=".8" fill="currentColor"/></svg>
+      Fotos dos Marcos
     </div>
-    <div class="card-body" style="padding:0">
-      <table class="op-table">
+    <div class="card-body" style="padding:0;overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;min-width:600px">
+        <!-- Cabeçalho dos marcos -->
         <thead>
-          <tr>
-            <th style="width:30px">#</th>
-            <th>Tipo / Desc.</th>
-            <th>Cavalo</th>
-            <th>Carreta</th>
-            <th>Carreta 2</th>
-            <th>Motorista</th>
+          <tr style="background:var(--bg3);border-bottom:1px solid var(--border2)">
+            <th style="padding:8px 10px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;text-align:center;border-right:1px solid var(--border)">Início de Viagem</th>
+            <th style="padding:8px 10px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;text-align:center;border-right:1px solid var(--border)">Chegada Operação</th>
+            <th style="padding:8px 10px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;text-align:center;border-right:1px solid var(--border)">Início Operação</th>
+            <th style="padding:8px 10px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;text-align:center;border-right:1px solid var(--border)">Término Operação</th>
+            <th style="padding:8px 10px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;text-align:center">Término de Viagem</th>
           </tr>
         </thead>
         <tbody>
-          {% for item in veiculos_print %}
+          <!-- Linha de data/hora e KM -->
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:3px 8px;text-align:center;font-size:11px;color:var(--text2);border-right:1px solid var(--border)">
+              {% if op.inicio_viagem %}{{ op.inicio_viagem|date:"d/m/Y H:i" }}<br><span style="color:var(--text3)">KM: {{ op.km_inicio_viagem|default:"—" }}</span>{% else %}—{% endif %}
+            </td>
+            <td style="padding:3px 8px;text-align:center;font-size:11px;color:var(--text2);border-right:1px solid var(--border)">
+              {% if op.chegada_operacao %}{{ op.chegada_operacao|date:"d/m/Y H:i" }}<br><span style="color:var(--text3)">KM: {{ op.km_chegada_operacao|default:"—" }}</span>{% else %}—{% endif %}
+            </td>
+            <td style="padding:3px 8px;text-align:center;font-size:11px;color:var(--text2);border-right:1px solid var(--border)">
+              {% if op.inicio_operacao %}{{ op.inicio_operacao|date:"d/m/Y H:i" }}<br><span style="color:var(--text3)">KM: {{ op.km_inicio_operacao|default:"—" }}</span>{% else %}—{% endif %}
+            </td>
+            <td style="padding:3px 8px;text-align:center;font-size:11px;color:var(--text2);border-right:1px solid var(--border)">
+              {% if op.termino_operacao %}{{ op.termino_operacao|date:"d/m/Y H:i" }}<br><span style="color:var(--text3)">KM: {{ op.km_termino_operacao|default:"—" }}</span>{% else %}—{% endif %}
+            </td>
+            <td style="padding:3px 8px;text-align:center;font-size:11px;color:var(--text2)">
+              {% if op.termino_viagem %}{{ op.termino_viagem|date:"d/m/Y H:i" }}<br><span style="color:var(--text3)">KM: {{ op.km_termino_viagem|default:"—" }}</span>{% else %}—{% endif %}
+            </td>
+          </tr>
+          <!-- Linha das fotos -->
+          <tr style="border-bottom:1px solid var(--border)">
+            {% for marco_key, marco_label in fotos_marco_lista %}
+            <td style="padding:4px;text-align:center;vertical-align:middle;height:180px;{% if not forloop.last %}border-right:1px solid var(--border);{% endif %}">
+              {% if marco_key in fotos_marco %}
+                <a href="{{ fotos_marco|get_item:marco_key }}" target="_blank">
+                  <img src="{{ fotos_marco|get_item:marco_key }}"
+                       alt="Foto {{ marco_label }}"
+                       style="width:100%;height:160px;border-radius:6px;object-fit:cover;box-shadow:0 1px 4px rgba(0,0,0,.15);display:block">
+                </a>
+              {% else %}
+                <span style="color:var(--text3);font-size:11px">Sem foto</span>
+              {% endif %}
+            </td>
+            {% endfor %}
+          </tr>
+          <!-- Linha de tempos e distâncias -->
           <tr>
-            <td>{{ item.veiculo.ordem }}</td>
-            <td>{{ item.veiculo.veiculo|default:"—" }}</td>
-            <td class="num">{{ item.veiculo.placa_cavalo|default:"—" }}</td>
-            <td class="num">{{ item.veiculo.placa_carreta|default:"—" }}</td>
-            <td class="num">{{ item.veiculo.placa_carreta2|default:"—" }}</td>
-            <td>{{ item.veiculo.motorista|default:"—" }}</td>
+            <td style="padding:3px 8px;text-align:center;font-size:10px;color:var(--text3);border-right:1px solid var(--border)">—</td>
+            <td style="padding:3px 8px;text-align:center;font-size:10px;color:var(--text3);border-right:1px solid var(--border)">
+              Tempo: {{ op.tempo_chegada|default:"—" }}<br>Dist.: {{ op.km_trecho_chegada|default:"0" }} km
+            </td>
+            <td style="padding:3px 8px;text-align:center;font-size:10px;color:var(--text3);border-right:1px solid var(--border)">
+              Tempo: {{ op.tempo_inicio_op|default:"—" }}<br>Dist.: 0 km
+            </td>
+            <td style="padding:3px 8px;text-align:center;font-size:10px;color:var(--text3);border-right:1px solid var(--border)">
+              Tempo: {{ op.tempo_termino_op|default:"—" }}<br>Dist.: {{ op.km_trecho_termino_op|default:"0" }} km
+            </td>
+            <td style="padding:3px 8px;text-align:center;font-size:10px;color:var(--text3)">
+              Tempo: {{ op.tempo_termino_viagem|default:"—" }}<br>Dist.: {{ op.km_total|default:"0" }} km
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+
+  <!--  DESPESAS / CREDITOS  -->
+  {% if despesas %}
+  <div class="card">
+    <div class="card-header">
+      <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><rect x="1" y="3" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 7h2M8 7h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Despesas / Créditos
+    </div>
+    <div class="card-body" style="padding:0">
+      <table class="op-table" style="width:100%">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Natureza</th>
+            <th>Descrição</th>
+            <th>Data</th>
+            <th style="text-align:right;padding-right:16px">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in despesas %}
+          <tr>
+            <td class="sit">{{ d.get_tipo_display }}</td>
+            <td>{% if d.natureza == 'credito' %}<span class="badge badge-green">Crédito</span>{% else %}<span class="badge badge-red">Despesa</span>{% endif %}</td>
+            <td style="color:var(--text3)">{{ d.descricao|default:"" }}</td>
+            <td>{{ d.ocorrido_em|date:"d/m/Y H:i" }}</td>
+            <td class="num" style="text-align:right;padding-right:16px">R$ {{ d.valor }}</td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
+  {% endif %}
 
-  <!-- ── FOTOS DOS VEÍCULOS ESCOLTADOS ── -->
-  {% for item in veiculos_print %}
-  {% if item.fotos %}
+  <!--  ASSINATURAS DIGITAIS  -->
+  {% if assinaturas_lista %}
   <div class="card">
     <div class="card-header">
-      <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><circle cx="5" cy="5" r="1.2" fill="currentColor"/><path d="M1 10l3-3 2.5 2.5L10 5l3 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Fotos — {{ item.veiculo.placa_cavalo|default:item.veiculo.veiculo|default:"Veículo" }}
-      {% if item.veiculo.motorista %}<span class="hl">{{ item.veiculo.motorista }}</span>{% endif %}
+      <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><path d="M2 10c2-3 4-5 6-4s1 4-1 4 3-4 5-6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Assinaturas Digitais
     </div>
     <div class="card-body">
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
-        {% for foto in item.fotos %}
-        <div class="veiculo-foto" style="max-width:200px;height:140px">
-          <img src="{{ foto.foto.url }}" alt="Foto veículo">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px">
+        {% for a in assinaturas_lista %}
+        <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg3)">
+          <div style="padding:6px 10px;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);background:var(--bg4)">
+            {{ a.get_tipo_display }}
+          </div>
+          <div style="background:#fff;padding:8px;text-align:center">
+            <img src="{{ a.imagem.url }}" alt="Assinatura" style="max-height:80px;max-width:100%;object-fit:contain">
+          </div>
+          <div style="padding:6px 10px;font-size:11px;color:var(--text2);border-top:1px solid var(--border)">
+             {{ a.nome }}<br>
+            <span style="font-size:10px;color:var(--text3)">{{ a.criado_em|date:"d/m/Y H:i" }}</span>
+          </div>
         </div>
         {% endfor %}
       </div>
-      <div class="g3">
-        <div class="field"><label>Tipo / Desc.</label><div class="val">{{ item.veiculo.veiculo|default:"—" }}</div></div>
-        <div class="field"><label>Placa Cavalo</label><div class="val bold">{{ item.veiculo.placa_cavalo|default:"—" }}</div></div>
-        {% if item.veiculo.placa_carreta %}
-        <div class="field"><label>Carreta</label><div class="val bold">{{ item.veiculo.placa_carreta }}</div></div>
-        {% endif %}
-        {% if item.veiculo.placa_carreta2 %}
-        <div class="field"><label>Carreta 2</label><div class="val bold">{{ item.veiculo.placa_carreta2 }}</div></div>
-        {% endif %}
-        <div class="field"><label>Motorista</label><div class="val">{{ item.veiculo.motorista|default:"—" }}</div></div>
-      </div>
     </div>
   </div>
   {% endif %}
-  {% endfor %}
-  {% endif %}
-
-
-  <!-- FOTOS DOS MARCOS -->
-  {% if fotos_marco %}
-  <div class="card" style="margin-top:16px">
-    <div class="card-header">
-      <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><circle cx="5" cy="5" r="1.2" fill="currentColor"/><path d="M1 10l3-3 2.5 2.5L10 5l3 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Fotos dos Marcos
-    </div>
-    <div class="card-body">
-      <table style="width:100%;border-collapse:collapse;font-size:11px">
-        <thead>
-          <tr>
-            {% for marco_key, marco_label in fotos_marco_lista %}
-            <th style="text-align:center;padding:6px 4px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:10px;text-transform:uppercase">{{ marco_label }}</th>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            {% for marco_key, marco_label in fotos_marco_lista %}
-            <td style="text-align:center;padding:6px 4px;vertical-align:top">
-              {% if fotos_marco|get_item:marco_key %}
-              <img src="{{ fotos_marco|get_item:marco_key }}" style="width:100%;max-width:160px;height:110px;object-fit:cover;border-radius:6px;border:1px solid #e2e8f0">
-              {% else %}
-              <span style="color:#94a3b8;font-size:10px">Sem foto</span>
-              {% endif %}
-            </td>
-            {% endfor %}
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-  {% endif %}
-
-
-  <!-- ── ASSINATURAS ── -->
-  <div class="card">
-    <div class="card-header">
-      <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><path d="M2 10l2-2 6-6 2 2-6 6-2 2H2v-2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
-      Assinaturas
-    </div>
-    <div class="card-body">
-      <div class="assinatura-wrap">
-
-        <!-- Agente 1 -->
-        <div class="assinatura-box">
-          <div class="assinatura-canvas-wrap">
-            {% if assinatura_agente1 and assinatura_agente1.imagem %}
-              <img src="{{ assinatura_agente1.imagem.url }}" alt="Assinatura Agente 1">
-            {% else %}
-              <span style="color:var(--text3);font-size:11px">Sem assinatura</span>
-            {% endif %}
-          </div>
-          <div class="assinatura-linha"></div>
-          <div class="assinatura-nome">{{ os.snap_agente1_nome|default:"Agente 1" }}</div>
-          <div class="assinatura-cargo">Agente de Escolta</div>
-        </div>
-
-        <!-- Agente 2 -->
-        <div class="assinatura-box">
-          <div class="assinatura-canvas-wrap">
-            {% if assinatura_agente2 and assinatura_agente2.imagem %}
-              <img src="{{ assinatura_agente2.imagem.url }}" alt="Assinatura Agente 2">
-            {% else %}
-              <span style="color:var(--text3);font-size:11px">Sem assinatura</span>
-            {% endif %}
-          </div>
-          <div class="assinatura-linha"></div>
-          <div class="assinatura-nome">{{ os.snap_agente2_nome|default:"Agente 2" }}</div>
-          <div class="assinatura-cargo">Agente de Escolta</div>
-        </div>
-
-        <!-- Motorista -->
-        <div class="assinatura-box">
-          <div class="assinatura-canvas-wrap">
-            {% if assinatura_motorista and assinatura_motorista.imagem %}
-              <img src="{{ assinatura_motorista.imagem.url }}" alt="Assinatura Motorista">
-            {% else %}
-              <span style="color:var(--text3);font-size:11px">Sem assinatura</span>
-            {% endif %}
-          </div>
-          <div class="assinatura-linha"></div>
-          <div class="assinatura-nome">{{ assinatura_motorista.nome|default:"Motorista" }}</div>
-          <div class="assinatura-cargo">Motorista</div>
-        </div>
-
-      </div>
-    </div>
-  </div>
 
   <div class="rodape">ATENCIOSAMENTE — DEPARTAMENTO DE ESCOLTA ARMADA — JR SEGURANÇA</div>
 
