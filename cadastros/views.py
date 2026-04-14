@@ -869,6 +869,13 @@ def os_print(request, pk):
     assinatura_agente2   = AssinaturaOS.objects.filter(os=os_obj, tipo='agente2').first()
     assinatura_motorista = AssinaturaOS.objects.filter(os=os_obj, tipo='motorista').first()
 
+    # Veículos escoltados com fotos
+    from .models import VeiculoEscoltado, FotoVeiculoEscoltado
+    veiculos_print = []
+    for v in os_obj.veiculos.order_by('ordem'):
+        fotos = FotoVeiculoEscoltado.objects.filter(veiculo=v)
+        veiculos_print.append({'veiculo': v, 'fotos': fotos})
+
     return render(request, 'cadastros/os_print.html', {
         'os': os_obj,
         'op': op,
@@ -878,6 +885,7 @@ def os_print(request, pk):
         'assinatura_agente1':   assinatura_agente1,
         'assinatura_agente2':   assinatura_agente2,
         'assinatura_motorista': assinatura_motorista,
+        'veiculos_print': veiculos_print,
     })
 
 

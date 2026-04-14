@@ -401,7 +401,7 @@ body{
   {% endif %}
 
   <!-- ── VEÍCULOS ESCOLTADOS ── -->
-  {% if os.veiculos.exists %}
+  {% if veiculos_print %}
   <div class="card">
     <div class="card-header">
       <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><rect x="1" y="5" width="12" height="6" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 5V4a3.5 3.5 0 017 0v1" stroke="currentColor" stroke-width="1.3"/></svg>
@@ -411,8 +411,8 @@ body{
       <table class="op-table">
         <thead>
           <tr>
-            <th style="width:40px">#</th>
-            <th>Veículo</th>
+            <th style="width:30px">#</th>
+            <th>Tipo / Desc.</th>
             <th>Cavalo</th>
             <th>Carreta</th>
             <th>Carreta 2</th>
@@ -420,46 +420,54 @@ body{
           </tr>
         </thead>
         <tbody>
-          {% for v in os.veiculos.all %}
-          {% if v.placa_cavalo or v.veiculo or v.motorista %}
+          {% for item in veiculos_print %}
           <tr>
-            <td class="center">{{ v.ordem }}</td>
-            <td>{{ v.veiculo|default:"—" }}</td>
-            <td class="num">{{ v.placa_cavalo|default:"—" }}</td>
-            <td class="num">{{ v.placa_carreta|default:"—" }}</td>
-            <td class="num">{{ v.placa_carreta2|default:"—" }}</td>
-            <td>{{ v.motorista|default:"—" }}</td>
+            <td>{{ item.veiculo.ordem }}</td>
+            <td>{{ item.veiculo.veiculo|default:"—" }}</td>
+            <td class="num">{{ item.veiculo.placa_cavalo|default:"—" }}</td>
+            <td class="num">{{ item.veiculo.placa_carreta|default:"—" }}</td>
+            <td class="num">{{ item.veiculo.placa_carreta2|default:"—" }}</td>
+            <td>{{ item.veiculo.motorista|default:"—" }}</td>
           </tr>
-          {% endif %}
           {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
-  {% endif %}
 
-
-  <!-- ── FOTO DO VEÍCULO ESCOLTADO ── -->
-  {% for v in os.veiculos.all %}
-  {% if v.foto %}
+  <!-- ── FOTOS DOS VEÍCULOS ESCOLTADOS ── -->
+  {% for item in veiculos_print %}
+  {% if item.fotos %}
   <div class="card">
     <div class="card-header">
       <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><circle cx="5" cy="5" r="1.2" fill="currentColor"/><path d="M1 10l3-3 2.5 2.5L10 5l3 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Foto do Veículo Escoltado{% if v.placa_cavalo %} — {{ v.placa_cavalo }}{% endif %}
+      Fotos — {{ item.veiculo.placa_cavalo|default:item.veiculo.veiculo|default:"Veículo" }}
+      {% if item.veiculo.motorista %}<span class="hl">{{ item.veiculo.motorista }}</span>{% endif %}
     </div>
     <div class="card-body">
-      <div class="veiculo-foto">
-        <img src="{{ request.scheme }}://{{ request.get_host }}{{ v.foto.url }}" alt="Foto do veículo escoltado">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+        {% for foto in item.fotos %}
+        <div class="veiculo-foto" style="max-width:200px;height:140px">
+          <img src="{{ foto.foto.url }}" alt="Foto veículo">
+        </div>
+        {% endfor %}
       </div>
       <div class="g3">
-        <div class="field"><label>Veículo</label><div class="val">{{ v.veiculo|default:"—" }}</div></div>
-        <div class="field"><label>Placa Cavalo</label><div class="val bold">{{ v.placa_cavalo|default:"—" }}</div></div>
-        <div class="field"><label>Motorista</label><div class="val">{{ v.motorista|default:"—" }}</div></div>
+        <div class="field"><label>Tipo / Desc.</label><div class="val">{{ item.veiculo.veiculo|default:"—" }}</div></div>
+        <div class="field"><label>Placa Cavalo</label><div class="val bold">{{ item.veiculo.placa_cavalo|default:"—" }}</div></div>
+        {% if item.veiculo.placa_carreta %}
+        <div class="field"><label>Carreta</label><div class="val bold">{{ item.veiculo.placa_carreta }}</div></div>
+        {% endif %}
+        {% if item.veiculo.placa_carreta2 %}
+        <div class="field"><label>Carreta 2</label><div class="val bold">{{ item.veiculo.placa_carreta2 }}</div></div>
+        {% endif %}
+        <div class="field"><label>Motorista</label><div class="val">{{ item.veiculo.motorista|default:"—" }}</div></div>
       </div>
     </div>
   </div>
   {% endif %}
   {% endfor %}
+  {% endif %}
 
   <!-- ── OBSERVAÇÕES ── -->
   {% if os.observacoes %}
