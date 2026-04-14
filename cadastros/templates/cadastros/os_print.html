@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿{% load cadastros_extras %}
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
@@ -496,6 +497,41 @@ body{
           <div class="val bold" style="color:#22c55e">R$ {{ op.pedagio }}</div>
         </div>
       </div>
+    </div>
+  </div>
+  {% endif %}
+
+
+  <!-- FOTOS DOS MARCOS -->
+  {% if fotos_marco %}
+  <div class="card" style="margin-top:16px">
+    <div class="card-header">
+      <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><circle cx="5" cy="5" r="1.2" fill="currentColor"/><path d="M1 10l3-3 2.5 2.5L10 5l3 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Fotos dos Marcos
+    </div>
+    <div class="card-body">
+      <table style="width:100%;border-collapse:collapse;font-size:11px">
+        <thead>
+          <tr>
+            {% for marco_key, marco_label in fotos_marco_lista %}
+            <th style="text-align:center;padding:6px 4px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:10px;text-transform:uppercase">{{ marco_label }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            {% for marco_key, marco_label in fotos_marco_lista %}
+            <td style="text-align:center;padding:6px 4px;vertical-align:top">
+              {% if fotos_marco|get_item:marco_key %}
+              <img src="{{ fotos_marco|get_item:marco_key }}" style="width:100%;max-width:160px;height:110px;object-fit:cover;border-radius:6px;border:1px solid #e2e8f0">
+              {% else %}
+              <span style="color:#94a3b8;font-size:10px">Sem foto</span>
+              {% endif %}
+            </td>
+            {% endfor %}
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
   {% endif %}
