@@ -1358,32 +1358,66 @@ async function deleteItem(token, tipo, pk, elId) {
 }
 
 /* ── ASSINATURA CANVAS ── */
-(function initCanvases() {
-  document.querySelectorAll('canvas.sig').forEach(canvas => {
-    const ctx = canvas.getContext('2d');
-    canvas.width = canvas.offsetWidth;
-    let drawing = false, lastX = 0, lastY = 0;
+function setupCanvas(canvas) {
+  // Evita re-inicializar canvas que já foi configurado
+  if (canvas.dataset.ready === '1') return;
+  canvas.dataset.ready = '1';
 
-    function getPos(e) {
-      const rect = canvas.getBoundingClientRect();
-      const touch = e.touches ? e.touches[0] : e;
-      return [touch.clientX - rect.left, touch.clientY - rect.top];
-    }
-    function start(e) { e.preventDefault(); drawing = true; [lastX, lastY] = getPos(e); }
-    function move(e) {
-      e.preventDefault(); if (!drawing) return;
-      const [x, y] = getPos(e);
-      ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2.5;
-      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-      ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
-      [lastX, lastY] = [x, y];
-    }
-    function stop() { drawing = false; }
-    canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move);
-    canvas.addEventListener('mouseup', stop);    canvas.addEventListener('mouseleave', stop);
-    canvas.addEventListener('touchstart', start, {passive:false});
-    canvas.addEventListener('touchmove',  move,  {passive:false});
-    canvas.addEventListener('touchend',   stop);
+  // Define largura real do canvas (fundamental para toque funcionar)
+  canvas.width  = canvas.offsetWidth  || canvas.parentElement.offsetWidth || 300;
+  canvas.height = canvas.height || 140;
+
+  const ctx = canvas.getContext('2d');
+  let drawing = false, lastX = 0, lastY = 0;
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    // Escala correta para telas de alta densidade (Retina/celular)
+    const scaleX = canvas.width  / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const touch = e.touches ? e.touches[0] : e;
+    return [
+      (touch.clientX - rect.left) * scaleX,
+      (touch.clientY - rect.top)  * scaleY
+    ];
+  }
+  function start(e) { e.preventDefault(); drawing = true; [lastX, lastY] = getPos(e); }
+  function move(e) {
+    e.preventDefault(); if (!drawing) return;
+    const [x, y] = getPos(e);
+    ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
+    [lastX, lastY] = [x, y];
+  }
+  function stop() { drawing = false; }
+  canvas.addEventListener('mousedown',  start);
+  canvas.addEventListener('mousemove',  move);
+  canvas.addEventListener('mouseup',    stop);
+  canvas.addEventListener('mouseleave', stop);
+  canvas.addEventListener('touchstart', start, {passive: false});
+  canvas.addEventListener('touchmove',  move,  {passive: false});
+  canvas.addEventListener('touchend',   stop);
+}
+
+// Inicializa canvas quando a aba Assinaturas for aberta
+(function initCanvases() {
+  // Tenta inicializar imediatamente (caso aba já esteja visível)
+  document.querySelectorAll('canvas.sig').forEach(setupCanvas);
+
+  // Re-inicializa sempre que o usuário clicar na aba Assinaturas
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      if ((this.textContent || '').includes('Assinatura')) {
+        // Pequeno delay para o painel ficar visível e ter offsetWidth real
+        setTimeout(() => {
+          document.querySelectorAll('canvas.sig').forEach(c => {
+            c.dataset.ready = ''; // força re-setup para pegar largura correta
+            setupCanvas(c);
+          });
+        }, 80);
+      }
+    });
   });
 })();
 
