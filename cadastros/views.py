@@ -769,11 +769,11 @@ def os_operacional_save(request, pk):
     op.km_termino_viagem   = parse_int(request.POST.get('km_termino_viagem'))
     # Pedágio
     pedagio_val = request.POST.get('pedagio', '').strip().replace(',', '.')
-    try:
-        op.pedagio = float(pedagio_val) if pedagio_val else None
-    except ValueError:
-        op.pedagio = None
-    op.save()
+    if pedagio_val:
+        try:
+            op.pedagio = float(pedagio_val)
+        except ValueError:
+            pass
 
     # Salvar veículos escoltados (máx 4)
     os_obj.veiculos.all().delete()
