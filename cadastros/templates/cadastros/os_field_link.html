@@ -478,9 +478,8 @@
         {% if v.veiculo %}<p style="font-size:12px;color:var(--muted);margin-bottom:4px">Tipo/Desc.: {{ v.veiculo }}</p>{% endif %}
         {% if v.placa_carreta %}<p style="font-size:12px;color:var(--muted);margin-bottom:4px">Carreta: {{ v.placa_carreta }}{% if v.placa_carreta2 %} / {{ v.placa_carreta2 }}{% endif %}</p>{% endif %}
 
-        <!-- Fotos antes/depois (funcionalidade existente mantida) -->
-        <p style="font-size:12px;color:var(--cyan);margin-bottom:8px">Fotos antes da escolta</p>
-        <div class="foto-grid" id="fotos_veiculo_antes_{{ v.pk }}">
+        <!-- Foto do veículo -->
+        <div class="foto-grid" id="fotos_veiculo_{{ v.pk }}">
           {% for f in v.fotos.all %}{% if f.momento == 'antes' %}
           <div class="foto-thumb" id="fveic_{{ f.pk }}">
             <img src="{{ f.foto.url }}">
@@ -488,23 +487,9 @@
               onclick="deleteFotoVeiculo('{{ op.token }}',{{ f.pk }},'fveic_{{ f.pk }}')">✕</button>
           </div>
           {% endif %}{% endfor %}
-          <label class="foto-upload-btn" for="fvantes_{{ v.pk }}"><span>📷</span>Antes</label>
-          <input type="file" id="fvantes_{{ v.pk }}" accept="image/*" capture="environment"
-            onchange="uploadFotoVeiculo(this,{{ v.pk }},'antes','fotos_veiculo_antes_{{ v.pk }}','{{ op.token }}')">
-        </div>
-
-        <p style="font-size:12px;color:var(--cyan);margin:10px 0 8px">Fotos após a escolta</p>
-        <div class="foto-grid" id="fotos_veiculo_depois_{{ v.pk }}">
-          {% for f in v.fotos.all %}{% if f.momento == 'depois' %}
-          <div class="foto-thumb" id="fveic_{{ f.pk }}">
-            <img src="{{ f.foto.url }}">
-            <button type="button" class="del-btn"
-              onclick="deleteFotoVeiculo('{{ op.token }}',{{ f.pk }},'fveic_{{ f.pk }}')">✕</button>
-          </div>
-          {% endif %}{% endfor %}
-          <label class="foto-upload-btn" for="fvdepois_{{ v.pk }}"><span>📷</span>Após</label>
-          <input type="file" id="fvdepois_{{ v.pk }}" accept="image/*" capture="environment"
-            onchange="uploadFotoVeiculo(this,{{ v.pk }},'depois','fotos_veiculo_depois_{{ v.pk }}','{{ op.token }}')">
+          <label class="foto-upload-btn" for="fvfoto_{{ v.pk }}"><span>📷</span>Foto</label>
+          <input type="file" id="fvfoto_{{ v.pk }}" accept="image/*" capture="environment"
+            onchange="uploadFotoVeiculo(this,{{ v.pk }},'antes','fotos_veiculo_{{ v.pk }}','{{ op.token }}')">
         </div>
       </div>
     </div>
@@ -537,7 +522,7 @@
       <div class="grid-2">
         <div class="field">
           <label>Placa Cavalo</label>
-          <input type="text" id="veiculoPlacaCav" placeholder="AAA-0000" maxlength="8" style="text-transform:uppercase" oninput="mascaraPlaca(this)">
+          <input type="text" id="veiculoPlacaCav" placeholder="AAA-0000" style="text-transform:uppercase">
         </div>
         <div class="field">
           <label>Motorista</label>
@@ -547,11 +532,11 @@
       <div class="grid-2">
         <div class="field">
           <label>Placa Carreta</label>
-          <input type="text" id="veiculoPlacaCar" placeholder="AAA-0000" maxlength="8" style="text-transform:uppercase" oninput="mascaraPlaca(this)">
+          <input type="text" id="veiculoPlacaCar" placeholder="AAA-0000" style="text-transform:uppercase">
         </div>
         <div class="field">
           <label>Placa Carreta 2</label>
-          <input type="text" id="veiculoPlacaCar2" placeholder="AAA-0000" maxlength="8" style="text-transform:uppercase" oninput="mascaraPlaca(this)">
+          <input type="text" id="veiculoPlacaCar2" placeholder="AAA-0000" style="text-transform:uppercase">
         </div>
       </div>
 
@@ -621,7 +606,7 @@ function salvarVeiculo(token) {
   fd.append('placa_carreta', placaCar);
   fd.append('placa_carreta2',placaCar2);
   fd.append('motorista',     motorista);
-  fd.append('csrfmiddlewaretoken', _getCookie('csrftoken'));
+  fd.append('csrfmiddlewaretoken', getCookie('csrftoken'));
 
   fetch(`/os/field/${token}/veiculo/salvar/`, { method: 'POST', body: fd })
     .then(r => r.json())
@@ -674,17 +659,10 @@ function salvarVeiculo(token) {
           <div class="card-body">
             ${data.veiculo ? `<p style="font-size:12px;color:var(--muted);margin-bottom:4px">Tipo/Desc.: ${escHtml(data.veiculo)}</p>` : ''}
             ${data.placa_carreta ? `<p style="font-size:12px;color:var(--muted);margin-bottom:4px">Carreta: ${escHtml(data.placa_carreta)}${data.placa_carreta2 ? ' / ' + escHtml(data.placa_carreta2) : ''}</p>` : ''}
-            <p style="font-size:12px;color:var(--cyan);margin-bottom:8px">Fotos antes da escolta</p>
-            <div class="foto-grid" id="fotos_veiculo_antes_${data.pk}">
-              <label class="foto-upload-btn" for="fvantes_${data.pk}"><span>📷</span>Antes</label>
-              <input type="file" id="fvantes_${data.pk}" accept="image/*" capture="environment"
-                onchange="uploadFotoVeiculo(this,${data.pk},'antes','fotos_veiculo_antes_${data.pk}','${token}')">
-            </div>
-            <p style="font-size:12px;color:var(--cyan);margin:10px 0 8px">Fotos após a escolta</p>
-            <div class="foto-grid" id="fotos_veiculo_depois_${data.pk}">
-              <label class="foto-upload-btn" for="fvdepois_${data.pk}"><span>📷</span>Após</label>
-              <input type="file" id="fvdepois_${data.pk}" accept="image/*" capture="environment"
-                onchange="uploadFotoVeiculo(this,${data.pk},'depois','fotos_veiculo_depois_${data.pk}','${token}')">
+            <div class="foto-grid" id="fotos_veiculo_${data.pk}">
+              <label class="foto-upload-btn" for="fvfoto_${data.pk}"><span>📷</span>Foto</label>
+              <input type="file" id="fvfoto_${data.pk}" accept="image/*" capture="environment"
+                onchange="uploadFotoVeiculo(this,${data.pk},'antes','fotos_veiculo_${data.pk}','${token}')">
             </div>
           </div>
         </div>`;
@@ -702,7 +680,7 @@ function salvarVeiculo(token) {
 function deletarVeiculo(token, pk, cardId) {
   if (!confirm('Remover este veículo escoltado?')) return;
   const fd = new FormData();
-  fd.append('csrfmiddlewaretoken', _getCookie('csrftoken'));
+  fd.append('csrfmiddlewaretoken', getCookie('csrftoken'));
   fetch(`/os/field/${token}/veiculo/${pk}/delete/`, { method: 'POST', body: fd })
     .then(r => r.json())
     .then(data => {
@@ -727,19 +705,6 @@ function escHtml(s) {
 }
 function escJs(s) {
   return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-}
-
-/* máscara de placa AAA-0000 */
-function mascaraPlaca(input) {
-  let v = input.value.replace(/[^a-zA-Z0-9]/g,'').toUpperCase();
-  if (v.length > 3) v = v.slice(0,3) + '-' + v.slice(3,7);
-  input.value = v;
-}
-
-/* getCookie local para este script */
-function _getCookie(name) {
-  const val = document.cookie.split(';').map(c=>c.trim()).find(c=>c.startsWith(name+'='));
-  return val ? decodeURIComponent(val.split('=')[1]) : '';
 }
 </script>
 
