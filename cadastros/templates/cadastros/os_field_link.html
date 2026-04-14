@@ -380,7 +380,7 @@
       <div class="card-body">
         <div class="field">
           <label>Valor Total Pedágio</label>
-          <div class="input-prefix"><span class="prefix-lbl">R$</span><input type="text" id="input_pedagio" name="pedagio" value="{{ op.pedagio|default_if_none:0 }}" placeholder="0,00" inputmode="decimal"></div>
+          <div class="input-prefix"><span class="prefix-lbl">R$</span><input type="text" id="input_pedagio" name="pedagio" value="{{ op.pedagio|default_if_none:0 }}" placeholder="0,00" inputmode="numeric" oninput="mascaraPedagio(this)"></div>
         </div>
       </div>
     </div>
@@ -1377,6 +1377,16 @@ async function salvarAssinatura(tipo, token) {
 }
 
 /*  SALVAR PEDAGIO  */
+/*  MASCARA PEDAGIO (tipo caixa registradora)  */
+function mascaraPedagio(input) {
+  let digits = input.value.replace(/\D/g, "");
+  if (!digits) { input.value = ""; return; }
+  let num = parseInt(digits, 10);
+  let reais = Math.floor(num / 100);
+  let centavos = num % 100;
+  input.value = reais + "," + String(centavos).padStart(2, "0");
+}
+
 async function salvarPedagio(token) {
   const input = document.getElementById('input_pedagio');
   const valor = input.value.trim().replace(',', '.');
