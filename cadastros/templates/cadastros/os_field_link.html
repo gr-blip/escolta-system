@@ -371,22 +371,18 @@
         </div>
       </div>
 
+  <!-- PEDÁGIO -->
+  <div class="card" style="margin-top:14px">
+    <div class="card-header"><div class="card-header-left"><span class="icon">🚦</span><h3>Pedágio</h3></div></div>
+    <div class="card-body">
+      <div class="field">
+        <label>Valor Total Pedágio</label>
+        <div class="input-prefix"><span class="prefix-lbl">R$</span><input type="text" id="input_pedagio" name="pedagio" value="{{ op.pedagio|default_if_none:0 }}" placeholder="0,00" inputmode="numeric" oninput="mascaraPedagio(this)"></div>
       </div>
     </div>
+  </div>
+  <button type="button" class="btn btn-primary btn-submit-full" style="margin-top:6px" onclick="salvarPedagio('{{ op.token }}')">💾 Salvar Pedágio</button>
 
-    <!-- PEDÁGIO -->
-    <div class="card">
-      <div class="card-header"><div class="card-header-left"><span class="icon">🚦</span><h3>Pedágio</h3></div></div>
-      <div class="card-body">
-        <div class="field">
-          <label>Valor Total Pedágio</label>
-          <div class="input-prefix"><span class="prefix-lbl">R$</span><input type="text" id="input_pedagio" name="pedagio" value="{{ op.pedagio|default_if_none:0 }}" placeholder="0,00" inputmode="numeric" oninput="mascaraPedagio(this)"></div>
-        </div>
-      </div>
-    </div>
-
-    <button type="button" class="btn btn-primary btn-submit-full" onclick="salvarPedagio('{{ op.token }}')"> Salvar Pedágio</button>
-  </form>
 </div>
 </div>
 
