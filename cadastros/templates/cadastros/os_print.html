@@ -589,7 +589,6 @@ body{
 
 
   <!-- ── ASSINATURAS ── -->
-  {% if op %}
   <div class="card">
     <div class="card-header">
       <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><path d="M2 10l2-2 6-6 2 2-6 6-2 2H2v-2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
@@ -597,67 +596,52 @@ body{
     </div>
     <div class="card-body">
       <div class="assinatura-wrap">
-        {% if op.assinatura_agente1 %}
-        <div class="assinatura-box">
-          <div class="assinatura-canvas-wrap">
-            <img src="{{ request.scheme }}://{{ request.get_host }}{{ op.assinatura_agente1.url }}" alt="Assinatura Agente 1">
-          </div>
-          <div class="assinatura-linha"></div>
-          <div class="assinatura-nome">{% if os.equipe %}{{ os.equipe.agente1.nome }}{% else %}Agente 1{% endif %}</div>
-          <div class="assinatura-cargo">Agente de Escolta</div>
-        </div>
-        {% else %}
-        <div class="assinatura-box">
-          <div class="assinatura-canvas-wrap" style="color:var(--text3);font-size:11px">Sem assinatura</div>
-          <div class="assinatura-linha"></div>
-          <div class="assinatura-nome">{% if os.equipe %}{{ os.equipe.agente1.nome }}{% else %}Agente 1{% endif %}</div>
-          <div class="assinatura-cargo">Agente de Escolta</div>
-        </div>
-        {% endif %}
 
-        {% if op.assinatura_agente2 %}
+        <!-- Agente 1 -->
         <div class="assinatura-box">
           <div class="assinatura-canvas-wrap">
-            <img src="{{ request.scheme }}://{{ request.get_host }}{{ op.assinatura_agente2.url }}" alt="Assinatura Agente 2">
+            {% if assinatura_agente1 and assinatura_agente1.imagem %}
+              <img src="{{ assinatura_agente1.imagem.url }}" alt="Assinatura Agente 1">
+            {% else %}
+              <span style="color:var(--text3);font-size:11px">Sem assinatura</span>
+            {% endif %}
           </div>
           <div class="assinatura-linha"></div>
-          <div class="assinatura-nome">{% if os.equipe %}{{ os.equipe.agente2.nome }}{% else %}Agente 2{% endif %}</div>
+          <div class="assinatura-nome">{{ os.snap_agente1_nome|default:"Agente 1" }}</div>
           <div class="assinatura-cargo">Agente de Escolta</div>
         </div>
-        {% else %}
-        <div class="assinatura-box">
-          <div class="assinatura-canvas-wrap" style="color:var(--text3);font-size:11px">Sem assinatura</div>
-          <div class="assinatura-linha"></div>
-          <div class="assinatura-nome">{% if os.equipe %}{{ os.equipe.agente2.nome }}{% else %}Agente 2{% endif %}</div>
-          <div class="assinatura-cargo">Agente de Escolta</div>
-        </div>
-        {% endif %}
 
-        {% if op.assinatura_motorista %}
+        <!-- Agente 2 -->
         <div class="assinatura-box">
           <div class="assinatura-canvas-wrap">
-            <img src="{{ request.scheme }}://{{ request.get_host }}{{ op.assinatura_motorista.url }}" alt="Assinatura Motorista">
+            {% if assinatura_agente2 and assinatura_agente2.imagem %}
+              <img src="{{ assinatura_agente2.imagem.url }}" alt="Assinatura Agente 2">
+            {% else %}
+              <span style="color:var(--text3);font-size:11px">Sem assinatura</span>
+            {% endif %}
           </div>
           <div class="assinatura-linha"></div>
-          <div class="assinatura-nome">
-            {% for v in os.veiculos.all %}{% if forloop.first %}{{ v.motorista|default:"Motorista" }}{% endif %}{% empty %}Motorista{% endfor %}
+          <div class="assinatura-nome">{{ os.snap_agente2_nome|default:"Agente 2" }}</div>
+          <div class="assinatura-cargo">Agente de Escolta</div>
+        </div>
+
+        <!-- Motorista -->
+        <div class="assinatura-box">
+          <div class="assinatura-canvas-wrap">
+            {% if assinatura_motorista and assinatura_motorista.imagem %}
+              <img src="{{ assinatura_motorista.imagem.url }}" alt="Assinatura Motorista">
+            {% else %}
+              <span style="color:var(--text3);font-size:11px">Sem assinatura</span>
+            {% endif %}
           </div>
+          <div class="assinatura-linha"></div>
+          <div class="assinatura-nome">{{ assinatura_motorista.nome|default:"Motorista" }}</div>
           <div class="assinatura-cargo">Motorista</div>
         </div>
-        {% else %}
-        <div class="assinatura-box">
-          <div class="assinatura-canvas-wrap" style="color:var(--text3);font-size:11px">Sem assinatura</div>
-          <div class="assinatura-linha"></div>
-          <div class="assinatura-nome">
-            {% for v in os.veiculos.all %}{% if forloop.first %}{{ v.motorista|default:"Motorista" }}{% endif %}{% empty %}Motorista{% endfor %}
-          </div>
-          <div class="assinatura-cargo">Motorista</div>
-        </div>
-        {% endif %}
+
       </div>
     </div>
   </div>
-  {% endif %}
 
   <div class="rodape">ATENCIOSAMENTE — DEPARTAMENTO DE ESCOLTA ARMADA — JR SEGURANÇA</div>
 
