@@ -254,8 +254,12 @@ def _buscar_ultimo_id_post() -> dict:
         resultado = {'id': 0, 'idctrl': 0}
         if xml_str:
             try:
-                root = ET.fromstring(str(xml_str))
-                id_val    = root.findtext('id') or root.findtext('Id') or '0'
+                # A API devolve fragmento sem elemento raiz: <id>N</id><idctrl>M</idctrl>...
+                # É necessário encapsular antes de parsear.
+                xml_raw = str(xml_str).strip()
+                wrapped = f'<root>{xml_raw}</root>'
+                root = ET.fromstring(wrapped)
+                id_val     = root.findtext('id')     or root.findtext('Id')     or '0'
                 idctrl_val = root.findtext('idctrl') or root.findtext('Idctrl') or '0'
                 resultado = {
                     'id':     int(id_val.strip()),
@@ -296,8 +300,9 @@ def get_ultima_posicao(mct_id: str) -> dict | None:
         id_terminal_str = str(id_terminal)
 
         ids = _buscar_ultimo_id_post()
-        # Olha ~5000 eventos atrás para encontrar a última posição automática
-        ultimo_seq = max(0, ids['id'] - 5000)
+        # Olha ~5000 eventos atrás para encontrar a última posição automática.
+        # UltimoSequencial=0 é inválido na API (-204); mínimo aceitável é 1.
+        ultimo_seq = max(1, ids['id'] - 5000)
 
         client = _get_client()
         xml_str = client.service.ObtemEventosNormais(
@@ -342,8 +347,12 @@ def get_historico_posicoes(mct_id: str, inicio: datetime, fim: datetime) -> list
     Retorna lista de posições do veículo no intervalo inicio..fim.
 
     Estratégia:
-      ObtemEventosNormais(UltimoSequencial=0) → todos os eventos no buffer (7 dias)
+      BuscarUltimoIdPost → obtém ID atual (N)
+      ObtemEventosNormais(UltimoSequencial = max(1, N - LOOKBACK)) → eventos recentes
       Filtra por IdTerminal e intervalo de datas.
+
+    LOOKBACK = 200000 eventos (cobre vários dias de frota inteira).
+    UltimoSequencial=0 é inválido na API (erro -204).
 
     Retorna lista de dicts: lat, lng, velocidade, odometro, ignicao, data_hora
     (lista vazia se não houver dados).
@@ -358,12 +367,16 @@ def get_historico_posicoes(mct_id: str, inicio: datetime, fim: datetime) -> list
         id_terminal = _mct_id_to_terminal(mct_id)
         id_terminal_str = str(id_terminal)
 
+        # Obtém o ID atual para calcular lookback histórico
+        ids = _buscar_ultimo_id_post()
+        # 200 000 eventos de lookback — deve cobrir 7 dias de toda a frota
+        lookback = max(1, ids['id'] - 200_000)
+
         client = _get_client()
-        # UltimoSequencial=0 → retorna tudo que está no buffer (até 7 dias)
         xml_str = client.service.ObtemEventosNormais(
             Usuario=USUARIO,
             Senha=SENHA_MD5,
-            UltimoSequencial=0,
+            UltimoSequencial=lookback,
         )
 
         todos_eventos = _parse_teleeventos_xml(str(xml_str) if xml_str else '')
