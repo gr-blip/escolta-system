@@ -64,6 +64,9 @@ urlpatterns += [
     path('operacional/os/<int:pk>/print/',               views.os_print,             name='os_print'),
     path('operacional/os/<int:pk>/email/',               views.os_email_html,        name='os_email_html'),
     path('operacional/os/<int:pk>/finalizar/',           views.os_finalizar,         name='os_finalizar'),
+    # Omnilink — rastreamento
+    path('operacional/os/<int:pk>/rastreamento/posicao/',  views.omnilink_posicao_atual, name='omnilink_posicao_atual'),
+    path('operacional/os/<int:pk>/rastreamento/historico/', views.omnilink_historico,    name='omnilink_historico'),
 ]
 
 # Faturamento — Tabela de Precos

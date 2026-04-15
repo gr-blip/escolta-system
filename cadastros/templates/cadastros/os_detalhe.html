@@ -5,6 +5,122 @@
   <a href="{% url 'dashboard' %}">Início</a> /
   <a href="{% url 'os_list' %}">Ordens de Serviço</a> /
   {% if novo %}Nova OS{% else %}OS-{{ os.numero }}{% endif %}
+
+{% if not novo and os.equipe and os.equipe.viatura and os.equipe.viatura.mct_id %}
+<!-- ══ RASTREAMENTO OMNILINK ════════════════════════════════════════════ -->
+<div style="margin-top:24px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+    <h3 style="font-size:15px;font-weight:700;color:var(--text1);display:flex;align-items:center;gap:8px;margin:0">
+      <svg width="16" height="16" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/><line x1="8" y1="1.5" x2="8" y2="4" stroke="currentColor" stroke-width="1.3"/><line x1="8" y1="12" x2="8" y2="14.5" stroke="currentColor" stroke-width="1.3"/><line x1="1.5" y1="8" x2="4" y2="8" stroke="currentColor" stroke-width="1.3"/><line x1="12" y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.3"/></svg>
+      Rastreamento Omnilink — <span style="color:var(--accent)">MCT {{ os.equipe.viatura.mct_id }}</span>
+    </h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="rastrearPosicao()" id="btn-posicao" style="padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">📍 Posição Atual</button>
+      <button onclick="carregarHistorico()" id="btn-historico" style="padding:6px 14px;background:var(--bg3);color:var(--text1);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">🗺 Rota da OS</button>
+    </div>
+  </div>
+
+  <div id="rastr-cards" style="display:none;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:14px">
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Velocidade</div>
+      <div id="rastr-vel" style="font-size:22px;font-weight:700;color:var(--text1)">—</div>
+      <div style="font-size:10px;color:var(--text3)">km/h</div>
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Odômetro</div>
+      <div id="rastr-odo" style="font-size:22px;font-weight:700;color:var(--text1)">—</div>
+      <div style="font-size:10px;color:var(--text3)">km</div>
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Ignição</div>
+      <div id="rastr-ign" style="font-size:18px;font-weight:700;color:var(--text1)">—</div>
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Atualizado</div>
+      <div id="rastr-hora" style="font-size:13px;font-weight:600;color:var(--text1)">—</div>
+    </div>
+  </div>
+
+  <div id="rastr-end" style="display:none;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text2);margin-bottom:14px">
+    📍 <span id="rastr-end-txt"></span>
+  </div>
+
+  <div id="rastr-mapa" style="display:none;height:380px;border-radius:12px;overflow:hidden;border:1px solid var(--border)"></div>
+  <div id="rastr-msg" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;text-align:center;margin-top:10px"></div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function(){
+  const OS_PK = {{ os.pk }};
+  let mapa = null, marcador = null, rotaLayer = null;
+
+  function initMapa(lat, lng) {
+    if (!mapa) {
+      document.getElementById('rastr-mapa').style.display = 'block';
+      mapa = L.map('rastr-mapa').setView([lat, lng], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {attribution:'© OpenStreetMap'}).addTo(mapa);
+    }
+    setTimeout(()=>mapa.invalidateSize(),150);
+  }
+
+  function setStatus(msg, tipo) {
+    const el = document.getElementById('rastr-msg');
+    el.style.display = 'block';
+    el.style.background = tipo==='erro' ? 'rgba(239,68,68,.12)' : 'rgba(16,185,129,.12)';
+    el.style.color      = tipo==='erro' ? '#ef4444' : '#10b981';
+    el.textContent = msg;
+  }
+
+  window.rastrearPosicao = function() {
+    const btn = document.getElementById('btn-posicao');
+    btn.textContent = '⟳ Buscando...'; btn.disabled = true;
+    fetch(`/operacional/os/${OS_PK}/rastreamento/posicao/`)
+      .then(r=>r.json()).then(d=>{
+        btn.textContent='📍 Posição Atual'; btn.disabled=false;
+        if (!d.ok){ setStatus('⚠ '+d.erro,'erro'); return; }
+        document.getElementById('rastr-cards').style.display='grid';
+        document.getElementById('rastr-vel').textContent  = d.velocidade??'—';
+        document.getElementById('rastr-odo').textContent  = d.odometro??'—';
+        document.getElementById('rastr-ign').textContent  = d.ignicao?'🟢 Ligada':'🔴 Desligada';
+        document.getElementById('rastr-hora').textContent = d.data_hora?(d.data_hora+'').substring(0,16).replace('T',' '):'—';
+        if (d.endereco){ document.getElementById('rastr-end').style.display='block'; document.getElementById('rastr-end-txt').textContent=d.endereco; }
+        if (d.lat && d.lng){
+          initMapa(d.lat, d.lng);
+          const ic = L.divIcon({className:'',iconAnchor:[7,7],html:'<div style="width:14px;height:14px;background:#3b82f6;border:3px solid #fff;border-radius:50%;box-shadow:0 0 8px rgba(59,130,246,.9)"></div>'});
+          if(marcador) marcador.setLatLng([d.lat,d.lng]);
+          else marcador=L.marker([d.lat,d.lng],{icon:ic}).addTo(mapa).bindPopup('<b>{{ os.equipe.viatura.mct_id }}</b><br>'+d.velocidade+' km/h');
+          mapa.setView([d.lat,d.lng],15);
+        }
+        setStatus('✓ Posição atualizada com sucesso','ok');
+      }).catch(()=>{ btn.textContent='📍 Posição Atual'; btn.disabled=false; setStatus('Erro de conexão com API Omnilink.','erro'); });
+  };
+
+  window.carregarHistorico = function() {
+    const btn = document.getElementById('btn-historico');
+    btn.textContent='⟳ Carregando...'; btn.disabled=true;
+    fetch(`/operacional/os/${OS_PK}/rastreamento/historico/`)
+      .then(r=>r.json()).then(d=>{
+        btn.textContent='🗺 Rota da OS'; btn.disabled=false;
+        if (!d.ok||!d.pontos.length){ setStatus('Sem histórico de rota para esta OS.','erro'); return; }
+        const coords=d.pontos.map(p=>[p.lat,p.lng]);
+        initMapa(coords[0][0],coords[0][1]);
+        if(rotaLayer) mapa.removeLayer(rotaLayer);
+        rotaLayer=L.polyline(coords,{color:'#3b82f6',weight:3,opacity:.85}).addTo(mapa);
+        const mkIc=(cor)=>L.divIcon({className:'',iconAnchor:[7,7],html:`<div style="width:14px;height:14px;background:${cor};border:3px solid #fff;border-radius:50%"></div>`});
+        L.marker(coords[0],{icon:mkIc('#10b981')}).addTo(mapa).bindPopup('🟢 Início');
+        L.marker(coords[coords.length-1],{icon:mkIc('#ef4444')}).addTo(mapa).bindPopup('🔴 Fim');
+        mapa.fitBounds(rotaLayer.getBounds(),{padding:[20,20]});
+        setStatus(`✓ ${d.pontos.length} pontos carregados`,'ok');
+      }).catch(()=>{ btn.textContent='🗺 Rota da OS'; btn.disabled=false; setStatus('Erro ao carregar histórico.','erro'); });
+  };
+})();
+</script>
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+{% endif %}
+
 {% endblock %}
 
 {% block topbar_actions %}

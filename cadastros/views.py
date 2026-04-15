@@ -903,6 +903,40 @@ def os_email_html(request, pk):
     return html
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# RASTREAMENTO OMNILINK — endpoints AJAX
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def omnilink_posicao_atual(request, pk):
+    """AJAX — retorna última posição GPS da viatura da OS."""
+    from django.http import JsonResponse
+    from .omnilink import get_ultima_posicao
+
+    os_obj = get_object_or_404(OrdemServico, pk=pk)
+    viatura = os_obj.equipe.viatura if os_obj.equipe else None
+    mct_id  = viatura.mct_id if viatura and viatura.mct_id else None
+
+    if not mct_id:
+        return JsonResponse({'ok': False, 'erro': 'Viatura sem MCT ID cadastrado.'})
+
+    dados = get_ultima_posicao(mct_id)
+    if not dados:
+        return JsonResponse({'ok': False, 'erro': 'Sem resposta da API Omnilink.'})
+
+    return JsonResponse({'ok': True, 'mct_id': mct_id, **dados})
+
+
+@login_required
+def omnilink_historico(request, pk):
+    """AJAX — retorna histórico de posições da viatura durante a OS."""
+    from django.http import JsonResponse
+    from .omnilink import get_historico_operacao
+
+    os_obj = get_object_or_404(OrdemServico, pk=pk)
+    pontos = get_historico_operacao(os_obj)
+    return JsonResponse({'ok': True, 'pontos': pontos})
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # FATURAMENTO — Tabela de Precos
