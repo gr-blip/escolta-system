@@ -864,10 +864,8 @@ def os_print(request, pk):
         for foto in FotoMarco.objects.filter(os=os_obj):
             fotos_marco[foto.marco] = foto.foto.url
 
-    # Assinaturas digitais
-    assinatura_agente1   = AssinaturaOS.objects.filter(os=os_obj, tipo='agente1').first()
-    assinatura_agente2   = AssinaturaOS.objects.filter(os=os_obj, tipo='agente2').first()
-    assinatura_motorista = AssinaturaOS.objects.filter(os=os_obj, tipo='motorista').first()
+    # Assinaturas digitais — passa como lista para o template usar {% for a in assinaturas_lista %}
+    assinaturas_lista = list(AssinaturaOS.objects.filter(os=os_obj).order_by('tipo'))
 
     # Veículos escoltados com fotos
     from .models import VeiculoEscoltado, FotoVeiculoEscoltado
@@ -882,9 +880,7 @@ def os_print(request, pk):
         'rastreador_viatura': rastreador_viatura,
         'fotos_marco': fotos_marco,
         'fotos_marco_lista': MARCOS_LISTA,
-        'assinatura_agente1':   assinatura_agente1,
-        'assinatura_agente2':   assinatura_agente2,
-        'assinatura_motorista': assinatura_motorista,
+        'assinaturas_lista': assinaturas_lista,
         'veiculos_print': veiculos_print,
     })
 
