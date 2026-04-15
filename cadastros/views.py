@@ -931,10 +931,25 @@ def omnilink_posicao_atual(request, pk):
 def omnilink_historico(request, pk):
     """AJAX — retorna histórico de posições da viatura durante a OS."""
     from django.http import JsonResponse
-    from .omnilink import get_historico_operacao
+    from datetime import datetime, timedelta
+    from .omnilink import get_historico_operacao, get_historico_posicoes
 
     os_obj = get_object_or_404(OrdemServico, pk=pk)
+
+    # Tenta primeiro usando o período da OS
     pontos = get_historico_operacao(os_obj)
+
+    # Se vazio, tenta as últimas 24h (OS pode não ter inicio_viagem preenchido ainda)
+    if not pontos:
+        viatura = os_obj.equipe.viatura if os_obj.equipe else None
+        mct_id  = viatura.mct_id if viatura and viatura.mct_id else None
+        if mct_id:
+            fim    = datetime.now()
+            inicio = fim - timedelta(hours=24)
+            pontos = get_historico_posicoes(mct_id, inicio, fim)
+            if pontos:
+                return JsonResponse({'ok': True, 'pontos': pontos, 'aviso': 'Exibindo últimas 24h (OS sem horário de viagem registrado).'})
+
     return JsonResponse({'ok': True, 'pontos': pontos})
 
 

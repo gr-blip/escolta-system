@@ -938,7 +938,8 @@ document.getElementById('modal-link').addEventListener('click', function(e) {
     fetch(`/operacional/os/${OS_PK}/rastreamento/historico/`)
       .then(r=>r.json()).then(d=>{
         btn.textContent='🗺 Rota da OS'; btn.disabled=false;
-        if (!d.ok||!d.pontos.length){ setStatus('Sem histórico de rota para esta OS.','erro'); return; }
+        if (!d.ok||!d.pontos.length){ setStatus('Sem dados de rota disponíveis. Verifique se a viatura transmitiu posições recentemente.','erro'); return; }
+        if (d.aviso) setStatus('⚠ '+d.aviso,'ok');
         const coords=d.pontos.map(p=>[p.lat,p.lng]);
         initMapa(coords[0][0],coords[0][1]);
         if(rotaLayer) mapa.removeLayer(rotaLayer);
