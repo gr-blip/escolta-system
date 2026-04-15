@@ -6,3 +6,4 @@ psycopg2-binary
 whitenoise
 reportlab
 openpyxl
+zeep
