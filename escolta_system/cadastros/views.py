@@ -966,10 +966,12 @@ def omnilink_historico(request, pk):
             diagnostico['ultimo_id_post'] = ids
 
             client = _get_client()
+            # UltimoSequencial=0 é inválido (-204); usa max(1, id_atual - lookback)
+            seq_diag = max(1, ids.get('id', 1) - 200_000) if ids.get('id', 0) > 0 else 1
             xml_str = client.service.ObtemEventosNormais(
                 Usuario=USUARIO,
                 Senha=SENHA_MD5,
-                UltimoSequencial=0,
+                UltimoSequencial=seq_diag,
             )
             xml_str = str(xml_str) if xml_str else ''
             diagnostico['xml_inicio'] = xml_str[:500]
