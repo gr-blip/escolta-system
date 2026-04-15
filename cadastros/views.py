@@ -932,9 +932,75 @@ def omnilink_historico(request, pk):
     """AJAX — retorna histórico de posições da viatura durante a OS."""
     from django.http import JsonResponse
     from datetime import datetime, timedelta
-    from .omnilink import get_historico_operacao, get_historico_posicoes
+    from xml.etree import ElementTree as ET
+    from .omnilink import (get_historico_operacao, get_historico_posicoes,
+                           _get_client, _buscar_ultimo_id_post,
+                           _mct_id_to_terminal, _parse_teleeventos_xml,
+                           USUARIO, SENHA_MD5)
 
     os_obj = get_object_or_404(OrdemServico, pk=pk)
+
+    # ── Modo diagnóstico: ?debug=1 ───────────────────────────────────────────
+    # Retorna todos os IdTerminals encontrados no buffer da API (sem filtrar),
+    # útil para descobrir o ID correto do veículo.
+    if request.GET.get('debug') == '1':
+        viatura = os_obj.equipe.viatura if os_obj.equipe else None
+        mct_id  = viatura.mct_id if viatura and viatura.mct_id else '?'
+        try:
+            id_terminal_esperado = _mct_id_to_terminal(mct_id)
+        except Exception:
+            id_terminal_esperado = None
+
+        diagnostico = {
+            'mct_id': mct_id,
+            'id_terminal_esperado': id_terminal_esperado,
+            'ultimo_id_post': None,
+            'total_eventos_xml': 0,
+            'id_terminals_encontrados': [],
+            'cod_msgs_encontrados': [],
+            'erro': None,
+            'xml_inicio': '',
+        }
+        try:
+            ids = _buscar_ultimo_id_post()
+            diagnostico['ultimo_id_post'] = ids
+
+            client = _get_client()
+            xml_str = client.service.ObtemEventosNormais(
+                Usuario=USUARIO,
+                Senha=SENHA_MD5,
+                UltimoSequencial=0,
+            )
+            xml_str = str(xml_str) if xml_str else ''
+            diagnostico['xml_inicio'] = xml_str[:500]
+
+            # Conta eventos e coleta IdTerminals únicos
+            xml_wrap = f'<root>{xml_str}</root>' if not xml_str.startswith('<root') else xml_str
+            try:
+                root = ET.fromstring(xml_wrap)
+                eventos = list(root.iter('teleevento'))
+                diagnostico['total_eventos_xml'] = len(eventos)
+
+                ids_set  = set()
+                msgs_set = set()
+                for ev in eventos:
+                    it = ev.findtext('IdTerminal') or ev.findtext('idTerminal') or ''
+                    cm = ev.findtext('CodMsg') or ev.findtext('codmsg') or ''
+                    if it:
+                        ids_set.add(it.strip())
+                    if cm:
+                        msgs_set.add(cm.strip())
+
+                diagnostico['id_terminals_encontrados'] = sorted(ids_set)
+                diagnostico['cod_msgs_encontrados'] = sorted(msgs_set)
+            except ET.ParseError as e:
+                diagnostico['erro'] = f'XML parse error: {e}'
+
+        except Exception as e:
+            diagnostico['erro'] = str(e)
+
+        return JsonResponse({'ok': True, 'diagnostico': diagnostico})
+    # ── fim modo diagnóstico ─────────────────────────────────────────────────
 
     # Tenta primeiro usando o período da OS
     pontos = get_historico_operacao(os_obj)
