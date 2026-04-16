@@ -920,9 +920,18 @@ def omnilink_posicao_atual(request, pk):
     if not mct_id:
         return JsonResponse({'ok': False, 'erro': 'Viatura sem MCT ID cadastrado.'})
 
+    import logging as _logging
+    _log = _logging.getLogger(__name__)
+
     dados = get_ultima_posicao(mct_id)
     if not dados:
-        return JsonResponse({'ok': False, 'erro': 'Sem resposta da API Omnilink.'})
+        from .omnilink import _mct_id_to_terminal
+        try:
+            id_term = _mct_id_to_terminal(mct_id)
+        except Exception:
+            id_term = '?'
+        _log.warning(f"omnilink_posicao_atual: sem dados para MCT={mct_id} IdTerminal={id_term}")
+        return JsonResponse({'ok': False, 'erro': f'Sem posição recente para viatura {mct_id} (IdTerminal: {id_term}). Verifique se o rastreador transmitiu posições.'})
 
     return JsonResponse({'ok': True, 'mct_id': mct_id, **dados})
 
@@ -966,18 +975,24 @@ def omnilink_historico(request, pk):
             diagnostico['ultimo_id_post'] = ids
 
             client = _get_client()
-            # UltimoSequencial=0 é inválido (-204); usa max(1, id_atual - lookback)
-            seq_diag = max(1, ids.get('id', 1) - 200_000) if ids.get('id', 0) > 0 else 1
+            # UltimoSequencial=0 é inválido (-204); lookback de 100M ≈ 7 dias na plataforma global
+            seq_diag = max(1, ids.get('id', 1) - 100_000_000) if ids.get('id', 0) > 0 else 1
             xml_str = client.service.ObtemEventosNormais(
                 Usuario=USUARIO,
                 Senha=SENHA_MD5,
                 UltimoSequencial=seq_diag,
             )
+            import re as _re
             xml_str = str(xml_str) if xml_str else ''
-            diagnostico['xml_inicio'] = xml_str[:500]
+            diagnostico['xml_inicio'] = xml_str[:600]
 
-            # Conta eventos e coleta IdTerminals únicos
-            xml_wrap = f'<root>{xml_str}</root>' if not xml_str.startswith('<root') else xml_str
+            # Normaliza PascalCase → lowercase (API retorna <TeleEvento>, <IdTerminal> etc.)
+            xml_low = _re.sub(
+                r'<(/?)([A-Za-z][A-Za-z0-9_]*)',
+                lambda m: f'<{m.group(1)}{m.group(2).lower()}',
+                xml_str
+            )
+            xml_wrap = f'<root>{xml_low}</root>'
             try:
                 root = ET.fromstring(xml_wrap)
                 eventos = list(root.iter('teleevento'))
@@ -986,8 +1001,8 @@ def omnilink_historico(request, pk):
                 ids_set  = set()
                 msgs_set = set()
                 for ev in eventos:
-                    it = ev.findtext('IdTerminal') or ev.findtext('idTerminal') or ''
-                    cm = ev.findtext('CodMsg') or ev.findtext('codmsg') or ''
+                    it = ev.findtext('idterminal') or ''
+                    cm = ev.findtext('codmsg') or ''
                     if it:
                         ids_set.add(it.strip())
                     if cm:
@@ -1019,6 +1034,198 @@ def omnilink_historico(request, pk):
                 return JsonResponse({'ok': True, 'pontos': pontos, 'aviso': 'Exibindo últimas 24h (OS sem horário de viagem registrado).'})
 
     return JsonResponse({'ok': True, 'pontos': pontos})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# RASTREAMENTO — Página de frota (mapa com todas as viaturas)
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def omnilink_frota(request):
+    """Página de rastreamento da frota — mapa com todas as viaturas."""
+    from .models import Viatura
+    viaturas = Viatura.objects.filter(mct_id__isnull=False).exclude(mct_id='').order_by('placa')
+    return render(request, 'cadastros/omnilink_frota.html', {'viaturas': viaturas})
+
+
+@login_required
+def omnilink_frota_posicoes(request):
+    """
+    AJAX — retorna a última posição de todas as viaturas com MCT ID.
+    Usa o buffer compartilhado _get_eventos_normais() (uma só chamada API).
+    """
+    from django.http import JsonResponse
+    from .models import Viatura
+    from .omnilink import _get_eventos_normais, _mct_id_to_terminal
+
+    viaturas = Viatura.objects.filter(mct_id__isnull=False).exclude(mct_id='')
+
+    # Obtém todos os eventos de uma vez (cache compartilhado)
+    todos_eventos = _get_eventos_normais()
+
+    # Indexa o último evento por id_terminal para lookup O(1)
+    ultimo_por_terminal: dict = {}
+    for ev in todos_eventos:
+        tid = ev.get('id_terminal', '')
+        if tid:
+            ultimo_por_terminal[tid] = ev   # mantém sempre o mais recente (lista é ordenada por tempo)
+
+    resultado = []
+    for v in viaturas:
+        try:
+            id_terminal = _mct_id_to_terminal(v.mct_id)
+        except Exception:
+            id_terminal = None
+
+        ev = ultimo_por_terminal.get(id_terminal) if id_terminal else None
+        resultado.append({
+            'mct_id':      v.mct_id,
+            'id_terminal': id_terminal,
+            'placa':       v.placa,
+            'modelo':      v.marca_modelo,
+            'lat':         ev['lat']       if ev else None,
+            'lng':         ev['lng']       if ev else None,
+            'velocidade':  ev['velocidade'] if ev else None,
+            'odometro':    ev['odometro']  if ev else None,
+            'ignicao':     ev['ignicao']   if ev else None,
+            'data_hora':   ev['data_hora'] if ev else None,
+            'online':      ev is not None,
+        })
+
+    return JsonResponse({'ok': True, 'viaturas': resultado})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ESPELHAMENTOS OMNILINK
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def espelhamento_list(request):
+    """Página de gestão de espelhamentos."""
+    from .models import Viatura
+    viaturas = Viatura.objects.filter(mct_id__isnull=False).exclude(mct_id='').order_by('placa')
+    return render(request, 'cadastros/espelhamento_list.html', {'viaturas': viaturas})
+
+
+@login_required
+def espelhamento_listar_ajax(request):
+    """AJAX — lista espelhamentos enviados e recebidos."""
+    from django.http import JsonResponse
+    from .omnilink import listar_espelhamentos
+
+    inicio = request.GET.get('inicio', '')
+    fim    = request.GET.get('fim', '')
+    status = request.GET.get('status', '')
+
+    # Converte yyyy-mm-dd → dd/MM/yyyy
+    def fmt(d):
+        if d and '-' in d:
+            parts = d.split('-')
+            return f'{parts[2]}/{parts[1]}/{parts[0]}'
+        return d
+
+    todos = listar_espelhamentos(status=status, data_inicio=fmt(inicio), data_fim=fmt(fim))
+
+    # Separa enviados (id_cliente = conta JR = origem) de recebidos
+    # A API retorna todos; id_cliente_destino preenchido = enviado por nós
+    enviados  = [e for e in todos if e.get('id_cliente_destino')]
+    recebidos = [e for e in todos if not e.get('id_cliente_destino')]
+
+    return JsonResponse({'ok': True, 'enviados': enviados, 'recebidos': recebidos})
+
+
+@login_required
+def espelhamento_centrais_ajax(request):
+    """AJAX — lista centrais disponíveis para espelhamento."""
+    from django.http import JsonResponse
+    from .omnilink import listar_centrais_disponiveis, descobrir_metodos_wsdl
+
+    centrais = listar_centrais_disponiveis()
+    if not centrais:
+        # Retorna TODOS os métodos WSDL para diagnóstico (sem filtro)
+        todos_metodos = descobrir_metodos_wsdl()
+        return JsonResponse({
+            'ok': False,
+            'centrais': [],
+            'aviso': 'Nenhum método encontrou centrais. Verifique todos_metodos_wsdl para identificar o nome correto.',
+            'todos_metodos_wsdl': todos_metodos,
+        })
+    return JsonResponse({'ok': True, 'centrais': centrais})
+
+
+@login_required
+def espelhamento_criar_ajax(request):
+    """AJAX POST — cria novo espelhamento."""
+    from django.http import JsonResponse
+    import json
+    from .omnilink import criar_espelhamento
+
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'mensagem': 'Método inválido.'})
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'ok': False, 'mensagem': 'JSON inválido.'})
+
+    placa         = data.get('placa', '').strip()
+    cnpj_destino  = data.get('cnpj_destino', '').strip()
+    id_central    = data.get('id_central', '').strip()
+    data_exp      = data.get('data_expiracao', '').strip()
+    obrigatorio   = int(data.get('obrigatorio', 0))
+
+    if not placa or not data_exp:
+        return JsonResponse({'ok': False, 'mensagem': 'Placa e data de expiração são obrigatórios.'})
+
+    resultado = criar_espelhamento(
+        placa=placa,
+        data_expiracao=data_exp,
+        cnpj_destino=cnpj_destino,
+        id_central=id_central,
+        obrigatorio=obrigatorio,
+    )
+    return JsonResponse(resultado)
+
+
+@login_required
+def espelhamento_aceitar_ajax(request):
+    """AJAX POST — aceita ou rejeita espelhamento recebido."""
+    from django.http import JsonResponse
+    import json
+    from .omnilink import aceitar_espelhamento
+
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'mensagem': 'Método inválido.'})
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'ok': False, 'mensagem': 'JSON inválido.'})
+
+    resultado = aceitar_espelhamento(
+        id_solicitacao=int(data.get('id', 0)),
+        aceitar=bool(data.get('aceitar', True)),
+    )
+    return JsonResponse(resultado)
+
+
+@login_required
+def espelhamento_cancelar_ajax(request):
+    """AJAX POST — cancela/exclui espelhamento."""
+    from django.http import JsonResponse
+    import json
+    from .omnilink import excluir_espelhamento
+
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'mensagem': 'Método inválido.'})
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'ok': False, 'mensagem': 'JSON inválido.'})
+
+    resultado = excluir_espelhamento(id_solicitacao=int(data.get('id', 0)))
+    return JsonResponse(resultado)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
