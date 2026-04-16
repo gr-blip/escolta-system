@@ -795,10 +795,43 @@ def listar_centrais_disponiveis() -> list[dict]:
                 logger.debug(f"Omnilink {nome} erro: {e_inner}")
                 continue
 
-        logger.warning("Omnilink listar_centrais: nenhum método encontrou resultados")
-        return []
+
+        logger.warning("Omnilink listar_centrais: nenhum método WSDL encontrou resultados")
+        return _extrair_centrais_dos_espelhamentos()
+
     except Exception as e:
         logger.error(f"Omnilink listar_centrais: {e}")
+        return _extrair_centrais_dos_espelhamentos()
+
+
+def _extrair_centrais_dos_espelhamentos() -> list[dict]:
+    """
+    Fallback: extrai centrais únicas dos espelhamentos já registrados na conta.
+    Usa id_central + nome_central retornados por ListarEspelhamentosByClienteStatus.
+    Não depende de nenhum método WSDL adicional.
+    """
+    cache_key = 'omnilink_centrais_fallback_v1'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    try:
+        espelhamentos = listar_espelhamentos()
+        vistas = {}
+        for e in espelhamentos:
+            id_c   = e.get('id_central') or e.get('id_cliente_destino') or ''
+            nome_c = e.get('nome_central') or e.get('cnpj_central') or ''
+            if nome_c and id_c and id_c not in vistas:
+                vistas[id_c] = nome_c
+
+        centrais = [{'id': k, 'nome': v} for k, v in sorted(vistas.items(), key=lambda x: x[1])]
+        logger.info(f"Omnilink centrais fallback: {len(centrais)} únicas dos espelhamentos")
+
+        if centrais:
+            cache.set(cache_key, centrais, 1800)
+        return centrais
+    except Exception as e:
+        logger.error(f"Omnilink _extrair_centrais_dos_espelhamentos: {e}")
         return []
 
 
