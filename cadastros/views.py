@@ -966,8 +966,8 @@ def omnilink_historico(request, pk):
             diagnostico['ultimo_id_post'] = ids
 
             client = _get_client()
-            # UltimoSequencial=0 é inválido (-204); usa max(1, id_atual - lookback)
-            seq_diag = max(1, ids.get('id', 1) - 200_000) if ids.get('id', 0) > 0 else 1
+            # UltimoSequencial=0 é inválido (-204); lookback de 100M ≈ 7 dias na plataforma global
+            seq_diag = max(1, ids.get('id', 1) - 100_000_000) if ids.get('id', 0) > 0 else 1
             xml_str = client.service.ObtemEventosNormais(
                 Usuario=USUARIO,
                 Senha=SENHA_MD5,

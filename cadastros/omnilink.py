@@ -300,9 +300,9 @@ def get_ultima_posicao(mct_id: str) -> dict | None:
         id_terminal_str = str(id_terminal)
 
         ids = _buscar_ultimo_id_post()
-        # Olha ~5000 eventos atrás para encontrar a última posição automática.
-        # UltimoSequencial=0 é inválido na API (-204); mínimo aceitável é 1.
-        ultimo_seq = max(1, ids['id'] - 5000)
+        # Lookback de 20M IDs ≈ ~4-5 dias na plataforma global Omnilink.
+        # UltimoSequencial=0 é inválido (-204); mínimo aceitável é 1.
+        ultimo_seq = max(1, ids['id'] - 20_000_000)
 
         client = _get_client()
         xml_str = client.service.ObtemEventosNormais(
@@ -367,10 +367,11 @@ def get_historico_posicoes(mct_id: str, inicio: datetime, fim: datetime) -> list
         id_terminal = _mct_id_to_terminal(mct_id)
         id_terminal_str = str(id_terminal)
 
-        # Obtém o ID atual para calcular lookback histórico
+        # Obtém o ID atual para calcular lookback histórico.
+        # A plataforma Omnilink é global (~3-5M eventos/dia totais).
+        # Para cobrir 7 dias = ~35M IDs. Usamos 100M para ter margem.
         ids = _buscar_ultimo_id_post()
-        # 200 000 eventos de lookback — deve cobrir 7 dias de toda a frota
-        lookback = max(1, ids['id'] - 200_000)
+        lookback = max(1, ids['id'] - 100_000_000)
 
         client = _get_client()
         xml_str = client.service.ObtemEventosNormais(
