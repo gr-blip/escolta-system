@@ -81,8 +81,12 @@
 (function(){
   // ── Mapa ─────────────────────────────────────────────────────────────────
   const mapa = L.map('mapa-frota').setView([-15.8, -47.9], 5);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    {attribution:'© OpenStreetMap'}).addTo(mapa);
+  // CartoDB Voyager — sem restrição de Referer (funciona em Railway/produção)
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19
+  }).addTo(mapa);
 
   const marcadores = {};  // mct_id → L.Marker
 
@@ -120,6 +124,14 @@
           atualizarLinha(v);
           atualizarMarcador(v);
         });
+
+        // Ajusta zoom para englobar todas as viaturas com posição
+        const coords = data.viaturas.filter(v => v.lat && v.lng).map(v => [v.lat, v.lng]);
+        if (coords.length === 1) {
+          mapa.setView(coords[0], 13);
+        } else if (coords.length > 1) {
+          mapa.fitBounds(coords, {padding: [40, 40]});
+        }
 
         const agora = new Date().toLocaleTimeString('pt-BR');
         document.getElementById('status-txt').textContent = `Atualizado às ${agora} — ${online} viatura(s) com sinal`;
