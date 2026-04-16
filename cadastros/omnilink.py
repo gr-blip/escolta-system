@@ -67,14 +67,19 @@ def _get_client():
 
 # ─── Conversões ───────────────────────────────────────────────────────────────
 
-def _mct_id_to_terminal(mct_id: str) -> int:
+def _mct_id_to_terminal(mct_id: str) -> str:
     """
-    Extrai a parte numérica do MCT ID para usar como IdTerminal nos filtros.
-    Exemplo: "ON6034040" → 6034040
+    Converte MCT ID para IdTerminal hexadecimal (formato usado nos teleeventos).
+
+    A API Omnilink armazena IdTerminal como hex uppercase de 6 chars.
+    Exemplo: "OM6034040" → decimal 6034040 → hex "5C1278"
+
+    Retorna string hex uppercase (ex: "5C1278").
     """
     m = re.search(r'\d+', str(mct_id))
     if m:
-        return int(m.group())
+        n = int(m.group())
+        return format(n, 'X').upper()   # ex: 6034040 → "5C1278"
     raise ValueError(f"MCT ID sem parte numérica: '{mct_id}'")
 
 
@@ -159,19 +164,27 @@ def _parse_teleeventos_xml(xml_str: str, apenas_posicoes: bool = True) -> list[d
     if not xml_str:
         return eventos
 
-    # Encapsula em tag raiz se necessário (às vezes a API devolve fragmento)
-    xml_limpo = xml_str.strip()
+    # A API retorna tags em PascalCase (ex: <TeleEvento>, <IdTerminal>).
+    # Normalizamos para lowercase antes de parsear para simplificar o código.
+    xml_limpo = re.sub(
+        r'<(/?)([A-Za-z][A-Za-z0-9_]*)',
+        lambda m: f'<{m.group(1)}{m.group(2).lower()}',
+        xml_str.strip()
+    )
+
     if not xml_limpo.startswith('<'):
         return eventos
-    if not xml_limpo.startswith('<?xml') and not xml_limpo.startswith('<ListaTeleeventos'):
+
+    # Encapsula fragmento sem elemento raiz
+    if not (xml_limpo.startswith('<root') or xml_limpo.startswith('<?xml')
+            or xml_limpo.startswith('<listateleeventos')):
         xml_limpo = f'<root>{xml_limpo}</root>'
 
     try:
         root = ET.fromstring(xml_limpo)
     except ET.ParseError:
-        # Tenta encapsular de qualquer forma
         try:
-            root = ET.fromstring(f'<root>{xml_str}</root>')
+            root = ET.fromstring(f'<root>{xml_limpo}</root>')
         except ET.ParseError as e:
             logger.error(f"Omnilink XML inválido: {e} | início: {xml_str[:200]}")
             return eventos
@@ -181,7 +194,8 @@ def _parse_teleeventos_xml(xml_str: str, apenas_posicoes: bool = True) -> list[d
             el = ev.find(tag)
             return (el.text or '').strip() if el is not None else default
 
-        cod_raw = _t('CodMsg') or _t('codmsg')
+        # Tags já estão em lowercase após normalização
+        cod_raw = _t('codmsg')
         if not cod_raw:
             continue
 
@@ -190,14 +204,14 @@ def _parse_teleeventos_xml(xml_str: str, apenas_posicoes: bool = True) -> list[d
         if apenas_posicoes and cod_msg not in (CODMSG_POSICAO_AUTOMATICA, CODMSG_POSICAO_AVULSA):
             continue
 
-        lat = _parse_coord(_t('Latitude'))
-        lng = _parse_coord(_t('Longitude'))
+        lat = _parse_coord(_t('latitude'))
+        lng = _parse_coord(_t('longitude'))
 
         # Coordenadas (0,0) = posição inválida/GPS sem lock
         if lat == 0.0 and lng == 0.0:
             continue
 
-        ign_val = _t('Ignicao')
+        ign_val = _t('ignicao')
         if ign_val == '1':
             ignicao = True
         elif ign_val == '0':
@@ -207,12 +221,12 @@ def _parse_teleeventos_xml(xml_str: str, apenas_posicoes: bool = True) -> list[d
 
         # Hodômetro vem em metros, convertemos para km
         try:
-            hodometro_km = round(float(_t('Hodometro') or 0) / 1000.0, 1)
+            hodometro_km = round(float(_t('hodometro') or 0) / 1000.0, 1)
         except ValueError:
             hodometro_km = 0.0
 
         try:
-            velocidade = float(_t('Velocidade') or 0)
+            velocidade = float(_t('velocidade') or 0)
         except ValueError:
             velocidade = 0.0
 
@@ -222,8 +236,8 @@ def _parse_teleeventos_xml(xml_str: str, apenas_posicoes: bool = True) -> list[d
             'velocidade':  velocidade,
             'odometro':    hodometro_km,
             'ignicao':     ignicao,
-            'data_hora':   _t('DataHoraEvento') or _t('DataHora'),
-            'id_terminal': _t('IdTerminal') or _t('idTerminal'),
+            'data_hora':   _t('datahoraevento') or _t('datahora'),
+            'id_terminal': _t('idterminal'),
             'cod_msg':     cod_msg,
         })
 
@@ -254,13 +268,18 @@ def _buscar_ultimo_id_post() -> dict:
         resultado = {'id': 0, 'idctrl': 0}
         if xml_str:
             try:
-                # A API devolve fragmento sem elemento raiz: <id>N</id><idctrl>M</idctrl>...
-                # É necessário encapsular antes de parsear.
+                # A API devolve fragmento sem elemento raiz e tags podem ser
+                # PascalCase. Normalizamos e encapsulamos antes de parsear.
                 xml_raw = str(xml_str).strip()
-                wrapped = f'<root>{xml_raw}</root>'
+                xml_low = re.sub(
+                    r'<(/?)([A-Za-z][A-Za-z0-9_]*)',
+                    lambda m: f'<{m.group(1)}{m.group(2).lower()}',
+                    xml_raw
+                )
+                wrapped = f'<root>{xml_low}</root>'
                 root = ET.fromstring(wrapped)
-                id_val     = root.findtext('id')     or root.findtext('Id')     or '0'
-                idctrl_val = root.findtext('idctrl') or root.findtext('Idctrl') or '0'
+                id_val     = root.findtext('id')     or '0'
+                idctrl_val = root.findtext('idctrl') or '0'
                 resultado = {
                     'id':     int(id_val.strip()),
                     'idctrl': int(idctrl_val.strip()),
