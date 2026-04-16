@@ -386,6 +386,14 @@ def get_historico_posicoes(mct_id: str, inicio: datetime, fim: datetime) -> list
         id_terminal = _mct_id_to_terminal(mct_id)
         id_terminal_str = str(id_terminal)
 
+        # Remove timezone de inicio/fim — datetimes da API são sempre naive.
+        # Se o Django armazenar com tz (USE_TZ=True), a comparação lançaria TypeError.
+        def _naive(dt):
+            return dt.replace(tzinfo=None) if getattr(dt, 'tzinfo', None) else dt
+
+        inicio_n = _naive(inicio)
+        fim_n    = _naive(fim)
+
         # Obtém o ID atual para calcular lookback histórico.
         # A plataforma Omnilink é global (~3-5M eventos/dia totais).
         # Para cobrir 7 dias = ~35M IDs. Usamos 100M para ter margem.
@@ -412,7 +420,7 @@ def get_historico_posicoes(mct_id: str, inicio: datetime, fim: datetime) -> list
             dth_str = ev.get('data_hora', '')
             if dth_str:
                 dth = _parse_datetime(dth_str)
-                if dth is not None and not (inicio <= dth <= fim):
+                if dth is not None and not (inicio_n <= dth <= fim_n):
                     continue
 
             pontos.append({
