@@ -95,87 +95,88 @@
 </div>
 
 <!-- ══ MODAL NOVO COMPARTILHAMENTO ════════════════════════════════════════ -->
-<div id="modal-novo" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center">
-  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;width:480px;max-width:95vw;max-height:90vh;display:flex;flex-direction:column;position:relative;overflow:hidden">
+<div id="modal-novo" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;padding:16px;box-sizing:border-box">
+  <div style="background:#fff;border-radius:12px;width:100%;max-width:460px;display:flex;flex-direction:column;max-height:calc(100vh - 32px);box-shadow:0 8px 40px rgba(0,0,0,.18)">
 
-    <!-- Cabeçalho fixo -->
-    <div style="padding:20px 24px 16px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between">
-      <h2 style="font-size:16px;font-weight:700;color:var(--text1);margin:0">Novo compartilhamento</h2>
-      <button onclick="fecharModal()" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;line-height:1">✕</button>
+    <!-- CABEÇALHO -->
+    <div style="padding:18px 20px 14px;border-bottom:1px solid #e5e7eb;flex-shrink:0;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:15px;font-weight:700;color:#111;letter-spacing:.5px;text-transform:uppercase">NOVO ESPELHAMENTO</span>
+      <button onclick="fecharModal()" style="background:none;border:none;color:#6b7280;font-size:22px;cursor:pointer;line-height:1;padding:0 4px">✕</button>
     </div>
 
-    <!-- Conteúdo com scroll -->
-    <div style="padding:20px 24px;overflow-y:auto;flex:1">
+    <!-- CONTEÚDO (scroll) — min-height:0 é obrigatório para o overflow-y funcionar em flex -->
+    <div style="padding:18px 20px;overflow-y:auto;flex:1;min-height:0">
 
-      <!-- Placa -->
-      <div style="margin-bottom:14px">
-        <label style="font-size:12px;font-weight:600;color:var(--text3);display:block;margin-bottom:6px">Placa *</label>
-        <select id="novo-placa" style="width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px">
-          <option value="">Selecione uma placa</option>
+      <!-- PLACA -->
+      <div style="margin-bottom:16px">
+        <label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">PLACA *</label>
+        <select id="novo-placa" style="width:100%;padding:9px 12px;background:#f9fafb;border:1px solid #d1d5db;border-radius:8px;color:#111;font-size:13px;font-weight:600;text-transform:uppercase">
+          <option value="">SELECIONE A PLACA</option>
           {% for v in viaturas %}
-          <option value="{{ v.placa }}">{{ v.placa }} — {{ v.marca_modelo }}</option>
+          <option value="{{ v.placa }}">{{ v.placa }} — {{ v.marca_modelo|upper }}</option>
           {% endfor %}
         </select>
       </div>
 
-      <!-- Tipo de destino -->
-      <div style="margin-bottom:14px">
-        <label style="font-size:12px;font-weight:600;color:var(--text3);display:block;margin-bottom:8px">Destino *</label>
-        <div style="display:flex;gap:16px;margin-bottom:10px">
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);cursor:pointer">
-            <input type="radio" name="tipo-destino" value="central" checked onchange="toggleDestino(this.value)"> Central
+      <!-- DESTINO -->
+      <div style="margin-bottom:16px">
+        <label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">DESTINO *</label>
+        <div style="display:flex;gap:20px;margin-bottom:10px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#374151;cursor:pointer;text-transform:uppercase">
+            <input type="radio" name="tipo-destino" value="central" checked onchange="toggleDestino(this.value)"> CENTRAL
           </label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);cursor:pointer">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#374151;cursor:pointer;text-transform:uppercase">
             <input type="radio" name="tipo-destino" value="cnpj" onchange="toggleDestino(this.value)"> CPF / CNPJ
           </label>
         </div>
 
-        <!-- Central -->
+        <!-- campo Central -->
         <div id="campo-central">
-          <input id="busca-central" type="text" placeholder="🔍 Filtrar central…"
+          <input id="busca-central" type="text" placeholder="FILTRAR CENTRAL..."
             oninput="filtrarCentrais(this.value)"
-            style="width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box;margin-bottom:6px"/>
+            style="width:100%;padding:9px 12px;background:#f9fafb;border:1px solid #d1d5db;border-radius:8px;color:#111;font-size:13px;box-sizing:border-box;text-transform:uppercase;letter-spacing:.3px"/>
           <select id="novo-central"
-            style="width:100%;padding:8px 10px;background:var(--bg3);border:2px solid var(--accent);border-radius:8px;color:var(--text1);font-size:13px;display:none">
-            <option value="">— selecione —</option>
+            style="width:100%;margin-top:6px;padding:9px 12px;background:#f9fafb;border:2px solid #2563eb;border-radius:8px;color:#111;font-size:13px;font-weight:600;display:none;text-transform:uppercase">
+            <option value="">— SELECIONE A CENTRAL —</option>
           </select>
-          <p id="centrais-msg" style="font-size:11px;color:var(--text3);margin:4px 0 0"></p>
+          <p id="centrais-msg" style="font-size:11px;color:#9ca3af;margin:5px 0 0;text-transform:uppercase;letter-spacing:.3px"></p>
         </div>
 
-        <!-- CPF/CNPJ -->
+        <!-- campo CNPJ -->
         <div id="campo-cnpj" style="display:none">
-          <input id="novo-cnpj" type="text" placeholder="Digite o CPF ou CNPJ"
-            style="width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box"/>
+          <input id="novo-cnpj" type="text" placeholder="DIGITE O CPF OU CNPJ"
+            style="width:100%;padding:9px 12px;background:#f9fafb;border:1px solid #d1d5db;border-radius:8px;color:#111;font-size:13px;box-sizing:border-box;letter-spacing:.5px"/>
         </div>
       </div>
 
-      <!-- Data de expiração -->
-      <div style="margin-bottom:14px">
-        <label style="font-size:12px;font-weight:600;color:var(--text3);display:block;margin-bottom:6px">Data de expiração *</label>
+      <!-- DATA DE EXPIRAÇÃO -->
+      <div style="margin-bottom:16px">
+        <label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">DATA DE EXPIRAÇÃO *</label>
         <input type="datetime-local" id="novo-expiracao"
-          style="width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box"/>
+          style="width:100%;padding:9px 12px;background:#f9fafb;border:1px solid #d1d5db;border-radius:8px;color:#111;font-size:13px;box-sizing:border-box"/>
       </div>
 
-      <!-- Obrigatório -->
-      <div>
-        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);cursor:pointer">
-          <input type="checkbox" id="novo-obrigatorio" style="width:15px;height:15px">
-          Espelhamento obrigatório (somente destino pode cancelar)
+      <!-- OBRIGATÓRIO -->
+      <div style="margin-bottom:4px">
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#374151;cursor:pointer;text-transform:uppercase;letter-spacing:.3px">
+          <input type="checkbox" id="novo-obrigatorio" style="width:16px;height:16px;cursor:pointer">
+          ESPELHAMENTO OBRIGATÓRIO (SOMENTE DESTINO PODE CANCELAR)
         </label>
       </div>
 
-      <!-- Mensagem de resultado -->
-      <div id="modal-msg" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;margin-top:14px"></div>
+      <!-- MENSAGEM -->
+      <div id="modal-msg" style="display:none;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:14px;font-weight:600;text-transform:uppercase;letter-spacing:.3px"></div>
     </div>
 
-    <!-- Rodapé fixo com botões -->
-    <div style="padding:16px 24px;border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:10px;justify-content:flex-end;background:var(--bg2)">
-      <button onclick="fecharModal()" style="padding:9px 20px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer">
-        Cancelar
+    <!-- RODAPÉ FIXO -->
+    <div style="padding:14px 20px;border-top:1px solid #e5e7eb;flex-shrink:0;display:flex;gap:10px;justify-content:flex-end;background:#fff;border-radius:0 0 12px 12px">
+      <button onclick="fecharModal()"
+        style="padding:10px 22px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.5px">
+        CANCELAR
       </button>
       <button onclick="salvarEspelhamento()" id="btn-salvar"
-        style="padding:9px 28px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">
-        ⟳ Espelhar
+        style="padding:10px 28px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:.5px">
+        ESPELHAR
       </button>
     </div>
   </div>
