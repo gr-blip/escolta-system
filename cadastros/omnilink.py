@@ -637,13 +637,18 @@ def criar_espelhamento(placa: str, data_expiracao: str,
                 continue
 
         # ── Fallback: CriarSolicitacaoEspelhamentoReverso ────────────────
-        resultado = client.service.CriarSolicitacaoEspelhamentoReverso(
+        kwargs_criar = dict(
             Usuario=USUARIO,
             Senha=SENHA_MD5,
             Placa=placa,
             data_expiracao=data_expiracao,
             Espelhamento_Obrigatorio=obrigatorio,
         )
+        if id_central:
+            kwargs_criar['IdCentral'] = id_central
+        if cnpj_destino:
+            kwargs_criar['CNPJ'] = cnpj_destino
+        resultado = client.service.CriarSolicitacaoEspelhamentoReverso(**kwargs_criar)
         logger.info(f"Omnilink CriarSolicitacaoEspelhamentoReverso({placa}): {resultado}")
         xml_r = re.sub(r'<(/?)([A-Za-z][A-Za-z0-9_]*)',
                        lambda m: f'<{m.group(1)}{m.group(2).lower()}', str(resultado))
@@ -699,7 +704,7 @@ def excluir_espelhamento(id_solicitacao: int) -> dict:
 def listar_centrais_disponiveis() -> list[dict]:
     """
     Lista as centrais/bases disponíveis para espelhamento.
-    Tenta múltiplos nomes de método (WSDL pode variar por versão).
+    Tenta múltiplos nomes de método WSDL; fallback: fixture local JSON.
     """
     cache_key = 'omnilink_centrais_v1'
     cached = cache.get(cache_key)
@@ -709,7 +714,9 @@ def listar_centrais_disponiveis() -> list[dict]:
     try:
         client = _get_client()
         for nome in ('ListarCentraisDisponiveis', 'ListarBases', 'ListarCentrais',
-                     'GetCentrais', 'BuscarCentrais', 'ListarBasesParceiras'):
+                     'GetCentrais', 'BuscarCentrais', 'ListarBasesParceiras',
+                     'ListarCentraisOmnilink', 'ListarClientes', 'GetBases',
+                     'BuscarBases', 'ListarEmpresas', 'GetEmpresas'):
             op = getattr(client.service, nome, None)
             if op is None:
                 continue
@@ -732,10 +739,51 @@ def listar_centrais_disponiveis() -> list[dict]:
                 logger.debug(f"Omnilink {nome}: {e_inner}")
                 continue
 
-        logger.warning("Omnilink: nenhum método de listar centrais encontrado")
-        return []
+        logger.warning("Omnilink listar_centrais: nenhum método WSDL encontrou resultados — usando fixture local")
+        return _carregar_centrais_fixture()
     except Exception as e:
         logger.error(f"Omnilink listar_centrais: {e}")
+        return _carregar_centrais_fixture()
+
+
+def _carregar_centrais_fixture() -> list[dict]:
+    """
+    Carrega lista de centrais do arquivo JSON local (fixture extraída do AMNLink).
+    A Omnilink não expõe esse dado no WSDL — o portal embeds como variável JS.
+    """
+    import json as _json
+    import pathlib
+    fixture = pathlib.Path(__file__).parent / 'fixtures' / 'centrais_omnilink.json'
+    try:
+        with open(fixture, encoding='utf-8') as f:
+            data = _json.load(f)
+        logger.info(f"Omnilink centrais fixture: {len(data)} entradas carregadas")
+        return data
+    except Exception as e:
+        logger.error(f"Omnilink _carregar_centrais_fixture: {e}")
+        return _extrair_centrais_dos_espelhamentos()
+
+
+def _extrair_centrais_dos_espelhamentos() -> list[dict]:
+    """Fallback final: extrai centrais únicas dos espelhamentos existentes."""
+    cache_key = 'omnilink_centrais_fallback_v1'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+    try:
+        espelhamentos = listar_espelhamentos()
+        vistas = {}
+        for e in espelhamentos:
+            id_c   = e.get('id_central') or e.get('id_cliente_destino') or ''
+            nome_c = e.get('nome_central') or e.get('cnpj_central') or ''
+            if nome_c and id_c and id_c not in vistas:
+                vistas[id_c] = nome_c
+        centrais = [{'id': k, 'nome': v} for k, v in sorted(vistas.items(), key=lambda x: x[1])]
+        if centrais:
+            cache.set(cache_key, centrais, 1800)
+        return centrais
+    except Exception as e:
+        logger.error(f"Omnilink _extrair_centrais_dos_espelhamentos: {e}")
         return []
 
 

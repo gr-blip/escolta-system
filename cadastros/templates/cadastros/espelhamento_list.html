@@ -278,6 +278,8 @@
     document.getElementById('novo-expiracao').value = '';
     document.getElementById('novo-cnpj').value = '';
     document.getElementById('novo-obrigatorio').checked = false;
+    // Carrega centrais automaticamente ao abrir o modal (se ainda não carregadas)
+    if (!todasCentrais.length) carregarCentrais();
   };
   window.fecharModal = function() {
     document.getElementById('modal-novo').style.display = 'none';
