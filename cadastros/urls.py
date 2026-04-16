@@ -64,9 +64,12 @@ urlpatterns += [
     path('operacional/os/<int:pk>/print/',               views.os_print,             name='os_print'),
     path('operacional/os/<int:pk>/email/',               views.os_email_html,        name='os_email_html'),
     path('operacional/os/<int:pk>/finalizar/',           views.os_finalizar,         name='os_finalizar'),
-    # Omnilink — rastreamento
+    # Omnilink — rastreamento OS (endpoints AJAX por OS)
     path('operacional/os/<int:pk>/rastreamento/posicao/',  views.omnilink_posicao_atual, name='omnilink_posicao_atual'),
     path('operacional/os/<int:pk>/rastreamento/historico/', views.omnilink_historico,    name='omnilink_historico'),
+    # Omnilink — página de frota (todas as viaturas)
+    path('operacional/rastreamento/',          views.omnilink_frota,          name='omnilink_frota'),
+    path('operacional/rastreamento/posicoes/', views.omnilink_frota_posicoes, name='omnilink_frota_posicoes'),
 ]
 
 # Faturamento — Tabela de Precos

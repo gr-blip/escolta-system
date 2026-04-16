@@ -1037,6 +1037,65 @@ def omnilink_historico(request, pk):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# RASTREAMENTO — Página de frota (mapa com todas as viaturas)
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def omnilink_frota(request):
+    """Página de rastreamento da frota — mapa com todas as viaturas."""
+    from .models import Viatura
+    viaturas = Viatura.objects.filter(mct_id__isnull=False).exclude(mct_id='').order_by('placa')
+    return render(request, 'cadastros/omnilink_frota.html', {'viaturas': viaturas})
+
+
+@login_required
+def omnilink_frota_posicoes(request):
+    """
+    AJAX — retorna a última posição de todas as viaturas com MCT ID.
+    Usa o buffer compartilhado _get_eventos_normais() (uma só chamada API).
+    """
+    from django.http import JsonResponse
+    from .models import Viatura
+    from .omnilink import _get_eventos_normais, _mct_id_to_terminal
+
+    viaturas = Viatura.objects.filter(mct_id__isnull=False).exclude(mct_id='')
+
+    # Obtém todos os eventos de uma vez (cache compartilhado)
+    todos_eventos = _get_eventos_normais()
+
+    # Indexa o último evento por id_terminal para lookup O(1)
+    ultimo_por_terminal: dict = {}
+    for ev in todos_eventos:
+        tid = ev.get('id_terminal', '')
+        if tid:
+            ultimo_por_terminal[tid] = ev   # mantém sempre o mais recente (lista é ordenada por tempo)
+
+    resultado = []
+    for v in viaturas:
+        try:
+            id_terminal = _mct_id_to_terminal(v.mct_id)
+        except Exception:
+            id_terminal = None
+
+        ev = ultimo_por_terminal.get(id_terminal) if id_terminal else None
+        resultado.append({
+            'mct_id':      v.mct_id,
+            'id_terminal': id_terminal,
+            'placa':       v.placa,
+            'modelo':      v.marca_modelo,
+            'lat':         ev['lat']       if ev else None,
+            'lng':         ev['lng']       if ev else None,
+            'velocidade':  ev['velocidade'] if ev else None,
+            'odometro':    ev['odometro']  if ev else None,
+            'ignicao':     ev['ignicao']   if ev else None,
+            'data_hora':   ev['data_hora'] if ev else None,
+            'online':      ev is not None,
+        })
+
+    return JsonResponse({'ok': True, 'viaturas': resultado})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # FATURAMENTO — Tabela de Precos
 # ══════════════════════════════════════════════════════════════════════════════
 
