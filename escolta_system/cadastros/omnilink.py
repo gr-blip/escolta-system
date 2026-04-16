@@ -796,11 +796,31 @@ def listar_centrais_disponiveis() -> list[dict]:
                 continue
 
 
-        logger.warning("Omnilink listar_centrais: nenhum método WSDL encontrou resultados")
-        return _extrair_centrais_dos_espelhamentos()
+        logger.warning("Omnilink listar_centrais: nenhum método WSDL encontrou resultados — usando fixture local")
+        return _carregar_centrais_fixture()
 
     except Exception as e:
         logger.error(f"Omnilink listar_centrais: {e}")
+        return _carregar_centrais_fixture()
+
+
+def _carregar_centrais_fixture() -> list[dict]:
+    """
+    Carrega lista de centrais do arquivo JSON local (fixture extraída do AMNLink).
+    A Omnilink não expõe esse endpoint no WSDL público — a lista é embutida
+    no HTML do portal AMNLink como variável JavaScript.
+    """
+    import json as _json
+    import pathlib
+
+    fixture = pathlib.Path(__file__).parent / 'fixtures' / 'centrais_omnilink.json'
+    try:
+        with open(fixture, encoding='utf-8') as f:
+            data = _json.load(f)
+        logger.info(f"Omnilink centrais fixture: {len(data)} entradas carregadas")
+        return data
+    except Exception as e:
+        logger.error(f"Omnilink _carregar_centrais_fixture: {e}")
         return _extrair_centrais_dos_espelhamentos()
 
 
