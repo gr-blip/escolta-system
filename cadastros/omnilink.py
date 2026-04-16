@@ -44,6 +44,7 @@ CACHE_POSICAO_TTL   = 30    # 30 s — posição atual
 CACHE_HISTORICO_TTL = 300   # 5 min — rota histórica
 CACHE_IDS_TTL       = 10    # 10 s — sequenciais (mínimo permitido pela API)
 CACHE_CLIENT_TTL    = 120   # 2 min — instância zeep
+CACHE_EVENTOS_TTL   = 300   # 5 min — buffer de eventos (compartilhado posicao+historico)
 
 
 # ─── Cliente SOAP ─────────────────────────────────────────────────────────────
@@ -296,6 +297,55 @@ def _buscar_ultimo_id_post() -> dict:
         return {'id': 0, 'idctrl': 0}
 
 
+# ─── Buffer compartilhado de eventos ─────────────────────────────────────────
+
+def _get_eventos_normais() -> list[dict]:
+    """
+    Obtém e cacheia o buffer de eventos normais da plataforma Omnilink.
+
+    Compartilhado entre get_ultima_posicao e get_historico_posicoes para evitar
+    duas chamadas distintas à API (que causaria erro -413 "aguardar 180s").
+
+    Lookback de 100M IDs ≈ ~4 dias de eventos globais.
+    Cache de 5 min (mesmo TTL do cooldown da API).
+    """
+    cache_key = "omnilink_eventos_normais_v1"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        logger.debug(f"Omnilink cache hit: {len(cached)} eventos")
+        return cached
+
+    try:
+        ids = _buscar_ultimo_id_post()
+        if ids['id'] == 0:
+            logger.warning("Omnilink: BuscarUltimoIdPost retornou id=0")
+            return []
+
+        ultimo_seq = max(1, ids['id'] - 100_000_000)
+        logger.info(f"Omnilink ObtemEventosNormais: UltimoSequencial={ultimo_seq}")
+
+        client = _get_client()
+        xml_str = client.service.ObtemEventosNormais(
+            Usuario=USUARIO,
+            Senha=SENHA_MD5,
+            UltimoSequencial=ultimo_seq,
+        )
+
+        raw = str(xml_str) if xml_str else ''
+        logger.debug(f"Omnilink ObtemEventosNormais resposta (inicio): {raw[:200]}")
+
+        eventos = _parse_teleeventos_xml(raw)
+        logger.info(f"Omnilink ObtemEventosNormais: {len(eventos)} eventos parseados")
+
+        if eventos:
+            cache.set(cache_key, eventos, CACHE_EVENTOS_TTL)
+        return eventos
+
+    except Exception as e:
+        logger.error(f"Omnilink _get_eventos_normais: {e}")
+        return []
+
+
 # ─── Funções públicas ─────────────────────────────────────────────────────────
 
 def get_ultima_posicao(mct_id: str) -> dict | None:
@@ -315,31 +365,18 @@ def get_ultima_posicao(mct_id: str) -> dict | None:
         return cached
 
     try:
-        id_terminal = _mct_id_to_terminal(mct_id)
-        id_terminal_str = str(id_terminal)
+        id_terminal_str = _mct_id_to_terminal(mct_id)
 
-        ids = _buscar_ultimo_id_post()
-        # Lookback de 20M IDs ≈ ~4-5 dias na plataforma global Omnilink.
-        # UltimoSequencial=0 é inválido (-204); mínimo aceitável é 1.
-        ultimo_seq = max(1, ids['id'] - 20_000_000)
+        # Usa buffer compartilhado (evita segunda chamada API e erro -413)
+        todos_eventos = _get_eventos_normais()
 
-        client = _get_client()
-        xml_str = client.service.ObtemEventosNormais(
-            Usuario=USUARIO,
-            Senha=SENHA_MD5,
-            UltimoSequencial=ultimo_seq,
-        )
-
-        eventos = _parse_teleeventos_xml(str(xml_str) if xml_str else '')
-
-        # Filtra pelo veículo correto
         eventos_veiculo = [
-            e for e in eventos
+            e for e in todos_eventos
             if e.get('id_terminal') == id_terminal_str
         ]
 
         if not eventos_veiculo:
-            logger.info(f"Omnilink: nenhuma posição recente para IdTerminal={id_terminal} (MCT={mct_id})")
+            logger.info(f"Omnilink: nenhuma posição para IdTerminal={id_terminal_str} (MCT={mct_id})")
             return None
 
         # O último na lista é o mais recente
@@ -383,8 +420,7 @@ def get_historico_posicoes(mct_id: str, inicio: datetime, fim: datetime) -> list
         return cached
 
     try:
-        id_terminal = _mct_id_to_terminal(mct_id)
-        id_terminal_str = str(id_terminal)
+        id_terminal_str = _mct_id_to_terminal(mct_id)
 
         # Remove timezone de inicio/fim — datetimes da API são sempre naive.
         # Se o Django armazenar com tz (USE_TZ=True), a comparação lançaria TypeError.
@@ -394,20 +430,8 @@ def get_historico_posicoes(mct_id: str, inicio: datetime, fim: datetime) -> list
         inicio_n = _naive(inicio)
         fim_n    = _naive(fim)
 
-        # Obtém o ID atual para calcular lookback histórico.
-        # A plataforma Omnilink é global (~3-5M eventos/dia totais).
-        # Para cobrir 7 dias = ~35M IDs. Usamos 100M para ter margem.
-        ids = _buscar_ultimo_id_post()
-        lookback = max(1, ids['id'] - 100_000_000)
-
-        client = _get_client()
-        xml_str = client.service.ObtemEventosNormais(
-            Usuario=USUARIO,
-            Senha=SENHA_MD5,
-            UltimoSequencial=lookback,
-        )
-
-        todos_eventos = _parse_teleeventos_xml(str(xml_str) if xml_str else '')
+        # Usa buffer compartilhado (evita segunda chamada API e erro -413)
+        todos_eventos = _get_eventos_normais()
         logger.info(f"Omnilink historico: {len(todos_eventos)} eventos totais para filtrar")
 
         pontos = []

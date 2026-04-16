@@ -920,9 +920,18 @@ def omnilink_posicao_atual(request, pk):
     if not mct_id:
         return JsonResponse({'ok': False, 'erro': 'Viatura sem MCT ID cadastrado.'})
 
+    import logging as _logging
+    _log = _logging.getLogger(__name__)
+
     dados = get_ultima_posicao(mct_id)
     if not dados:
-        return JsonResponse({'ok': False, 'erro': 'Sem resposta da API Omnilink.'})
+        from .omnilink import _mct_id_to_terminal
+        try:
+            id_term = _mct_id_to_terminal(mct_id)
+        except Exception:
+            id_term = '?'
+        _log.warning(f"omnilink_posicao_atual: sem dados para MCT={mct_id} IdTerminal={id_term}")
+        return JsonResponse({'ok': False, 'erro': f'Sem posição recente para viatura {mct_id} (IdTerminal: {id_term}). Verifique se o rastreador transmitiu posições.'})
 
     return JsonResponse({'ok': True, 'mct_id': mct_id, **dados})
 
