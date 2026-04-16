@@ -637,13 +637,20 @@ def criar_espelhamento(placa: str, data_expiracao: str,
                 continue
 
         # ── Fallback: CriarSolicitacaoEspelhamentoReverso ────────────────
-        resultado = client.service.CriarSolicitacaoEspelhamentoReverso(
+        # Monta kwargs base e adiciona IdCentral / CNPJ se fornecidos
+        kwargs_criar = dict(
             Usuario=USUARIO,
             Senha=SENHA_MD5,
             Placa=placa,
             data_expiracao=data_expiracao,
             Espelhamento_Obrigatorio=obrigatorio,
         )
+        if id_central:
+            kwargs_criar['IdCentral'] = id_central
+        if cnpj_destino:
+            kwargs_criar['CNPJ'] = cnpj_destino
+
+        resultado = client.service.CriarSolicitacaoEspelhamentoReverso(**kwargs_criar)
         logger.info(f"Omnilink CriarSolicitacaoEspelhamentoReverso({placa}): {resultado}")
         xml_r = re.sub(r'<(/?)([A-Za-z][A-Za-z0-9_]*)',
                        lambda m: f'<{m.group(1)}{m.group(2).lower()}', str(resultado))

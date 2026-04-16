@@ -1,0 +1,408 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}Espelhamentos Omnilink{% endblock %}
+
+{% block content %}
+<div style="padding:20px 24px 32px">
+
+  <!-- Cabeçalho -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+    <div>
+      <h1 style="font-size:20px;font-weight:700;color:var(--text1);margin:0;display:flex;align-items:center;gap:8px">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 00-2 2v14a2 2 0 002 2h3M16 3h3a2 2 0 012 2v14a2 2 0 01-2 2h-3M12 8v8M9 11l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Espelhamentos Omnilink
+      </h1>
+      <p style="font-size:12px;color:var(--text3);margin:4px 0 0">Compartilhamento de rastreadores com clientes via Omnilink</p>
+    </div>
+    <button onclick="abrirModalNovo()"
+      style="padding:8px 18px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
+      <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Novo compartilhamento
+    </button>
+  </div>
+
+  <!-- Abas -->
+  <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:20px">
+    <button onclick="mudarAba('enviados')" id="tab-enviados"
+      style="padding:9px 20px;background:none;border:none;border-bottom:2px solid var(--accent);margin-bottom:-2px;font-size:13px;font-weight:600;color:var(--accent);cursor:pointer">
+      Enviados
+    </button>
+    <button onclick="mudarAba('recebidos')" id="tab-recebidos"
+      style="padding:9px 20px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer">
+      Recebidos
+    </button>
+  </div>
+
+  <!-- Filtro de período -->
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <label style="font-size:12px;color:var(--text3)">Período:</label>
+    <input type="date" id="filtro-inicio" style="padding:5px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text1);font-size:12px"/>
+    <span style="color:var(--text3);font-size:12px">até</span>
+    <input type="date" id="filtro-fim" style="padding:5px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text1);font-size:12px"/>
+    <select id="filtro-status" style="padding:5px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text1);font-size:12px">
+      <option value="">Todos os status</option>
+      <option value="1">Aceito</option>
+      <option value="0">Aguardando</option>
+      <option value="2">Recusado</option>
+    </select>
+    <button onclick="carregarEspelhamentos()" style="padding:5px 14px;background:var(--bg3);color:var(--text1);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer">
+      Buscar
+    </button>
+    <span id="loading-txt" style="font-size:12px;color:var(--text3);display:none">Consultando API…</span>
+  </div>
+
+  <!-- Tabela Enviados -->
+  <div id="painel-enviados">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr style="background:var(--bg3)">
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Placa</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Base Destino</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Criado em</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Expira em</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Status</th>
+            <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-enviados">
+          <tr><td colspan="6" style="padding:28px;text-align:center;color:var(--text3)">Clique em "Buscar" para carregar.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tabela Recebidos -->
+  <div id="painel-recebidos" style="display:none">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr style="background:var(--bg3)">
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Placa</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Base Origem</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Criado em</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Expira em</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Status</th>
+            <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-recebidos">
+          <tr><td colspan="6" style="padding:28px;text-align:center;color:var(--text3)">Clique em "Buscar" para carregar.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ MODAL NOVO COMPARTILHAMENTO ════════════════════════════════════════ -->
+<div id="modal-novo" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;width:480px;max-width:95vw;position:relative">
+    <button onclick="fecharModal()" style="position:absolute;top:14px;right:14px;background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer">✕</button>
+    <h2 style="font-size:16px;font-weight:700;color:var(--text1);margin:0 0 20px">Novo compartilhamento</h2>
+
+    <!-- Placa -->
+    <div style="margin-bottom:14px">
+      <label style="font-size:12px;font-weight:600;color:var(--text3);display:block;margin-bottom:6px">Placa *</label>
+      <select id="novo-placa" style="width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px">
+        <option value="">Selecione uma placa</option>
+        {% for v in viaturas %}
+        <option value="{{ v.placa }}">{{ v.placa }} — {{ v.marca_modelo }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Tipo de destino -->
+    <div style="margin-bottom:14px">
+      <label style="font-size:12px;font-weight:600;color:var(--text3);display:block;margin-bottom:8px">Destino *</label>
+      <div style="display:flex;gap:16px;margin-bottom:10px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);cursor:pointer">
+          <input type="radio" name="tipo-destino" value="central" checked onchange="toggleDestino(this.value)"> Central
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);cursor:pointer">
+          <input type="radio" name="tipo-destino" value="cnpj" onchange="toggleDestino(this.value)"> CPF / CNPJ
+        </label>
+      </div>
+
+      <!-- Central -->
+      <div id="campo-central">
+        <div style="display:flex;gap:8px">
+          <input id="busca-central" type="text" placeholder="Digite para filtrar centrais…"
+            oninput="filtrarCentrais(this.value)"
+            style="flex:1;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px"/>
+          <button onclick="carregarCentrais()" id="btn-load-centrais"
+            style="padding:8px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text2);cursor:pointer">
+            Carregar
+          </button>
+        </div>
+        <select id="novo-central" size="5"
+          style="width:100%;margin-top:6px;padding:6px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;display:none">
+        </select>
+        <p id="centrais-msg" style="font-size:11px;color:var(--text3);margin:6px 0 0">Clique em "Carregar" para buscar as centrais disponíveis.</p>
+      </div>
+
+      <!-- CPF/CNPJ -->
+      <div id="campo-cnpj" style="display:none">
+        <input id="novo-cnpj" type="text" placeholder="Digite o CPF ou CNPJ"
+          style="width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box"/>
+      </div>
+    </div>
+
+    <!-- Data de expiração -->
+    <div style="margin-bottom:14px">
+      <label style="font-size:12px;font-weight:600;color:var(--text3);display:block;margin-bottom:6px">Data de expiração *</label>
+      <input type="datetime-local" id="novo-expiracao"
+        style="width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box"/>
+    </div>
+
+    <!-- Obrigatório -->
+    <div style="margin-bottom:20px">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);cursor:pointer">
+        <input type="checkbox" id="novo-obrigatorio" style="width:15px;height:15px">
+        Espelhamento obrigatório (somente destino pode cancelar)
+      </label>
+    </div>
+
+    <!-- Mensagem de resultado -->
+    <div id="modal-msg" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px"></div>
+
+    <!-- Botões -->
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="fecharModal()" style="padding:8px 18px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer">
+        Cancelar
+      </button>
+      <button onclick="salvarEspelhamento()" id="btn-salvar"
+        style="padding:8px 18px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">
+        Cadastrar
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  let abaAtual = 'enviados';
+  let todasCentrais = [];
+
+  // ── Abas ───────────────────────────────────────────────────────────────────
+  window.mudarAba = function(aba) {
+    abaAtual = aba;
+    document.getElementById('painel-enviados').style.display  = aba === 'enviados'  ? '' : 'none';
+    document.getElementById('painel-recebidos').style.display = aba === 'recebidos' ? '' : 'none';
+    document.getElementById('tab-enviados').style.color       = aba === 'enviados'  ? 'var(--accent)' : 'var(--text3)';
+    document.getElementById('tab-recebidos').style.color      = aba === 'recebidos' ? 'var(--accent)' : 'var(--text3)';
+    document.getElementById('tab-enviados').style.borderBottomColor  = aba === 'enviados'  ? 'var(--accent)' : 'transparent';
+    document.getElementById('tab-recebidos').style.borderBottomColor = aba === 'recebidos' ? 'var(--accent)' : 'transparent';
+  };
+
+  // ── Filtros com datas padrão ────────────────────────────────────────────────
+  (function() {
+    const hoje = new Date();
+    const m30  = new Date(hoje); m30.setDate(hoje.getDate() - 30);
+    document.getElementById('filtro-fim').value    = hoje.toISOString().split('T')[0];
+    document.getElementById('filtro-inicio').value = m30.toISOString().split('T')[0];
+  })();
+
+  // ── Carregar espelhamentos ─────────────────────────────────────────────────
+  window.carregarEspelhamentos = function() {
+    const inicio = document.getElementById('filtro-inicio').value;
+    const fim    = document.getElementById('filtro-fim').value;
+    const status = document.getElementById('filtro-status').value;
+    if (!inicio || !fim) { alert('Selecione o período.'); return; }
+
+    document.getElementById('loading-txt').style.display = '';
+    const url = `/operacional/espelhamentos/listar/?inicio=${inicio}&fim=${fim}&status=${status}`;
+    fetch(url).then(r=>r.json()).then(data => {
+      document.getElementById('loading-txt').style.display = 'none';
+      if (!data.ok) { alert('Erro: ' + (data.erro||'desconhecido')); return; }
+      renderTabela(data.enviados || [], data.recebidos || []);
+    }).catch(()=>{ document.getElementById('loading-txt').style.display='none'; alert('Falha de conexão.'); });
+  };
+
+  function badgeStatus(s) {
+    const mapa = {'1':'#10b981','0':'#f59e0b','2':'#ef4444',''  :'#6b7280'};
+    const txt  = {'1':'Aceito','0':'Aguardando','2':'Recusado','':'—'};
+    const cor  = mapa[s] || '#6b7280';
+    return `<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;background:${cor}22;color:${cor};font-size:11px;font-weight:600">${txt[s]||s}</span>`;
+  }
+
+  function renderTabela(enviados, recebidos) {
+    const teBody = document.getElementById('tbody-enviados');
+    const trBody = document.getElementById('tbody-recebidos');
+
+    if (!enviados.length) {
+      teBody.innerHTML = '<tr><td colspan="6" style="padding:28px;text-align:center;color:var(--text3)">Nenhum espelhamento enviado no período.</td></tr>';
+    } else {
+      teBody.innerHTML = enviados.map(e => `
+        <tr style="border-top:1px solid var(--border)">
+          <td style="padding:10px 14px;font-weight:600;color:var(--text1);font-family:monospace">${e.placa||'—'}</td>
+          <td style="padding:10px 14px;color:var(--text2)">${e.nome_central||e.cnpj_central||e.id_cliente_destino||'—'}</td>
+          <td style="padding:10px 14px;color:var(--text3);font-size:12px">${e.data_cad||'—'}</td>
+          <td style="padding:10px 14px;color:var(--text3);font-size:12px">${e.data_exp||'—'}</td>
+          <td style="padding:10px 14px">${badgeStatus(e.status_aceite||e.status)}</td>
+          <td style="padding:10px 14px;text-align:center">
+            <button onclick="cancelarEspelhamento(${e.id},'${e.placa}')"
+              style="padding:4px 10px;background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.3);border-radius:6px;font-size:11px;cursor:pointer">
+              Cancelar
+            </button>
+          </td>
+        </tr>`).join('');
+    }
+
+    if (!recebidos.length) {
+      trBody.innerHTML = '<tr><td colspan="6" style="padding:28px;text-align:center;color:var(--text3)">Nenhum espelhamento recebido no período.</td></tr>';
+    } else {
+      trBody.innerHTML = recebidos.map(e => {
+        const pendente = (e.status_aceite === '0' || e.status_aceite === '');
+        const acoes = pendente
+          ? `<button onclick="avaliarEspelhamento(${e.id},true)" style="padding:4px 10px;background:rgba(16,185,129,.1);color:#10b981;border:1px solid rgba(16,185,129,.3);border-radius:6px;font-size:11px;cursor:pointer;margin-right:4px">Aceitar</button>
+             <button onclick="avaliarEspelhamento(${e.id},false)" style="padding:4px 10px;background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.3);border-radius:6px;font-size:11px;cursor:pointer">Rejeitar</button>`
+          : `<button onclick="cancelarEspelhamento(${e.id},'${e.placa}')" style="padding:4px 10px;background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.3);border-radius:6px;font-size:11px;cursor:pointer">Cancelar</button>`;
+        return `
+          <tr style="border-top:1px solid var(--border)">
+            <td style="padding:10px 14px;font-weight:600;color:var(--text1);font-family:monospace">${e.placa||'—'}</td>
+            <td style="padding:10px 14px;color:var(--text2)">${e.nome_central||e.cnpj_central||e.id_cliente||'—'}</td>
+            <td style="padding:10px 14px;color:var(--text3);font-size:12px">${e.data_cad||'—'}</td>
+            <td style="padding:10px 14px;color:var(--text3);font-size:12px">${e.data_exp||'—'}</td>
+            <td style="padding:10px 14px">${badgeStatus(e.status_aceite||e.status)}</td>
+            <td style="padding:10px 14px;text-align:center;white-space:nowrap">${acoes}</td>
+          </tr>`;
+      }).join('');
+    }
+  }
+
+  // ── Modal ─────────────────────────────────────────────────────────────────
+  window.abrirModalNovo = function() {
+    document.getElementById('modal-novo').style.display = 'flex';
+    document.getElementById('modal-msg').style.display = 'none';
+    document.getElementById('novo-placa').value = '';
+    document.getElementById('novo-expiracao').value = '';
+    document.getElementById('novo-cnpj').value = '';
+    document.getElementById('novo-obrigatorio').checked = false;
+    // Carrega centrais automaticamente ao abrir o modal (se ainda não carregadas)
+    if (!todasCentrais.length) carregarCentrais();
+  };
+  window.fecharModal = function() {
+    document.getElementById('modal-novo').style.display = 'none';
+  };
+
+  window.toggleDestino = function(tipo) {
+    document.getElementById('campo-central').style.display = tipo === 'central' ? '' : 'none';
+    document.getElementById('campo-cnpj').style.display    = tipo === 'cnpj'    ? '' : 'none';
+  };
+
+  // ── Centrais ──────────────────────────────────────────────────────────────
+  window.carregarCentrais = function() {
+    const btn = document.getElementById('btn-load-centrais');
+    btn.textContent = '…'; btn.disabled = true;
+    fetch('/operacional/espelhamentos/centrais/')
+      .then(r=>r.json()).then(data => {
+        btn.textContent = 'Carregar'; btn.disabled = false;
+        if (!data.ok || !data.centrais.length) {
+          document.getElementById('centrais-msg').textContent = data.aviso || 'Nenhuma central disponível via API.';
+          return;
+        }
+        todasCentrais = data.centrais;
+        renderCentrais(data.centrais);
+        document.getElementById('centrais-msg').textContent = `${data.centrais.length} centrais carregadas.`;
+      }).catch(()=>{ btn.textContent='Carregar'; btn.disabled=false; });
+  };
+
+  function renderCentrais(lista) {
+    const sel = document.getElementById('novo-central');
+    sel.innerHTML = lista.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+    sel.style.display = lista.length ? '' : 'none';
+  }
+
+  window.filtrarCentrais = function(q) {
+    if (!todasCentrais.length) return;
+    const filtradas = q ? todasCentrais.filter(c => c.nome.toLowerCase().includes(q.toLowerCase())) : todasCentrais;
+    renderCentrais(filtradas);
+  };
+
+  // ── Salvar espelhamento ───────────────────────────────────────────────────
+  window.salvarEspelhamento = function() {
+    const placa = document.getElementById('novo-placa').value;
+    const tipo  = document.querySelector('input[name="tipo-destino"]:checked').value;
+    const expiracao = document.getElementById('novo-expiracao').value;
+    const obrig = document.getElementById('novo-obrigatorio').checked ? 1 : 0;
+
+    if (!placa) { mostrarMsgModal('Selecione uma placa.','erro'); return; }
+    if (!expiracao) { mostrarMsgModal('Informe a data de expiração.','erro'); return; }
+
+    let cnpj = '', idCentral = '';
+    if (tipo === 'cnpj') {
+      cnpj = document.getElementById('novo-cnpj').value.trim().replace(/\D/g,'');
+      if (!cnpj) { mostrarMsgModal('Informe o CPF/CNPJ.','erro'); return; }
+    } else {
+      const sel = document.getElementById('novo-central');
+      idCentral = sel.value;
+      if (!idCentral) { mostrarMsgModal('Selecione uma central.','erro'); return; }
+    }
+
+    // Converte datetime-local para dd/MM/yyyy HH:mm:ss
+    const dt = new Date(expiracao);
+    const pad = n => String(n).padStart(2,'0');
+    const dataFmt = `${pad(dt.getDate())}/${pad(dt.getMonth()+1)}/${dt.getFullYear()} ${pad(dt.getHours())}:${pad(dt.getMinutes())}:00`;
+
+    const btn = document.getElementById('btn-salvar');
+    btn.textContent = 'Salvando…'; btn.disabled = true;
+
+    fetch('/operacional/espelhamentos/criar/', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken')},
+      body: JSON.stringify({placa, cnpj_destino: cnpj, id_central: idCentral, data_expiracao: dataFmt, obrigatorio: obrig})
+    }).then(r=>r.json()).then(data => {
+      btn.textContent = 'Cadastrar'; btn.disabled = false;
+      if (data.ok) {
+        mostrarMsgModal(`✓ Espelhamento criado! ${data.mensagem}`,'ok');
+        setTimeout(()=>{ fecharModal(); carregarEspelhamentos(); }, 2000);
+      } else {
+        mostrarMsgModal('⚠ ' + data.mensagem,'erro');
+      }
+    }).catch(()=>{ btn.textContent='Cadastrar'; btn.disabled=false; mostrarMsgModal('Falha de conexão.','erro'); });
+  };
+
+  function mostrarMsgModal(msg, tipo) {
+    const el = document.getElementById('modal-msg');
+    el.style.display = '';
+    el.style.background = tipo==='erro' ? 'rgba(239,68,68,.12)' : 'rgba(16,185,129,.12)';
+    el.style.color      = tipo==='erro' ? '#ef4444' : '#10b981';
+    el.textContent = msg;
+  }
+
+  // ── Aceitar/Rejeitar ──────────────────────────────────────────────────────
+  window.avaliarEspelhamento = function(id, aceitar) {
+    if (!confirm(aceitar ? `Aceitar espelhamento #${id}?` : `Rejeitar espelhamento #${id}?`)) return;
+    fetch('/operacional/espelhamentos/aceitar/', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken')},
+      body: JSON.stringify({id, aceitar})
+    }).then(r=>r.json()).then(data => {
+      alert(data.mensagem || (data.ok ? 'Concluído.' : 'Erro.'));
+      if (data.ok) carregarEspelhamentos();
+    });
+  };
+
+  // ── Cancelar ──────────────────────────────────────────────────────────────
+  window.cancelarEspelhamento = function(id, placa) {
+    if (!confirm(`Cancelar espelhamento da placa ${placa} (#${id})?`)) return;
+    fetch('/operacional/espelhamentos/cancelar/', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken')},
+      body: JSON.stringify({id})
+    }).then(r=>r.json()).then(data => {
+      alert(data.mensagem || (data.ok ? 'Cancelado.' : 'Erro.'));
+      if (data.ok) carregarEspelhamentos();
+    });
+  };
+
+  function getCookie(name) {
+    const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return v ? v.pop() : '';
+  }
+
+  // Carrega automaticamente ao abrir
+  carregarEspelhamentos();
+})();
+</script>
+{% endblock %}
