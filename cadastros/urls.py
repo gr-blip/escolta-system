@@ -70,6 +70,13 @@ urlpatterns += [
     # Omnilink — página de frota (todas as viaturas)
     path('operacional/rastreamento/',          views.omnilink_frota,          name='omnilink_frota'),
     path('operacional/rastreamento/posicoes/', views.omnilink_frota_posicoes, name='omnilink_frota_posicoes'),
+    # Omnilink — espelhamentos
+    path('operacional/espelhamentos/',           views.espelhamento_list,           name='espelhamento_list'),
+    path('operacional/espelhamentos/listar/',    views.espelhamento_listar_ajax,    name='espelhamento_listar_ajax'),
+    path('operacional/espelhamentos/centrais/',  views.espelhamento_centrais_ajax,  name='espelhamento_centrais_ajax'),
+    path('operacional/espelhamentos/criar/',     views.espelhamento_criar_ajax,     name='espelhamento_criar_ajax'),
+    path('operacional/espelhamentos/aceitar/',   views.espelhamento_aceitar_ajax,   name='espelhamento_aceitar_ajax'),
+    path('operacional/espelhamentos/cancelar/',  views.espelhamento_cancelar_ajax,  name='espelhamento_cancelar_ajax'),
 ]
 
 # Faturamento — Tabela de Precos

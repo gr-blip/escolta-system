@@ -1096,6 +1096,140 @@ def omnilink_frota_posicoes(request):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# ESPELHAMENTOS OMNILINK
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def espelhamento_list(request):
+    """Página de gestão de espelhamentos."""
+    from .models import Viatura
+    viaturas = Viatura.objects.filter(mct_id__isnull=False).exclude(mct_id='').order_by('placa')
+    return render(request, 'cadastros/espelhamento_list.html', {'viaturas': viaturas})
+
+
+@login_required
+def espelhamento_listar_ajax(request):
+    """AJAX — lista espelhamentos enviados e recebidos."""
+    from django.http import JsonResponse
+    from .omnilink import listar_espelhamentos
+
+    inicio = request.GET.get('inicio', '')
+    fim    = request.GET.get('fim', '')
+    status = request.GET.get('status', '')
+
+    # Converte yyyy-mm-dd → dd/MM/yyyy
+    def fmt(d):
+        if d and '-' in d:
+            parts = d.split('-')
+            return f'{parts[2]}/{parts[1]}/{parts[0]}'
+        return d
+
+    todos = listar_espelhamentos(status=status, data_inicio=fmt(inicio), data_fim=fmt(fim))
+
+    # Separa enviados (id_cliente = conta JR = origem) de recebidos
+    # A API retorna todos; id_cliente_destino preenchido = enviado por nós
+    enviados  = [e for e in todos if e.get('id_cliente_destino')]
+    recebidos = [e for e in todos if not e.get('id_cliente_destino')]
+
+    return JsonResponse({'ok': True, 'enviados': enviados, 'recebidos': recebidos})
+
+
+@login_required
+def espelhamento_centrais_ajax(request):
+    """AJAX — lista centrais disponíveis para espelhamento."""
+    from django.http import JsonResponse
+    from .omnilink import listar_centrais_disponiveis, descobrir_metodos_wsdl
+
+    centrais = listar_centrais_disponiveis()
+    if not centrais:
+        # Retorna lista de métodos para diagnóstico
+        metodos = descobrir_metodos_wsdl()
+        metodos_central = [m for m in metodos if any(x in m.lower() for x in ['central','base','lista'])]
+        return JsonResponse({
+            'ok': False,
+            'centrais': [],
+            'aviso': 'Método de listar centrais não encontrado na API.',
+            'metodos_disponiveis': metodos_central,
+        })
+    return JsonResponse({'ok': True, 'centrais': centrais})
+
+
+@login_required
+def espelhamento_criar_ajax(request):
+    """AJAX POST — cria novo espelhamento."""
+    from django.http import JsonResponse
+    import json
+    from .omnilink import criar_espelhamento
+
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'mensagem': 'Método inválido.'})
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'ok': False, 'mensagem': 'JSON inválido.'})
+
+    placa         = data.get('placa', '').strip()
+    cnpj_destino  = data.get('cnpj_destino', '').strip()
+    id_central    = data.get('id_central', '').strip()
+    data_exp      = data.get('data_expiracao', '').strip()
+    obrigatorio   = int(data.get('obrigatorio', 0))
+
+    if not placa or not data_exp:
+        return JsonResponse({'ok': False, 'mensagem': 'Placa e data de expiração são obrigatórios.'})
+
+    resultado = criar_espelhamento(
+        placa=placa,
+        data_expiracao=data_exp,
+        cnpj_destino=cnpj_destino,
+        id_central=id_central,
+        obrigatorio=obrigatorio,
+    )
+    return JsonResponse(resultado)
+
+
+@login_required
+def espelhamento_aceitar_ajax(request):
+    """AJAX POST — aceita ou rejeita espelhamento recebido."""
+    from django.http import JsonResponse
+    import json
+    from .omnilink import aceitar_espelhamento
+
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'mensagem': 'Método inválido.'})
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'ok': False, 'mensagem': 'JSON inválido.'})
+
+    resultado = aceitar_espelhamento(
+        id_solicitacao=int(data.get('id', 0)),
+        aceitar=bool(data.get('aceitar', True)),
+    )
+    return JsonResponse(resultado)
+
+
+@login_required
+def espelhamento_cancelar_ajax(request):
+    """AJAX POST — cancela/exclui espelhamento."""
+    from django.http import JsonResponse
+    import json
+    from .omnilink import excluir_espelhamento
+
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'mensagem': 'Método inválido.'})
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'ok': False, 'mensagem': 'JSON inválido.'})
+
+    resultado = excluir_espelhamento(id_solicitacao=int(data.get('id', 0)))
+    return JsonResponse(resultado)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # FATURAMENTO — Tabela de Precos
 # ══════════════════════════════════════════════════════════════════════════════
 

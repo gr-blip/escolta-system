@@ -513,3 +513,236 @@ def pede_posicao_avulsa(mct_id: str) -> str | None:
     except Exception as e:
         logger.error(f"Omnilink PedePosicaoAvulsa({mct_id}): {e}")
         return None
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ESPELHAMENTOS — Compartilhamento de rastreadores entre contas Omnilink
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _parse_espelhamentos_xml(xml_str: str) -> list[dict]:
+    """Parseia XML de ListarEspelhamentosByClienteStatus."""
+    resultado = []
+    if not xml_str:
+        return resultado
+    xml_low = re.sub(
+        r'<(/?)([A-Za-z][A-Za-z0-9_]*)',
+        lambda m: f'<{m.group(1)}{m.group(2).lower()}',
+        str(xml_str).strip()
+    )
+    try:
+        root = ET.fromstring(f'<root>{xml_low}</root>')
+    except ET.ParseError:
+        try:
+            root = ET.fromstring(xml_low)
+        except ET.ParseError as e:
+            logger.error(f"Omnilink espelhamentos XML: {e}")
+            return resultado
+
+    def _t(el, tag):
+        node = el.find(tag)
+        return (node.text or '').strip() if node is not None else ''
+
+    for esp in root.iter('espelhamento'):
+        resultado.append({
+            'id':                      _t(esp, 'id'),
+            'placa':                   _t(esp, 'placa'),
+            'serial':                  _t(esp, 'serial'),
+            'id_cliente':              _t(esp, 'id_cliente'),
+            'id_cliente_destino':      _t(esp, 'id_cliente_destino'),
+            'status':                  _t(esp, 'status'),
+            'data_cad':                _t(esp, 'data_cad'),
+            'data_exp':                _t(esp, 'data_exp'),
+            'user_cad':                _t(esp, 'user_cad'),
+            'user_aceite':             _t(esp, 'user_aceite'),
+            'data_aceite':             _t(esp, 'data_aceite'),
+            'status_aceite':           _t(esp, 'status_aceite'),
+            'cnpj_central':            _t(esp, 'cnpj_central'),
+            'id_central':              _t(esp, 'id_central'),
+            'nome_central':            _t(esp, 'nome_central') or _t(esp, 'base_destino') or _t(esp, 'basedestino'),
+            'espelhamento_obrigatorio': _t(esp, 'espelhamento_obrigatorio'),
+        })
+    return resultado
+
+
+def listar_espelhamentos(status: str = '', data_inicio: str = '', data_fim: str = '') -> list[dict]:
+    """
+    Lista espelhamentos da conta via ListarEspelhamentosByClienteStatus.
+
+    status: '' ou None = todos | '0' = aguardando | '1' = aceito | '2' = recusado
+    data_inicio / data_fim: 'dd/MM/yyyy'  (máx 30 dias, obrigatório)
+    """
+    if not data_inicio:
+        from datetime import datetime, timedelta
+        hoje = datetime.now()
+        data_fim    = hoje.strftime('%d/%m/%Y')
+        data_inicio = (hoje - timedelta(days=30)).strftime('%d/%m/%Y')
+
+    try:
+        client = _get_client()
+        xml_str = client.service.ListarEspelhamentosByClienteStatus(
+            Usuario=USUARIO,
+            Senha=SENHA_MD5,
+            Status=status,
+            data_inicio=data_inicio,
+            data_fim=data_fim,
+        )
+        logger.info(f"Omnilink ListarEspelhamentos ({data_inicio}→{data_fim}): {str(xml_str)[:200]}")
+        return _parse_espelhamentos_xml(xml_str)
+    except Exception as e:
+        logger.error(f"Omnilink listar_espelhamentos: {e}")
+        return []
+
+
+def criar_espelhamento(placa: str, data_expiracao: str,
+                       cnpj_destino: str = '', id_central: str = '',
+                       obrigatorio: int = 0) -> dict:
+    """
+    Cria espelhamento enviado (JR → cliente).
+
+    Tenta primeiro CriarEspelhamento (método direto com destino),
+    depois CriarSolicitacaoEspelhamentoReverso como fallback.
+
+    placa:          placa do rastreador JR a compartilhar
+    data_expiracao: 'dd/MM/yyyy HH:mm:ss'
+    cnpj_destino:   CNPJ/CPF da base destino (opcional)
+    id_central:     ID numérico da central destino (opcional)
+    obrigatorio:    0=ambos podem excluir  1=somente destino
+
+    Retorna dict: {'ok': bool, 'id_sequencia': str, 'mensagem': str}
+    """
+    try:
+        client = _get_client()
+
+        # ── Tenta método direto (com destino explícito) ───────────────────
+        for nome_metodo in ('CriarEspelhamento', 'CriarCompartilhamento',
+                            'EnviarEspelhamento', 'NovoEspelhamento'):
+            op = getattr(client.service, nome_metodo, None)
+            if op is None:
+                continue
+            try:
+                if cnpj_destino:
+                    resultado = op(Usuario=USUARIO, Senha=SENHA_MD5,
+                                   Placa=placa, CNPJ=cnpj_destino,
+                                   data_expiracao=data_expiracao,
+                                   Espelhamento_Obrigatorio=obrigatorio)
+                else:
+                    resultado = op(Usuario=USUARIO, Senha=SENHA_MD5,
+                                   Placa=placa, IdCentral=id_central,
+                                   data_expiracao=data_expiracao,
+                                   Espelhamento_Obrigatorio=obrigatorio)
+                logger.info(f"Omnilink {nome_metodo}({placa}): {resultado}")
+                return {'ok': True, 'id_sequencia': str(resultado), 'mensagem': str(resultado), 'metodo': nome_metodo}
+            except Exception as e_inner:
+                logger.debug(f"Omnilink {nome_metodo} falhou: {e_inner}")
+                continue
+
+        # ── Fallback: CriarSolicitacaoEspelhamentoReverso ────────────────
+        resultado = client.service.CriarSolicitacaoEspelhamentoReverso(
+            Usuario=USUARIO,
+            Senha=SENHA_MD5,
+            Placa=placa,
+            data_expiracao=data_expiracao,
+            Espelhamento_Obrigatorio=obrigatorio,
+        )
+        logger.info(f"Omnilink CriarSolicitacaoEspelhamentoReverso({placa}): {resultado}")
+        xml_r = re.sub(r'<(/?)([A-Za-z][A-Za-z0-9_]*)',
+                       lambda m: f'<{m.group(1)}{m.group(2).lower()}', str(resultado))
+        try:
+            root = ET.fromstring(f'<root>{xml_r}</root>')
+            id_seq = root.findtext('idsequencia') or root.findtext('id') or ''
+            conf   = root.findtext('confirmacao') or str(resultado)
+        except Exception:
+            id_seq, conf = '', str(resultado)
+        return {'ok': True, 'id_sequencia': id_seq, 'mensagem': conf, 'metodo': 'CriarSolicitacaoEspelhamentoReverso'}
+
+    except Exception as e:
+        logger.error(f"Omnilink criar_espelhamento({placa}): {e}")
+        return {'ok': False, 'id_sequencia': '', 'mensagem': str(e)}
+
+
+def aceitar_espelhamento(id_solicitacao: int, aceitar: bool = True) -> dict:
+    """
+    Aceita (aceitar=True) ou rejeita (aceitar=False) uma solicitação recebida.
+    StatusAceite: 1=aceito  2=rejeitado
+    """
+    try:
+        client = _get_client()
+        resultado = client.service.AceiteDeEspelhamentoReverso(
+            Usuario=USUARIO,
+            Senha=SENHA_MD5,
+            IdSolicitacao=int(id_solicitacao),
+            StatusAceite=1 if aceitar else 2,
+        )
+        logger.info(f"Omnilink AceiteEspelhamento({id_solicitacao}, aceitar={aceitar}): {resultado}")
+        return {'ok': True, 'mensagem': str(resultado)}
+    except Exception as e:
+        logger.error(f"Omnilink aceitar_espelhamento({id_solicitacao}): {e}")
+        return {'ok': False, 'mensagem': str(e)}
+
+
+def excluir_espelhamento(id_solicitacao: int) -> dict:
+    """Exclui/cancela um espelhamento pelo IdSolicitacao."""
+    try:
+        client = _get_client()
+        resultado = client.service.ExcluirSolicitacaoEspelhamentoReverso(
+            Usuario=USUARIO,
+            Senha=SENHA_MD5,
+            IdSolicitacao=int(id_solicitacao),
+        )
+        logger.info(f"Omnilink ExcluirEspelhamento({id_solicitacao}): {resultado}")
+        return {'ok': True, 'mensagem': str(resultado)}
+    except Exception as e:
+        logger.error(f"Omnilink excluir_espelhamento({id_solicitacao}): {e}")
+        return {'ok': False, 'mensagem': str(e)}
+
+
+def listar_centrais_disponiveis() -> list[dict]:
+    """
+    Lista as centrais/bases disponíveis para espelhamento.
+    Tenta múltiplos nomes de método (WSDL pode variar por versão).
+    """
+    cache_key = 'omnilink_centrais_v1'
+    cached = cache.get(cache_key)
+    if cached:
+        return cached
+
+    try:
+        client = _get_client()
+        for nome in ('ListarCentraisDisponiveis', 'ListarBases', 'ListarCentrais',
+                     'GetCentrais', 'BuscarCentrais', 'ListarBasesParceiras'):
+            op = getattr(client.service, nome, None)
+            if op is None:
+                continue
+            try:
+                xml_str = op(Usuario=USUARIO, Senha=SENHA_MD5)
+                xml_low = re.sub(r'<(/?)([A-Za-z][A-Za-z0-9_]*)',
+                                 lambda m: f'<{m.group(1)}{m.group(2).lower()}', str(xml_str))
+                root = ET.fromstring(f'<root>{xml_low}</root>')
+                centrais = []
+                for el in root.iter():
+                    id_c  = el.findtext('id') or el.findtext('idcentral') or ''
+                    nome_c = el.findtext('nome') or el.findtext('descricao') or ''
+                    if id_c and nome_c:
+                        centrais.append({'id': id_c, 'nome': nome_c})
+                if centrais:
+                    cache.set(cache_key, centrais, 3600)
+                    logger.info(f"Omnilink {nome}: {len(centrais)} centrais")
+                    return centrais
+            except Exception as e_inner:
+                logger.debug(f"Omnilink {nome}: {e_inner}")
+                continue
+
+        logger.warning("Omnilink: nenhum método de listar centrais encontrado")
+        return []
+    except Exception as e:
+        logger.error(f"Omnilink listar_centrais: {e}")
+        return []
+
+
+def descobrir_metodos_wsdl() -> list[str]:
+    """Retorna lista completa de métodos disponíveis no WSDL (diagnóstico)."""
+    try:
+        client = _get_client()
+        return sorted(client.service._operations)
+    except Exception as e:
+        return [f"ERRO: {e}"]
