@@ -1112,6 +1112,7 @@ def espelhamento_listar_ajax(request):
     """AJAX — lista espelhamentos enviados e recebidos."""
     from django.http import JsonResponse
     from .omnilink import listar_espelhamentos
+    from .models import Viatura
 
     inicio = request.GET.get('inicio', '')
     fim    = request.GET.get('fim', '')
@@ -1124,12 +1125,42 @@ def espelhamento_listar_ajax(request):
             return f'{parts[2]}/{parts[1]}/{parts[0]}'
         return d
 
-    todos = listar_espelhamentos(status=status, data_inicio=fmt(inicio), data_fim=fmt(fim))
+    di, df = fmt(inicio), fmt(fim)
 
-    # Separa enviados (id_cliente = conta JR = origem) de recebidos
-    # A API retorna todos; id_cliente_destino preenchido = enviado por nós
-    enviados  = [e for e in todos if e.get('id_cliente_destino')]
-    recebidos = [e for e in todos if not e.get('id_cliente_destino')]
+    # Quando "todos os status": busca pendentes (0), aceitos (1) e recusados (2)
+    # separadamente para garantir que a API retorne cada grupo corretamente
+    if not status:
+        todos = []
+        vistos = set()
+        for s in ('0', '1', '2'):
+            for e in listar_espelhamentos(status=s, data_inicio=di, data_fim=df):
+                eid = e.get('id') or str(e)
+                if eid not in vistos:
+                    vistos.add(eid)
+                    todos.append(e)
+    else:
+        todos = listar_espelhamentos(status=status, data_inicio=di, data_fim=df)
+
+    # Identifica placas da própria frota JR para separar enviados de recebidos.
+    # Solicitações pendentes têm id_cliente_destino vazio — sem esse check
+    # elas cairiam erroneamente em "recebidos".
+    try:
+        placas_jr = set(
+            v.upper() for v in Viatura.objects.values_list('placa', flat=True) if v
+        )
+    except Exception:
+        placas_jr = set()
+
+    def eh_enviado(e):
+        placa = (e.get('placa') or '').strip().upper()
+        # Se a placa está na frota JR, JR é o emissor (enviado)
+        if placa and placa in placas_jr:
+            return True
+        # Fallback: id_cliente_destino preenchido indica enviado confirmado
+        return bool(e.get('id_cliente_destino'))
+
+    enviados  = [e for e in todos if eh_enviado(e)]
+    recebidos = [e for e in todos if not eh_enviado(e)]
 
     return JsonResponse({'ok': True, 'enviados': enviados, 'recebidos': recebidos})
 
