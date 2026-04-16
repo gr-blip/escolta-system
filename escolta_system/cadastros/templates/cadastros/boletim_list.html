@@ -77,9 +77,9 @@
           <div class="ms-dropdown" id="msDropdown">
             <!-- Selecionar todos -->
             <label class="ms-option ms-select-all" id="msSelectAll">
-              <input type="checkbox" id="msCheckAll"> <span>Selecionar todos</span>
+              <input type="checkbox" id="msCheckAll">
+              <span>Selecionar todos</span>
             </label>
-            <div class="ms-divider"></div>
             {% for cli in todos_clientes %}
             <label class="ms-option">
               <input type="checkbox" name="clientes" value="{{ cli.id }}"
@@ -111,37 +111,6 @@
       </div>
 
     </form>
-
-    <!-- Botões de Exportação -->
-    <div style="display:flex;gap:8px;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
-      <span style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-right:4px;">Exportar resultado:</span>
-      {% with qs=request.GET.urlencode %}
-      <a href="{% url 'boletim_export_pdf' %}?{{ qs }}"
-         title="Gerar Boletim de Medição em PDF (mesmo filtro ativo)"
-         style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;background:#c0392b;color:#fff;font-size:12px;font-weight:600;text-decoration:none;transition:background .15s;"
-         onmouseover="this.style.background='#a93226'" onmouseout="this.style.background='#c0392b'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
-          <path d="M4.603 14.087a.81.81 0 0 1-.438-.42c-.195-.388-.13-.776.08-1.102.198-.307.526-.568.897-.787a7.68 7.68 0 0 1 1.482-.645 19.47 19.47 0 0 0 1.062-2.227 7.269 7.269 0 0 1-.43-1.295c-.086-.4-.119-.796-.046-1.136.075-.354.274-.672.65-.823.192-.077.4-.12.602-.077a.7.7 0 0 1 .477.365c.088.164.12.356.127.538.007.188-.012.396-.047.614-.084.51-.27 1.134-.52 1.794a10.954 10.954 0 0 0 .98 1.686 5.753 5.753 0 0 1 1.334.05c.364.066.734.195.96.465.12.144.193.32.2.518.007.192-.047.382-.138.563a1.04 1.04 0 0 1-.354.416.856.856 0 0 1-.51.138c-.331-.014-.654-.196-.933-.417a5.712 5.712 0 0 1-.911-.95 11.651 11.651 0 0 0-1.997.406 11.307 11.307 0 0 1-1.02 1.51c-.292.35-.609.656-.927.787a.793.793 0 0 1-.58.029z"/>
-        </svg>
-        Exportar PDF
-      </a>
-      <a href="{% url 'boletim_export_xlsx' %}?{{ qs }}"
-         title="Gerar Boletim de Medição em Excel XLSX (mesmo filtro ativo)"
-         style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;background:#1a6b35;color:#fff;font-size:12px;font-weight:600;text-decoration:none;transition:background .15s;"
-         onmouseover="this.style.background='#155228'" onmouseout="this.style.background='#1a6b35'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
-          <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.641L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219 5.884 6.68z"/>
-        </svg>
-        Exportar Excel
-      </a>
-      {% endwith %}
-      <span style="font-size:11px;color:var(--text3);margin-left:4px;">
-        {% if boletins %}{{ boletins|length }} registro{{ boletins|length|pluralize }}{% endif %}
-      </span>
-    </div>
-
   </div>
 
   <div class="table-wrap">

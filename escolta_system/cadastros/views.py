@@ -113,24 +113,22 @@ def viatura_list(request):
 @login_required
 def viatura_create(request):
     form = ViaturaForm(request.POST or None)
-    rastreadores = Rastreador.objects.all().order_by('marca', 'modelo')
     if form.is_valid():
         form.save()
         messages.success(request, 'Viatura cadastrada com sucesso!')
         return redirect('viatura_list')
-    return render(request, 'cadastros/viatura_form.html', {'form': form, 'titulo': 'Nova Viatura', 'rastreadores': rastreadores})
+    return render(request, 'cadastros/viatura_form.html', {'form': form, 'titulo': 'Nova Viatura'})
 
 
 @login_required
 def viatura_edit(request, pk):
     viatura = get_object_or_404(Viatura, pk=pk)
     form = ViaturaForm(request.POST or None, instance=viatura)
-    rastreadores = Rastreador.objects.all().order_by('marca', 'modelo')
     if form.is_valid():
         form.save()
         messages.success(request, 'Viatura atualizada com sucesso!')
         return redirect('viatura_list')
-    return render(request, 'cadastros/viatura_form.html', {'form': form, 'titulo': 'Editar Viatura', 'obj': viatura, 'rastreadores': rastreadores})
+    return render(request, 'cadastros/viatura_form.html', {'form': form, 'titulo': 'Editar Viatura', 'obj': viatura})
 
 
 @login_required
@@ -438,12 +436,6 @@ def equipe_edit(request, pk):
 @login_required
 def equipe_delete(request, pk):
     equipe = get_object_or_404(Equipe, pk=pk)
-    # Bloqueia exclusão se houver OS abertas vinculadas
-    STATUS_ABERTOS = ['aberta', 'em_viagem', 'em_operacao', 'encerrando', 'concluida']
-    os_abertas = OrdemServico.objects.filter(equipe=equipe, status__in=STATUS_ABERTOS)
-    if os_abertas.exists():
-        messages.error(request, f'Não é possível excluir: equipe vinculada a {os_abertas.count()} OS em aberto. Finalize as OS antes de excluir.')
-        return redirect('equipe_list')
     if request.method == 'POST':
         equipe.delete()
         messages.success(request, 'Equipe removida.')
@@ -478,36 +470,7 @@ def os_finalizar(request, pk):
     if request.method == 'POST':
         os_obj.status = 'finalizada'
         os_obj.finalizada_em = timezone.now()
-        # Salva snapshot da equipe antes de finalizar
-        eq = os_obj.equipe
-        if eq:
-            os_obj.snap_equipe_nome = eq.nome or ''
-            a1 = eq.agente1
-            if a1:
-                os_obj.snap_agente1_nome     = a1.nome or ''
-                os_obj.snap_agente1_cpf      = a1.cpf or ''
-                os_obj.snap_agente1_rg       = a1.rg or ''
-                os_obj.snap_agente1_telefone = a1.telefone or ''
-                os_obj.snap_agente1_cnh      = a1.cnh or ''
-                os_obj.snap_agente1_cnv      = a1.cnv or ''
-                os_obj.snap_agente1_foto     = a1.foto.name if a1.foto else ''
-            a2 = eq.agente2
-            if a2:
-                os_obj.snap_agente2_nome     = a2.nome or ''
-                os_obj.snap_agente2_cpf      = a2.cpf or ''
-                os_obj.snap_agente2_rg       = a2.rg or ''
-                os_obj.snap_agente2_telefone = a2.telefone or ''
-                os_obj.snap_agente2_cnh      = a2.cnh or ''
-                os_obj.snap_agente2_cnv      = a2.cnv or ''
-                os_obj.snap_agente2_foto     = a2.foto.name if a2.foto else ''
-            v = eq.viatura
-            if v:
-                os_obj.snap_viatura_modelo = v.marca_modelo or ''
-                os_obj.snap_viatura_placa  = v.placa or ''
-                os_obj.snap_viatura_cor    = v.cor or ''
-                os_obj.snap_viatura_frota  = v.frota or ''
-                os_obj.snap_viatura_mct    = v.mct_id or ''
-        os_obj.save()
+        os_obj.save(update_fields=['status', 'finalizada_em'])
         messages.success(request, f'OS-{os_obj.numero} finalizada com sucesso. Dados bloqueados para edição.')
         return redirect('os_list')
     return render(request, 'cadastros/confirm_delete.html', {
@@ -1229,7 +1192,7 @@ def espelhamento_cancelar_ajax(request):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# FATURAMENTO — Tabela de Precos
+# FATURAMENTO — Tabela de Preços
 # ══════════════════════════════════════════════════════════════════════════════
 
 from .models import TabelaPreco, BoletimMedicao
@@ -1250,8 +1213,8 @@ def tabela_preco_create(request):
     clientes = Cliente.objects.all().order_by('razao_social')
     if request.method == 'POST':
         try:
-            def dec(v, d='0'):
-                try: return float((v or d).replace(',', '.'))
+            def dec(v, d='0'): 
+                try: return float((v or d).replace(',','.')) 
                 except: return 0
             TabelaPreco.objects.create(
                 cliente_id       = request.POST['cliente'],
@@ -1270,11 +1233,11 @@ def tabela_preco_create(request):
                 pedagio_fixo     = dec(request.POST.get('pedagio_fixo')),
                 pedagio_percent  = dec(request.POST.get('pedagio_percent')),
             )
-            messages.success(request, 'Tabela de preco criada com sucesso!')
+            messages.success(request, 'Tabela de preço criada com sucesso!')
             return redirect('tabela_preco_list')
         except Exception as e:
             messages.error(request, f'Erro: {e}')
-    return render(request, 'cadastros/tabela_preco_form.html', {'clientes': clientes, 'titulo': 'Nova Tabela de Preco'})
+    return render(request, 'cadastros/tabela_preco_form.html', {'clientes': clientes, 'titulo': 'Nova Tabela de Preço'})
 
 
 @login_required
@@ -1283,8 +1246,8 @@ def tabela_preco_edit(request, pk):
     clientes = Cliente.objects.all().order_by('razao_social')
     if request.method == 'POST':
         try:
-            def dec(v, d='0'):
-                try: return float((v or d).replace(',', '.'))
+            def dec(v, d='0'): 
+                try: return float((v or d).replace(',','.')) 
                 except: return 0
             tabela.cliente_id       = request.POST['cliente']
             tabela.nome             = request.POST['nome']
@@ -1307,7 +1270,7 @@ def tabela_preco_edit(request, pk):
         except Exception as e:
             messages.error(request, f'Erro: {e}')
     return render(request, 'cadastros/tabela_preco_form.html', {
-        'tabela': tabela, 'clientes': clientes, 'titulo': 'Editar Tabela de Preco'
+        'tabela': tabela, 'clientes': clientes, 'titulo': 'Editar Tabela de Preço'
     })
 
 
@@ -1318,25 +1281,23 @@ def tabela_preco_delete(request, pk):
         tabela.delete()
         messages.success(request, 'Tabela removida.')
         return redirect('tabela_preco_list')
-    return render(request, 'cadastros/confirm_delete.html', {'obj': tabela, 'tipo': 'Tabela de Preco'})
+    return render(request, 'cadastros/confirm_delete.html', {'obj': tabela, 'tipo': 'Tabela de Preço'})
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# FATURAMENTO — Boletim de Medicao
-# ══════════════════════════════════════════════════════════════════════════════
+# ── Boletim de Medição ────────────────────────────────────────────────────────
 
 @login_required
 def boletim_list(request):
-    from datetime import datetime
     q = request.GET.get('q', '')
     status_filtro = request.GET.get('status', '')
-    clientes_filtro = request.GET.getlist('clientes')
-    data_ini = request.GET.get('data_ini', '')
-    data_fim = request.GET.get('data_fim', '')
-    # Criar boletins automaticamente para OS finalizadas que ainda nao tem boletim
-    os_sem_boletim = OrdemServico.objects.filter(status='finalizada').exclude(boletim__isnull=False)
-    for os_obj in os_sem_boletim:
+    boletins = BoletimMedicao.objects.select_related('os', 'os__cliente', 'os__equipe', 'tabela_preco').all()
+    # OS finalizadas sem boletim — criar automaticamente
+    os_finalizadas_sem_boletim = OrdemServico.objects.filter(
+        status='finalizada'
+    ).exclude(boletim__isnull=False)
+    for os_obj in os_finalizadas_sem_boletim:
         BoletimMedicao.objects.get_or_create(os=os_obj)
+    # Recarregar após criação automática
     boletins = BoletimMedicao.objects.select_related('os', 'os__cliente', 'os__equipe', 'tabela_preco').all()
     if q:
         boletins = boletins.filter(
@@ -1346,27 +1307,8 @@ def boletim_list(request):
         )
     if status_filtro:
         boletins = boletins.filter(status=status_filtro)
-    if clientes_filtro:
-        boletins = boletins.filter(os__cliente__id__in=clientes_filtro)
-    if data_ini:
-        try:
-            boletins = boletins.filter(os__previsao_inicio__date__gte=datetime.strptime(data_ini, '%Y-%m-%d').date())
-        except ValueError:
-            pass
-    if data_fim:
-        try:
-            boletins = boletins.filter(os__previsao_inicio__date__lte=datetime.strptime(data_fim, '%Y-%m-%d').date())
-        except ValueError:
-            pass
-    todos_clientes = Cliente.objects.all().order_by('razao_social')
     return render(request, 'cadastros/boletim_list.html', {
-        'boletins': boletins,
-        'q': q,
-        'status_filtro': status_filtro,
-        'clientes_filtro': clientes_filtro,
-        'data_ini': data_ini,
-        'data_fim': data_fim,
-        'todos_clientes': todos_clientes,
+        'boletins': boletins, 'q': q, 'status_filtro': status_filtro
     })
 
 
@@ -1381,25 +1323,18 @@ def boletim_detalhe(request, pk):
 
     if request.method == 'POST':
         if boletim.status == 'faturado':
-            messages.error(request, 'Boletim ja faturado nao pode ser alterado.')
+            messages.error(request, 'Boletim já faturado não pode ser alterado.')
             return redirect('boletim_detalhe', pk=pk)
+
         tabela_id = request.POST.get('tabela_preco')
         if tabela_id:
             boletim.tabela_preco_id = tabela_id
-        def to_float(val):
-            try:
-                return float(str(val or '0').replace(',', '.'))
-            except (ValueError, TypeError):
-                return 0.0
-        boletim.acrescimo    = to_float(request.POST.get('acrescimo', '0'))
-        boletim.desconto     = to_float(request.POST.get('desconto', '0'))
-        boletim.valor_pedagio = to_float(request.POST.get('valor_pedagio', '0'))
-        boletim.numero_nota  = request.POST.get('numero_nota', '')
-        boletim.observacoes  = request.POST.get('observacoes', '')
+        boletim.acrescimo   = float(request.POST.get('acrescimo', 0) or 0)
+        boletim.desconto    = float(request.POST.get('desconto', 0) or 0)
+        boletim.numero_nota = request.POST.get('numero_nota', '')
+        boletim.observacoes = request.POST.get('observacoes', '')
         action = request.POST.get('action', 'salvar')
         if action == 'calcular' and boletim.tabela_preco_id:
-            # Salva o pedágio manual antes de calcular para não ser sobrescrito
-            boletim.save()
             boletim.calcular()
             messages.success(request, 'Valores calculados com sucesso!')
         elif action == 'faturar':
@@ -1412,14 +1347,8 @@ def boletim_detalhe(request, pk):
             messages.success(request, 'Boletim salvo!')
         return redirect('boletim_detalhe', pk=pk)
 
-    # Pré-preenche pedágio da OS se o boletim ainda não tiver valor
-    pedagio_sugerido = boletim.valor_pedagio
-    if pedagio_sugerido == 0 and op and op.pedagio:
-        pedagio_sugerido = op.pedagio
-
     return render(request, 'cadastros/boletim_detalhe.html', {
         'boletim': boletim, 'os': os_obj, 'op': op, 'tabelas': tabelas,
-        'pedagio_sugerido': pedagio_sugerido,
     })
 
 
@@ -2862,3 +2791,4 @@ def os_field_veiculo_delete(request, token, pk):
     return JsonResponse({'ok': True})
 
 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               

@@ -16,25 +16,69 @@
       <div class="field"><label>Cor *</label>{{ form.cor }}</div>
       <div class="field"><label>Placa *</label>{{ form.placa }}</div>
 
+      <!-- MCT com seleção de rastreador -->
       <div class="field">
-        <label>MCT / ID — Rastreador</label>
-        <select name="mct_id"
-          style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;color:var(--text);font-size:13px;width:100%;outline:none">
-          <option value="">— Sem rastreador —</option>
-          {% for r in rastreadores %}
-          <option value="{{ r.numero_serie }}"
-            {% if form.instance.mct_id == r.numero_serie %}selected{% endif %}>
-            {{ r.numero_serie }} — {{ r.marca }} {{ r.modelo }}
-          </option>
-          {% empty %}
-          <option disabled>Nenhum rastreador cadastrado</option>
-          {% endfor %}
-        </select>
-        {% if not rastreadores %}
-        <div style="font-size:11px;color:var(--text3);margin-top:4px">
-          <a href="{% url 'rastreador_create' %}" style="color:var(--blue-light)">+ Cadastrar rastreador</a>
+        <label>MCT / ID
+          <span style="font-size:11px;color:var(--text3);font-weight:400;margin-left:4px">— vincular rastreador</span>
+        </label>
+        <div style="display:flex;gap:8px;align-items:stretch">
+          {{ form.mct_id }}
+          <div style="position:relative">
+            <button type="button" id="btn-rastreador"
+              onclick="document.getElementById('rastreador-dropdown').classList.toggle('open')"
+              style="height:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);cursor:pointer;font-size:12px;white-space:nowrap;display:flex;align-items:center;gap:6px">
+              <svg width="13" height="13" fill="none" viewBox="0 0 16 16">
+                <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/>
+                <circle cx="8" cy="8" r="2" fill="currentColor"/>
+                <line x1="8" y1="2" x2="8" y2="4" stroke="currentColor" stroke-width="1.3"/>
+                <line x1="8" y1="12" x2="8" y2="14" stroke="currentColor" stroke-width="1.3"/>
+                <line x1="2" y1="8" x2="4" y2="8" stroke="currentColor" stroke-width="1.3"/>
+                <line x1="12" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="1.3"/>
+              </svg>
+              Rastreadores
+            </button>
+
+            <div id="rastreador-dropdown" style="
+              display:none;position:absolute;top:calc(100% + 6px);right:0;
+              background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+              min-width:280px;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.4);overflow:hidden">
+
+              <div style="padding:10px 12px 8px;border-bottom:1px solid var(--border);font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">
+                Selecione o rastreador
+              </div>
+
+              {% if rastreadores %}
+                {% for r in rastreadores %}
+                <div onclick="selecionarRastreador('{{ r.numero_serie }}')"
+                  style="padding:10px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:13px;transition:background .1s"
+                  onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+                  <div>
+                    <span style="font-weight:600;color:var(--text)">{{ r.numero_serie }}</span>
+                    <span style="color:var(--text3);margin-left:8px;font-size:12px">{{ r.marca }} {{ r.modelo }}</span>
+                  </div>
+                  <span class="badge {% if r.status == 'online' %}badge-green{% elif r.status == 'offline' %}badge-red{% else %}badge-amber{% endif %}"
+                    style="font-size:10px;padding:2px 7px">
+                    {{ r.get_status_display }}
+                  </span>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div style="padding:16px;text-align:center;color:var(--text3);font-size:13px">
+                  Nenhum rastreador cadastrado.
+                  <a href="{% url 'rastreador_create' %}" style="color:var(--blue-light);display:block;margin-top:6px">+ Cadastrar rastreador</a>
+                </div>
+              {% endif %}
+
+              <div style="padding:8px 12px;border-top:1px solid var(--border);font-size:11px;color:var(--text3)">
+                <a href="{% url 'rastreador_list' %}" style="color:var(--blue-light)">Gerenciar rastreadores →</a>
+              </div>
+            </div>
+          </div>
         </div>
-        {% endif %}
+        <div id="mct-selecionado" style="display:none;margin-top:6px;font-size:12px;color:var(--green);display:flex;align-items:center;gap:5px">
+          <svg width="12" height="12" fill="none" viewBox="0 0 16 16"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span id="mct-nome"></span>
+        </div>
       </div>
 
       <div class="field"><label>Frota</label>{{ form.frota }}</div>
@@ -64,5 +108,47 @@
     <a href="{% url 'viatura_list' %}" class="btn btn-secondary">Cancelar</a>
   </div>
 </form>
+
+<script>
+function selecionarRastreador(serie) {
+  // Preenche o campo MCT com o número de série
+  const mctInput = document.querySelector('input[name="mct_id"]');
+  if (mctInput) {
+    mctInput.value = serie;
+    mctInput.style.borderColor = 'var(--green)';
+    setTimeout(() => mctInput.style.borderColor = '', 2000);
+  }
+  // Mostra confirmação
+  document.getElementById('mct-selecionado').style.display = 'flex';
+  document.getElementById('mct-nome').textContent = 'Rastreador ' + serie + ' vinculado';
+  // Fecha dropdown
+  document.getElementById('rastreador-dropdown').classList.remove('open');
+  document.getElementById('rastreador-dropdown').style.display = 'none';
+}
+
+// Toggle dropdown
+document.getElementById('rastreador-dropdown').style.display = 'none';
+document.addEventListener('click', function(e) {
+  const dd = document.getElementById('rastreador-dropdown');
+  const btn = document.getElementById('btn-rastreador');
+  if (!btn.contains(e.target) && !dd.contains(e.target)) {
+    dd.style.display = 'none';
+  }
+});
+document.getElementById('btn-rastreador').addEventListener('click', function(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('rastreador-dropdown');
+  dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+});
+
+// Se já tem MCT preenchido ao carregar, mostra confirmação
+window.addEventListener('DOMContentLoaded', function() {
+  const mctInput = document.querySelector('input[name="mct_id"]');
+  if (mctInput && mctInput.value) {
+    document.getElementById('mct-selecionado').style.display = 'flex';
+    document.getElementById('mct-nome').textContent = 'Rastreador ' + mctInput.value + ' vinculado';
+  }
+});
+</script>
 {% endblock %}
 

@@ -1,11 +1,12 @@
-from django.shortcuts import render, redirect, get_object_or_404
+﻿from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.db.models import Q
 from django.http import JsonResponse
 from .models import Agente, Viatura, Rastreador, Armamento, Cliente, Colete, Equipe, \
     FotoMarco, Parada, FotoParada, Incidente, FotoIncidente, FotoVeiculoEscoltado, \
-    TrocaMotorista, FotoTrocaMotorista, AssinaturaOS, DespesaOS, OrdemServico
+    TrocaMotorista, FotoTrocaMotorista, AssinaturaOS, DespesaOS
 from .forms import AgenteForm, ViaturaForm, RastreadorForm, ArmamentoForm, ClienteForm
 
 
@@ -703,7 +704,8 @@ def os_detalhe(request, pk):
         'ufs': UFS,
         'novo': False,
         'forma_choices': OrdemServico.FORMA_CHOICES,
-        'operacional': getattr(os, 'operacional', None),
+        'operacional': OSOperacional.objects.filter(os=os).first(),
+        'op': OSOperacional.objects.filter(os=os).first(),
         'veiculos': veiculos_qs,
         'veiculo_slots': veiculo_slots,
         'fotos_marco': fotos_marco,
@@ -767,11 +769,11 @@ def os_operacional_save(request, pk):
     op.km_termino_viagem   = parse_int(request.POST.get('km_termino_viagem'))
     # Pedágio
     pedagio_val = request.POST.get('pedagio', '').strip().replace(',', '.')
-    try:
-        op.pedagio = float(pedagio_val) if pedagio_val else None
-    except ValueError:
-        op.pedagio = None
-    op.save()
+    if pedagio_val:
+        try:
+            op.pedagio = float(pedagio_val)
+        except ValueError:
+            pass
 
     # Salvar veículos escoltados (máx 4)
     os_obj.veiculos.all().delete()
@@ -862,11 +864,15 @@ def os_print(request, pk):
         for foto in FotoMarco.objects.filter(os=os_obj):
             fotos_marco[foto.marco] = foto.foto.url
 
-    # Assinaturas digitais
-    assinaturas = {a.tipo: a for a in AssinaturaOS.objects.filter(os=os_obj)}
+    # Assinaturas digitais — passa como lista para o template usar {% for a in assinaturas_lista %}
+    assinaturas_lista = list(AssinaturaOS.objects.filter(os=os_obj).order_by('tipo'))
 
-    # Despesas / Creditos
-    despesas = DespesaOS.objects.filter(os=os_obj).order_by('ocorrido_em')
+    # Veículos escoltados com fotos
+    from .models import VeiculoEscoltado, FotoVeiculoEscoltado
+    veiculos_print = []
+    for v in os_obj.veiculos.order_by('ordem'):
+        fotos = FotoVeiculoEscoltado.objects.filter(veiculo=v)
+        veiculos_print.append({'veiculo': v, 'fotos': fotos})
 
     return render(request, 'cadastros/os_print.html', {
         'os': os_obj,
@@ -874,12 +880,8 @@ def os_print(request, pk):
         'rastreador_viatura': rastreador_viatura,
         'fotos_marco': fotos_marco,
         'fotos_marco_lista': MARCOS_LISTA,
-        'assinaturas_lista': list(AssinaturaOS.objects.filter(os=os_obj).order_by('tipo')),
-        'assinatura_tipos_lista': [
-            ('agente1', 'Agente 1'), ('agente2', 'Agente 2'),
-            ('motorista', 'Motorista Escoltado'), ('supervisor', 'Supervisor'),
-        ],
-        'despesas': despesas,
+        'assinaturas_lista': assinaturas_lista,
+        'veiculos_print': veiculos_print,
     })
 
 
@@ -900,6 +902,331 @@ def os_email_html(request, pk):
     })
     return html
 
+
+# ══════════════════════════════════════════════════════════════════════════════
+# RASTREAMENTO OMNILINK — endpoints AJAX
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def omnilink_posicao_atual(request, pk):
+    """AJAX — retorna última posição GPS da viatura da OS."""
+    from django.http import JsonResponse
+    from .omnilink import get_ultima_posicao
+
+    os_obj = get_object_or_404(OrdemServico, pk=pk)
+    viatura = os_obj.equipe.viatura if os_obj.equipe else None
+    mct_id  = viatura.mct_id if viatura and viatura.mct_id else None
+
+    if not mct_id:
+        return JsonResponse({'ok': False, 'erro': 'Viatura sem MCT ID cadastrado.'})
+
+    import logging as _logging
+    _log = _logging.getLogger(__name__)
+
+    dados = get_ultima_posicao(mct_id)
+    if not dados:
+        from .omnilink import _mct_id_to_terminal
+        try:
+            id_term = _mct_id_to_terminal(mct_id)
+        except Exception:
+            id_term = '?'
+        _log.warning(f"omnilink_posicao_atual: sem dados para MCT={mct_id} IdTerminal={id_term}")
+        return JsonResponse({'ok': False, 'erro': f'Sem posição recente para viatura {mct_id} (IdTerminal: {id_term}). Verifique se o rastreador transmitiu posições.'})
+
+    return JsonResponse({'ok': True, 'mct_id': mct_id, **dados})
+
+
+@login_required
+def omnilink_historico(request, pk):
+    """AJAX — retorna histórico de posições da viatura durante a OS."""
+    from django.http import JsonResponse
+    from datetime import datetime, timedelta
+    from xml.etree import ElementTree as ET
+    from .omnilink import (get_historico_operacao, get_historico_posicoes,
+                           _get_client, _buscar_ultimo_id_post,
+                           _mct_id_to_terminal, _parse_teleeventos_xml,
+                           USUARIO, SENHA_MD5)
+
+    os_obj = get_object_or_404(OrdemServico, pk=pk)
+
+    # ── Modo diagnóstico: ?debug=1 ───────────────────────────────────────────
+    # Retorna todos os IdTerminals encontrados no buffer da API (sem filtrar),
+    # útil para descobrir o ID correto do veículo.
+    if request.GET.get('debug') == '1':
+        viatura = os_obj.equipe.viatura if os_obj.equipe else None
+        mct_id  = viatura.mct_id if viatura and viatura.mct_id else '?'
+        try:
+            id_terminal_esperado = _mct_id_to_terminal(mct_id)
+        except Exception:
+            id_terminal_esperado = None
+
+        diagnostico = {
+            'mct_id': mct_id,
+            'id_terminal_esperado': id_terminal_esperado,
+            'ultimo_id_post': None,
+            'total_eventos_xml': 0,
+            'id_terminals_encontrados': [],
+            'cod_msgs_encontrados': [],
+            'erro': None,
+            'xml_inicio': '',
+        }
+        try:
+            ids = _buscar_ultimo_id_post()
+            diagnostico['ultimo_id_post'] = ids
+
+            client = _get_client()
+            # UltimoSequencial=0 é inválido (-204); lookback de 100M ≈ 7 dias na plataforma global
+            seq_diag = max(1, ids.get('id', 1) - 100_000_000) if ids.get('id', 0) > 0 else 1
+            xml_str = client.service.ObtemEventosNormais(
+                Usuario=USUARIO,
+                Senha=SENHA_MD5,
+                UltimoSequencial=seq_diag,
+            )
+            import re as _re
+            xml_str = str(xml_str) if xml_str else ''
+            diagnostico['xml_inicio'] = xml_str[:600]
+
+            # Normaliza PascalCase → lowercase (API retorna <TeleEvento>, <IdTerminal> etc.)
+            xml_low = _re.sub(
+                r'<(/?)([A-Za-z][A-Za-z0-9_]*)',
+                lambda m: f'<{m.group(1)}{m.group(2).lower()}',
+                xml_str
+            )
+            xml_wrap = f'<root>{xml_low}</root>'
+            try:
+                root = ET.fromstring(xml_wrap)
+                eventos = list(root.iter('teleevento'))
+                diagnostico['total_eventos_xml'] = len(eventos)
+
+                ids_set  = set()
+                msgs_set = set()
+                for ev in eventos:
+                    it = ev.findtext('idterminal') or ''
+                    cm = ev.findtext('codmsg') or ''
+                    if it:
+                        ids_set.add(it.strip())
+                    if cm:
+                        msgs_set.add(cm.strip())
+
+                diagnostico['id_terminals_encontrados'] = sorted(ids_set)
+                diagnostico['cod_msgs_encontrados'] = sorted(msgs_set)
+            except ET.ParseError as e:
+                diagnostico['erro'] = f'XML parse error: {e}'
+
+        except Exception as e:
+            diagnostico['erro'] = str(e)
+
+        return JsonResponse({'ok': True, 'diagnostico': diagnostico})
+    # ── fim modo diagnóstico ─────────────────────────────────────────────────
+
+    # Tenta primeiro usando o período da OS
+    pontos = get_historico_operacao(os_obj)
+
+    # Se vazio, tenta as últimas 24h (OS pode não ter inicio_viagem preenchido ainda)
+    if not pontos:
+        viatura = os_obj.equipe.viatura if os_obj.equipe else None
+        mct_id  = viatura.mct_id if viatura and viatura.mct_id else None
+        if mct_id:
+            fim    = datetime.now()
+            inicio = fim - timedelta(hours=24)
+            pontos = get_historico_posicoes(mct_id, inicio, fim)
+            if pontos:
+                return JsonResponse({'ok': True, 'pontos': pontos, 'aviso': 'Exibindo últimas 24h (OS sem horário de viagem registrado).'})
+
+    return JsonResponse({'ok': True, 'pontos': pontos})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# RASTREAMENTO — Página de frota (mapa com todas as viaturas)
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def omnilink_frota(request):
+    """Página de rastreamento da frota — mapa com todas as viaturas."""
+    from .models import Viatura
+    viaturas = Viatura.objects.filter(mct_id__isnull=False).exclude(mct_id='').order_by('placa')
+    return render(request, 'cadastros/omnilink_frota.html', {'viaturas': viaturas})
+
+
+@login_required
+def omnilink_frota_posicoes(request):
+    """
+    AJAX — retorna a última posição de todas as viaturas com MCT ID.
+    Usa o buffer compartilhado _get_eventos_normais() (uma só chamada API).
+    """
+    from django.http import JsonResponse
+    from .models import Viatura
+    from .omnilink import _get_eventos_normais, _mct_id_to_terminal
+
+    viaturas = Viatura.objects.filter(mct_id__isnull=False).exclude(mct_id='')
+
+    # Obtém todos os eventos de uma vez (cache compartilhado)
+    todos_eventos = _get_eventos_normais()
+
+    # Indexa o último evento por id_terminal para lookup O(1)
+    ultimo_por_terminal: dict = {}
+    for ev in todos_eventos:
+        tid = ev.get('id_terminal', '')
+        if tid:
+            ultimo_por_terminal[tid] = ev   # mantém sempre o mais recente (lista é ordenada por tempo)
+
+    resultado = []
+    for v in viaturas:
+        try:
+            id_terminal = _mct_id_to_terminal(v.mct_id)
+        except Exception:
+            id_terminal = None
+
+        ev = ultimo_por_terminal.get(id_terminal) if id_terminal else None
+        resultado.append({
+            'mct_id':      v.mct_id,
+            'id_terminal': id_terminal,
+            'placa':       v.placa,
+            'modelo':      v.marca_modelo,
+            'lat':         ev['lat']       if ev else None,
+            'lng':         ev['lng']       if ev else None,
+            'velocidade':  ev['velocidade'] if ev else None,
+            'odometro':    ev['odometro']  if ev else None,
+            'ignicao':     ev['ignicao']   if ev else None,
+            'data_hora':   ev['data_hora'] if ev else None,
+            'online':      ev is not None,
+        })
+
+    return JsonResponse({'ok': True, 'viaturas': resultado})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ESPELHAMENTOS OMNILINK
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def espelhamento_list(request):
+    """Página de gestão de espelhamentos."""
+    from .models import Viatura
+    viaturas = Viatura.objects.filter(mct_id__isnull=False).exclude(mct_id='').order_by('placa')
+    return render(request, 'cadastros/espelhamento_list.html', {'viaturas': viaturas})
+
+
+@login_required
+def espelhamento_listar_ajax(request):
+    """AJAX — lista espelhamentos enviados e recebidos."""
+    from django.http import JsonResponse
+    from .omnilink import listar_espelhamentos
+
+    inicio = request.GET.get('inicio', '')
+    fim    = request.GET.get('fim', '')
+    status = request.GET.get('status', '')
+
+    # Converte yyyy-mm-dd → dd/MM/yyyy
+    def fmt(d):
+        if d and '-' in d:
+            parts = d.split('-')
+            return f'{parts[2]}/{parts[1]}/{parts[0]}'
+        return d
+
+    todos = listar_espelhamentos(status=status, data_inicio=fmt(inicio), data_fim=fmt(fim))
+
+    # Separa enviados (id_cliente = conta JR = origem) de recebidos
+    # A API retorna todos; id_cliente_destino preenchido = enviado por nós
+    enviados  = [e for e in todos if e.get('id_cliente_destino')]
+    recebidos = [e for e in todos if not e.get('id_cliente_destino')]
+
+    return JsonResponse({'ok': True, 'enviados': enviados, 'recebidos': recebidos})
+
+
+@login_required
+def espelhamento_centrais_ajax(request):
+    """AJAX — lista centrais disponíveis para espelhamento."""
+    from django.http import JsonResponse
+    from .omnilink import listar_centrais_disponiveis, descobrir_metodos_wsdl
+
+    centrais = listar_centrais_disponiveis()
+    if not centrais:
+        # Retorna lista de métodos para diagnóstico
+        metodos = descobrir_metodos_wsdl()
+        metodos_central = [m for m in metodos if any(x in m.lower() for x in ['central','base','lista'])]
+        return JsonResponse({
+            'ok': False,
+            'centrais': [],
+            'aviso': 'Método de listar centrais não encontrado na API.',
+            'metodos_disponiveis': metodos_central,
+        })
+    return JsonResponse({'ok': True, 'centrais': centrais})
+
+
+@login_required
+def espelhamento_criar_ajax(request):
+    """AJAX POST — cria novo espelhamento."""
+    from django.http import JsonResponse
+    import json
+    from .omnilink import criar_espelhamento
+
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'mensagem': 'Método inválido.'})
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'ok': False, 'mensagem': 'JSON inválido.'})
+
+    placa         = data.get('placa', '').strip()
+    cnpj_destino  = data.get('cnpj_destino', '').strip()
+    id_central    = data.get('id_central', '').strip()
+    data_exp      = data.get('data_expiracao', '').strip()
+    obrigatorio   = int(data.get('obrigatorio', 0))
+
+    if not placa or not data_exp:
+        return JsonResponse({'ok': False, 'mensagem': 'Placa e data de expiração são obrigatórios.'})
+
+    resultado = criar_espelhamento(
+        placa=placa,
+        data_expiracao=data_exp,
+        cnpj_destino=cnpj_destino,
+        id_central=id_central,
+        obrigatorio=obrigatorio,
+    )
+    return JsonResponse(resultado)
+
+
+@login_required
+def espelhamento_aceitar_ajax(request):
+    """AJAX POST — aceita ou rejeita espelhamento recebido."""
+    from django.http import JsonResponse
+    import json
+    from .omnilink import aceitar_espelhamento
+
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'mensagem': 'Método inválido.'})
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'ok': False, 'mensagem': 'JSON inválido.'})
+
+    resultado = aceitar_espelhamento(
+        id_solicitacao=int(data.get('id', 0)),
+        aceitar=bool(data.get('aceitar', True)),
+    )
+    return JsonResponse(resultado)
+
+
+@login_required
+def espelhamento_cancelar_ajax(request):
+    """AJAX POST — cancela/exclui espelhamento."""
+    from django.http import JsonResponse
+    import json
+    from .omnilink import excluir_espelhamento
+
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'mensagem': 'Método inválido.'})
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'ok': False, 'mensagem': 'JSON inválido.'})
+
+    resultado = excluir_espelhamento(id_solicitacao=int(data.get('id', 0)))
+    return JsonResponse(resultado)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1775,6 +2102,63 @@ def usuario_delete(request, pk):
 # LINK EXTERNO — Agente de campo preenche OS sem login
 # ==============================================================================
 
+
+@csrf_exempt
+def os_field_marco_salvar(request, token):
+    """Salva um marco individual (data + km + gps + foto) via AJAX do link do agente."""
+    from django.http import JsonResponse
+    from datetime import datetime
+
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Metodo invalido.'})
+
+    try:
+        op = OSOperacional.objects.get(token=token, link_ativo=True)
+    except OSOperacional.DoesNotExist:
+        return JsonResponse({'ok': False, 'erro': 'Link invalido ou inativo.'})
+
+    marco = request.POST.get('marco', '').strip()
+    campos_validos = ['inicio_viagem', 'chegada_operacao', 'inicio_operacao', 'termino_operacao', 'termino_viagem']
+    if marco not in campos_validos:
+        return JsonResponse({'ok': False, 'erro': 'Marco invalido.'})
+
+    dt_val  = request.POST.get('dt',  '').strip()
+    km_val  = request.POST.get('km',  '').strip()
+    lat_val = request.POST.get('lat', '').strip()
+    lng_val = request.POST.get('lng', '').strip()
+
+    def parse_dt(val):
+        if not val: return None
+        for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
+            try: return datetime.strptime(val, fmt)
+            except ValueError: continue
+        return None
+
+    def parse_float(val):
+        try: return float(val) if val else None
+        except (ValueError, TypeError): return None
+
+    def parse_int(val):
+        try: return int(val) if val else None
+        except (ValueError, TypeError): return None
+
+    setattr(op, marco,           parse_dt(dt_val))
+    setattr(op, f'km_{marco}',   parse_int(km_val))
+    setattr(op, f'gps_{marco}_lat', parse_float(lat_val))
+    setattr(op, f'gps_{marco}_lng', parse_float(lng_val))
+    op.save()
+
+    foto_id = None
+    foto_url = None
+    foto = request.FILES.get('foto')
+    if foto:
+        FotoMarco.objects.filter(os=op.os, marco=marco).delete()
+        fm = FotoMarco.objects.create(os=op.os, marco=marco, foto=foto)
+        foto_id = fm.pk
+        foto_url = fm.foto.url
+
+    return JsonResponse({'ok': True, 'foto_id': foto_id, 'foto_url': foto_url})
+
 def os_field_link(request, token):
     """Página pública para agente externo preencher dados operacionais da OS."""
     from datetime import datetime
@@ -1819,6 +2203,14 @@ def os_field_link(request, token):
         op.km_inicio_operacao  = parse_int(request.POST.get('km_inicio_operacao'))
         op.km_termino_operacao = parse_int(request.POST.get('km_termino_operacao'))
         op.km_termino_viagem   = parse_int(request.POST.get('km_termino_viagem'))
+
+        # Pedagio
+        pedagio_raw = request.POST.get('pedagio', '').strip().replace(',', '.')
+        try:
+            op.pedagio = float(pedagio_raw) if pedagio_raw else None
+        except ValueError:
+            op.pedagio = None
+
 
         # GPS — capturado pelo browser do agente
         def parse_dec(val):
@@ -1889,11 +2281,6 @@ def os_field_link(request, token):
             'termino_operacao': fmt_gps(op.gps_termino_operacao_lat, op.gps_termino_operacao_lng),
             'termino_viagem':   fmt_gps(op.gps_termino_viagem_lat,   op.gps_termino_viagem_lng),
         },
-        'assinatura_tipos': AssinaturaOS.TIPO_CHOICES if hasattr(AssinaturaOS, 'TIPO_CHOICES') else [
-            ('agente1', 'Agente 1'), ('agente2', 'Agente 2'),
-            ('motorista', 'Motorista'), ('supervisor', 'Supervisor'),
-        ],
-        'assinaturas_dict': {a.tipo: a for a in AssinaturaOS.objects.filter(os=os_obj)},
     })
 
 
@@ -2398,6 +2785,23 @@ def os_field_despesa_delete(request, token, pk):
         desp.delete()
         return JsonResponse({'ok': True})
     return JsonResponse({'ok': False}, status=405)
+
+@csrf_exempt
+def os_field_pedagio_salvar(request, token):
+    """Salva o valor do pedagio via AJAX (link externo do agente)."""
+    from .models import OSOperacional
+    op = get_object_or_404(OSOperacional, token=token)
+    if not op.link_ativo:
+        return JsonResponse({'ok': False, 'erro': 'Link inativo.'}, status=403)
+    if request.method == 'POST':
+        pedagio_raw = request.POST.get('pedagio', '').strip().replace(',', '.')
+        try:
+            op.pedagio = float(pedagio_raw) if pedagio_raw else None
+        except ValueError:
+            return JsonResponse({'ok': False, 'erro': 'Valor inválido.'})
+        op.save(update_fields=['pedagio'])
+        return JsonResponse({'ok': True, 'pedagio': str(op.pedagio)})
+    return JsonResponse({'ok': False}, status=405)
 # ─────────────────────────────────────────────────────────────────────────────
 # ADICIONAR ao final de cadastros/views.py
 # ─────────────────────────────────────────────────────────────────────────────
@@ -2457,3 +2861,5 @@ def os_field_veiculo_delete(request, token, pk):
     obj = get_object_or_404(VeiculoEscoltado, pk=pk, os=op.os)
     obj.delete()
     return JsonResponse({'ok': True})
+
+

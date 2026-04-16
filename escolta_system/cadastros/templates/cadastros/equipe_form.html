@@ -191,9 +191,9 @@
               <option value="">— Selecione um armamento —</option>
               {% for arm in armamentos %}
               <option value="{{ arm.pk }}"
-                data-info="{{ arm.get_tipo_display }} {{ arm.marca }} {{ arm.modelo }} · Cal. {{ arm.calibre }}"
+                data-info="{{ arm.get_tipo_display }} · Série: {{ arm.numero_serie }}"
                 {% if obj.armamento_agente1_id == arm.pk %}selected{% endif %}>
-                Série: {{ arm.numero_serie }} — {{ arm.get_tipo_display }} {{ arm.marca }} {{ arm.calibre }}
+                {{ arm.marca }} {{ arm.modelo }} — {{ arm.calibre }}
               </option>
               {% endfor %}
             </select>
@@ -247,9 +247,9 @@
               <option value="">— Selecione um armamento —</option>
               {% for arm in armamentos %}
               <option value="{{ arm.pk }}"
-                data-info="{{ arm.get_tipo_display }} {{ arm.marca }} {{ arm.modelo }} · Cal. {{ arm.calibre }}"
+                data-info="{{ arm.get_tipo_display }} · Série: {{ arm.numero_serie }}"
                 {% if obj.armamento_agente2_id == arm.pk %}selected{% endif %}>
-                Série: {{ arm.numero_serie }} — {{ arm.get_tipo_display }} {{ arm.marca }} {{ arm.calibre }}
+                {{ arm.marca }} {{ arm.modelo }} — {{ arm.calibre }}
               </option>
               {% endfor %}
             </select>
@@ -338,9 +338,9 @@
               <option value="">— Sem armamento extra —</option>
               {% for arm in armamentos %}
               <option value="{{ arm.pk }}"
-                data-info="{{ arm.get_tipo_display }} {{ arm.marca }} {{ arm.modelo }} · Cal. {{ arm.calibre }}"
+                data-info="{{ arm.get_tipo_display }} · Série: {{ arm.numero_serie }}"
                 {% if obj.armamento_extra_id == arm.pk %}selected{% endif %}>
-                Série: {{ arm.numero_serie }} — {{ arm.get_tipo_display }} {{ arm.marca }} {{ arm.calibre }}
+                {{ arm.marca }} {{ arm.modelo }} — {{ arm.calibre }}
               </option>
               {% endfor %}
             </select>
@@ -364,45 +364,6 @@
 
   </div><!-- /equipe-grid -->
 
-  <!-- VIATURA -->
-  <div class="full-card" style="margin-bottom:20px">
-    <div class="card-header" style="display:flex;align-items:center;gap:10px">
-      <div class="icon icon-amber" style="width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:var(--amber-bg);color:var(--amber);border:1px solid #3a2a10">
-        <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="1" y="5" width="12" height="6" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 5V4.5a3.5 3.5 0 017 0V5" stroke="currentColor" stroke-width="1.3"/><circle cx="3.5" cy="10.5" r=".8" fill="currentColor"/><circle cx="10.5" cy="10.5" r=".8" fill="currentColor"/></svg>
-      </div>
-      Viatura da Equipe
-      <span style="margin-left:auto;font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">Opcional</span>
-    </div>
-    <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start">
-      <div class="field">
-        <label>Selecionar Viatura</label>
-        <div class="select-custom">
-          <select name="viatura" onchange="updatePreview(this,'prev-viatura','viatura')">
-            <option value="">— Sem viatura atribuída —</option>
-            {% for v in viaturas %}
-            <option value="{{ v.pk }}"
-              data-info="Placa: {{ v.placa }} · {{ v.cor }} · {{ v.ano }}"
-              {% if obj.viatura_id == v.pk %}selected{% endif %}>
-              {{ v.marca_modelo }} — {{ v.placa }}{% if v.frota %} (Frota {{ v.frota }}){% endif %}
-            </option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="preview-box {% if obj.viatura %}has-value{% endif %}" id="prev-viatura">
-          {% if obj.viatura %}
-            <div class="dot"></div>Placa: {{ obj.viatura.placa }} · {{ obj.viatura.cor }} · {{ obj.viatura.ano }}
-          {% else %}
-            Nenhuma viatura selecionada
-          {% endif %}
-        </div>
-      </div>
-      <div style="font-size:12px;color:var(--text3);padding-top:20px;line-height:1.7">
-        Somente viaturas com status <span style="color:var(--green)">Ativa</span> são listadas.<br>
-        Para cadastrar novas viaturas acesse <a href="{% url 'viatura_list' %}" style="color:var(--blue-light)">Viaturas</a>.
-      </div>
-    </div>
-  </div>
-
   <div style="display:flex;gap:10px;justify-content:flex-end">
     <a href="{% url 'equipe_list' %}" class="btn btn-secondary">Cancelar</a>
     <button type="submit" class="btn btn-primary">
@@ -416,10 +377,9 @@
 function updatePreview(select, previewId, type) {
   const box = document.getElementById(previewId);
   const opt = select.options[select.selectedIndex];
-  const labels = {'agente':'agente','armamento':'armamento','colete':'colete','viatura':'viatura'};
   if (!opt || !opt.value) {
     box.className = 'preview-box';
-    box.innerHTML = 'Nenhum' + (type === 'armamento' ? ' armamento' : type === 'viatura' ? 'a viatura' : ' ' + (labels[type]||type)) + ' selecionado' + (type === 'viatura' ? 'a' : '');
+    box.innerHTML = 'Nenhum ' + {'agente':'agente','armamento':'armamento','colete':'colete'}[type] + ' selecionado';
     return;
   }
   const info = opt.getAttribute('data-info') || '';

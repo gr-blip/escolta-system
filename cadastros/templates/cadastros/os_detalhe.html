@@ -1,5 +1,4 @@
-{% extends 'cadastros/base.html' %}
-{% load cadastros_extras %}
+﻿{% extends 'cadastros/base.html' %}
 {% block title %}{% if novo %}Nova OS — Detalhes{% else %}OS-{{ os.numero }}{% endif %}{% endblock %}
 {% block page_title %}{% if novo %}Abrir Ordem de Serviço{% else %}OS-{{ os.numero }}{% endif %}{% endblock %}
 {% block breadcrumb %}
@@ -7,6 +6,7 @@
   <a href="{% url 'os_list' %}">Ordens de Serviço</a> /
   {% if novo %}Nova OS{% else %}OS-{{ os.numero }}{% endif %}
 {% endblock %}
+
 
 {% block topbar_actions %}
   {% if not novo %}
@@ -488,31 +488,6 @@
       </table>
     </div>
 
-    <!-- ── FOTOS DOS MARCOS ── -->
-    {% if fotos_marco %}
-    <div style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px">
-      <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📷 Fotos dos Marcos</div>
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;overflow-x:auto">
-        {% for marco_key, marco_label in fotos_marco_lista %}
-        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
-          <span style="font-size:10px;font-weight:600;color:var(--text2);text-align:center;text-transform:uppercase;letter-spacing:.04em">{{ marco_label }}</span>
-          {% if marco_key in fotos_marco %}
-            <a href="{{ fotos_marco|get_item:marco_key }}" target="_blank" style="display:block;width:100%">
-              <img src="{{ fotos_marco|get_item:marco_key }}"
-                   alt="Foto {{ marco_label }}"
-                   style="width:100%;height:110px;object-fit:cover;border-radius:8px;border:1px solid var(--border2);box-shadow:0 1px 4px rgba(0,0,0,.1);cursor:pointer">
-            </a>
-          {% else %}
-            <div style="width:100%;height:110px;border-radius:8px;border:1px dashed var(--border2);background:var(--bg3);display:flex;align-items:center;justify-content:center">
-              <span style="font-size:11px;color:var(--text3)">Sem foto</span>
-            </div>
-          {% endif %}
-        </div>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-
     <!-- Totalizadores -->
     <div style="display:flex;flex-wrap:wrap;gap:24px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
       <div style="display:flex;flex-direction:column;gap:4px">
@@ -535,8 +510,8 @@
         <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Pedágio</span>
         <div style="display:flex;align-items:center;gap:6px">
           <span style="font-size:12px;color:var(--text3)">R$</span>
-          <input type="number" name="pedagio" min="0" step="0.01"
-            value="{{ operacional.pedagio|default:'' }}"
+          <input type="text" name="pedagio" inputmode="decimal"
+            value="{{ operacional.pedagio|default:'' }}" 
             placeholder="0,00"
             style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:14px;font-weight:600;font-family:inherit;outline:none;width:110px;text-align:right"
             onfocus="this.style.borderColor='var(--blue)'"
@@ -546,6 +521,32 @@
     </div>
   </div>
 </div>
+
+
+<!--  CARD: FOTOS DOS MARCOS  -->
+{% load cadastros_extras %}
+{% if fotos_marco %}
+<div class="os-card" style="margin-bottom:16px">
+  <div class="os-card-header">
+    <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><circle cx="5" cy="5" r="1.2" fill="currentColor"/><path d="M1 10l3-3 2.5 2.5L10 5l3 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Fotos dos Marcos
+  </div>
+  <div class="os-card-body">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+      {% for marco_key, marco_label in fotos_marco_lista %}
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <span style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;text-align:center">{{ marco_label }}</span>
+        {% if fotos_marco|get_item:marco_key %}
+        <img src="{{ fotos_marco|get_item:marco_key }}" style="width:100%;height:100px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+        {% else %}
+        <div style="width:100%;height:100px;border-radius:8px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3)">Sem foto</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
 
 <!-- ── CARD: VEÍCULOS ESCOLTADOS ── -->
 <div class="os-card" style="margin-bottom:16px">
@@ -838,6 +839,7 @@ document.getElementById('modal-link').addEventListener('click', function(e) {
 });
 </script>
 {% endif %}
+
 
 {% endblock %}
 

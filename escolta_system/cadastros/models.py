@@ -240,27 +240,6 @@ class OrdemServico(models.Model):
     cidade_destino  = models.CharField(max_length=200, verbose_name='Cidade Destino')
     uf_destino      = models.CharField(max_length=2, default='GO', verbose_name='UF Destino')
     equipe          = models.ForeignKey('Equipe', on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Equipe')
-    # Snapshot da equipe — preservado mesmo após excluir a equipe
-    snap_equipe_nome     = models.CharField(max_length=100, blank=True, verbose_name='Equipe (snapshot)')
-    snap_agente1_nome    = models.CharField(max_length=200, blank=True, verbose_name='Agente 1 (snapshot)')
-    snap_agente1_cpf     = models.CharField(max_length=20,  blank=True)
-    snap_agente1_rg      = models.CharField(max_length=20,  blank=True)
-    snap_agente1_telefone= models.CharField(max_length=20,  blank=True)
-    snap_agente1_cnh     = models.CharField(max_length=20,  blank=True)
-    snap_agente1_cnv     = models.CharField(max_length=20,  blank=True)
-    snap_agente1_foto    = models.CharField(max_length=500, blank=True)
-    snap_agente2_nome    = models.CharField(max_length=200, blank=True, verbose_name='Agente 2 (snapshot)')
-    snap_agente2_cpf     = models.CharField(max_length=20,  blank=True)
-    snap_agente2_rg      = models.CharField(max_length=20,  blank=True)
-    snap_agente2_telefone= models.CharField(max_length=20,  blank=True)
-    snap_agente2_cnh     = models.CharField(max_length=20,  blank=True)
-    snap_agente2_cnv     = models.CharField(max_length=20,  blank=True)
-    snap_agente2_foto    = models.CharField(max_length=500, blank=True)
-    snap_viatura_modelo  = models.CharField(max_length=100, blank=True)
-    snap_viatura_placa   = models.CharField(max_length=20,  blank=True)
-    snap_viatura_cor     = models.CharField(max_length=50,  blank=True)
-    snap_viatura_frota   = models.CharField(max_length=20,  blank=True)
-    snap_viatura_mct     = models.CharField(max_length=20,  blank=True)
     observacoes     = models.TextField(blank=True, verbose_name='Observações')
     status          = models.CharField(max_length=20, choices=STATUS_CHOICES, default='aberta', verbose_name='Status')
     finalizada_em   = models.DateTimeField(null=True, blank=True, verbose_name='Finalizada em')
@@ -383,17 +362,26 @@ class VeiculoEscoltado(models.Model):
         return f'{self.placa_cavalo or self.veiculo}'
 
 
-# ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
 # FATURAMENTO
-# ==============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
 
 class TabelaPreco(models.Model):
-    SITUACAO_CHOICES = [('ativo', 'Ativo'), ('inativo', 'Inativo')]
-    TIPO_VIAGEM_CHOICES = [
-        ('urbana', 'Urbana'), ('rodoviaria', 'Rodoviária'),
-        ('administrativa', 'Administrativa'), ('todas', 'Todas'),
+    """Tabela de preços por cliente e rota"""
+    SITUACAO_CHOICES = [
+        ('ativo',   'Ativo'),
+        ('inativo', 'Inativo'),
     ]
-    COBRAR_PEDAGIO_CHOICES = [('sim', 'Sim'), ('nao', 'Não')]
+    TIPO_VIAGEM_CHOICES = [
+        ('urbana',         'Urbana'),
+        ('rodoviaria',     'Rodoviária'),
+        ('administrativa', 'Administrativa'),
+        ('todas',          'Todas'),
+    ]
+    COBRAR_PEDAGIO_CHOICES = [
+        ('sim', 'Sim'),
+        ('nao', 'Não'),
+    ]
 
     cliente          = models.ForeignKey('Cliente', on_delete=models.PROTECT,
                                           related_name='tabelas_preco', verbose_name='Cliente')
@@ -402,18 +390,34 @@ class TabelaPreco(models.Model):
                                          default='todas', verbose_name='Tipo de Viagem')
     situacao         = models.CharField(max_length=10, choices=SITUACAO_CHOICES,
                                          default='ativo', verbose_name='Situação')
+
+    # Datas
     data_inclusao    = models.DateField(auto_now_add=True, verbose_name='Inclusão')
     inicio_contrato  = models.DateField(null=True, blank=True, verbose_name='Início Contrato')
     ultimo_reajuste  = models.DateField(null=True, blank=True, verbose_name='Último Reajuste')
     proximo_reajuste = models.DateField(null=True, blank=True, verbose_name='Próximo Reajuste')
-    valor_escolta    = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Valor da Escolta (R$)')
+
+    # Franquia
+    valor_escolta    = models.DecimalField(max_digits=10, decimal_places=2,
+                                            verbose_name='Valor da Escolta (R$)')
     franquia_km      = models.PositiveIntegerField(default=0, verbose_name='Franquia KM')
-    franquia_horas   = models.CharField(max_length=6, default='000:00', verbose_name='Franquia Horas (HHH:MM)')
-    excedente_km     = models.DecimalField(max_digits=8, decimal_places=2, default=0, verbose_name='Excedente por KM (R$)')
-    excedente_hora   = models.DecimalField(max_digits=8, decimal_places=2, default=0, verbose_name='Excedente por Hora (R$)')
-    cobrar_pedagio   = models.CharField(max_length=3, choices=COBRAR_PEDAGIO_CHOICES, default='sim', verbose_name='Cobrar Pedágio')
-    pedagio_fixo     = models.DecimalField(max_digits=8, decimal_places=2, default=0, verbose_name='Pedágio Fixo (R$)')
-    pedagio_percent  = models.DecimalField(max_digits=5, decimal_places=2, default=0, verbose_name='% Pedágio')
+    franquia_horas   = models.CharField(max_length=6, default='000:00',
+                                         verbose_name='Franquia Horas (HH:MM)')
+
+    # Excedentes
+    excedente_km     = models.DecimalField(max_digits=8, decimal_places=2, default=0,
+                                            verbose_name='Excedente por KM (R$)')
+    excedente_hora   = models.DecimalField(max_digits=8, decimal_places=2, default=0,
+                                            verbose_name='Excedente por Hora (R$)')
+
+    # Pedágio
+    cobrar_pedagio   = models.CharField(max_length=3, choices=COBRAR_PEDAGIO_CHOICES,
+                                         default='sim', verbose_name='Cobrar Pedágio')
+    pedagio_fixo     = models.DecimalField(max_digits=8, decimal_places=2, default=0,
+                                            verbose_name='Pedágio Fixo (R$)')
+    pedagio_percent  = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+                                            verbose_name='% Pedágio')
+
     criado_em        = models.DateTimeField(auto_now_add=True)
     atualizado_em    = models.DateTimeField(auto_now=True)
 
@@ -426,6 +430,7 @@ class TabelaPreco(models.Model):
         return f'{self.cliente.razao_social} — {self.nome}'
 
     def franquia_horas_minutos(self):
+        """Retorna franquia de horas em minutos totais"""
         try:
             h, m = self.franquia_horas.split(':')
             return int(h) * 60 + int(m)
@@ -434,9 +439,10 @@ class TabelaPreco(models.Model):
 
 
 class BoletimMedicao(models.Model):
+    """Fechamento financeiro de uma OS finalizada"""
     STATUS_CHOICES = [
-        ('aberto', 'Em Aberto'),
-        ('faturado', 'Faturado'),
+        ('aberto',    'Em Aberto'),
+        ('faturado',  'Faturado'),
         ('cancelado', 'Cancelado'),
     ]
 
@@ -445,22 +451,40 @@ class BoletimMedicao(models.Model):
     tabela_preco    = models.ForeignKey('TabelaPreco', on_delete=models.PROTECT,
                                          null=True, blank=True,
                                          related_name='boletins', verbose_name='Tabela de Preço')
-    status          = models.CharField(max_length=15, choices=STATUS_CHOICES, default='aberto', verbose_name='Status')
-    horas_realizadas      = models.CharField(max_length=6, default='00:00', verbose_name='Horas Realizadas')
+    status          = models.CharField(max_length=15, choices=STATUS_CHOICES,
+                                        default='aberto', verbose_name='Status')
+
+    # Realizado (preenchido automaticamente)
+    horas_realizadas      = models.CharField(max_length=6, default='00:00',
+                                              verbose_name='Horas Realizadas')
     km_realizado          = models.PositiveIntegerField(default=0, verbose_name='KM Realizado')
-    horas_excedentes      = models.CharField(max_length=6, default='00:00', verbose_name='Horas Excedentes')
+
+    # Excedentes calculados
+    horas_excedentes      = models.CharField(max_length=6, default='00:00',
+                                              verbose_name='Horas Excedentes')
     km_excedente          = models.PositiveIntegerField(default=0, verbose_name='KM Excedente')
-    valor_escolta         = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Valor Escolta (R$)')
-    valor_excedente_km    = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Valor Excedente KM (R$)')
-    valor_excedente_hora  = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Valor Excedente Hora (R$)')
-    valor_pedagio         = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Valor Pedágio (R$)')
-    acrescimo             = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Acréscimo (R$)')
-    desconto              = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Desconto (R$)')
-    valor_total           = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Valor Total (R$)')
-    numero_nota           = models.CharField(max_length=50, blank=True, verbose_name='Nº Nota Fiscal')
-    observacoes           = models.TextField(blank=True, verbose_name='Observações')
-    criado_em             = models.DateTimeField(auto_now_add=True)
-    atualizado_em         = models.DateTimeField(auto_now=True)
+
+    # Valores calculados
+    valor_escolta         = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+                                                 verbose_name='Valor Escolta (R$)')
+    valor_excedente_km    = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+                                                 verbose_name='Valor Excedente KM (R$)')
+    valor_excedente_hora  = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+                                                 verbose_name='Valor Excedente Hora (R$)')
+    valor_pedagio         = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+                                                 verbose_name='Valor Pedágio (R$)')
+    acrescimo            = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+                                                verbose_name='Acréscimo (R$)')
+    desconto             = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+                                                verbose_name='Desconto (R$)')
+    valor_total          = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+                                                verbose_name='Valor Total (R$)')
+
+    # Controle
+    numero_nota          = models.CharField(max_length=50, blank=True, verbose_name='Nº Nota Fiscal')
+    observacoes          = models.TextField(blank=True, verbose_name='Observações')
+    criado_em            = models.DateTimeField(auto_now_add=True)
+    atualizado_em        = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = 'Boletim de Medição'
@@ -471,46 +495,72 @@ class BoletimMedicao(models.Model):
         return f'Boletim OS-{self.os.numero}'
 
     def calcular(self):
+        """Recalcula todos os valores com base na tabela e nos dados da OS"""
         from decimal import Decimal
         op = getattr(self.os, 'operacional', None)
         tabela = self.tabela_preco
         if not tabela or not op:
             return
+
+        # ── Horas faturáveis ──────────────────────────────────────────────────
+        # Regra: se chegada_operacao > previsao_inicio → base = chegada_operacao
+        #        caso contrário → base = previsao_inicio
+        from datetime import datetime, timedelta
+
         inicio_base = self.os.previsao_inicio
         if op.chegada_operacao and op.chegada_operacao > self.os.previsao_inicio:
             inicio_base = op.chegada_operacao
+
         fim_base = op.termino_operacao
+
         if inicio_base and fim_base and fim_base > inicio_base:
-            total_min = int((fim_base - inicio_base).total_seconds() // 60)
+            delta = fim_base - inicio_base
+            total_min = int(delta.total_seconds() // 60)
         else:
             total_min = 0
-        self.horas_realizadas = f'{total_min // 60:02d}:{total_min % 60:02d}'
-        # KM deve ser calculado entre Início e Término da Operação
-        km_real = op.km_trecho_termino_op or 0
+
+        horas_real_h = total_min // 60
+        horas_real_m = total_min % 60
+        self.horas_realizadas = f'{horas_real_h:02d}:{horas_real_m:02d}'
+
+        # ── KM realizado ─────────────────────────────────────────────────────
+        km_real = op.km_total or 0
         self.km_realizado = km_real
+
+        # ── Excedentes ───────────────────────────────────────────────────────
         franquia_min = tabela.franquia_horas_minutos()
         excedente_min = max(0, total_min - franquia_min)
-        self.horas_excedentes = f'{excedente_min // 60:02d}:{excedente_min % 60:02d}'
+        exc_h = excedente_min // 60
+        exc_m = excedente_min % 60
+        self.horas_excedentes = f'{exc_h:02d}:{exc_m:02d}'
+
         km_exc = max(0, km_real - tabela.franquia_km)
         self.km_excedente = km_exc
+
+        # ── Valores ──────────────────────────────────────────────────────────
         self.valor_escolta = tabela.valor_escolta
-        exc_horas_dec = Decimal(excedente_min) / Decimal(60)
-        self.valor_excedente_hora = (exc_horas_dec * tabela.excedente_hora).quantize(Decimal('0.01'))
-        self.valor_excedente_km = (Decimal(km_exc) * tabela.excedente_km).quantize(Decimal('0.01'))
-        # Só define pedágio automático se o campo estiver zerado (não foi digitado manualmente)
-        if self.valor_pedagio == 0:
-            if tabela.cobrar_pedagio == 'sim':
-                if tabela.pedagio_fixo > 0:
-                    self.valor_pedagio = tabela.pedagio_fixo
-                elif op.pedagio:
-                    self.valor_pedagio = Decimal(str(op.pedagio))
-                else:
-                    self.valor_pedagio = Decimal('0')
+
+        exc_horas_decimal = Decimal(excedente_min) / Decimal(60)
+        self.valor_excedente_hora = (exc_horas_decimal * tabela.excedente_hora).quantize(Decimal('0.01'))
+        self.valor_excedente_km   = (Decimal(km_exc) * tabela.excedente_km).quantize(Decimal('0.01'))
+
+        # Pedágio
+        if tabela.cobrar_pedagio == 'sim':
+            if tabela.pedagio_fixo > 0:
+                self.valor_pedagio = tabela.pedagio_fixo
+            elif op.pedagio:
+                self.valor_pedagio = Decimal(str(op.pedagio))
             else:
                 self.valor_pedagio = Decimal('0')
+        else:
+            self.valor_pedagio = Decimal('0')
+
         self.valor_total = (
-            self.valor_escolta + self.valor_excedente_km +
-            self.valor_excedente_hora + Decimal(str(self.valor_pedagio)) +
-            Decimal(str(self.acrescimo)) - Decimal(str(self.desconto))
-        ).quantize(Decimal('0.01'))
+            self.valor_escolta +
+            self.valor_excedente_km +
+            self.valor_excedente_hora +
+            self.valor_pedagio +
+            self.acrescimo -
+            self.desconto
+        )
         self.save()
