@@ -973,11 +973,17 @@ def omnilink_historico(request, pk):
                 Senha=SENHA_MD5,
                 UltimoSequencial=seq_diag,
             )
+            import re as _re
             xml_str = str(xml_str) if xml_str else ''
-            diagnostico['xml_inicio'] = xml_str[:500]
+            diagnostico['xml_inicio'] = xml_str[:600]
 
-            # Conta eventos e coleta IdTerminals únicos
-            xml_wrap = f'<root>{xml_str}</root>' if not xml_str.startswith('<root') else xml_str
+            # Normaliza PascalCase → lowercase (API retorna <TeleEvento>, <IdTerminal> etc.)
+            xml_low = _re.sub(
+                r'<(/?)([A-Za-z][A-Za-z0-9_]*)',
+                lambda m: f'<{m.group(1)}{m.group(2).lower()}',
+                xml_str
+            )
+            xml_wrap = f'<root>{xml_low}</root>'
             try:
                 root = ET.fromstring(xml_wrap)
                 eventos = list(root.iter('teleevento'))
@@ -986,8 +992,8 @@ def omnilink_historico(request, pk):
                 ids_set  = set()
                 msgs_set = set()
                 for ev in eventos:
-                    it = ev.findtext('IdTerminal') or ev.findtext('idTerminal') or ''
-                    cm = ev.findtext('CodMsg') or ev.findtext('codmsg') or ''
+                    it = ev.findtext('idterminal') or ''
+                    cm = ev.findtext('codmsg') or ''
                     if it:
                         ids_set.add(it.strip())
                     if cm:
