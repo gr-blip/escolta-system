@@ -331,17 +331,18 @@
     const expiracao = document.getElementById('novo-expiracao').value;
     const obrig = document.getElementById('novo-obrigatorio').checked ? 1 : 0;
 
-    if (!placa) { mostrarMsgModal('Selecione uma placa.','erro'); return; }
-    if (!expiracao) { mostrarMsgModal('Informe a data de expiração.','erro'); return; }
+    if (!placa) { mostrarMsgModal('SELECIONE UMA PLACA.','erro'); return; }
+    if (!expiracao) { mostrarMsgModal('INFORME A DATA DE EXPIRAÇÃO.','erro'); return; }
 
-    let cnpj = '', idCentral = '';
+    let cnpj = '', idCentral = '', nomeCentral = '';
     if (tipo === 'cnpj') {
       cnpj = document.getElementById('novo-cnpj').value.trim().replace(/\D/g,'');
-      if (!cnpj) { mostrarMsgModal('Informe o CPF/CNPJ.','erro'); return; }
+      if (!cnpj) { mostrarMsgModal('INFORME O CPF/CNPJ.','erro'); return; }
     } else {
       const sel = document.getElementById('novo-central');
       idCentral = sel.value;
-      if (!idCentral) { mostrarMsgModal('Selecione uma central.','erro'); return; }
+      nomeCentral = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : '';
+      if (!idCentral) { mostrarMsgModal('SELECIONE UMA CENTRAL.','erro'); return; }
     }
 
     // Converte datetime-local para dd/MM/yyyy HH:mm:ss
@@ -350,21 +351,26 @@
     const dataFmt = `${pad(dt.getDate())}/${pad(dt.getMonth()+1)}/${dt.getFullYear()} ${pad(dt.getHours())}:${pad(dt.getMinutes())}:00`;
 
     const btn = document.getElementById('btn-salvar');
-    btn.textContent = 'Salvando…'; btn.disabled = true;
+    btn.textContent = 'ENVIANDO...'; btn.disabled = true;
 
     fetch('/operacional/espelhamentos/criar/', {
       method: 'POST',
       headers: {'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken')},
       body: JSON.stringify({placa, cnpj_destino: cnpj, id_central: idCentral, data_expiracao: dataFmt, obrigatorio: obrig})
     }).then(r=>r.json()).then(data => {
-      btn.textContent = 'Cadastrar'; btn.disabled = false;
+      btn.textContent = 'ESPELHAR'; btn.disabled = false;
       if (data.ok) {
-        mostrarMsgModal(`✓ Espelhamento criado! ${data.mensagem}`,'ok');
-        setTimeout(()=>{ fecharModal(); carregarEspelhamentos(); }, 2000);
+        const idSeq = data.id_sequencia || '';
+        const destino = nomeCentral || cnpj || 'DESTINO';
+        const msg = idSeq
+          ? `✓ SOLICITAÇÃO CRIADA! ID #${idSeq} — INFORME ESTE NÚMERO À ${destino.toUpperCase()} PARA ACEITAR O ESPELHAMENTO.`
+          : `✓ ESPELHAMENTO ENVIADO PARA ${destino.toUpperCase()}.`;
+        mostrarMsgModal(msg, 'ok');
+        setTimeout(()=>{ fecharModal(); carregarEspelhamentos(); }, 4000);
       } else {
-        mostrarMsgModal('⚠ ' + data.mensagem,'erro');
+        mostrarMsgModal('⚠ ' + data.mensagem.toUpperCase(), 'erro');
       }
-    }).catch(()=>{ btn.textContent='Cadastrar'; btn.disabled=false; mostrarMsgModal('Falha de conexão.','erro'); });
+    }).catch(()=>{ btn.textContent='ESPELHAR'; btn.disabled=false; mostrarMsgModal('FALHA DE CONEXÃO.','erro'); });
   };
 
   function mostrarMsgModal(msg, tipo) {
