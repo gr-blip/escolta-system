@@ -1176,7 +1176,17 @@ def espelhamento_listar_ajax(request):
         placa = (e.get('placa') or '').strip().upper()
         if placa and placa in placas_jr:
             return True
-        return bool(e.get('id_cliente_destino'))
+        # Espelhamentos enviados por nós via central (id_central/nome_central preenchidos)
+        if e.get('id_central') or e.get('nome_central') or e.get('cnpj_central'):
+            return True
+        # Espelhamentos enviados por nós via CNPJ direto
+        if e.get('id_cliente_destino'):
+            return True
+        # Verificar pelo usuário que cadastrou (conta JRS)
+        user_cad = (e.get('user_cad') or '').lower()
+        if user_cad and ('grupojrservicos' in user_cad or 'jrservicos' in user_cad):
+            return True
+        return False
 
     enviados  = [e for e in todos if eh_enviado(e)]
     recebidos = [e for e in todos if not eh_enviado(e)]
