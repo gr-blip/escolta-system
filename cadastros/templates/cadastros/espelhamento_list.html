@@ -202,9 +202,10 @@
   (function() {
     const hoje = new Date();
     const amanha = new Date(hoje); amanha.setDate(hoje.getDate() + 1);
+    const m30   = new Date(hoje); m30.setDate(hoje.getDate() - 30);
     const fmt = d => d.toISOString().split('T')[0];
     document.getElementById('filtro-fim').value    = fmt(amanha);
-    document.getElementById('filtro-inicio').value = '2024-01-01'; // histórico completo
+    document.getElementById('filtro-inicio').value = fmt(m30);
     // Carrega automaticamente ao entrar na página
     carregarEspelhamentos();
   })();
@@ -216,13 +217,31 @@
     const status = document.getElementById('filtro-status').value;
     if (!inicio || !fim) { alert('Selecione o período.'); return; }
 
-    document.getElementById('loading-txt').style.display = '';
+    const loading = document.getElementById('loading-txt');
+    loading.textContent = 'Consultando API…';
+    loading.style.display = '';
+
     const url = `/operacional/espelhamentos/listar/?inicio=${inicio}&fim=${fim}&status=${status}`;
-    fetch(url).then(r=>r.json()).then(data => {
-      document.getElementById('loading-txt').style.display = 'none';
-      if (!data.ok) { alert('Erro: ' + (data.erro||'desconhecido')); return; }
-      renderTabela(data.enviados || [], data.recebidos || []);
-    }).catch(()=>{ document.getElementById('loading-txt').style.display='none'; alert('Falha de conexão.'); });
+    fetch(url, {signal: AbortSignal.timeout(90000)})
+      .then(r => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(data => {
+        loading.style.display = 'none';
+        if (!data.ok) {
+          loading.textContent = 'Erro: ' + (data.erro || 'desconhecido');
+          loading.style.display = '';
+          return;
+        }
+        renderTabela(data.enviados || [], data.recebidos || []);
+      })
+      .catch(err => {
+        loading.style.display = '';
+        loading.textContent = err.name === 'TimeoutError'
+          ? '⚠ Consulta demorou demais. Reduza o período e tente novamente.'
+          : '⚠ Falha ao carregar. Verifique a conexão e tente Buscar.';
+      });
   };
 
   function badgeStatus(s) {

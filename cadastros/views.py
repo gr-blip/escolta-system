@@ -1126,14 +1126,18 @@ def espelhamento_listar_ajax(request):
             return f'{parts[2]}/{parts[1]}/{parts[0]}'
         return d
 
-    # Usa datas do filtro ou padrão: de 2024-01-01 até amanhã
     hoje = datetime.now()
     amanha = hoje + timedelta(days=1)
-    data_inicio_dt = datetime.strptime(inicio, '%Y-%m-%d') if inicio else datetime(2024, 1, 1)
-    data_fim_dt    = datetime.strptime(fim, '%Y-%m-%d') if fim else amanha
+    data_inicio_dt = datetime.strptime(inicio, '%Y-%m-%d') if inicio else (hoje - timedelta(days=30))
+    data_fim_dt    = datetime.strptime(fim,    '%Y-%m-%d') if fim    else amanha
+
+    # Limita a 90 dias por consulta para não estourar timeout do servidor
+    MAX_DIAS = 90
+    if (data_fim_dt - data_inicio_dt).days > MAX_DIAS:
+        data_inicio_dt = data_fim_dt - timedelta(days=MAX_DIAS)
 
     def _buscar_status(s, di_dt, df_dt):
-        """Divide o intervalo em chunks de 28 dias e combina resultados."""
+        """Divide o intervalo em chunks de 28 dias (limite da API Omnilink)."""
         resultados = []
         vistos = set()
         cursor = di_dt
