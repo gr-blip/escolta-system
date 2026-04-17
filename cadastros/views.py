@@ -1128,16 +1128,19 @@ def espelhamento_listar_ajax(request):
 
     hoje = datetime.now()
     amanha = hoje + timedelta(days=1)
-    data_inicio_dt = datetime.strptime(inicio, '%Y-%m-%d') if inicio else (hoje - timedelta(days=30))
+    data_inicio_dt = datetime.strptime(inicio, '%Y-%m-%d') if inicio else (hoje - timedelta(days=365))
     data_fim_dt    = datetime.strptime(fim,    '%Y-%m-%d') if fim    else amanha
 
-    # Limita a 90 dias por consulta para não estourar timeout do servidor
-    MAX_DIAS = 90
+    # Limita a 365 dias por consulta para não estourar timeout do servidor.
+    # Quando buscamos todos os status de uma vez (Status=''), cada chunk faz
+    # apenas 1 chamada à API — cabe ~13 chunks dentro do timeout do Railway.
+    MAX_DIAS = 365
     if (data_fim_dt - data_inicio_dt).days > MAX_DIAS:
         data_inicio_dt = data_fim_dt - timedelta(days=MAX_DIAS)
 
-    def _buscar_status(s, di_dt, df_dt):
-        """Divide o intervalo em chunks de 28 dias (limite da API Omnilink)."""
+    def _buscar_periodo(s, di_dt, df_dt):
+        """Divide o intervalo em chunks de 28 dias (limite da API Omnilink).
+        Passa Status vazio quando todos os status são desejados — 1 chamada por chunk."""
         resultados = []
         vistos = set()
         cursor = di_dt
@@ -1153,12 +1156,13 @@ def espelhamento_listar_ajax(request):
             cursor = chunk_fim + timedelta(days=1)
         return resultados
 
-    # Busca por cada status para garantir cobertura completa
-    statuses = ('0', '1', '2') if not status else (status,)
+    # Se nenhum status específico → usa Status='' (todos de uma vez, mais rápido).
+    # Se status específico → busca só aquele.
     todos = []
     vistos_global = set()
-    for s in statuses:
-        for e in _buscar_status(s, data_inicio_dt, data_fim_dt):
+    statuses_buscar = ('',) if not status else (status,)
+    for s in statuses_buscar:
+        for e in _buscar_periodo(s, data_inicio_dt, data_fim_dt):
             eid = e.get('id') or str(e)
             if eid not in vistos_global:
                 vistos_global.add(eid)

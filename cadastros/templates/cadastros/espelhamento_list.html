@@ -234,10 +234,10 @@
   (function() {
     const hoje = new Date();
     const amanha = new Date(hoje); amanha.setDate(hoje.getDate() + 1);
-    const m30   = new Date(hoje); m30.setDate(hoje.getDate() - 30);
+    const m365  = new Date(hoje); m365.setFullYear(hoje.getFullYear() - 1);
     const fmt = d => d.toISOString().split('T')[0];
     document.getElementById('filtro-fim').value    = fmt(amanha);
-    document.getElementById('filtro-inicio').value = fmt(m30);
+    document.getElementById('filtro-inicio').value = fmt(m365);
     carregarEspelhamentos();
   })();
 
