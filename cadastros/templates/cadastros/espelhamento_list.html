@@ -198,18 +198,6 @@
     document.getElementById('tab-recebidos').style.borderBottomColor = aba === 'recebidos' ? 'var(--accent)' : 'transparent';
   };
 
-  // ── Filtros com datas padrão ────────────────────────────────────────────────
-  (function() {
-    const hoje = new Date();
-    const amanha = new Date(hoje); amanha.setDate(hoje.getDate() + 1);
-    const m30   = new Date(hoje); m30.setDate(hoje.getDate() - 30);
-    const fmt = d => d.toISOString().split('T')[0];
-    document.getElementById('filtro-fim').value    = fmt(amanha);
-    document.getElementById('filtro-inicio').value = fmt(m30);
-    // Carrega automaticamente ao entrar na página
-    carregarEspelhamentos();
-  })();
-
   // ── Carregar espelhamentos ─────────────────────────────────────────────────
   window.carregarEspelhamentos = function() {
     const inicio = document.getElementById('filtro-inicio').value;
@@ -222,7 +210,7 @@
     loading.style.display = '';
 
     const url = `/operacional/espelhamentos/listar/?inicio=${inicio}&fim=${fim}&status=${status}`;
-    fetch(url, {signal: AbortSignal.timeout(90000)})
+    fetch(url)
       .then(r => {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
@@ -238,11 +226,20 @@
       })
       .catch(err => {
         loading.style.display = '';
-        loading.textContent = err.name === 'TimeoutError'
-          ? '⚠ Consulta demorou demais. Reduza o período e tente novamente.'
-          : '⚠ Falha ao carregar. Verifique a conexão e tente Buscar.';
+        loading.textContent = '⚠ Falha ao carregar. Verifique a conexão e tente Buscar. (' + err.message + ')';
       });
   };
+
+  // ── Filtros com datas padrão + auto-load ───────────────────────────────────
+  (function() {
+    const hoje = new Date();
+    const amanha = new Date(hoje); amanha.setDate(hoje.getDate() + 1);
+    const m30   = new Date(hoje); m30.setDate(hoje.getDate() - 30);
+    const fmt = d => d.toISOString().split('T')[0];
+    document.getElementById('filtro-fim').value    = fmt(amanha);
+    document.getElementById('filtro-inicio').value = fmt(m30);
+    carregarEspelhamentos();
+  })();
 
   function badgeStatus(s) {
     const mapa = {'1':'#10b981','0':'#f59e0b','2':'#ef4444',''  :'#6b7280'};
@@ -434,8 +431,6 @@
     return v ? v.pop() : '';
   }
 
-  // Carrega automaticamente ao abrir
-  carregarEspelhamentos();
 })();
 </script>
 {% endblock %}
