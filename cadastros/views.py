@@ -1109,51 +1109,60 @@ def espelhamento_list(request):
 
 @login_required
 def espelhamento_listar_ajax(request):
-    """AJAX — lista espelhamentos enviados e recebidos."""
+    """AJAX — lista espelhamentos enviados (banco local) e recebidos (API Omnilink)."""
     from django.http import JsonResponse
     from datetime import datetime, timedelta
     from .omnilink import listar_espelhamentos
-    from .models import Viatura
+    from .models import EspelhamentoEnviado
     import traceback
 
     inicio = request.GET.get('inicio', '')
     fim    = request.GET.get('fim', '')
     status = request.GET.get('status', '')
-    try:
-        return _espelhamento_listar_ajax_inner(
-            inicio, fim, status, listar_espelhamentos, Viatura)
-    except Exception as exc:
-        import logging
-        logging.getLogger(__name__).error(f'espelhamento_listar_ajax: {traceback.format_exc()}')
-        return JsonResponse({'ok': False, 'erro': str(exc)}, status=200)
 
-
-def _espelhamento_listar_ajax_inner(inicio, fim, status, listar_espelhamentos, Viatura):
-    from django.http import JsonResponse
-    from datetime import datetime, timedelta
-
-    # Converte yyyy-mm-dd → dd/MM/yyyy
-    def fmt(d):
-        if d and '-' in d:
-            parts = d.split('-')
-            return f'{parts[2]}/{parts[1]}/{parts[0]}'
-        return d
-
-    hoje = datetime.now()
+    hoje   = datetime.now()
     amanha = hoje + timedelta(days=1)
     data_inicio_dt = datetime.strptime(inicio, '%Y-%m-%d') if inicio else (hoje - timedelta(days=30))
     data_fim_dt    = datetime.strptime(fim,    '%Y-%m-%d') if fim    else amanha
 
+    # ── ENVIADOS: banco de dados local ────────────────────────────────────────
+    try:
+        qs = EspelhamentoEnviado.objects.filter(
+            data_criacao__gte=data_inicio_dt,
+            data_criacao__lte=data_fim_dt,
+            cancelado=False,
+        )
+        enviados = [
+            {
+                'id':           str(e.id),
+                'placa':        e.placa,
+                'nome_central': e.nome_central or e.cnpj_destino or e.id_central or '—',
+                'cnpj_central': e.cnpj_destino,
+                'id_central':   e.id_central,
+                'data_cad':     e.data_criacao.strftime('%Y-%m-%d %H:%M:%S'),
+                'data_exp':     e.data_expiracao,
+                'status_aceite': '',   # não temos o status da API para enviados
+                'status':       '',
+                'id_sequencia': e.id_sequencia or '',
+            }
+            for e in qs
+        ]
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).error(f'EspelhamentoEnviado.query: {exc}\n{traceback.format_exc()}')
+        enviados = []
+
+    # ── RECEBIDOS: API Omnilink ───────────────────────────────────────────────
+    # A API só retorna espelhamentos onde somos DESTINO (cnpj_central = nosso CNPJ).
     MAX_DIAS = 90
     if (data_fim_dt - data_inicio_dt).days > MAX_DIAS:
-        data_inicio_dt = data_fim_dt - timedelta(days=MAX_DIAS)
+        data_inicio_api = data_fim_dt - timedelta(days=MAX_DIAS)
+    else:
+        data_inicio_api = data_inicio_dt
 
-    # A API aceita '0','1','2' mas NÃO aceita None/vazio para "todos".
-    # Quando nenhum status específico é pedido, fazemos 3 chamadas.
     statuses_buscar = ('0', '1', '2') if not status else (status,)
 
     def _buscar_status(s, di_dt, df_dt):
-        """Divide o intervalo em chunks de 28 dias (limite da API Omnilink)."""
         resultados = []
         vistos = set()
         cursor = di_dt
@@ -1174,56 +1183,19 @@ def _espelhamento_listar_ajax_inner(inicio, fim, status, listar_espelhamentos, V
             cursor = chunk_fim + timedelta(days=1)
         return resultados
 
-    todos = []
-    vistos_global = set()
-    for s in statuses_buscar:
-        for e in _buscar_status(s, data_inicio_dt, data_fim_dt):
-            eid = e.get('id') or str(e)
-            if eid not in vistos_global:
-                vistos_global.add(eid)
-                todos.append(e)
-
-    # Identifica placas da própria frota JR para separar enviados de recebidos.
+    recebidos = []
+    vistos_recebidos = set()
     try:
-        placas_jr = set(
-            v.upper() for v in Viatura.objects.values_list('placa', flat=True) if v
-        )
-    except Exception:
-        placas_jr = set()
+        for s in statuses_buscar:
+            for e in _buscar_status(s, data_inicio_api, data_fim_dt):
+                eid = e.get('id') or str(e)
+                if eid not in vistos_recebidos:
+                    vistos_recebidos.add(eid)
+                    recebidos.append(e)
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).error(f'recebidos API: {exc}\n{traceback.format_exc()}')
 
-    # CNPJ do JRS FACILITES.
-    # Espelhamentos RECEBIDOS têm cnpj_central == nosso CNPJ (outra empresa
-    # nos adicionou como destino) OU id_cliente_destino == nosso CNPJ.
-    NOSSO_CNPJ = '51425050000151'
-
-    def eh_enviado(e):
-        id_dest      = (e.get('id_cliente_destino') or '').strip()
-        cnpj_central = (e.get('cnpj_central') or '').strip()
-
-        # Se o destino somos nós → foi enviado para nós = recebido
-        if id_dest == NOSSO_CNPJ or cnpj_central == NOSSO_CNPJ:
-            return False
-
-        placa = (e.get('placa') or '').strip().upper()
-        # Placa da nossa frota → enviado por nós
-        if placa and placa in placas_jr:
-            return True
-
-        # Tem destino definido (central por ID, outro CNPJ, outro cliente) → enviado
-        if id_dest or e.get('id_central') or cnpj_central:
-            return True
-
-        # Usuário cadastrante é da conta JRS FACILITES
-        user_cad = (e.get('user_cad') or '').lower().strip()
-        if 'administrativo@grupojrservicos' in user_cad or 'diretoria@grupojrservicos' in user_cad:
-            return True
-
-        return False
-
-    enviados  = [e for e in todos if eh_enviado(e)]
-    recebidos = [e for e in todos if not eh_enviado(e)]
-
-    from django.http import JsonResponse
     return JsonResponse({'ok': True, 'enviados': enviados, 'recebidos': recebidos})
 
 
@@ -1306,6 +1278,33 @@ def espelhamento_criar_ajax(request):
         id_central=id_central,
         obrigatorio=obrigatorio,
     )
+
+    # Se criado com sucesso, persiste no banco local (a API não retorna
+    # espelhamentos enviados em ListarEspelhamentosByClienteStatus).
+    if resultado.get('ok'):
+        try:
+            from .models import EspelhamentoEnviado
+            from .omnilink import _carregar_centrais_fixture
+            nome_central = ''
+            if id_central:
+                try:
+                    mapa = {str(c['id']): c['nome'] for c in _carregar_centrais_fixture()}
+                    nome_central = mapa.get(id_central, '')
+                except Exception:
+                    pass
+            EspelhamentoEnviado.objects.create(
+                id_sequencia=resultado.get('id_sequencia') or None,
+                placa=placa.upper(),
+                id_central=id_central,
+                nome_central=nome_central,
+                cnpj_destino=cnpj_destino,
+                data_expiracao=data_exp,
+                obrigatorio=bool(obrigatorio),
+            )
+        except Exception as ex:
+            import logging
+            logging.getLogger(__name__).error(f'EspelhamentoEnviado.create: {ex}')
+
     return JsonResponse(resultado)
 
 
@@ -1346,7 +1345,27 @@ def espelhamento_cancelar_ajax(request):
     except Exception:
         return JsonResponse({'ok': False, 'mensagem': 'JSON inválido.'})
 
-    resultado = excluir_espelhamento(id_solicitacao=int(data.get('id', 0)))
+    id_solicitacao = data.get('id', 0)
+
+    # Se o ID começa com dígitos pequenos pode ser do banco local (pk do Django)
+    # Se for um número grande é id da API Omnilink
+    resultado = {'ok': False, 'mensagem': 'ID inválido.'}
+    try:
+        id_int = int(id_solicitacao)
+    except (ValueError, TypeError):
+        return JsonResponse(resultado)
+
+    # Tenta cancelar no banco local primeiro (espelhamentos enviados por nós)
+    from .models import EspelhamentoEnviado
+    local = EspelhamentoEnviado.objects.filter(pk=id_int).first()
+    if local:
+        local.cancelado = True
+        local.save()
+        resultado = {'ok': True, 'mensagem': f'Espelhamento da placa {local.placa} cancelado.'}
+    else:
+        # Cancela na API Omnilink (espelhamentos recebidos)
+        resultado = excluir_espelhamento(id_solicitacao=id_int)
+
     return JsonResponse(resultado)
 
 

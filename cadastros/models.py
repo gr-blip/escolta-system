@@ -843,3 +843,31 @@ class DespesaOS(models.Model):
     @property
     def os(self):  # alias para _foto_upload_path funcionar no comprovante
         return self.__class__.objects.get(pk=self.pk).os if self.pk else None
+
+
+
+# ── Espelhamentos enviados (armazenados localmente) ────────────────────────
+class EspelhamentoEnviado(models.Model):
+    """Registro local de espelhamentos criados por JRS FACILITES via Omnilink.
+    A API só retorna espelhamentos onde somos DESTINO, então guardamos
+    os que ENVIAMOS aqui para exibi-los na tela."""
+
+    id_sequencia   = models.CharField(max_length=50, unique=True, null=True, blank=True,
+                                      help_text='ID retornado pela API ao criar')
+    placa          = models.CharField(max_length=20, verbose_name='Placa')
+    id_central     = models.CharField(max_length=20, blank=True, verbose_name='ID Central Omnilink')
+    nome_central   = models.CharField(max_length=200, blank=True, verbose_name='Nome da Central')
+    cnpj_destino   = models.CharField(max_length=20, blank=True, verbose_name='CNPJ Destino')
+    data_expiracao = models.CharField(max_length=30, verbose_name='Expiração (dd/MM/yyyy HH:mm:ss)')
+    data_criacao   = models.DateTimeField(auto_now_add=True, verbose_name='Criado em')
+    obrigatorio    = models.BooleanField(default=False, verbose_name='Obrigatório')
+    cancelado      = models.BooleanField(default=False, verbose_name='Cancelado')
+
+    class Meta:
+        verbose_name        = 'Espelhamento Enviado'
+        verbose_name_plural = 'Espelhamentos Enviados'
+        ordering            = ['-data_criacao']
+
+    def __str__(self):
+        destino = self.nome_central or self.cnpj_destino or 'desconhecido'
+        return f'{self.placa} → {destino}'
