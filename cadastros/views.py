@@ -1126,7 +1126,10 @@ def espelhamento_listar_ajax(request):
     data_fim_dt    = datetime.strptime(fim,    '%Y-%m-%d') if fim    else amanha
 
     # ── ENVIADOS: banco de dados local ────────────────────────────────────────
+    _enviados_erro = None
+    _total_db = -1
     try:
+        _total_db = EspelhamentoEnviado.objects.count()
         qs = EspelhamentoEnviado.objects.filter(
             data_criacao__gte=data_inicio_dt,
             data_criacao__lte=data_fim_dt,
@@ -1149,6 +1152,7 @@ def espelhamento_listar_ajax(request):
         ]
     except Exception as exc:
         import logging
+        _enviados_erro = str(exc)
         logging.getLogger(__name__).error(f'EspelhamentoEnviado.query: {exc}\n{traceback.format_exc()}')
         enviados = []
 
@@ -1196,7 +1200,16 @@ def espelhamento_listar_ajax(request):
         import logging
         logging.getLogger(__name__).error(f'recebidos API: {exc}\n{traceback.format_exc()}')
 
-    return JsonResponse({'ok': True, 'enviados': enviados, 'recebidos': recebidos})
+    return JsonResponse({
+        'ok': True,
+        'enviados': enviados,
+        'recebidos': recebidos,
+        '_debug': {
+            'total_db': _total_db,
+            'erro_db': _enviados_erro,
+            'range': f'{data_inicio_dt} → {data_fim_dt}',
+        },
+    })
 
 
 @login_required
