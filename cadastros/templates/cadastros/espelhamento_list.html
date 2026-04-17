@@ -201,9 +201,14 @@
   // ── Filtros com datas padrão ────────────────────────────────────────────────
   (function() {
     const hoje = new Date();
-    const m30  = new Date(hoje); m30.setDate(hoje.getDate() - 30);
-    document.getElementById('filtro-fim').value    = hoje.toISOString().split('T')[0];
-    document.getElementById('filtro-inicio').value = m30.toISOString().split('T')[0];
+    // amanhã como fim para garantir que itens de hoje sejam incluídos
+    const amanha = new Date(hoje); amanha.setDate(hoje.getDate() + 1);
+    const m60 = new Date(hoje); m60.setDate(hoje.getDate() - 60);
+    const fmt = d => d.toISOString().split('T')[0];
+    document.getElementById('filtro-fim').value    = fmt(amanha);
+    document.getElementById('filtro-inicio').value = fmt(m60);
+    // Carrega automaticamente ao entrar na página
+    carregarEspelhamentos();
   })();
 
   // ── Carregar espelhamentos ─────────────────────────────────────────────────
