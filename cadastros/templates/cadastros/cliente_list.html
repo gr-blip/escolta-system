@@ -46,7 +46,7 @@
           <td>
             <div style="display:flex;gap:4px">
               <a href="{% url 'cliente_edit' c.pk %}" class="btn-icon" title="Editar"><svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M11 2l3 3L5 14H2v-3L11 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></a>
-              <form method="post" action="{% url 'cliente_inativar' c.pk %}" style="display:inline" onsubmit="return confirm('{% if c.ativo %}Inativar{% else %}Reativar{% endif %} o cliente {{ c.razao_social }}?')">
+              <form method="post" action="{% url 'cliente_delete' c.pk %}" style="display:inline" onsubmit="return confirm('{% if c.ativo %}Inativar{% else %}Reativar{% endif %} o cliente {{ c.razao_social }}?')">
                 {% csrf_token %}
                 <button type="submit" class="btn-icon" title="{% if c.ativo %}Inativar{% else %}Reativar{% endif %}" style="color:{% if c.ativo %}var(--red){% else %}var(--green,#22c55e){% endif %};background:none;border:none;cursor:pointer;padding:4px">
                   {% if c.ativo %}
