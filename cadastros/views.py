@@ -1144,16 +1144,15 @@ def _espelhamento_listar_ajax_inner(inicio, fim, status, listar_espelhamentos, V
     data_inicio_dt = datetime.strptime(inicio, '%Y-%m-%d') if inicio else (hoje - timedelta(days=30))
     data_fim_dt    = datetime.strptime(fim,    '%Y-%m-%d') if fim    else amanha
 
-    # Com Status=None (null SOAP) a API retorna TODOS os status de uma vez.
-    # Isso permite cobrir 365 dias com apenas ~13 chamadas (< 120 s Railway).
-    MAX_DIAS = 365
+    MAX_DIAS = 90
     if (data_fim_dt - data_inicio_dt).days > MAX_DIAS:
         data_inicio_dt = data_fim_dt - timedelta(days=MAX_DIAS)
 
-    # status vazio = todos (None para null SOAP); status específico = filtrar
-    status_param = status if status else None
+    # A API aceita '0','1','2' mas NÃO aceita None/vazio para "todos".
+    # Quando nenhum status específico é pedido, fazemos 3 chamadas.
+    statuses_buscar = ('0', '1', '2') if not status else (status,)
 
-    def _buscar_periodo(di_dt, df_dt, s_param):
+    def _buscar_status(s, di_dt, df_dt):
         """Divide o intervalo em chunks de 28 dias (limite da API Omnilink)."""
         resultados = []
         vistos = set()
@@ -1163,7 +1162,7 @@ def _espelhamento_listar_ajax_inner(inicio, fim, status, listar_espelhamentos, V
             di_str = cursor.strftime('%d/%m/%Y')
             df_str = chunk_fim.strftime('%d/%m/%Y')
             try:
-                for e in listar_espelhamentos(status=s_param, data_inicio=di_str, data_fim=df_str):
+                for e in listar_espelhamentos(status=s, data_inicio=di_str, data_fim=df_str):
                     eid = e.get('id') or str(e)
                     if eid and eid not in vistos:
                         vistos.add(eid)
@@ -1171,11 +1170,18 @@ def _espelhamento_listar_ajax_inner(inicio, fim, status, listar_espelhamentos, V
             except Exception as exc:
                 import logging
                 logging.getLogger(__name__).error(
-                    f'listar_espelhamentos status={s_param!r} {di_str}-{df_str}: {exc}')
+                    f'listar_espelhamentos status={s!r} {di_str}-{df_str}: {exc}')
             cursor = chunk_fim + timedelta(days=1)
         return resultados
 
-    todos = list(_buscar_periodo(data_inicio_dt, data_fim_dt, status_param))
+    todos = []
+    vistos_global = set()
+    for s in statuses_buscar:
+        for e in _buscar_status(s, data_inicio_dt, data_fim_dt):
+            eid = e.get('id') or str(e)
+            if eid not in vistos_global:
+                vistos_global.add(eid)
+                todos.append(e)
 
     # Identifica placas da própria frota JR para separar enviados de recebidos.
     try:
@@ -1219,6 +1225,34 @@ def _espelhamento_listar_ajax_inner(inicio, fim, status, listar_espelhamentos, V
 
     from django.http import JsonResponse
     return JsonResponse({'ok': True, 'enviados': enviados, 'recebidos': recebidos})
+
+
+@login_required
+def espelhamento_debug_ajax(request):
+    """Debug temporário — retorna XML bruto da API Omnilink para diagnóstico."""
+    from django.http import JsonResponse
+    from .omnilink import _get_client, USUARIO, SENHA_MD5
+    from datetime import datetime, timedelta
+
+    hoje = datetime.now()
+    data_fim    = hoje.strftime('%d/%m/%Y')
+    data_inicio = (hoje - timedelta(days=7)).strftime('%d/%m/%Y')
+
+    try:
+        client = _get_client()
+        resultados = {}
+        for s in ('0', '1', '2'):
+            xml_str = client.service.ListarEspelhamentosByClienteStatus(
+                Usuario=USUARIO,
+                Senha=SENHA_MD5,
+                Status=s,
+                data_inicio=data_inicio,
+                data_fim=data_fim,
+            )
+            resultados[f'status_{s}'] = str(xml_str)[:2000]
+        return JsonResponse({'ok': True, 'periodo': f'{data_inicio} → {data_fim}', 'raw': resultados})
+    except Exception as exc:
+        return JsonResponse({'ok': False, 'erro': str(exc)})
 
 
 @login_required

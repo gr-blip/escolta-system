@@ -77,6 +77,7 @@ urlpatterns += [
     path('operacional/espelhamentos/criar/',     views.espelhamento_criar_ajax,     name='espelhamento_criar_ajax'),
     path('operacional/espelhamentos/aceitar/',   views.espelhamento_aceitar_ajax,   name='espelhamento_aceitar_ajax'),
     path('operacional/espelhamentos/cancelar/',  views.espelhamento_cancelar_ajax,  name='espelhamento_cancelar_ajax'),
+    path('operacional/espelhamentos/debug/',     views.espelhamento_debug_ajax,     name='espelhamento_debug_ajax'),
 ]
 
 # Faturamento — Tabela de Precos

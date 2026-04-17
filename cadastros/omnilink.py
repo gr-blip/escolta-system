@@ -574,18 +574,15 @@ def _parse_espelhamentos_xml(xml_str: str) -> list[dict]:
     return resultado
 
 
-def listar_espelhamentos(status=None, data_inicio: str = '', data_fim: str = '') -> list[dict]:
+def listar_espelhamentos(status: str = '1', data_inicio: str = '', data_fim: str = '') -> list[dict]:
     """
     Lista espelhamentos da conta via ListarEspelhamentosByClienteStatus.
 
-    status: None = todos os status (SOAP null)
-            '0'  = aguardando avaliação
-            '1'  = aceito
-            '2'  = recusado
+    status: '0' = aguardando avaliação | '1' = aceito | '2' = recusado
     data_inicio / data_fim: 'dd/MM/yyyy'  (máx 30 dias, obrigatório)
 
-    Conforme manual WSTT 1.191 §29.4:
-      "nulo = retorna as informações para todos os status"
+    Nota: a API NÃO aceita status vazio/nulo corretamente —
+    sempre passe um dos valores explícitos acima.
     """
     if not data_inicio:
         from datetime import datetime, timedelta
@@ -593,20 +590,16 @@ def listar_espelhamentos(status=None, data_inicio: str = '', data_fim: str = '')
         data_fim    = hoje.strftime('%d/%m/%Y')
         data_inicio = (hoje - timedelta(days=30)).strftime('%d/%m/%Y')
 
-    # Converte '' para None — a API interpreta '' como status=0 (aguardando),
-    # mas None (null SOAP) retorna todos os status.
-    status_param = None if not status else status
-
     try:
         client = _get_client()
         xml_str = client.service.ListarEspelhamentosByClienteStatus(
             Usuario=USUARIO,
             Senha=SENHA_MD5,
-            Status=status_param,
+            Status=status,
             data_inicio=data_inicio,
             data_fim=data_fim,
         )
-        logger.info(f"Omnilink ListarEspelhamentos status={status_param!r} ({data_inicio}→{data_fim}): {str(xml_str)[:300]}")
+        logger.info(f"Omnilink ListarEspelhamentos status={status!r} ({data_inicio}→{data_fim}): {str(xml_str)[:300]}")
         return _parse_espelhamentos_xml(xml_str)
     except Exception as e:
         logger.error(f"Omnilink listar_espelhamentos: {e}")
