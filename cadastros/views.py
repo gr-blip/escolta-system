@@ -1114,10 +1114,23 @@ def espelhamento_listar_ajax(request):
     from datetime import datetime, timedelta
     from .omnilink import listar_espelhamentos
     from .models import Viatura
+    import traceback
 
     inicio = request.GET.get('inicio', '')
     fim    = request.GET.get('fim', '')
     status = request.GET.get('status', '')
+    try:
+        return _espelhamento_listar_ajax_inner(
+            inicio, fim, status, listar_espelhamentos, Viatura)
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).error(f'espelhamento_listar_ajax: {traceback.format_exc()}')
+        return JsonResponse({'ok': False, 'erro': str(exc)}, status=200)
+
+
+def _espelhamento_listar_ajax_inner(inicio, fim, status, listar_espelhamentos, Viatura):
+    from django.http import JsonResponse
+    from datetime import datetime, timedelta
 
     # Converte yyyy-mm-dd → dd/MM/yyyy
     def fmt(d):
@@ -1128,19 +1141,17 @@ def espelhamento_listar_ajax(request):
 
     hoje = datetime.now()
     amanha = hoje + timedelta(days=1)
-    data_inicio_dt = datetime.strptime(inicio, '%Y-%m-%d') if inicio else (hoje - timedelta(days=365))
+    data_inicio_dt = datetime.strptime(inicio, '%Y-%m-%d') if inicio else (hoje - timedelta(days=30))
     data_fim_dt    = datetime.strptime(fim,    '%Y-%m-%d') if fim    else amanha
 
-    # Limita a 365 dias por consulta para não estourar timeout do servidor.
-    # Quando buscamos todos os status de uma vez (Status=''), cada chunk faz
-    # apenas 1 chamada à API — cabe ~13 chunks dentro do timeout do Railway.
-    MAX_DIAS = 365
+    # Limita a 90 dias por consulta para não estourar timeout do servidor.
+    # 90 dias × 3 statuses = ~10 chunks × 3 = ~30 chamadas ≈ 60 s (< 120 s Railway).
+    MAX_DIAS = 90
     if (data_fim_dt - data_inicio_dt).days > MAX_DIAS:
         data_inicio_dt = data_fim_dt - timedelta(days=MAX_DIAS)
 
-    def _buscar_periodo(s, di_dt, df_dt):
-        """Divide o intervalo em chunks de 28 dias (limite da API Omnilink).
-        Passa Status vazio quando todos os status são desejados — 1 chamada por chunk."""
+    def _buscar_status(s, di_dt, df_dt):
+        """Divide o intervalo em chunks de 28 dias (limite da API Omnilink)."""
         resultados = []
         vistos = set()
         cursor = di_dt
@@ -1148,21 +1159,23 @@ def espelhamento_listar_ajax(request):
             chunk_fim = min(cursor + timedelta(days=28), df_dt)
             di_str = cursor.strftime('%d/%m/%Y')
             df_str = chunk_fim.strftime('%d/%m/%Y')
-            for e in listar_espelhamentos(status=s, data_inicio=di_str, data_fim=df_str):
-                eid = e.get('id') or str(e)
-                if eid and eid not in vistos:
-                    vistos.add(eid)
-                    resultados.append(e)
+            try:
+                for e in listar_espelhamentos(status=s, data_inicio=di_str, data_fim=df_str):
+                    eid = e.get('id') or str(e)
+                    if eid and eid not in vistos:
+                        vistos.add(eid)
+                        resultados.append(e)
+            except Exception as exc:
+                import logging
+                logging.getLogger(__name__).error(f'listar_espelhamentos status={s} {di_str}-{df_str}: {exc}')
             cursor = chunk_fim + timedelta(days=1)
         return resultados
 
-    # Se nenhum status específico → usa Status='' (todos de uma vez, mais rápido).
-    # Se status específico → busca só aquele.
+    statuses = ('0', '1', '2') if not status else (status,)
     todos = []
     vistos_global = set()
-    statuses_buscar = ('',) if not status else (status,)
-    for s in statuses_buscar:
-        for e in _buscar_periodo(s, data_inicio_dt, data_fim_dt):
+    for s in statuses:
+        for e in _buscar_status(s, data_inicio_dt, data_fim_dt):
             eid = e.get('id') or str(e)
             if eid not in vistos_global:
                 vistos_global.add(eid)
@@ -1201,6 +1214,7 @@ def espelhamento_listar_ajax(request):
     enviados  = [e for e in todos if eh_enviado(e)]
     recebidos = [e for e in todos if not eh_enviado(e)]
 
+    from django.http import JsonResponse
     return JsonResponse({'ok': True, 'enviados': enviados, 'recebidos': recebidos})
 
 
