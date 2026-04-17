@@ -1144,13 +1144,16 @@ def _espelhamento_listar_ajax_inner(inicio, fim, status, listar_espelhamentos, V
     data_inicio_dt = datetime.strptime(inicio, '%Y-%m-%d') if inicio else (hoje - timedelta(days=30))
     data_fim_dt    = datetime.strptime(fim,    '%Y-%m-%d') if fim    else amanha
 
-    # Limita a 90 dias por consulta para não estourar timeout do servidor.
-    # 90 dias × 3 statuses = ~10 chunks × 3 = ~30 chamadas ≈ 60 s (< 120 s Railway).
-    MAX_DIAS = 90
+    # Com Status=None (null SOAP) a API retorna TODOS os status de uma vez.
+    # Isso permite cobrir 365 dias com apenas ~13 chamadas (< 120 s Railway).
+    MAX_DIAS = 365
     if (data_fim_dt - data_inicio_dt).days > MAX_DIAS:
         data_inicio_dt = data_fim_dt - timedelta(days=MAX_DIAS)
 
-    def _buscar_status(s, di_dt, df_dt):
+    # status vazio = todos (None para null SOAP); status específico = filtrar
+    status_param = status if status else None
+
+    def _buscar_periodo(di_dt, df_dt, s_param):
         """Divide o intervalo em chunks de 28 dias (limite da API Omnilink)."""
         resultados = []
         vistos = set()
@@ -1160,26 +1163,19 @@ def _espelhamento_listar_ajax_inner(inicio, fim, status, listar_espelhamentos, V
             di_str = cursor.strftime('%d/%m/%Y')
             df_str = chunk_fim.strftime('%d/%m/%Y')
             try:
-                for e in listar_espelhamentos(status=s, data_inicio=di_str, data_fim=df_str):
+                for e in listar_espelhamentos(status=s_param, data_inicio=di_str, data_fim=df_str):
                     eid = e.get('id') or str(e)
                     if eid and eid not in vistos:
                         vistos.add(eid)
                         resultados.append(e)
             except Exception as exc:
                 import logging
-                logging.getLogger(__name__).error(f'listar_espelhamentos status={s} {di_str}-{df_str}: {exc}')
+                logging.getLogger(__name__).error(
+                    f'listar_espelhamentos status={s_param!r} {di_str}-{df_str}: {exc}')
             cursor = chunk_fim + timedelta(days=1)
         return resultados
 
-    statuses = ('0', '1', '2') if not status else (status,)
-    todos = []
-    vistos_global = set()
-    for s in statuses:
-        for e in _buscar_status(s, data_inicio_dt, data_fim_dt):
-            eid = e.get('id') or str(e)
-            if eid not in vistos_global:
-                vistos_global.add(eid)
-                todos.append(e)
+    todos = list(_buscar_periodo(data_inicio_dt, data_fim_dt, status_param))
 
     # Identifica placas da própria frota JR para separar enviados de recebidos.
     try:
@@ -1189,26 +1185,33 @@ def _espelhamento_listar_ajax_inner(inicio, fim, status, listar_espelhamentos, V
     except Exception:
         placas_jr = set()
 
-    # CNPJ do JRS FACILITES — quando id_cliente_destino é este valor, o
-    # espelhamento foi enviado POR OUTRA empresa PARA nós (= recebido).
+    # CNPJ do JRS FACILITES.
+    # Espelhamentos RECEBIDOS têm cnpj_central == nosso CNPJ (outra empresa
+    # nos adicionou como destino) OU id_cliente_destino == nosso CNPJ.
     NOSSO_CNPJ = '51425050000151'
 
     def eh_enviado(e):
-        id_dest = (e.get('id_cliente_destino') or '').strip()
-        # Se o destino somos nós mesmos → foi enviado para nós = recebido
-        if id_dest == NOSSO_CNPJ:
+        id_dest      = (e.get('id_cliente_destino') or '').strip()
+        cnpj_central = (e.get('cnpj_central') or '').strip()
+
+        # Se o destino somos nós → foi enviado para nós = recebido
+        if id_dest == NOSSO_CNPJ or cnpj_central == NOSSO_CNPJ:
             return False
+
         placa = (e.get('placa') or '').strip().upper()
         # Placa da nossa frota → enviado por nós
         if placa and placa in placas_jr:
             return True
-        # Tem destino definido (central, CNPJ ou ID) → enviado por nós
-        if id_dest or e.get('id_central') or e.get('nome_central') or e.get('cnpj_central'):
+
+        # Tem destino definido (central por ID, outro CNPJ, outro cliente) → enviado
+        if id_dest or e.get('id_central') or cnpj_central:
             return True
-        # Usuário cadastrante da conta JRS FACILITES
+
+        # Usuário cadastrante é da conta JRS FACILITES
         user_cad = (e.get('user_cad') or '').lower().strip()
         if 'administrativo@grupojrservicos' in user_cad or 'diretoria@grupojrservicos' in user_cad:
             return True
+
         return False
 
     enviados  = [e for e in todos if eh_enviado(e)]

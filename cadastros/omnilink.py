@@ -542,7 +542,17 @@ def _parse_espelhamentos_xml(xml_str: str) -> list[dict]:
         node = el.find(tag)
         return (node.text or '').strip() if node is not None else ''
 
+    # Mapa id_central → nome (carregado do fixture local, melhor esforço)
+    try:
+        _mapa_centrais = {str(c['id']): c['nome'] for c in _carregar_centrais_fixture()}
+    except Exception:
+        _mapa_centrais = {}
+
     for esp in root.iter('espelhamento'):
+        id_central   = _t(esp, 'id_central')
+        cnpj_central = _t(esp, 'cnpj_central')
+        # nome_central não existe no XML da API — resolvemos pelo fixture
+        nome_central = _mapa_centrais.get(id_central, '') if id_central else ''
         resultado.append({
             'id':                      _t(esp, 'id'),
             'placa':                   _t(esp, 'placa'),
@@ -556,20 +566,26 @@ def _parse_espelhamentos_xml(xml_str: str) -> list[dict]:
             'user_aceite':             _t(esp, 'user_aceite'),
             'data_aceite':             _t(esp, 'data_aceite'),
             'status_aceite':           _t(esp, 'status_aceite'),
-            'cnpj_central':            _t(esp, 'cnpj_central'),
-            'id_central':              _t(esp, 'id_central'),
-            'nome_central':            _t(esp, 'nome_central') or _t(esp, 'base_destino') or _t(esp, 'basedestino'),
+            'cnpj_central':            cnpj_central,
+            'id_central':              id_central,
+            'nome_central':            nome_central,
             'espelhamento_obrigatorio': _t(esp, 'espelhamento_obrigatorio'),
         })
     return resultado
 
 
-def listar_espelhamentos(status: str = '', data_inicio: str = '', data_fim: str = '') -> list[dict]:
+def listar_espelhamentos(status=None, data_inicio: str = '', data_fim: str = '') -> list[dict]:
     """
     Lista espelhamentos da conta via ListarEspelhamentosByClienteStatus.
 
-    status: '' ou None = todos | '0' = aguardando | '1' = aceito | '2' = recusado
+    status: None = todos os status (SOAP null)
+            '0'  = aguardando avaliação
+            '1'  = aceito
+            '2'  = recusado
     data_inicio / data_fim: 'dd/MM/yyyy'  (máx 30 dias, obrigatório)
+
+    Conforme manual WSTT 1.191 §29.4:
+      "nulo = retorna as informações para todos os status"
     """
     if not data_inicio:
         from datetime import datetime, timedelta
@@ -577,16 +593,20 @@ def listar_espelhamentos(status: str = '', data_inicio: str = '', data_fim: str 
         data_fim    = hoje.strftime('%d/%m/%Y')
         data_inicio = (hoje - timedelta(days=30)).strftime('%d/%m/%Y')
 
+    # Converte '' para None — a API interpreta '' como status=0 (aguardando),
+    # mas None (null SOAP) retorna todos os status.
+    status_param = None if not status else status
+
     try:
         client = _get_client()
         xml_str = client.service.ListarEspelhamentosByClienteStatus(
             Usuario=USUARIO,
             Senha=SENHA_MD5,
-            Status=status,
+            Status=status_param,
             data_inicio=data_inicio,
             data_fim=data_fim,
         )
-        logger.info(f"Omnilink ListarEspelhamentos ({data_inicio}→{data_fim}): {str(xml_str)[:200]}")
+        logger.info(f"Omnilink ListarEspelhamentos status={status_param!r} ({data_inicio}→{data_fim}): {str(xml_str)[:300]}")
         return _parse_espelhamentos_xml(xml_str)
     except Exception as e:
         logger.error(f"Omnilink listar_espelhamentos: {e}")
