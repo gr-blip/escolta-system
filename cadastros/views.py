@@ -1172,19 +1172,25 @@ def espelhamento_listar_ajax(request):
     except Exception:
         placas_jr = set()
 
+    # CNPJ do JRS FACILITES — quando id_cliente_destino é este valor, o
+    # espelhamento foi enviado POR OUTRA empresa PARA nós (= recebido).
+    NOSSO_CNPJ = '51425050000151'
+
     def eh_enviado(e):
+        id_dest = (e.get('id_cliente_destino') or '').strip()
+        # Se o destino somos nós mesmos → foi enviado para nós = recebido
+        if id_dest == NOSSO_CNPJ:
+            return False
         placa = (e.get('placa') or '').strip().upper()
+        # Placa da nossa frota → enviado por nós
         if placa and placa in placas_jr:
             return True
-        # Espelhamentos enviados por nós via central (id_central/nome_central preenchidos)
-        if e.get('id_central') or e.get('nome_central') or e.get('cnpj_central'):
+        # Tem destino definido (central, CNPJ ou ID) → enviado por nós
+        if id_dest or e.get('id_central') or e.get('nome_central') or e.get('cnpj_central'):
             return True
-        # Espelhamentos enviados por nós via CNPJ direto
-        if e.get('id_cliente_destino'):
-            return True
-        # Verificar pelo usuário que cadastrou (conta JRS)
-        user_cad = (e.get('user_cad') or '').lower()
-        if user_cad and ('grupojrservicos' in user_cad or 'jrservicos' in user_cad):
+        # Usuário cadastrante da conta JRS FACILITES
+        user_cad = (e.get('user_cad') or '').lower().strip()
+        if 'administrativo@grupojrservicos' in user_cad or 'diretoria@grupojrservicos' in user_cad:
             return True
         return False
 
