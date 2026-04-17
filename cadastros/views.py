@@ -1107,6 +1107,103 @@ def espelhamento_list(request):
     return render(request, 'cadastros/espelhamento_list.html', {'viaturas': viaturas})
 
 
+def _garantir_tabela_espelhamento():
+    """Cria a tabela EspelhamentoEnviado e semeia dados históricos se ainda não existir."""
+    from django.db import connection, OperationalError, ProgrammingError
+    from datetime import datetime as _dt
+
+    _HISTORICOS = [
+        ('SSR0E93', 'NORISK',                     '17/04/2026 23:59:00', _dt(2026, 4, 16, 22, 30, 21)),
+        ('SIS6B65', 'SKYMARK',                    '17/04/2026 23:59:00', _dt(2026, 4, 16, 22, 30,  4)),
+        ('SUU7D41', 'SKYMARK',                    '17/04/2026 23:59:00', _dt(2026, 4, 16, 22, 29, 43)),
+        ('SUI1G21', 'SMITH SEGURANÇA PRIVADA',    '30/11/2027 20:51:00', _dt(2024, 7, 30, 18, 49, 53)),
+        ('REU2F04', 'SMITH SEGURANÇA PRIVADA',    '30/11/2027 20:51:00', _dt(2024, 7, 30, 18, 49, 53)),
+        ('REK3J23', 'SMITH SEGURANÇA PRIVADA',    '30/11/2027 20:51:00', _dt(2024, 7, 30, 18, 49, 53)),
+        ('REU2F12', 'SMITH SEGURANÇA PRIVADA',    '30/11/2027 20:51:00', _dt(2024, 7, 30, 18, 49, 53)),
+        ('SGN4B76', 'SMITH SEGURANÇA PRIVADA',    '30/11/2027 20:51:00', _dt(2024, 7, 30, 18, 49, 53)),
+        ('REU2F12', 'JR SEGURANÇA E VIGILÂNCIA',  '30/12/2063 23:59:00', _dt(2024, 6, 30,  9, 17, 19)),
+        ('SGN4B76', 'JR SEGURANÇA E VIGILÂNCIA',  '31/12/2030 09:55:00', _dt(2024, 1, 29,  9, 55, 46)),
+    ]
+
+    with connection.cursor() as cur:
+        # Detecta banco (postgres vs sqlite)
+        vendor = connection.vendor  # 'postgresql' ou 'sqlite'
+
+        # Verifica se a tabela existe
+        if vendor == 'postgresql':
+            cur.execute("""
+                SELECT EXISTS(
+                    SELECT 1 FROM information_schema.tables
+                    WHERE table_name = 'cadastros_espelhamentoenviado'
+                )
+            """)
+            existe = cur.fetchone()[0]
+        else:
+            cur.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='cadastros_espelhamentoenviado'"
+            )
+            existe = bool(cur.fetchone())
+
+        if existe:
+            return  # já existe, nada a fazer
+
+        # Cria a tabela
+        if vendor == 'postgresql':
+            cur.execute("""
+                CREATE TABLE cadastros_espelhamentoenviado (
+                    id            SERIAL PRIMARY KEY,
+                    id_sequencia  VARCHAR(50) UNIQUE,
+                    placa         VARCHAR(20) NOT NULL,
+                    id_central    VARCHAR(20) NOT NULL DEFAULT '',
+                    nome_central  VARCHAR(200) NOT NULL DEFAULT '',
+                    cnpj_destino  VARCHAR(20) NOT NULL DEFAULT '',
+                    data_expiracao VARCHAR(30) NOT NULL,
+                    data_criacao  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                    obrigatorio   BOOLEAN NOT NULL DEFAULT FALSE,
+                    cancelado     BOOLEAN NOT NULL DEFAULT FALSE
+                )
+            """)
+        else:
+            cur.execute("""
+                CREATE TABLE cadastros_espelhamentoenviado (
+                    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id_sequencia   TEXT UNIQUE,
+                    placa          TEXT NOT NULL,
+                    id_central     TEXT NOT NULL DEFAULT '',
+                    nome_central   TEXT NOT NULL DEFAULT '',
+                    cnpj_destino   TEXT NOT NULL DEFAULT '',
+                    data_expiracao TEXT NOT NULL,
+                    data_criacao   TEXT NOT NULL DEFAULT (datetime('now')),
+                    obrigatorio    INTEGER NOT NULL DEFAULT 0,
+                    cancelado      INTEGER NOT NULL DEFAULT 0
+                )
+            """)
+
+        # Semeia dados históricos
+        for placa, nome_central, data_exp, data_cad in _HISTORICOS:
+            cur.execute("""
+                INSERT INTO cadastros_espelhamentoenviado
+                    (placa, nome_central, data_expiracao, data_criacao, cancelado, obrigatorio, id_central, cnpj_destino)
+                VALUES (%s, %s, %s, %s, FALSE, FALSE, '', '')
+            """ if vendor == 'postgresql' else """
+                INSERT INTO cadastros_espelhamentoenviado
+                    (placa, nome_central, data_expiracao, data_criacao, cancelado, obrigatorio, id_central, cnpj_destino)
+                VALUES (?, ?, ?, ?, 0, 0, '', '')
+            """, [placa, nome_central, data_exp, data_cad.isoformat()])
+
+        # Registra na tabela de migrations do Django para evitar conflito futuro
+        for num in ('0026_espelhamentoenviado', '0027_seed_espelhamentos_historicos'):
+            try:
+                cur.execute(
+                    "INSERT INTO django_migrations (app, name, applied) VALUES (%s, %s, NOW())"
+                    if vendor == 'postgresql' else
+                    "INSERT INTO django_migrations (app, name, applied) VALUES (?, ?, datetime('now'))",
+                    ['cadastros', num]
+                )
+            except Exception:
+                pass  # já registrada
+
+
 @login_required
 def espelhamento_listar_ajax(request):
     """AJAX — lista espelhamentos enviados (banco local) e recebidos (API Omnilink)."""
@@ -1115,6 +1212,13 @@ def espelhamento_listar_ajax(request):
     from .omnilink import listar_espelhamentos
     from .models import EspelhamentoEnviado
     import traceback
+
+    # Garante que a tabela existe (auto-cria se migration não rodou no Railway)
+    try:
+        _garantir_tabela_espelhamento()
+    except Exception as _te:
+        import logging
+        logging.getLogger(__name__).error(f'_garantir_tabela_espelhamento: {_te}')
 
     inicio = request.GET.get('inicio', '')
     fim    = request.GET.get('fim', '')
@@ -1266,6 +1370,11 @@ def espelhamento_criar_ajax(request):
     from django.http import JsonResponse
     import json
     from .omnilink import criar_espelhamento
+
+    try:
+        _garantir_tabela_espelhamento()
+    except Exception:
+        pass
 
     if request.method != 'POST':
         return JsonResponse({'ok': False, 'mensagem': 'Método inválido.'})
