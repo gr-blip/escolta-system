@@ -201,12 +201,10 @@
   // ── Filtros com datas padrão ────────────────────────────────────────────────
   (function() {
     const hoje = new Date();
-    // amanhã como fim para garantir que itens de hoje sejam incluídos
     const amanha = new Date(hoje); amanha.setDate(hoje.getDate() + 1);
-    const m60 = new Date(hoje); m60.setDate(hoje.getDate() - 60);
     const fmt = d => d.toISOString().split('T')[0];
     document.getElementById('filtro-fim').value    = fmt(amanha);
-    document.getElementById('filtro-inicio').value = fmt(m60);
+    document.getElementById('filtro-inicio').value = '2024-01-01'; // histórico completo
     // Carrega automaticamente ao entrar na página
     carregarEspelhamentos();
   })();

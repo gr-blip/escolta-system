@@ -1111,6 +1111,7 @@ def espelhamento_list(request):
 def espelhamento_listar_ajax(request):
     """AJAX — lista espelhamentos enviados e recebidos."""
     from django.http import JsonResponse
+    from datetime import datetime, timedelta
     from .omnilink import listar_espelhamentos
     from .models import Viatura
 
@@ -1125,25 +1126,41 @@ def espelhamento_listar_ajax(request):
             return f'{parts[2]}/{parts[1]}/{parts[0]}'
         return d
 
-    di, df = fmt(inicio), fmt(fim)
+    # Usa datas do filtro ou padrão: de 2024-01-01 até amanhã
+    hoje = datetime.now()
+    amanha = hoje + timedelta(days=1)
+    data_inicio_dt = datetime.strptime(inicio, '%Y-%m-%d') if inicio else datetime(2024, 1, 1)
+    data_fim_dt    = datetime.strptime(fim, '%Y-%m-%d') if fim else amanha
 
-    # Quando "todos os status": busca pendentes (0), aceitos (1) e recusados (2)
-    # separadamente para garantir que a API retorne cada grupo corretamente
-    if not status:
-        todos = []
+    def _buscar_status(s, di_dt, df_dt):
+        """Divide o intervalo em chunks de 28 dias e combina resultados."""
+        resultados = []
         vistos = set()
-        for s in ('0', '1', '2'):
-            for e in listar_espelhamentos(status=s, data_inicio=di, data_fim=df):
+        cursor = di_dt
+        while cursor < df_dt:
+            chunk_fim = min(cursor + timedelta(days=28), df_dt)
+            di_str = cursor.strftime('%d/%m/%Y')
+            df_str = chunk_fim.strftime('%d/%m/%Y')
+            for e in listar_espelhamentos(status=s, data_inicio=di_str, data_fim=df_str):
                 eid = e.get('id') or str(e)
-                if eid not in vistos:
+                if eid and eid not in vistos:
                     vistos.add(eid)
-                    todos.append(e)
-    else:
-        todos = listar_espelhamentos(status=status, data_inicio=di, data_fim=df)
+                    resultados.append(e)
+            cursor = chunk_fim + timedelta(days=1)
+        return resultados
+
+    # Busca por cada status para garantir cobertura completa
+    statuses = ('0', '1', '2') if not status else (status,)
+    todos = []
+    vistos_global = set()
+    for s in statuses:
+        for e in _buscar_status(s, data_inicio_dt, data_fim_dt):
+            eid = e.get('id') or str(e)
+            if eid not in vistos_global:
+                vistos_global.add(eid)
+                todos.append(e)
 
     # Identifica placas da própria frota JR para separar enviados de recebidos.
-    # Solicitações pendentes têm id_cliente_destino vazio — sem esse check
-    # elas cairiam erroneamente em "recebidos".
     try:
         placas_jr = set(
             v.upper() for v in Viatura.objects.values_list('placa', flat=True) if v
@@ -1153,10 +1170,8 @@ def espelhamento_listar_ajax(request):
 
     def eh_enviado(e):
         placa = (e.get('placa') or '').strip().upper()
-        # Se a placa está na frota JR, JR é o emissor (enviado)
         if placa and placa in placas_jr:
             return True
-        # Fallback: id_cliente_destino preenchido indica enviado confirmado
         return bool(e.get('id_cliente_destino'))
 
     enviados  = [e for e in todos if eh_enviado(e)]
