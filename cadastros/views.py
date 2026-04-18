@@ -1248,8 +1248,10 @@ def espelhamento_listar_ajax(request):
                 'id_central':   e.id_central,
                 'data_cad':     e.data_criacao.strftime('%Y-%m-%d %H:%M:%S'),
                 'data_exp':     e.data_expiracao,
-                'status_aceite': '',   # não temos o status da API para enviados
+                'status_aceite': '0',   # default: aguardando (será enriquecido abaixo via API)
                 'status':       '',
+                'data_aceite':  '',
+                'user_aceite':  '',
                 'id_sequencia': e.id_sequencia or '',
             }
             for e in qs
@@ -1260,8 +1262,12 @@ def espelhamento_listar_ajax(request):
         logging.getLogger(__name__).error(f'EspelhamentoEnviado.query: {exc}\n{traceback.format_exc()}')
         enviados = []
 
-    # ── RECEBIDOS: API Omnilink ───────────────────────────────────────────────
-    # A API só retorna espelhamentos onde somos DESTINO (cnpj_central = nosso CNPJ).
+    # ── API Omnilink: ListarEspelhamentosByClienteStatus ──────────────────────
+    # Segundo o manual (seção 29.4) esse método retorna TODOS os espelhamentos
+    # da conta — tanto os enviados (id_cliente=nós) quanto os recebidos
+    # (id_cliente_destino=nós). Usamos o resultado para:
+    #   1) Enriquecer os ENVIADOS locais com o status real (aceito/aguardando/recusado)
+    #   2) Separar o restante como RECEBIDOS
     MAX_DIAS = 90
     if (data_fim_dt - data_inicio_dt).days > MAX_DIAS:
         data_inicio_api = data_fim_dt - timedelta(days=MAX_DIAS)
@@ -1291,18 +1297,38 @@ def espelhamento_listar_ajax(request):
             cursor = chunk_fim + timedelta(days=1)
         return resultados
 
-    recebidos = []
-    vistos_recebidos = set()
+    # Mapa id_sequencia (retornado pela API ao criar) → enviado local
+    enviados_by_seq = {e['id_sequencia']: e for e in enviados if e['id_sequencia']}
+
+    api_results = []
+    vistos_api = set()
     try:
         for s in statuses_buscar:
             for e in _buscar_status(s, data_inicio_api, data_fim_dt):
                 eid = e.get('id') or str(e)
-                if eid not in vistos_recebidos:
-                    vistos_recebidos.add(eid)
-                    recebidos.append(e)
+                if eid not in vistos_api:
+                    vistos_api.add(eid)
+                    api_results.append(e)
     except Exception as exc:
         import logging
-        logging.getLogger(__name__).error(f'recebidos API: {exc}\n{traceback.format_exc()}')
+        logging.getLogger(__name__).error(f'API espelhamentos: {exc}\n{traceback.format_exc()}')
+
+    # Enriquece enviados com status real da API + separa o que é recebido
+    recebidos = []
+    _matched = 0
+    for api_item in api_results:
+        api_id = api_item.get('id', '')
+        local = enviados_by_seq.get(api_id)
+        if local is not None:
+            # Match: é um enviado nosso — enriquece com dados frescos da API
+            local['status_aceite'] = api_item.get('status_aceite') or local['status_aceite']
+            local['status']        = api_item.get('status', '')
+            local['data_aceite']   = api_item.get('data_aceite', '')
+            local['user_aceite']   = api_item.get('user_aceite', '')
+            _matched += 1
+        else:
+            # Sem match: é um espelhamento recebido
+            recebidos.append(api_item)
 
     return JsonResponse({
         'ok': True,
@@ -1312,6 +1338,8 @@ def espelhamento_listar_ajax(request):
             'total_db': _total_db,
             'erro_db': _enviados_erro,
             'range': f'{data_inicio_dt} → {data_fim_dt}',
+            'api_total': len(api_results),
+            'enviados_match_api': _matched,
         },
     })
 
