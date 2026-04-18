@@ -1336,36 +1336,58 @@ def espelhamento_listar_ajax(request):
     # Enriquece enviados com status real da API + separa o que é recebido
     recebidos = []
     _matched = 0
-    for api_item in api_results:
-        api_id    = api_item.get('id', '')
-        api_placa = (api_item.get('placa') or '').upper().strip()
-        api_dt    = _parse_dt(api_item.get('data_cad', ''))
+    _match_erro = None
+    try:
+        for api_item in api_results:
+            try:
+                api_id    = api_item.get('id', '') if isinstance(api_item, dict) else ''
+                api_placa = (api_item.get('placa') or '').upper().strip() if isinstance(api_item, dict) else ''
+                api_dt    = _parse_dt(api_item.get('data_cad', '')) if isinstance(api_item, dict) else None
 
-        # 1) Match exato por id_sequencia (raro funcionar, mas tentamos)
-        local = enviados_by_seq.get(api_id) if api_id else None
+                # 1) Match exato por id_sequencia
+                local = enviados_by_seq.get(api_id) if api_id else None
 
-        # 2) Fallback: match por placa (com data_cad como desempate quando há múltiplos)
-        if local is None and api_placa:
-            candidates = enviados_by_placa.get(api_placa, [])
-            if len(candidates) == 1:
-                local = candidates[0]
-            elif candidates and api_dt:
-                def _delta(c):
-                    cdt = _parse_dt(c.get('data_cad', ''))
-                    return abs((cdt - api_dt).total_seconds()) if cdt else float('inf')
-                local = min(candidates, key=_delta)
+                # 2) Fallback: match por placa (com data_cad como desempate quando há múltiplos)
+                if local is None and api_placa:
+                    candidates = enviados_by_placa.get(api_placa, [])
+                    if len(candidates) == 1:
+                        local = candidates[0]
+                    elif candidates and api_dt:
+                        def _delta(c, _api=api_dt):
+                            cdt = _parse_dt(c.get('data_cad', ''))
+                            return abs((cdt - _api).total_seconds()) if cdt else float('inf')
+                        local = min(candidates, key=_delta)
 
-        if local is not None:
-            # Só sobrescreve campos da API se eles trouxerem valor (para não apagar fallback '0')
-            if api_item.get('status_aceite') not in (None, ''):
-                local['status_aceite'] = api_item['status_aceite']
-            local['status']      = api_item.get('status',      local.get('status', ''))
-            local['data_aceite'] = api_item.get('data_aceite', local.get('data_aceite', ''))
-            local['user_aceite'] = api_item.get('user_aceite', local.get('user_aceite', ''))
-            _matched += 1
-        else:
-            # Não é nenhum dos nossos enviados → é um espelhamento recebido
-            recebidos.append(api_item)
+                if local is not None:
+                    if api_item.get('status_aceite') not in (None, ''):
+                        local['status_aceite'] = api_item['status_aceite']
+                    local['status']      = api_item.get('status', '') or local.get('status', '')
+                    local['data_aceite'] = api_item.get('data_aceite', '') or local.get('data_aceite', '')
+                    local['user_aceite'] = api_item.get('user_aceite', '') or local.get('user_aceite', '')
+                    _matched += 1
+                else:
+                    recebidos.append(api_item)
+            except Exception as _e_item:
+                import logging
+                logging.getLogger(__name__).error(f'match api_item falhou: {_e_item} — item={api_item!r}')
+                # Em caso de erro em um item específico, joga em recebidos para não perder dado
+                recebidos.append(api_item)
+    except Exception as _e_loop:
+        _match_erro = f'{type(_e_loop).__name__}: {_e_loop}'
+        import logging
+        logging.getLogger(__name__).error(f'match loop: {_match_erro}\n{traceback.format_exc()}')
+
+    # Diagnóstico seguro (qualquer erro aqui vira string, não derruba a response)
+    try:
+        _placas_locais = sorted(enviados_by_placa.keys())
+    except Exception:
+        _placas_locais = []
+    try:
+        _placas_api = sorted({(i.get('placa') or '').upper().strip()
+                              for i in api_results
+                              if isinstance(i, dict) and i.get('placa')})
+    except Exception:
+        _placas_api = []
 
     return JsonResponse({
         'ok': True,
@@ -1377,8 +1399,9 @@ def espelhamento_listar_ajax(request):
             'range': f'{data_inicio_dt} → {data_fim_dt}',
             'api_total': len(api_results),
             'enviados_match_api': _matched,
-            'placas_locais': sorted(enviados_by_placa.keys()),
-            'placas_api': sorted({(i.get('placa') or '').upper().strip() for i in api_results if i.get('placa')}),
+            'match_erro': _match_erro,
+            'placas_locais': _placas_locais,
+            'placas_api': _placas_api,
         },
     })
 
