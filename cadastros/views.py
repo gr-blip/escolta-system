@@ -1408,30 +1408,91 @@ def espelhamento_listar_ajax(request):
 
 @login_required
 def espelhamento_debug_ajax(request):
-    """Debug temporário — retorna XML bruto da API Omnilink para diagnóstico."""
+    """
+    Debug temporário — retorna:
+      - XML bruto de ListarEspelhamentosByClienteStatus nos 3 status
+      - Lista completa de métodos do WSDL
+      - Subconjunto de métodos cujo nome parece relacionado a
+        espelhamento / compartilhamento / solicitação / status
+      - Se a query string tiver ?testar=<NomeDoMetodo>&placa=XXX o endpoint
+        tenta invocar o método com várias assinaturas comuns e devolve a
+        resposta crua (primeiros 3000 chars) para inspecionarmos o XML.
+    """
     from django.http import JsonResponse
-    from .omnilink import _get_client, USUARIO, SENHA_MD5
+    from .omnilink import _get_client, USUARIO, SENHA_MD5, descobrir_metodos_wsdl
     from datetime import datetime, timedelta
 
     hoje = datetime.now()
     data_fim    = hoje.strftime('%d/%m/%Y')
     data_inicio = (hoje - timedelta(days=7)).strftime('%d/%m/%Y')
 
+    saida = {'ok': True, 'periodo': f'{data_inicio} → {data_fim}'}
+
+    # 1) Lista de métodos do WSDL + filtro por palavras-chave
+    try:
+        metodos = descobrir_metodos_wsdl()
+        saida['metodos_total'] = len(metodos)
+        saida['metodos'] = metodos
+        chaves = ('espelh', 'compart', 'solicit', 'status', 'consult', 'buscar', 'list')
+        saida['metodos_candidatos'] = [
+            m for m in metodos if any(k in m.lower() for k in chaves)
+        ]
+    except Exception as e_m:
+        saida['metodos_erro'] = str(e_m)
+
+    # 2) XML bruto do ListarEspelhamentosByClienteStatus nos 3 status
     try:
         client = _get_client()
         resultados = {}
         for s in ('0', '1', '2'):
-            xml_str = client.service.ListarEspelhamentosByClienteStatus(
-                Usuario=USUARIO,
-                Senha=SENHA_MD5,
-                Status=s,
-                data_inicio=data_inicio,
-                data_fim=data_fim,
-            )
-            resultados[f'status_{s}'] = str(xml_str)[:2000]
-        return JsonResponse({'ok': True, 'periodo': f'{data_inicio} → {data_fim}', 'raw': resultados})
+            try:
+                xml_str = client.service.ListarEspelhamentosByClienteStatus(
+                    Usuario=USUARIO,
+                    Senha=SENHA_MD5,
+                    Status=s,
+                    data_inicio=data_inicio,
+                    data_fim=data_fim,
+                )
+                resultados[f'status_{s}'] = str(xml_str)[:2000]
+            except Exception as e_s:
+                resultados[f'status_{s}_erro'] = str(e_s)
+        saida['raw'] = resultados
     except Exception as exc:
-        return JsonResponse({'ok': False, 'erro': str(exc)})
+        saida['raw_erro'] = str(exc)
+
+    # 3) Teste sob demanda de um método específico
+    testar = request.GET.get('testar', '').strip()
+    if testar:
+        placa   = request.GET.get('placa', '').strip()
+        id_req  = request.GET.get('id', '').strip()
+        try:
+            client = _get_client()
+            op = getattr(client.service, testar, None)
+            if op is None:
+                saida['teste'] = {'metodo': testar, 'erro': 'método inexistente no WSDL'}
+            else:
+                # Tenta várias combinações de argumentos
+                tentativas = [
+                    {'Usuario': USUARIO, 'Senha': SENHA_MD5, 'Placa': placa},
+                    {'Usuario': USUARIO, 'Senha': SENHA_MD5, 'placa': placa},
+                    {'Usuario': USUARIO, 'Senha': SENHA_MD5, 'IdSolicitacao': id_req},
+                    {'Usuario': USUARIO, 'Senha': SENHA_MD5, 'IdSequencia':   id_req},
+                    {'Usuario': USUARIO, 'Senha': SENHA_MD5, 'Id':            id_req},
+                    {'Usuario': USUARIO, 'Senha': SENHA_MD5},
+                ]
+                respostas = []
+                for kwargs in tentativas:
+                    try:
+                        r = op(**kwargs)
+                        respostas.append({'args': list(kwargs.keys()), 'resp': str(r)[:3000]})
+                        break  # a primeira assinatura que não estourar já serve
+                    except Exception as e_t:
+                        respostas.append({'args': list(kwargs.keys()), 'erro': str(e_t)[:300]})
+                saida['teste'] = {'metodo': testar, 'placa': placa, 'id': id_req, 'tentativas': respostas}
+        except Exception as e_test:
+            saida['teste'] = {'metodo': testar, 'erro': str(e_test)}
+
+    return JsonResponse(saida)
 
 
 @login_required
