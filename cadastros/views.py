@@ -1297,8 +1297,28 @@ def espelhamento_listar_ajax(request):
             cursor = chunk_fim + timedelta(days=1)
         return resultados
 
-    # Mapa id_sequencia (retornado pela API ao criar) → enviado local
+    # Mapas de lookup:
+    #   - por id_sequencia (funciona quando o id retornado ao criar = <id> da listagem)
+    #   - por placa (fallback principal, usa data_cad como desempate em ambiguidade)
     enviados_by_seq = {e['id_sequencia']: e for e in enviados if e['id_sequencia']}
+    enviados_by_placa = {}
+    for e in enviados:
+        p = (e['placa'] or '').upper().strip()
+        if p:
+            enviados_by_placa.setdefault(p, []).append(e)
+
+    def _parse_dt(s):
+        """Tenta parsear várias variações de formato de data que a API/DB podem trazer."""
+        if not s:
+            return None
+        for fmt in ('%d/%m/%Y %H:%M:%S', '%d/%m/%Y %H:%M',
+                    '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M',
+                    '%d/%m/%Y', '%Y-%m-%d'):
+            try:
+                return datetime.strptime(s.strip(), fmt)
+            except (ValueError, TypeError, AttributeError):
+                continue
+        return None
 
     api_results = []
     vistos_api = set()
@@ -1317,17 +1337,34 @@ def espelhamento_listar_ajax(request):
     recebidos = []
     _matched = 0
     for api_item in api_results:
-        api_id = api_item.get('id', '')
-        local = enviados_by_seq.get(api_id)
+        api_id    = api_item.get('id', '')
+        api_placa = (api_item.get('placa') or '').upper().strip()
+        api_dt    = _parse_dt(api_item.get('data_cad', ''))
+
+        # 1) Match exato por id_sequencia (raro funcionar, mas tentamos)
+        local = enviados_by_seq.get(api_id) if api_id else None
+
+        # 2) Fallback: match por placa (com data_cad como desempate quando há múltiplos)
+        if local is None and api_placa:
+            candidates = enviados_by_placa.get(api_placa, [])
+            if len(candidates) == 1:
+                local = candidates[0]
+            elif candidates and api_dt:
+                def _delta(c):
+                    cdt = _parse_dt(c.get('data_cad', ''))
+                    return abs((cdt - api_dt).total_seconds()) if cdt else float('inf')
+                local = min(candidates, key=_delta)
+
         if local is not None:
-            # Match: é um enviado nosso — enriquece com dados frescos da API
-            local['status_aceite'] = api_item.get('status_aceite') or local['status_aceite']
-            local['status']        = api_item.get('status', '')
-            local['data_aceite']   = api_item.get('data_aceite', '')
-            local['user_aceite']   = api_item.get('user_aceite', '')
+            # Só sobrescreve campos da API se eles trouxerem valor (para não apagar fallback '0')
+            if api_item.get('status_aceite') not in (None, ''):
+                local['status_aceite'] = api_item['status_aceite']
+            local['status']      = api_item.get('status',      local.get('status', ''))
+            local['data_aceite'] = api_item.get('data_aceite', local.get('data_aceite', ''))
+            local['user_aceite'] = api_item.get('user_aceite', local.get('user_aceite', ''))
             _matched += 1
         else:
-            # Sem match: é um espelhamento recebido
+            # Não é nenhum dos nossos enviados → é um espelhamento recebido
             recebidos.append(api_item)
 
     return JsonResponse({
@@ -1340,6 +1377,8 @@ def espelhamento_listar_ajax(request):
             'range': f'{data_inicio_dt} → {data_fim_dt}',
             'api_total': len(api_results),
             'enviados_match_api': _matched,
+            'placas_locais': sorted(enviados_by_placa.keys()),
+            'placas_api': sorted({(i.get('placa') or '').upper().strip() for i in api_results if i.get('placa')}),
         },
     })
 
