@@ -250,6 +250,14 @@
     return `<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;background:${cor}22;color:${cor};font-size:11px;font-weight:600">${txt[s]||s}</span>`;
   }
 
+  // Badge fixa "Enviado" para espelhamentos enviados — a API Omnilink
+  // só expõe o status real dos recebidos; o status de enviados existe
+  // apenas no portal Gestor, então exibimos apenas a confirmação do envio.
+  function badgeEnviado() {
+    const cor = '#3b82f6';
+    return `<span title="Confirmação consultada no portal Gestor Omnilink" style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;background:${cor}22;color:${cor};font-size:11px;font-weight:600">Enviado</span>`;
+  }
+
   function renderTabela(enviados, recebidos) {
     const teBody = document.getElementById('tbody-enviados');
     const trBody = document.getElementById('tbody-recebidos');
@@ -263,7 +271,7 @@
           <td style="padding:10px 14px;color:var(--text2)">${e.nome_central||e.cnpj_central||e.id_cliente_destino||'—'}</td>
           <td style="padding:10px 14px;color:var(--text3);font-size:12px">${e.data_cad||'—'}</td>
           <td style="padding:10px 14px;color:var(--text3);font-size:12px">${e.data_exp||'—'}</td>
-          <td style="padding:10px 14px">${badgeStatus(e.status_aceite||e.status)}</td>
+          <td style="padding:10px 14px">${badgeEnviado()}</td>
           <td style="padding:10px 14px;text-align:center">
             <button onclick="cancelarEspelhamento(${e.id},'${e.placa}')"
               style="padding:4px 10px;background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.3);border-radius:6px;font-size:11px;cursor:pointer">
