@@ -6,4 +6,4 @@ dj-database-url
 psycopg2-binary
 reportlab
 openpyxl
-zeep
+zeeppython-decouple==3.8
