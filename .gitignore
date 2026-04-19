@@ -5,3 +5,13 @@ __pycache__/
 .env
 db.sqlite3
 media/
+
+# Artefatos de refactor e drafts (não subir para produção)
+Codigo_Refatorado_v2/
+Escolta_Plano_Melhorias.docx
+Preview_Novo_Visual_v2.html
+preview_novo_visual.html
+base_novo.html
+CLAUDE.md
+~$*.docx
+.env
