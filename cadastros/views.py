@@ -2,57 +2,103 @@
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Count, Case, When, IntegerField
 from django.http import JsonResponse
+from django.utils import timezone
+from datetime import date, timedelta
 from .models import Agente, Viatura, Rastreador, Armamento, Cliente, Colete, Equipe, \
     FotoMarco, Parada, FotoParada, Incidente, FotoIncidente, FotoVeiculoEscoltado, \
     TrocaMotorista, FotoTrocaMotorista, AssinaturaOS, DespesaOS
 from .forms import AgenteForm, ViaturaForm, RastreadorForm, ArmamentoForm, ClienteForm
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Helper: situação da frota em 1 query usando Case/When
+# ─────────────────────────────────────────────────────────────────────────────
+def _fleet_data():
+    agg = Viatura.objects.aggregate(
+        ativa=Count(Case(When(status='ativa', then=1), output_field=IntegerField())),
+        manutencao=Count(Case(When(status='manutencao', then=1), output_field=IntegerField())),
+        inativa=Count(Case(When(status='inativa', then=1), output_field=IntegerField())),
+    )
+    return {k: (v or 0) for k, v in agg.items()}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Helper: agrega Ordens de Serviço por dia nos últimos N dias (zeros preenchidos)
+# ─────────────────────────────────────────────────────────────────────────────
+def _os_por_dia(n_dias=14):
+    # Import local para evitar dependência caso OrdemServico seja movido
+    from .models import OrdemServico
+
+    hoje = timezone.localdate()
+    inicio = hoje - timedelta(days=n_dias - 1)
+
+    buckets = {(inicio + timedelta(days=i)): 0 for i in range(n_dias)}
+
+    qs = OrdemServico.objects.filter(criado_em__date__gte=inicio).values_list('criado_em', flat=True)
+    for dt in qs:
+        d = timezone.localtime(dt).date() if timezone.is_aware(dt) else dt.date()
+        if d in buckets:
+            buckets[d] += 1
+
+    dias_ord = sorted(buckets.keys())
+    return {
+        'labels': [d.strftime('%d/%m') for d in dias_ord],
+        'values': [buckets[d] for d in dias_ord],
+    }
+
+
 @login_required
 def dashboard(request):
-    from datetime import date, timedelta
-
     hoje = date.today()
     limite = hoje + timedelta(days=60)  # 2 meses à frente
 
-    # CNH vencida ou vencendo em até 2 meses (agentes ativos)
-    alertas_cnh = Agente.objects.filter(
-        status='ativo'
-    ).exclude(
-        cnh_validade__isnull=True
-    ).filter(
-        cnh_validade__lte=limite
-    ).order_by('cnh_validade')
+    # CNH vencida ou vencendo em até 2 meses (agentes ativos) — com .only()
+    alertas_cnh = (
+        Agente.objects
+        .filter(status='ativo')
+        .exclude(cnh_validade__isnull=True)
+        .filter(cnh_validade__lte=limite)
+        .order_by('cnh_validade')
+        .only('id', 'nome', 'cnh_validade')
+    )
 
-    # CNV vencida ou vencendo em até 2 meses (agentes ativos)
-    alertas_cnv = Agente.objects.filter(
-        status='ativo'
-    ).exclude(
-        cnv_validade__isnull=True
-    ).filter(
-        cnv_validade__lte=limite
-    ).order_by('cnv_validade')
+    # CNV vencida ou vencendo em até 2 meses (agentes ativos) — com .only()
+    alertas_cnv = (
+        Agente.objects
+        .filter(status='ativo')
+        .exclude(cnv_validade__isnull=True)
+        .filter(cnv_validade__lte=limite)
+        .order_by('cnv_validade')
+        .only('id', 'nome', 'cnv_validade')
+    )
 
-    # Coletes vencidos ou vencendo em até 2 meses
-    alertas_coletes = Colete.objects.exclude(
-        validade__isnull=True
-    ).filter(
-        validade__lte=limite
-    ).order_by('validade')
+    # Coletes vencidos ou vencendo em até 2 meses — com .only()
+    alertas_coletes = (
+        Colete.objects
+        .exclude(validade__isnull=True)
+        .filter(validade__lte=limite)
+        .order_by('validade')
+        .only('id', 'marca', 'numeracao', 'validade')
+    )
 
     context = {
         'total_agentes': Agente.objects.filter(status='ativo').count(),
         'total_viaturas': Viatura.objects.filter(status='ativa').count(),
         'total_clientes': Cliente.objects.count(),
         'total_armamentos': Armamento.objects.count(),
-        'agentes_recentes': Agente.objects.order_by('-criado_em')[:5],
-        'viaturas': Viatura.objects.order_by('-criado_em')[:5],
+        'agentes_recentes': Agente.objects.order_by('-criado_em')[:5]
+                                          .only('id', 'nome', 'funcao', 'status'),
+        'viaturas': Viatura.objects.order_by('-criado_em')[:5]
+                                    .only('id', 'placa', 'marca_modelo', 'status'),
         'alertas_cnh': alertas_cnh,
         'alertas_cnv': alertas_cnv,
         'alertas_coletes': alertas_coletes,
         'hoje': hoje,
+        # NOVO — dados para os gráficos Chart.js do dashboard.html
+        'fleet_data': _fleet_data(),
+        'os_por_dia': _os_por_dia(14),
     }
     return render(request, 'cadastros/dashboard.html', context)
 

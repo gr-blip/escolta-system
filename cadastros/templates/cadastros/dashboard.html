@@ -1,4 +1,6 @@
 {% extends 'cadastros/base.html' %}
+{% load static %}
+
 {% block title %}Painel de Avisos{% endblock %}
 {% block page_title %}Painel de Avisos{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a>{% endblock %}
@@ -27,6 +29,36 @@
     <div class="stat-value">{{ total_armamentos }}</div>
     <div class="stat-sub"><a href="{% url 'armamento_list' %}" style="color:var(--blue-light);text-decoration:none">Ver todos →</a></div>
   </div>
+</div>
+
+<!-- ── GRÁFICOS ── (novo no Deploy 2a) -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+
+  <div class="card">
+    <div class="card-title">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2A10 10 0 1 0 22 12H12V2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M12 2A10 10 0 0 1 22 12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+      </svg>
+      Situação da frota
+    </div>
+    <div style="height:240px;position:relative">
+      <canvas id="chartFleet" aria-label="Distribuição do status das viaturas"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 20V10M10 20V4M16 20V14M22 20H2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      OS emitidas (últimos 14 dias)
+    </div>
+    <div style="height:240px;position:relative">
+      <canvas id="chartOS" aria-label="Ordens de serviço por dia"></canvas>
+    </div>
+  </div>
+
 </div>
 
 <!-- ── ALERTAS DE VENCIMENTO ── -->
@@ -195,5 +227,86 @@
     {% endif %}
   </div>
 </div>
+
+{# ── Dados para os gráficos (Chart.js). ── #}
+{# Se fleet_data ou os_por_dia não vier no contexto, o JS detecta e não renderiza — sem erro. #}
+{% if fleet_data %}{{ fleet_data|json_script:"fleet-data" }}{% endif %}
+{% if os_por_dia %}{{ os_por_dia|json_script:"os-data" }}{% endif %}
+
+<!-- ── Chart.js 4.4.1 (CDN) + inicialização dos gráficos ── -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+<script defer>
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof Chart === 'undefined') return;
+
+  const css = getComputedStyle(document.documentElement);
+  const colorText  = (css.getPropertyValue('--text2') || '#9db0cd').trim();
+  const colorGrid  = (css.getPropertyValue('--border') || 'rgba(255,255,255,.08)').trim();
+  const colorGreen = (css.getPropertyValue('--green') || '#10b981').trim();
+  const colorAmber = (css.getPropertyValue('--amber') || '#f59e0b').trim();
+  const colorGray  = (css.getPropertyValue('--gray')  || '#6b7280').trim();
+  const colorBlue  = (css.getPropertyValue('--blue-light') || '#3b82f6').trim();
+
+  Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+  Chart.defaults.color = colorText;
+  Chart.defaults.borderColor = colorGrid;
+
+  // Doughnut — situação da frota
+  const fleetEl  = document.getElementById('chartFleet');
+  const fleetRaw = document.getElementById('fleet-data');
+  if (fleetEl && fleetRaw) {
+    let f = {};
+    try { f = JSON.parse(fleetRaw.textContent || '{}'); } catch (_) {}
+    new Chart(fleetEl, {
+      type: 'doughnut',
+      data: {
+        labels: ['Ativa', 'Manutenção', 'Inativa'],
+        datasets: [{
+          data: [f.ativa || 0, f.manutencao || 0, f.inativa || 0],
+          backgroundColor: [colorGreen, colorAmber, colorGray],
+          borderWidth: 0,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '62%',
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 14 } } }
+      }
+    });
+  }
+
+  // Bar — OS por dia
+  const osEl  = document.getElementById('chartOS');
+  const osRaw = document.getElementById('os-data');
+  if (osEl && osRaw) {
+    let o = { labels: [], values: [] };
+    try { o = JSON.parse(osRaw.textContent || '{}'); } catch (_) {}
+    new Chart(osEl, {
+      type: 'bar',
+      data: {
+        labels: o.labels || [],
+        datasets: [{
+          label: 'OS',
+          data: o.values || [],
+          backgroundColor: colorBlue,
+          borderRadius: 6,
+          maxBarThickness: 22
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: colorText } },
+          y: { grid: { color: colorGrid }, ticks: { color: colorText, precision: 0 }, beginAtZero: true }
+        }
+      }
+    });
+  }
+});
+</script>
 
 {% endblock %}
