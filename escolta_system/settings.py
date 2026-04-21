@@ -139,9 +139,9 @@ if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
-    # HSTS progressivo: começa em 60s (rollback fácil), aumentar após 1-2 semanas estáveis.
-    # Próximos valores: 86400 (1 dia) → 2592000 (30 dias) → 31536000 (1 ano).
-    SECURE_HSTS_SECONDS = 60
+    # HSTS progressivo: 60s (inicial) → 86400 (1 dia, atual) → 2592000 (30 dias) → 31536000 (1 ano).
+    # Após 1 mês estável em 86400, promover para 2592000; após 1 ano sem regressões, para 31536000 + preload.
+    SECURE_HSTS_SECONDS = 86400
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = False  # só ativar depois de 1 ano estável + hstspreload.org
     SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
