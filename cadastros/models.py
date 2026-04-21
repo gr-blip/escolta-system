@@ -1,4 +1,4 @@
-﻿# Outras importa├º├Áes...
+﻿# Outras importações...
 from .models_perfil import PerfilUsuario
 from django.db import models
 
@@ -158,7 +158,7 @@ class Equipe(models.Model):
     STATUS_CHOICES = [
         ('ativa',      'Ativa'),
         ('inativa',    'Inativa'),
-        ('em_servico', 'Em Servi├ºo'),
+        ('em_servico', 'Em Serviço'),
         ('finalizada', 'Finalizada'),
     ]
 
@@ -172,7 +172,7 @@ class Equipe(models.Model):
     colete2          = models.ForeignKey('Colete',    on_delete=models.PROTECT, related_name='equipe_colete2',   verbose_name='Colete Agente 2')
     viatura          = models.ForeignKey('Viatura',   on_delete=models.SET_NULL, null=True, blank=True, related_name='equipe_viatura', verbose_name='Viatura')
     status           = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ativa', verbose_name='Status')
-    observacoes      = models.TextField(blank=True, verbose_name='Observa├º├Áes')
+    observacoes      = models.TextField(blank=True, verbose_name='Observações')
     criado_em        = models.DateTimeField(auto_now_add=True)
     atualizado_em    = models.DateTimeField(auto_now=True)
 
@@ -187,11 +187,11 @@ class Equipe(models.Model):
 
 class Colete(models.Model):
     PROTECAO_CHOICES = [
-        ('Nivel IIA',  'N├¡vel IIA'),
-        ('Nivel II',   'N├¡vel II'),
-        ('Nivel IIIA', 'N├¡vel IIIA'),
-        ('Nivel III',  'N├¡vel III'),
-        ('Nivel IV',   'N├¡vel IV'),
+        ('Nivel IIA',  'Nível IIA'),
+        ('Nivel II',   'Nível II'),
+        ('Nivel IIIA', 'Nível IIIA'),
+        ('Nivel III',  'Nível III'),
+        ('Nivel IV',   'Nível IV'),
     ]
 
     marca       = models.CharField(max_length=100, verbose_name='Marca')
@@ -214,9 +214,9 @@ class OrdemServico(models.Model):
     STATUS_CHOICES = [
         ('aberta',      'Aberta'),
         ('em_viagem',   'Em Viagem'),
-        ('em_operacao', 'Em Opera├º├úo'),
+        ('em_operacao', 'Em Operação'),
         ('encerrando',  'Encerrando'),
-        ('concluida',   'Conclu├¡da'),
+        ('concluida',   'Concluída'),
         ('finalizada',  'Finalizada'),
         ('cancelada',   'Cancelada'),
     ]
@@ -227,24 +227,24 @@ class OrdemServico(models.Model):
     ]
     TIPO_VIAGEM_CHOICES = [
         ('urbana',         'Urbana'),
-        ('rodoviaria',     'Rodovi├íria'),
+        ('rodoviaria',     'Rodoviária'),
         ('administrativa', 'Administrativa'),
     ]
 
-    numero          = models.CharField(max_length=20, unique=True, verbose_name='N┬║ OS', blank=True)
+    numero          = models.CharField(max_length=20, unique=True, verbose_name='Nº OS', blank=True)
     cliente         = models.ForeignKey('Cliente',  on_delete=models.PROTECT, verbose_name='Cliente')
     solicitante     = models.CharField(max_length=200, blank=True, verbose_name='Solicitante')
-    forma_solicitacao = models.CharField(max_length=20, choices=FORMA_CHOICES, verbose_name='Forma de Solicita├º├úo')
+    forma_solicitacao = models.CharField(max_length=20, choices=FORMA_CHOICES, verbose_name='Forma de Solicitação')
     tipo_viagem     = models.CharField(max_length=20, choices=TIPO_VIAGEM_CHOICES, verbose_name='Tipo de Viagem')
-    previsao_inicio = models.DateTimeField(verbose_name='Previs├úo de In├¡cio')
-    previsao_retorno= models.DateTimeField(blank=True, null=True, verbose_name='Previs├úo de Retorno')
+    previsao_inicio = models.DateTimeField(verbose_name='Previsão de Início')
+    previsao_retorno= models.DateTimeField(blank=True, null=True, verbose_name='Previsão de Retorno')
     imediata        = models.BooleanField(default=False, verbose_name='Imediata')
     cidade_origem   = models.CharField(max_length=200, verbose_name='Cidade Origem')
     uf_origem       = models.CharField(max_length=2, default='GO', verbose_name='UF Origem')
     cidade_destino  = models.CharField(max_length=200, verbose_name='Cidade Destino')
     uf_destino      = models.CharField(max_length=2, default='GO', verbose_name='UF Destino')
     equipe          = models.ForeignKey('Equipe', on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Equipe')
-    # Snapshot da equipe ÔÇö preservado mesmo ap├│s excluir a equipe
+    # Snapshot da equipe — preservado mesmo após excluir a equipe
     snap_equipe_nome     = models.CharField(max_length=100, blank=True, verbose_name='Equipe (snapshot)')
     snap_agente1_nome    = models.CharField(max_length=200, blank=True, verbose_name='Agente 1 (snapshot)')
     snap_agente1_cpf     = models.CharField(max_length=20,  blank=True)
@@ -265,7 +265,7 @@ class OrdemServico(models.Model):
     snap_viatura_cor     = models.CharField(max_length=50,  blank=True)
     snap_viatura_frota   = models.CharField(max_length=20,  blank=True)
     snap_viatura_mct     = models.CharField(max_length=20,  blank=True)
-    observacoes     = models.TextField(blank=True, verbose_name='Observa├º├Áes')
+    observacoes     = models.TextField(blank=True, verbose_name='Observações')
     status          = models.CharField(max_length=20, choices=STATUS_CHOICES, default='aberta', verbose_name='Status')
     finalizada_em   = models.DateTimeField(null=True, blank=True, verbose_name='Finalizada em')
     criado_em       = models.DateTimeField(auto_now_add=True)
@@ -276,12 +276,12 @@ class OrdemServico(models.Model):
         return self.status == 'finalizada'
 
     class Meta:
-        verbose_name = 'Ordem de Servi├ºo'
-        verbose_name_plural = 'Ordens de Servi├ºo'
+        verbose_name = 'Ordem de Serviço'
+        verbose_name_plural = 'Ordens de Serviço'
         ordering = ['-criado_em']
 
     def __str__(self):
-        return f'OS-{self.numero} ÔÇö {self.cliente}'
+        return f'OS-{self.numero} — {self.cliente}'
 
     def save(self, *args, **kwargs):
         if not self.numero:
@@ -293,30 +293,30 @@ class OrdemServico(models.Model):
 
 
 class OSOperacional(models.Model):
-    """Dados operacionais de execu├º├úo da OS ÔÇö tempos, KM e folha"""
+    """Dados operacionais de execução da OS — tempos, KM e folha"""
     import uuid as _uuid
     os = models.OneToOneField('OrdemServico', on_delete=models.CASCADE,
                               related_name='operacional', verbose_name='OS')
-    numero_folha      = models.CharField(max_length=20, blank=True, verbose_name='N┬║ Folha')
+    numero_folha      = models.CharField(max_length=20, blank=True, verbose_name='Nº Folha')
     token      = models.UUIDField(default=_uuid.uuid4, unique=True, editable=False, verbose_name='Token de Acesso Externo')
     link_ativo = models.BooleanField(default=True, verbose_name='Link Externo Ativo')
 
     # Marcos de data/hora
-    inicio_viagem     = models.DateTimeField(null=True, blank=True, verbose_name='In├¡cio de Viagem')
-    chegada_operacao  = models.DateTimeField(null=True, blank=True, verbose_name='Chegada Opera├º├úo')
-    inicio_operacao   = models.DateTimeField(null=True, blank=True, verbose_name='In├¡cio Opera├º├úo')
-    termino_operacao  = models.DateTimeField(null=True, blank=True, verbose_name='T├®rmino Opera├º├úo')
-    termino_viagem    = models.DateTimeField(null=True, blank=True, verbose_name='T├®rmino de Viagem')
+    inicio_viagem     = models.DateTimeField(null=True, blank=True, verbose_name='Início de Viagem')
+    chegada_operacao  = models.DateTimeField(null=True, blank=True, verbose_name='Chegada Operação')
+    inicio_operacao   = models.DateTimeField(null=True, blank=True, verbose_name='Início Operação')
+    termino_operacao  = models.DateTimeField(null=True, blank=True, verbose_name='Término Operação')
+    termino_viagem    = models.DateTimeField(null=True, blank=True, verbose_name='Término de Viagem')
 
     # KM em cada marco
-    km_inicio_viagem    = models.PositiveIntegerField(null=True, blank=True, verbose_name='KM In├¡cio Viagem')
-    km_chegada_operacao = models.PositiveIntegerField(null=True, blank=True, verbose_name='KM Chegada Opera├º├úo')
-    km_inicio_operacao  = models.PositiveIntegerField(null=True, blank=True, verbose_name='KM In├¡cio Opera├º├úo')
-    km_termino_operacao = models.PositiveIntegerField(null=True, blank=True, verbose_name='KM T├®rmino Opera├º├úo')
-    km_termino_viagem   = models.PositiveIntegerField(null=True, blank=True, verbose_name='KM T├®rmino Viagem')
-    pedagio             = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Ped├ígio (R$)')
+    km_inicio_viagem    = models.PositiveIntegerField(null=True, blank=True, verbose_name='KM Início Viagem')
+    km_chegada_operacao = models.PositiveIntegerField(null=True, blank=True, verbose_name='KM Chegada Operação')
+    km_inicio_operacao  = models.PositiveIntegerField(null=True, blank=True, verbose_name='KM Início Operação')
+    km_termino_operacao = models.PositiveIntegerField(null=True, blank=True, verbose_name='KM Término Operação')
+    km_termino_viagem   = models.PositiveIntegerField(null=True, blank=True, verbose_name='KM Término Viagem')
+    pedagio             = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Pedágio (R$)')
 
-    # Localiza├º├úo GPS de cada marco (lat/lng capturados pelo dispositivo do agente)
+    # Localização GPS de cada marco (lat/lng capturados pelo dispositivo do agente)
     gps_inicio_viagem_lat     = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     gps_inicio_viagem_lng     = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     gps_chegada_operacao_lat  = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
@@ -337,7 +337,7 @@ class OSOperacional(models.Model):
     def __str__(self):
         return f'Operacional OS-{self.os.numero}'
 
-    # ÔöÇÔöÇ helpers ÔöÇÔöÇ
+    # ── helpers ──
     @staticmethod
     def _diff_hhmm(dt1, dt2):
         if dt1 and dt2:
@@ -383,10 +383,10 @@ class OSOperacional(models.Model):
 
 
 class VeiculoEscoltado(models.Model):
-    """Ve├¡culos escoltados na OS (m├íx 4)"""
+    """Veículos escoltados na OS (máx 4)"""
     os           = models.ForeignKey('OrdemServico', on_delete=models.CASCADE,
                                      related_name='veiculos', verbose_name='OS')
-    veiculo      = models.CharField(max_length=100, blank=True, verbose_name='Ve├¡culo')
+    veiculo      = models.CharField(max_length=100, blank=True, verbose_name='Veículo')
     placa_cavalo  = models.CharField(max_length=15,  blank=True, verbose_name='Placa Cavalo')
     placa_carreta = models.CharField(max_length=15,  blank=True, verbose_name='Placa Carreta')
     placa_carreta2= models.CharField(max_length=15,  blank=True, verbose_name='Placa Carreta 2')
@@ -394,8 +394,8 @@ class VeiculoEscoltado(models.Model):
     ordem         = models.PositiveSmallIntegerField(default=1, verbose_name='Ordem')
 
     class Meta:
-        verbose_name = 'Ve├¡culo Escoltado'
-        verbose_name_plural = 'Ve├¡culos Escoltados'
+        verbose_name = 'Veículo Escoltado'
+        verbose_name_plural = 'Veículos Escoltados'
         ordering = ['ordem']
 
     def __str__(self):
@@ -409,10 +409,10 @@ class VeiculoEscoltado(models.Model):
 class TabelaPreco(models.Model):
     SITUACAO_CHOICES = [('ativo', 'Ativo'), ('inativo', 'Inativo')]
     TIPO_VIAGEM_CHOICES = [
-        ('urbana', 'Urbana'), ('rodoviaria', 'Rodovi├íria'),
+        ('urbana', 'Urbana'), ('rodoviaria', 'Rodoviária'),
         ('administrativa', 'Administrativa'), ('todas', 'Todas'),
     ]
-    COBRAR_PEDAGIO_CHOICES = [('sim', 'Sim'), ('nao', 'N├úo')]
+    COBRAR_PEDAGIO_CHOICES = [('sim', 'Sim'), ('nao', 'Não')]
 
     cliente          = models.ForeignKey('Cliente', on_delete=models.PROTECT,
                                           related_name='tabelas_preco', verbose_name='Cliente')
@@ -420,29 +420,29 @@ class TabelaPreco(models.Model):
     tipo_viagem      = models.CharField(max_length=20, choices=TIPO_VIAGEM_CHOICES,
                                          default='todas', verbose_name='Tipo de Viagem')
     situacao         = models.CharField(max_length=10, choices=SITUACAO_CHOICES,
-                                         default='ativo', verbose_name='Situa├º├úo')
-    data_inclusao    = models.DateField(auto_now_add=True, verbose_name='Inclus├úo')
-    inicio_contrato  = models.DateField(null=True, blank=True, verbose_name='In├¡cio Contrato')
-    ultimo_reajuste  = models.DateField(null=True, blank=True, verbose_name='├Ültimo Reajuste')
-    proximo_reajuste = models.DateField(null=True, blank=True, verbose_name='Pr├│ximo Reajuste')
+                                         default='ativo', verbose_name='Situação')
+    data_inclusao    = models.DateField(auto_now_add=True, verbose_name='Inclusão')
+    inicio_contrato  = models.DateField(null=True, blank=True, verbose_name='Início Contrato')
+    ultimo_reajuste  = models.DateField(null=True, blank=True, verbose_name='Último Reajuste')
+    proximo_reajuste = models.DateField(null=True, blank=True, verbose_name='Próximo Reajuste')
     valor_escolta    = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Valor da Escolta (R$)')
     franquia_km      = models.PositiveIntegerField(default=0, verbose_name='Franquia KM')
     franquia_horas   = models.CharField(max_length=6, default='000:00', verbose_name='Franquia Horas (HHH:MM)')
     excedente_km     = models.DecimalField(max_digits=8, decimal_places=2, default=0, verbose_name='Excedente por KM (R$)')
     excedente_hora   = models.DecimalField(max_digits=8, decimal_places=2, default=0, verbose_name='Excedente por Hora (R$)')
-    cobrar_pedagio   = models.CharField(max_length=3, choices=COBRAR_PEDAGIO_CHOICES, default='sim', verbose_name='Cobrar Ped├ígio')
-    pedagio_fixo     = models.DecimalField(max_digits=8, decimal_places=2, default=0, verbose_name='Ped├ígio Fixo (R$)')
-    pedagio_percent  = models.DecimalField(max_digits=5, decimal_places=2, default=0, verbose_name='% Ped├ígio')
+    cobrar_pedagio   = models.CharField(max_length=3, choices=COBRAR_PEDAGIO_CHOICES, default='sim', verbose_name='Cobrar Pedágio')
+    pedagio_fixo     = models.DecimalField(max_digits=8, decimal_places=2, default=0, verbose_name='Pedágio Fixo (R$)')
+    pedagio_percent  = models.DecimalField(max_digits=5, decimal_places=2, default=0, verbose_name='% Pedágio')
     criado_em        = models.DateTimeField(auto_now_add=True)
     atualizado_em    = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'Tabela de Pre├ºo'
-        verbose_name_plural = 'Tabelas de Pre├ºo'
+        verbose_name = 'Tabela de Preço'
+        verbose_name_plural = 'Tabelas de Preço'
         ordering = ['cliente__razao_social', 'nome']
 
     def __str__(self):
-        return f'{self.cliente.razao_social} ÔÇö {self.nome}'
+        return f'{self.cliente.razao_social} — {self.nome}'
 
     def franquia_horas_minutos(self):
         try:
@@ -463,7 +463,7 @@ class BoletimMedicao(models.Model):
                                             related_name='boletim', verbose_name='OS')
     tabela_preco    = models.ForeignKey('TabelaPreco', on_delete=models.PROTECT,
                                          null=True, blank=True,
-                                         related_name='boletins', verbose_name='Tabela de Pre├ºo')
+                                         related_name='boletins', verbose_name='Tabela de Preço')
     status          = models.CharField(max_length=15, choices=STATUS_CHOICES, default='aberto', verbose_name='Status')
     horas_realizadas      = models.CharField(max_length=6, default='00:00', verbose_name='Horas Realizadas')
     km_realizado          = models.PositiveIntegerField(default=0, verbose_name='KM Realizado')
@@ -472,18 +472,18 @@ class BoletimMedicao(models.Model):
     valor_escolta         = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Valor Escolta (R$)')
     valor_excedente_km    = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Valor Excedente KM (R$)')
     valor_excedente_hora  = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Valor Excedente Hora (R$)')
-    valor_pedagio         = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Valor Ped├ígio (R$)')
-    acrescimo             = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Acr├®scimo (R$)')
+    valor_pedagio         = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Valor Pedágio (R$)')
+    acrescimo             = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Acréscimo (R$)')
     desconto              = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Desconto (R$)')
     valor_total           = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Valor Total (R$)')
-    numero_nota           = models.CharField(max_length=50, blank=True, verbose_name='N┬║ Nota Fiscal')
-    observacoes           = models.TextField(blank=True, verbose_name='Observa├º├Áes')
+    numero_nota           = models.CharField(max_length=50, blank=True, verbose_name='Nº Nota Fiscal')
+    observacoes           = models.TextField(blank=True, verbose_name='Observações')
     criado_em             = models.DateTimeField(auto_now_add=True)
     atualizado_em         = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'Boletim de Medi├º├úo'
-        verbose_name_plural = 'Boletins de Medi├º├úo'
+        verbose_name = 'Boletim de Medição'
+        verbose_name_plural = 'Boletins de Medição'
         ordering = ['-criado_em']
 
     def __str__(self):
@@ -504,7 +504,7 @@ class BoletimMedicao(models.Model):
         else:
             total_min = 0
         self.horas_realizadas = f'{total_min // 60:02d}:{total_min % 60:02d}'
-        # KM deve ser calculado entre In├¡cio e T├®rmino da Opera├º├úo
+        # KM deve ser calculado entre Início e Término da Operação
         km_real = op.km_trecho_termino_op or 0
         self.km_realizado = km_real
         franquia_min = tabela.franquia_horas_minutos()
@@ -516,7 +516,7 @@ class BoletimMedicao(models.Model):
         exc_horas_dec = Decimal(excedente_min) / Decimal(60)
         self.valor_excedente_hora = (exc_horas_dec * tabela.excedente_hora).quantize(Decimal('0.01'))
         self.valor_excedente_km = (Decimal(km_exc) * tabela.excedente_km).quantize(Decimal('0.01'))
-        # S├│ define ped├ígio autom├ítico se o campo estiver zerado (n├úo foi digitado manualmente)
+        # Só define pedágio automático se o campo estiver zerado (não foi digitado manualmente)
         if self.valor_pedagio == 0:
             if tabela.cobrar_pedagio == 'sim':
                 if tabela.pedagio_fixo > 0:
@@ -537,8 +537,8 @@ class BoletimMedicao(models.Model):
 from .models_perfil import PerfilUsuario# ============================================================
 # ADICIONAR ao final de cadastros/models.py
 # ============================================================
-# Cole este bloco inteiro ap├│s a ├║ltima linha do models.py
-# (ap├│s a linha: from .models_perfil import PerfilUsuario)
+# Cole este bloco inteiro após a última linha do models.py
+# (após a linha: from .models_perfil import PerfilUsuario)
 # ============================================================
 
 import uuid as _uuid_mod
@@ -557,17 +557,17 @@ def _foto_upload_path(instance, filename):
     return _os_mod.path.join('os_fotos', numero, tipo, novo_nome)
 
 
-# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+# ────────────────────────────────────────────────
 # FOTOS DOS MARCOS OPERACIONAIS
-# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+# ────────────────────────────────────────────────
 class FotoMarco(models.Model):
     """Foto tirada pelo agente em cada marco da OS (inicio_viagem, chegada_operacao, etc.)"""
     MARCO_CHOICES = [
-        ('inicio_viagem',    'In├¡cio de Viagem'),
-        ('chegada_operacao', 'Chegada Opera├º├úo'),
-        ('inicio_operacao',  'In├¡cio Opera├º├úo'),
-        ('termino_operacao', 'T├®rmino Opera├º├úo'),
-        ('termino_viagem',   'T├®rmino de Viagem'),
+        ('inicio_viagem',    'Início de Viagem'),
+        ('chegada_operacao', 'Chegada Operação'),
+        ('inicio_operacao',  'Início Operação'),
+        ('termino_operacao', 'Término Operação'),
+        ('termino_viagem',   'Término de Viagem'),
     ]
 
     os           = models.ForeignKey('OrdemServico', on_delete=models.CASCADE,
@@ -584,29 +584,29 @@ class FotoMarco(models.Model):
         ordering = ['marco', 'criado_em']
 
     def __str__(self):
-        return f'{self.get_marco_display()} ÔÇö OS-{self.os.numero}'
+        return f'{self.get_marco_display()} — OS-{self.os.numero}'
 
 
-# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+# ────────────────────────────────────────────────
 # PARADAS
-# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+# ────────────────────────────────────────────────
 class Parada(models.Model):
-    """Parada registrada durante a OS ÔÇö com motivo, dura├º├úo e fotos."""
+    """Parada registrada durante a OS — com motivo, duração e fotos."""
     MOTIVO_CHOICES = [
         ('abastecimento',  'Abastecimento'),
-        ('refeicao',       'Refei├º├úo'),
+        ('refeicao',       'Refeição'),
         ('banheiro',       'Banheiro'),
-        ('mecanica',       'Mec├ónica / Pane'),
-        ('fiscal',         'Fiscaliza├º├úo / Barreira'),
-        ('aguardando',     'Aguardando Instru├º├Áes'),
+        ('mecanica',       'Mecânica / Pane'),
+        ('fiscal',         'Fiscalização / Barreira'),
+        ('aguardando',     'Aguardando Instruções'),
         ('outro',          'Outro'),
     ]
 
     os          = models.ForeignKey('OrdemServico', on_delete=models.CASCADE,
                                     related_name='paradas', verbose_name='OS')
     motivo      = models.CharField(max_length=20, choices=MOTIVO_CHOICES, verbose_name='Motivo')
-    descricao   = models.TextField(blank=True, verbose_name='Descri├º├úo / Observa├º├Áes')
-    inicio      = models.DateTimeField(verbose_name='In├¡cio da Parada')
+    descricao   = models.TextField(blank=True, verbose_name='Descrição / Observações')
+    inicio      = models.DateTimeField(verbose_name='Início da Parada')
     fim         = models.DateTimeField(null=True, blank=True, verbose_name='Fim da Parada')
     latitude    = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True, verbose_name='Latitude')
     longitude   = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True, verbose_name='Longitude')
@@ -619,7 +619,7 @@ class Parada(models.Model):
         ordering = ['inicio']
 
     def __str__(self):
-        return f'{self.get_motivo_display()} ÔÇö OS-{self.os.numero}'
+        return f'{self.get_motivo_display()} — OS-{self.os.numero}'
 
     @property
     def duracao_minutos(self):
@@ -635,7 +635,7 @@ class FotoParada(models.Model):
     foto      = models.ImageField(upload_to=_foto_upload_path, verbose_name='Foto')
     criado_em = models.DateTimeField(auto_now_add=True)
 
-    # Propriedade auxiliar para _foto_upload_path encontrar o n├║mero da OS
+    # Propriedade auxiliar para _foto_upload_path encontrar o número da OS
     @property
     def os(self):
         return self.parada.os
@@ -645,24 +645,24 @@ class FotoParada(models.Model):
         verbose_name_plural = 'Fotos de Parada'
 
 
-# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+# ────────────────────────────────────────────────
 # INCIDENTES
-# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+# ────────────────────────────────────────────────
 class Incidente(models.Model):
-    """Registro de ocorr├¬ncia/incidente durante a OS."""
+    """Registro de ocorrência/incidente durante a OS."""
     TIPO_CHOICES = [
-        ('acidente',       'Acidente de Tr├ónsito'),
+        ('acidente',       'Acidente de Trânsito'),
         ('tentativa_roubo','Tentativa de Roubo'),
         ('avaria_carga',   'Avaria na Carga'),
-        ('pane_viatura',   'Pane / Defeito Mec├ónico'),
+        ('pane_viatura',   'Pane / Defeito Mecânico'),
         ('atividade_suspeita', 'Atividade Suspeita'),
         ('outro',          'Outro'),
     ]
     GRAVIDADE_CHOICES = [
         ('baixa',  'Baixa'),
-        ('media',  'M├®dia'),
+        ('media',  'Média'),
         ('alta',   'Alta'),
-        ('critica','Cr├¡tica'),
+        ('critica','Crítica'),
     ]
 
     os          = models.ForeignKey('OrdemServico', on_delete=models.CASCADE,
@@ -670,11 +670,11 @@ class Incidente(models.Model):
     tipo        = models.CharField(max_length=30, choices=TIPO_CHOICES, verbose_name='Tipo')
     gravidade   = models.CharField(max_length=10, choices=GRAVIDADE_CHOICES,
                                    default='media', verbose_name='Gravidade')
-    descricao   = models.TextField(verbose_name='Descri├º├úo do Incidente')
+    descricao   = models.TextField(verbose_name='Descrição do Incidente')
     ocorrido_em = models.DateTimeField(verbose_name='Data / Hora do Incidente')
     latitude    = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     longitude   = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
-    bo_numero   = models.CharField(max_length=50, blank=True, verbose_name='N┬║ Boletim de Ocorr├¬ncia')
+    bo_numero   = models.CharField(max_length=50, blank=True, verbose_name='Nº Boletim de Ocorrência')
     criado_em   = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
 
@@ -684,7 +684,7 @@ class Incidente(models.Model):
         ordering = ['ocorrido_em']
 
     def __str__(self):
-        return f'{self.get_tipo_display()} ({self.get_gravidade_display()}) ÔÇö OS-{self.os.numero}'
+        return f'{self.get_tipo_display()} ({self.get_gravidade_display()}) — OS-{self.os.numero}'
 
 
 class FotoIncidente(models.Model):
@@ -703,19 +703,19 @@ class FotoIncidente(models.Model):
         verbose_name_plural = 'Fotos de Incidente'
 
 
-# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
-# FOTOS DOS VE├ìCULOS ESCOLTADOS
-# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+# ────────────────────────────────────────────────
+# FOTOS DOS VEÍCULOS ESCOLTADOS
+# ────────────────────────────────────────────────
 class FotoVeiculoEscoltado(models.Model):
-    """Fotos do ve├¡culo escoltado (antes/depois da escolta)."""
+    """Fotos do veículo escoltado (antes/depois da escolta)."""
     MOMENTO_CHOICES = [
         ('antes',  'Antes da Escolta'),
-        ('depois', 'Ap├│s a Escolta'),
+        ('depois', 'Após a Escolta'),
         ('outro',  'Outro'),
     ]
 
     veiculo   = models.ForeignKey('VeiculoEscoltado', on_delete=models.CASCADE,
-                                  related_name='fotos', verbose_name='Ve├¡culo')
+                                  related_name='fotos', verbose_name='Veículo')
     momento   = models.CharField(max_length=10, choices=MOMENTO_CHOICES, default='antes')
     foto      = models.ImageField(upload_to=_foto_upload_path, verbose_name='Foto')
     criado_em = models.DateTimeField(auto_now_add=True)
@@ -725,20 +725,20 @@ class FotoVeiculoEscoltado(models.Model):
         return self.veiculo.os
 
     class Meta:
-        verbose_name = 'Foto de Ve├¡culo Escoltado'
-        verbose_name_plural = 'Fotos de Ve├¡culos Escoltados'
+        verbose_name = 'Foto de Veículo Escoltado'
+        verbose_name_plural = 'Fotos de Veículos Escoltados'
 
 
-# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+# ────────────────────────────────────────────────
 # TROCA DE MOTORISTAS
-# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+# ────────────────────────────────────────────────
 class TrocaMotorista(models.Model):
     """Registro de troca de motorista durante a OS."""
     os               = models.ForeignKey('OrdemServico', on_delete=models.CASCADE,
                                          related_name='trocas_motorista', verbose_name='OS')
     veiculo_escoltado= models.ForeignKey('VeiculoEscoltado', on_delete=models.SET_NULL,
                                          null=True, blank=True,
-                                         related_name='trocas', verbose_name='Ve├¡culo')
+                                         related_name='trocas', verbose_name='Veículo')
     motorista_saindo = models.CharField(max_length=200, verbose_name='Motorista Saindo')
     motorista_entrando= models.CharField(max_length=200, verbose_name='Motorista Entrando')
     ocorrido_em      = models.DateTimeField(verbose_name='Data / Hora da Troca')
@@ -753,7 +753,7 @@ class TrocaMotorista(models.Model):
         ordering = ['ocorrido_em']
 
     def __str__(self):
-        return f'Troca: {self.motorista_saindo} ÔåÆ {self.motorista_entrando} (OS-{self.os.numero})'
+        return f'Troca: {self.motorista_saindo} → {self.motorista_entrando} (OS-{self.os.numero})'
 
 
 class FotoTrocaMotorista(models.Model):
@@ -772,9 +772,9 @@ class FotoTrocaMotorista(models.Model):
         verbose_name_plural = 'Fotos de Troca de Motorista'
 
 
-# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+# ────────────────────────────────────────────────
 # ASSINATURAS DIGITAIS
-# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+# ────────────────────────────────────────────────
 class AssinaturaOS(models.Model):
     """Assinatura digital capturada via canvas no link do agente."""
     TIPO_CHOICES = [
@@ -787,8 +787,8 @@ class AssinaturaOS(models.Model):
     os        = models.ForeignKey('OrdemServico', on_delete=models.CASCADE,
                                   related_name='assinaturas', verbose_name='OS')
     tipo      = models.CharField(max_length=20, choices=TIPO_CHOICES, verbose_name='Tipo')
-    nome      = models.CharField(max_length=200, verbose_name='Nome do Signat├írio')
-    # Imagem PNG gerada do canvas (base64 ÔåÆ arquivo)
+    nome      = models.CharField(max_length=200, verbose_name='Nome do Signatário')
+    # Imagem PNG gerada do canvas (base64 → arquivo)
     imagem    = models.ImageField(upload_to=_foto_upload_path, verbose_name='Assinatura')
     criado_em = models.DateTimeField(auto_now_add=True)
 
@@ -799,25 +799,25 @@ class AssinaturaOS(models.Model):
         ordering = ['tipo']
 
     def __str__(self):
-        return f'{self.get_tipo_display()} ÔÇö OS-{self.os.numero}'
+        return f'{self.get_tipo_display()} — OS-{self.os.numero}'
 
 
-# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
-# CR├ëDITOS E DESPESAS
-# ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+# ────────────────────────────────────────────────
+# CRÉDITOS E DESPESAS
+# ────────────────────────────────────────────────
 class DespesaOS(models.Model):
-    """Despesas e cr├®ditos registrados pelo agente durante a OS."""
+    """Despesas e créditos registrados pelo agente durante a OS."""
     TIPO_CHOICES = [
-        ('combustivel',  'Combust├¡vel'),
-        ('refeicao',     'Refei├º├úo'),
+        ('combustivel',  'Combustível'),
+        ('refeicao',     'Refeição'),
         ('hospedagem',   'Hospedagem'),
-        ('pedagio',      'Ped├ígio Avulso'),
+        ('pedagio',      'Pedágio Avulso'),
         ('estacionamento','Estacionamento'),
         ('outro',        'Outro'),
     ]
     NATUREZA_CHOICES = [
         ('despesa',  'Despesa'),
-        ('credito',  'Cr├®dito / Reembolso'),
+        ('credito',  'Crédito / Reembolso'),
     ]
 
     os        = models.ForeignKey('OrdemServico', on_delete=models.CASCADE,
@@ -825,7 +825,7 @@ class DespesaOS(models.Model):
     tipo      = models.CharField(max_length=20, choices=TIPO_CHOICES, verbose_name='Tipo')
     natureza  = models.CharField(max_length=10, choices=NATUREZA_CHOICES,
                                  default='despesa', verbose_name='Natureza')
-    descricao = models.CharField(max_length=300, blank=True, verbose_name='Descri├º├úo')
+    descricao = models.CharField(max_length=300, blank=True, verbose_name='Descrição')
     valor     = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Valor (R$)')
     comprovante = models.ImageField(upload_to=_foto_upload_path, null=True, blank=True,
                                     verbose_name='Comprovante (foto)')
@@ -833,12 +833,12 @@ class DespesaOS(models.Model):
     criado_em   = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Despesa / Cr├®dito'
-        verbose_name_plural = 'Despesas / Cr├®ditos'
+        verbose_name = 'Despesa / Crédito'
+        verbose_name_plural = 'Despesas / Créditos'
         ordering = ['ocorrido_em']
 
     def __str__(self):
-        return f'{self.get_tipo_display()} R${self.valor} ÔÇö OS-{self.os.numero}'
+        return f'{self.get_tipo_display()} R${self.valor} — OS-{self.os.numero}'
 
     @property
     def os(self):  # alias para _foto_upload_path funcionar no comprovante

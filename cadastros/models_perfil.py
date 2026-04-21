@@ -17,6 +17,7 @@ INSTRUÇÕES DE USO:
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
+from django.db.utils import OperationalError, ProgrammingError
 from django.dispatch import receiver
 
 
@@ -48,14 +49,25 @@ class PerfilUsuario(models.Model):
         return self.nivel in ('developer', 'admin')
 
 
-# Cria automaticamente o perfil quando um User é criado
+# Cria automaticamente o perfil quando um User é criado.
+# Envolvido em try/except para não quebrar durante migrações iniciais
+# (quando a tabela cadastros_perfilusuario ainda não existe, por exemplo
+# ao rodar migrate num banco fresco e o createsuperuser dispara o signal
+# antes da migration 0016_perfilusuario rodar).
 @receiver(post_save, sender=User)
 def criar_perfil_automatico(sender, instance, created, **kwargs):
     if created:
-        PerfilUsuario.objects.get_or_create(user=instance)
+        try:
+            PerfilUsuario.objects.get_or_create(user=instance)
+        except (OperationalError, ProgrammingError):
+            # Tabela ainda não existe (migração inicial em curso) — ignora
+            pass
 
 
 @receiver(post_save, sender=User)
 def salvar_perfil_automatico(sender, instance, **kwargs):
     if hasattr(instance, 'perfil'):
-        instance.perfil.save()
+        try:
+            instance.perfil.save()
+        except (OperationalError, ProgrammingError):
+            pass
