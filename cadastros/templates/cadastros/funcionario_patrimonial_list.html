@@ -1,0 +1,123 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}Funcionários Patrimoniais{% endblock %}
+{% block page_title %}Funcionários Patrimoniais{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / Patrimonial / Funcionários{% endblock %}
+{% block topbar_actions %}<a href="{% url 'funcionario_patrimonial_create' %}" class="btn btn-primary"><svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Novo Funcionário</a>{% endblock %}
+
+{% block content %}
+<div class="search-bar">
+  <form method="get" style="display:flex;gap:10px;flex-wrap:wrap;flex:1;align-items:center">
+    <input type="text" name="q" value="{{ q }}" placeholder="Buscar por nome, CPF, RG ou posto..." style="flex:1;min-width:220px">
+
+    <select name="tipo" style="min-width:150px">
+      <option value="">Todos os tipos</option>
+      <option value="vigilante" {% if tipo == 'vigilante' %}selected{% endif %}>Vigilante</option>
+      <option value="porteiro" {% if tipo == 'porteiro' %}selected{% endif %}>Porteiro</option>
+    </select>
+
+    <select name="status" style="min-width:130px">
+      <option value="">Todos os status</option>
+      <option value="ativo" {% if status_filtro == 'ativo' %}selected{% endif %}>Ativo</option>
+      <option value="afastado" {% if status_filtro == 'afastado' %}selected{% endif %}>Afastado</option>
+      <option value="inativo" {% if status_filtro == 'inativo' %}selected{% endif %}>Inativo</option>
+    </select>
+
+    <button type="submit" class="btn btn-secondary">Filtrar</button>
+    {% if q or tipo or status_filtro %}
+      <a href="{% url 'funcionario_patrimonial_list' %}" class="btn btn-secondary">Limpar</a>
+    {% endif %}
+  </form>
+</div>
+
+<div style="color:var(--text3);font-size:12px;margin:8px 0 12px 4px">
+  {{ total }} funcionário{{ total|pluralize:"s" }} encontrado{{ total|pluralize:"s" }}
+</div>
+
+<div class="card" style="padding:0">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Tipo</th>
+          <th>CPF</th>
+          <th>Telefone</th>
+          <th>Posto</th>
+          <th>Val. CNH</th>
+          <th>Val. CNV</th>
+          <th>Status</th>
+          <th style="width:110px">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in funcionarios %}
+        <tr>
+          <td>
+            <strong style="color:var(--text)">{{ f.nome }}</strong>
+            {% if f.tem_alerta_vencimento %}
+              <span class="badge badge-red" style="margin-left:6px;font-size:10px;padding:1px 6px" title="Documento vencido ou próximo do vencimento">!</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if f.tipo == 'vigilante' %}
+              <span class="badge badge-blue">Vigilante</span>
+            {% else %}
+              <span class="badge badge-gray">Porteiro</span>
+            {% endif %}
+          </td>
+          <td style="color:var(--text2);font-family:monospace">{{ f.cpf }}</td>
+          <td style="color:var(--text2)">{{ f.telefone|default:"—" }}</td>
+          <td style="color:var(--text2)">{{ f.posto_trabalho|default:"—" }}</td>
+          <td>
+            {% if f.cnh_validade %}
+              {% if f.cnh_status_vencimento == 'vencido' %}
+                <span class="badge badge-red">{{ f.cnh_validade|date:"d/m/Y" }}</span>
+              {% elif f.cnh_status_vencimento == 'vencendo' %}
+                <span class="badge badge-amber">{{ f.cnh_validade|date:"d/m/Y" }}</span>
+              {% else %}
+                <span style="color:var(--text2)">{{ f.cnh_validade|date:"d/m/Y" }}</span>
+              {% endif %}
+            {% else %}
+              <span style="color:var(--text3)">—</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if f.cnv_validade %}
+              {% if f.cnv_status_vencimento == 'vencido' %}
+                <span class="badge badge-red">{{ f.cnv_validade|date:"d/m/Y" }}</span>
+              {% elif f.cnv_status_vencimento == 'vencendo' %}
+                <span class="badge badge-amber">{{ f.cnv_validade|date:"d/m/Y" }}</span>
+              {% else %}
+                <span style="color:var(--text2)">{{ f.cnv_validade|date:"d/m/Y" }}</span>
+              {% endif %}
+            {% else %}
+              <span style="color:var(--text3)">—</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if f.status == 'ativo' %}<span class="badge badge-green">Ativo</span>
+            {% elif f.status == 'afastado' %}<span class="badge badge-amber">Afastado</span>
+            {% else %}<span class="badge badge-gray">Inativo</span>{% endif %}
+          </td>
+          <td>
+            <div style="display:flex;gap:4px">
+              <a href="{% url 'funcionario_patrimonial_detail' f.pk %}" class="btn-icon" title="Detalhes">
+                <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3M8 11h.01" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              </a>
+              <a href="{% url 'funcionario_patrimonial_edit' f.pk %}" class="btn-icon" title="Editar">
+                <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M11 2l3 3L5 14H2v-3L11 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+              </a>
+              <a href="{% url 'funcionario_patrimonial_delete' f.pk %}" class="btn-icon" title="Excluir" style="color:var(--red)">
+                <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M3 4h10M6 4V2h4v2M5 4l1 10h4l1-10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" style="text-align:center;color:var(--text3);padding:32px">Nenhum funcionário encontrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

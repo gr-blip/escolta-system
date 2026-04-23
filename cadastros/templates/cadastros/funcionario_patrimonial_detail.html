@@ -1,0 +1,83 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}{{ obj.nome }}{% endblock %}
+{% block page_title %}{{ obj.nome }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / Patrimonial / <a href="{% url 'funcionario_patrimonial_list' %}">Funcionários</a> / {{ obj.nome }}{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'funcionario_patrimonial_edit' obj.pk %}" class="btn btn-primary">Editar</a>
+  <a href="{% url 'funcionario_patrimonial_list' %}" class="btn btn-secondary">← Voltar</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-title">
+    <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    Identificação
+  </div>
+  <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap">
+    {% if obj.foto %}
+      <img src="{{ obj.foto.url }}" alt="{{ obj.nome }}" style="width:140px;height:140px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+    {% else %}
+      <div style="width:140px;height:140px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text3)">Sem foto</div>
+    {% endif %}
+
+    <div style="flex:1;min-width:300px">
+      <div class="form-grid form-grid-2">
+        <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">Tipo</div><div style="color:var(--text)">{{ obj.get_tipo_display }}</div></div>
+        <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">Função</div><div style="color:var(--text)">{{ obj.get_funcao_display|default:"—" }}</div></div>
+        <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">CPF</div><div style="color:var(--text);font-family:monospace">{{ obj.cpf }}</div></div>
+        <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">RG</div><div style="color:var(--text)">{{ obj.rg|default:"—" }}</div></div>
+        <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">Telefone</div><div style="color:var(--text)">{{ obj.telefone|default:"—" }}</div></div>
+        <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">Data nasc.</div><div style="color:var(--text)">{{ obj.data_nascimento|date:"d/m/Y"|default:"—" }}</div></div>
+        <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">Status</div><div>
+          {% if obj.status == 'ativo' %}<span class="badge badge-green">Ativo</span>
+          {% elif obj.status == 'afastado' %}<span class="badge badge-amber">Afastado</span>
+          {% else %}<span class="badge badge-gray">Inativo</span>{% endif %}
+        </div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Documentos profissionais</div>
+  <div class="form-grid form-grid-3">
+    <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">CNH</div><div style="color:var(--text)">{{ obj.cnh|default:"—" }} {% if obj.cnh_categoria %}<span style="color:var(--text3)">({{ obj.cnh_categoria }})</span>{% endif %}</div></div>
+    <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">Validade CNH</div><div>
+      {% if obj.cnh_validade %}
+        {% if obj.cnh_status_vencimento == 'vencido' %}<span class="badge badge-red">{{ obj.cnh_validade|date:"d/m/Y" }} — vencida</span>
+        {% elif obj.cnh_status_vencimento == 'vencendo' %}<span class="badge badge-amber">{{ obj.cnh_validade|date:"d/m/Y" }} — vencendo</span>
+        {% else %}<span style="color:var(--text)">{{ obj.cnh_validade|date:"d/m/Y" }}</span>{% endif %}
+      {% else %}<span style="color:var(--text3)">—</span>{% endif %}
+    </div></div>
+    <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">Registro DRT/MTE</div><div style="color:var(--text)">{{ obj.registro_drt|default:"—" }}</div></div>
+    <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">CNV</div><div style="color:var(--text)">{{ obj.cnv|default:"—" }}</div></div>
+    <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">Validade CNV</div><div>
+      {% if obj.cnv_validade %}
+        {% if obj.cnv_status_vencimento == 'vencido' %}<span class="badge badge-red">{{ obj.cnv_validade|date:"d/m/Y" }} — vencida</span>
+        {% elif obj.cnv_status_vencimento == 'vencendo' %}<span class="badge badge-amber">{{ obj.cnv_validade|date:"d/m/Y" }} — vencendo</span>
+        {% else %}<span style="color:var(--text)">{{ obj.cnv_validade|date:"d/m/Y" }}</span>{% endif %}
+      {% else %}<span style="color:var(--text3)">—</span>{% endif %}
+    </div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Posto e regime</div>
+  <div class="form-grid form-grid-3">
+    <div style="grid-column:span 2"><div style="color:var(--text3);font-size:11px;text-transform:uppercase">Posto de trabalho</div><div style="color:var(--text)">{{ obj.posto_trabalho|default:"—" }}</div></div>
+    <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">Escala</div><div style="color:var(--text)">{{ obj.get_escala_display|default:"—" }}</div></div>
+    <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">Data de admissão</div><div style="color:var(--text)">{{ obj.data_admissao|date:"d/m/Y"|default:"—" }}</div></div>
+  </div>
+</div>
+
+{% if obj.observacoes %}
+<div class="card">
+  <div class="card-title">Observações</div>
+  <div style="color:var(--text2);white-space:pre-wrap">{{ obj.observacoes }}</div>
+</div>
+{% endif %}
+
+<div style="color:var(--text3);font-size:12px;margin-top:12px">
+  Cadastrado em {{ obj.criado_em|date:"d/m/Y H:i" }} · Atualizado em {{ obj.atualizado_em|date:"d/m/Y H:i" }}
+</div>
+{% endblock %}
