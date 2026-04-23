@@ -1,5 +1,5 @@
 from django import forms
-from .models import Agente, Viatura, Rastreador, Armamento, Cliente, Colete
+from .models import Agente, Viatura, Rastreador, Armamento, Cliente, Colete, FuncionarioPatrimonial
 
 
 class AgenteForm(forms.ModelForm):
@@ -88,4 +88,25 @@ class ColeteForm(forms.ModelForm):
             'marca':     forms.TextInput(attrs={'placeholder': 'Ex: BLINTEC'}),
             'numeracao': forms.TextInput(attrs={'placeholder': 'Ex: 442 15206'}),
             'validade':  forms.DateInput(attrs={'type': 'date'}),
+        }
+
+
+class FuncionarioPatrimonialForm(forms.ModelForm):
+    class Meta:
+        model = FuncionarioPatrimonial
+        exclude = ['criado_em', 'atualizado_em']
+        widgets = {
+            'nome':            forms.TextInput(attrs={'placeholder': 'Ex: Jose Silva Santos'}),
+            'cpf':             forms.TextInput(attrs={'placeholder': '000.000.000-00'}),
+            'rg':              forms.TextInput(attrs={'placeholder': '0000000'}),
+            'telefone':        forms.TextInput(attrs={'placeholder': '(62) 99999-0000'}),
+            'data_nascimento': forms.DateInput(attrs={'type': 'date'}),
+            'cnh':             forms.TextInput(attrs={'placeholder': '00000000000'}),
+            'cnh_validade':    forms.DateInput(attrs={'type': 'date'}),
+            'cnv':             forms.TextInput(attrs={'placeholder': '00000/0000'}),
+            'cnv_validade':    forms.DateInput(attrs={'type': 'date'}),
+            'posto_trabalho':  forms.TextInput(attrs={'placeholder': 'Ex: Portaria Condominio Alpha'}),
+            'data_admissao':   forms.DateInput(attrs={'type': 'date'}),
+            'registro_drt':    forms.TextInput(attrs={'placeholder': 'Nr DRT/MTE'}),
+            'observacoes':     forms.Textarea(attrs={'rows': 3, 'placeholder': 'Observacoes sobre o funcionario...'}),
         }

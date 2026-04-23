@@ -871,3 +871,110 @@ class EspelhamentoEnviado(models.Model):
     def __str__(self):
         destino = self.nome_central or self.cnpj_destino or 'desconhecido'
         return f'{self.placa} → {destino}'
+
+
+# =====================================================================
+# Patrimonial — cadastro de funcionarios (vigilantes e porteiros)
+# Modulo independente, sem vinculo com OS/escolta. Serve apenas para
+# controle cadastral e de documentos (CNV, CNH, etc.).
+# =====================================================================
+class FuncionarioPatrimonial(models.Model):
+    TIPO_CHOICES = [
+        ('vigilante', 'Vigilante Patrimonial'),
+        ('porteiro', 'Porteiro'),
+    ]
+    STATUS_CHOICES = [
+        ('ativo', 'Ativo'),
+        ('afastado', 'Afastado'),
+        ('inativo', 'Inativo'),
+    ]
+    FUNCAO_CHOICES = [
+        ('vigilante_armado', 'Vigilante Armado'),
+        ('vigilante_desarmado', 'Vigilante Desarmado'),
+        ('lider_vigilancia', 'Lider de Vigilancia'),
+        ('porteiro_diurno', 'Porteiro Diurno'),
+        ('porteiro_noturno', 'Porteiro Noturno'),
+        ('lider_portaria', 'Lider de Portaria'),
+        ('supervisor', 'Supervisor'),
+        ('coordenador', 'Coordenador'),
+    ]
+    ESCALA_CHOICES = [
+        ('12x36_diurno', '12x36 Diurno'),
+        ('12x36_noturno', '12x36 Noturno'),
+        ('24x48', '24x48'),
+        ('5x2', '5x2 (Comercial)'),
+        ('6x1', '6x1'),
+        ('outro', 'Outro (descrever em observacoes)'),
+    ]
+
+    # Classificacao patrimonial
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, verbose_name='Tipo')
+
+    # Identificacao (espelho do Agente)
+    foto = models.ImageField(upload_to='funcionarios_patrimonial/', blank=True, null=True)
+    nome = models.CharField(max_length=200, verbose_name='Nome completo')
+    cpf = models.CharField(max_length=14, unique=True, verbose_name='CPF')
+    rg = models.CharField(max_length=20, blank=True, verbose_name='RG')
+    telefone = models.CharField(max_length=20, blank=True, verbose_name='Telefone / Contato')
+    data_nascimento = models.DateField(blank=True, null=True, verbose_name='Data de nascimento')
+
+    # Documentos profissionais (espelho do Agente)
+    cnh = models.CharField(max_length=20, blank=True, verbose_name='CNH')
+    cnh_validade = models.DateField(blank=True, null=True, verbose_name='Validade CNH')
+    cnh_categoria = models.CharField(max_length=5, blank=True, default='B', verbose_name='Categoria CNH')
+    cnv = models.CharField(max_length=20, blank=True, verbose_name='CNV')
+    cnv_validade = models.DateField(blank=True, null=True, verbose_name='Validade CNV')
+
+    # Campos especificos patrimonial
+    posto_trabalho = models.CharField(max_length=200, blank=True, verbose_name='Posto de trabalho')
+    escala = models.CharField(max_length=20, choices=ESCALA_CHOICES, blank=True, verbose_name='Escala')
+    data_admissao = models.DateField(blank=True, null=True, verbose_name='Data de admissao')
+    registro_drt = models.CharField(max_length=30, blank=True, verbose_name='Registro DRT/MTE')
+
+    # Funcao/cargo + status
+    funcao = models.CharField(max_length=30, choices=FUNCAO_CHOICES, blank=True, verbose_name='Funcao')
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='ativo', verbose_name='Status')
+    observacoes = models.TextField(blank=True, verbose_name='Observacoes')
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Funcionario Patrimonial'
+        verbose_name_plural = 'Funcionarios Patrimoniais'
+        ordering = ['nome']
+
+    def __str__(self):
+        return f'{self.nome} ({self.get_tipo_display()})'
+
+    @staticmethod
+    def _status_validade(data_validade):
+        """
+        Retorna o status de vencimento de uma data:
+          - 'vencido'  : ja passou
+          - 'vencendo' : vence em <= 30 dias
+          - 'ok'       : vence em mais de 30 dias
+          - None       : sem data cadastrada
+        """
+        if not data_validade:
+            return None
+        from datetime import date, timedelta
+        hoje = date.today()
+        if data_validade < hoje:
+            return 'vencido'
+        if data_validade <= hoje + timedelta(days=30):
+            return 'vencendo'
+        return 'ok'
+
+    @property
+    def cnv_status_vencimento(self):
+        return self._status_validade(self.cnv_validade)
+
+    @property
+    def cnh_status_vencimento(self):
+        return self._status_validade(self.cnh_validade)
+
+    @property
+    def tem_alerta_vencimento(self):
+        """True se qualquer documento esta vencido ou vencendo."""
+        return (self.cnv_status_vencimento in ('vencido', 'vencendo')
+                or self.cnh_status_vencimento in ('vencido', 'vencendo'))
