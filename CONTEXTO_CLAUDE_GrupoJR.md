@@ -22,7 +22,7 @@
 | Banco produção | PostgreSQL no Railway |
 | Banco local | SQLite (quando DATABASE_URL não está definida) |
 | Deploy | Automático via git push → GitHub → Railway |
-| Start Command | `python manage.py migrate --fake && python manage.py collectstatic --noinput && gunicorn escolta_system.wsgi:application` |
+| Start Command | `python manage.py migrate && python manage.py collectstatic --noinput && gunicorn escolta_system.wsgi --log-file - --timeout 120 --workers 2` |
 
 ### Variáveis de ambiente no Railway
 - `DATABASE_URL` → URL interna do PostgreSQL (usada pelo serviço web)
@@ -349,6 +349,7 @@ pg_restore -d "DATABASE_PUBLIC_URL" --clean "D:\backup_escolta.dump"
 - **Aba Veículos — máscara de placa:** adicionada função `mascaraPlaca()` no JS do link externo. Campos Placa Cavalo, Placa Carreta e Placa Carreta 2 agora aplicam máscara automática `AAA-0000` conforme o agente digita.
 - **Fix deploy Railway (13/04/2026):** resolvidos em sequência: (1) `STATIC_ROOT` ausente no `settings.py` → adicionado `STATIC_ROOT = BASE_DIR / 'staticfiles'`; (2) `gunicorn` não instalado → adicionado ao `requirements.txt`; (3) `CSRF_TRUSTED_ORIGINS` e `ALLOWED_HOSTS` ausentes → adicionados com domínio `grupojr.up.railway.app`; (4) `dj_database_url` e `psycopg2-binary` ausentes no `requirements.txt` → adicionados; (5) `settings.py` configurado para usar PostgreSQL via `DATABASE_URL` com fallback para SQLite local; (6) conflito de migrations (`DuplicateTable`) → resolvido com `--fake` no Start Command do Railway.
 - **Migração de dados SQLite → PostgreSQL:** dados exportados do SQLite local via `dumpdata` com script Python (encoding UTF-8 forçado) e importados no PostgreSQL do Railway via `loaddata` com `DATABASE_URL` definida no ambiente.
+- **Deploy 3b — remover `--fake` do Start Command (23/04/2026):** o Start Command antigo usava `migrate --fake` herdado de uma crise no Deploy inicial (13/04). Isso fazia com que QUALQUER migration nova entrasse como `FAKED` sem criar a tabela — descoberto quando a `0029_funcionariopatrimonial` foi deployada e bateu `relation does not exist` no primeiro GET. Fix: atualizado o Start Command para `python manage.py migrate && python manage.py collectstatic --noinput && gunicorn escolta_system.wsgi --log-file - --timeout 120 --workers 2` (sem `--fake`, com 2 workers e timeout 120s alinhados ao Procfile). A tabela `cadastros_funcionariopatrimonial` foi criada manualmente via SQL DDL no Data tab porque o registro já estava marcado como `FAKED` em `django_migrations`.
 
 ---
 
