@@ -69,7 +69,11 @@ class ArmamentoForm(forms.ModelForm):
 class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente
-        exclude = ['criado_em', 'atualizado_em']
+        # 'ativo' é excluído propositalmente: o template não renderiza esse
+        # campo e, sem ele no POST, Django salvaria como False (checkbox
+        # não marcado). A toggle de ativo/inativo é feita pela view dedicada
+        # cliente_inativar. Default do model (True) prevalece no cadastro.
+        exclude = ['criado_em', 'atualizado_em', 'ativo']
         widgets = {
             'razao_social': forms.TextInput(attrs={'placeholder': 'Ex: Bayer SA BCS'}),
             'cnpj': forms.TextInput(attrs={'placeholder': '00.000.000/0000-00'}),
