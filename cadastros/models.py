@@ -286,9 +286,21 @@ class OrdemServico(models.Model):
     def save(self, *args, **kwargs):
         if not self.numero:
             from django.utils import timezone
+            from django.db.models import Max
             ano = timezone.now().year
-            ultimo = OrdemServico.objects.filter(numero__startswith=str(ano)).count()
-            self.numero = f'{ano}{str(ultimo + 1).zfill(4)}'
+            prefixo = str(ano)
+            # Usa MAX+1 (não count+1) pra ser resiliente a deleções de OS.
+            # Com count(), se uma OS for deletada, o próximo número gerado
+            # pode colidir com um número ainda existente no banco.
+            ultimo = OrdemServico.objects.filter(
+                numero__startswith=prefixo
+            ).aggregate(maior=Max('numero'))['maior']
+            if ultimo:
+                # Extrai os 4 últimos dígitos (sufixo sequencial) e incrementa.
+                seq = int(ultimo[-4:]) + 1
+            else:
+                seq = 1
+            self.numero = f'{prefixo}{str(seq).zfill(4)}'
         super().save(*args, **kwargs)
 
 
