@@ -127,6 +127,9 @@ urlpatterns += [
 
 # Patrimonial
 urlpatterns += [
-    path('patrimonial/funcionarios/',      views.funcionario_patrimonial_list,   name='funcionario_patrimonial_list'),
-    path('patrimonial/funcionarios/novo/', views.funcionario_patrimonial_create, name='funcionario_patrimonial_create'),
+    path('patrimonial/funcionarios/',                  views.funcionario_patrimonial_list,   name='funcionario_patrimonial_list'),
+    path('patrimonial/funcionarios/novo/',             views.funcionario_patrimonial_create, name='funcionario_patrimonial_create'),
+    path('patrimonial/funcionarios/<int:pk>/',         views.funcionario_patrimonial_detail, name='funcionario_patrimonial_detail'),
+    path('patrimonial/funcionarios/<int:pk>/editar/',  views.funcionario_patrimonial_edit,   name='funcionario_patrimonial_edit'),
+    path('patrimonial/funcionarios/<int:pk>/excluir/', views.funcionario_patrimonial_delete, name='funcionario_patrimonial_delete'),
 ]
