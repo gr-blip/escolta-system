@@ -2236,31 +2236,52 @@ def _boletim_to_missao(idx, b):
             d = localtime(d)
         return d.strftime("%d/%m/%y %H:%M")
 
+    # Prestador: nome da equipe ou fallback
+    prestador = (equipe.nome if equipe and equipe.nome else os_obj.snap_equipe_nome) or 'JR SEGURANÇA'
+
     return {
-        'n':          str(idx).zfill(3),
-        'os':         str(os_obj.numero) if os_obj.numero else '',
-        'agentes':    agentes_str,
-        'origem':     f"{os_obj.cidade_origem}/{os_obj.uf_origem}",
-        'destino':    f"{os_obj.cidade_destino}/{os_obj.uf_destino}",
-        'viatura':    viatura_str,
-        'escoltado':  escoltados,
-        'programada': fmt_dt(os_obj.previsao_inicio),
-        'chegada':    fmt_dt(op.chegada_operacao if op else None),
-        'inicio':     fmt_dt(op.inicio_operacao if op else None),
-        'termino':    fmt_dt(op.termino_operacao if op else None),
-        'total_h':    b.horas_realizadas or '00:00',
-        'franq_h':    tab.franquia_horas if tab else '00:00',
-        'exced_h':    b.horas_excedentes or '00:00',
-        'total_km':   b.km_realizado or 0,
-        'franq_km':   tab.franquia_km if tab else 0,
-        'exced_km':   b.km_excedente or 0,
-        'desloc':     (op.km_trecho_chegada if op else 0) or 0,
-        'hr_exc':     float(b.valor_excedente_hora),
-        'km_exc':     float(b.valor_excedente_km),
-        'escolta':    float(b.valor_escolta),
-        'desloc_val': 0.0,
-        'pedagio':    float(b.valor_pedagio),
-        'total':      float(b.valor_total),
+        # ── Identificação ──────────────────────────────────────────
+        'os':           str(os_obj.numero) if os_obj.numero else '',
+        'cliente':      os_obj.cliente.razao_social if os_obj.cliente else '',
+        'prestador':    prestador,
+        'placa':        viatura_str,
+        'escoltado':    escoltados,
+        # ── Datas ──────────────────────────────────────────────────
+        'agendamento':  fmt_dt(os_obj.previsao_inicio),
+        'chegada_vtr':  fmt_dt(op.chegada_operacao  if op else None),
+        'inicio_op':    fmt_dt(op.inicio_operacao    if op else None),
+        'termino_op':   fmt_dt(op.termino_operacao   if op else None),
+        # ── Horas ─────────────────────────────────────────────────
+        'total_h':      b.horas_realizadas or '00:00',
+        # ── Hodômetros ────────────────────────────────────────────
+        'base_km':      (op.km_inicio_viagem       if op else None) or '',
+        'hod_ini':      (op.km_chegada_operacao    if op else None) or '',
+        'hod_fim':      (op.km_termino_operacao    if op else None) or '',
+        'total_km':     b.km_realizado or 0,
+        # ── Origem / Destino ───────────────────────────────────────
+        'cidade_ori':   os_obj.cidade_origem or '',
+        'uf_ori':       os_obj.uf_origem or '',
+        'cidade_dst':   os_obj.cidade_destino or '',
+        'uf_dst':       os_obj.uf_destino or '',
+        # ── Franquia ───────────────────────────────────────────────
+        'valor_franq':  float(tab.valor_escolta)  if tab else 0.0,
+        'franq_km':     tab.franquia_km           if tab else 0,
+        'franq_horas':  tab.franquia_horas        if tab else '00:00',
+        # ── KM Excedente ───────────────────────────────────────────
+        'total_os':     float(b.valor_excedente_km),     # TOTAL OS (vermelho)
+        'exced_km':     b.km_excedente or 0,
+        'taxa_km':      float(tab.excedente_km)   if tab else 0.0,
+        'subtotal_km':  float(b.valor_excedente_km),     # TOTAL km (laranja)
+        # ── Horas Excedentes ───────────────────────────────────────
+        'exced_h':      b.horas_excedentes or '00:00',
+        'taxa_hora':    float(tab.excedente_hora) if tab else 0.0,
+        'subtotal_h':   float(b.valor_excedente_hora),   # TOTAL horas (laranja)
+        # ── Encerramento ───────────────────────────────────────────
+        'despesas':     float(b.acrescimo),
+        'fechamento':   b.observacoes or '',
+        'dt_pagamento': '',
+        'nota_fiscal':  b.numero_nota or 'SEM',
+        'total':        float(b.valor_total),
     }
 
 
@@ -2288,6 +2309,8 @@ def _calcular_totais(boletins_list):
     def min_to_hhmm(m):
         return f'{m // 60:03d}:{m % 60:02d}'
 
+    despesas = Decimal('0')
+
     for b in boletins_list:
         op = getattr(b.os, 'operacional', None)
         total_hr_min += hhmm_to_min(b.horas_realizadas)
@@ -2299,21 +2322,25 @@ def _calcular_totais(boletins_list):
         km_exc       += b.valor_excedente_km
         escolta      += b.valor_escolta
         pedagio      += b.valor_pedagio
+        despesas     += b.acrescimo
         total        += b.valor_total
 
     return {
-        'missoes':   len(boletins_list),
-        'total_h':   min_to_hhmm(total_hr_min),
-        'exced_h':   min_to_hhmm(exced_hr_min),
-        'total_km':  total_km,
-        'exced_km':  exced_km,
-        'desloc_km': desloc_km,
-        'hr_exc':    float(hr_exc),
-        'km_exc':    float(km_exc),
-        'escolta':   float(escolta),
-        'desloc_val':0.0,
-        'pedagio':   float(pedagio),
-        'total':     float(total),
+        'missoes':      len(boletins_list),
+        'total_h':      min_to_hhmm(total_hr_min),
+        'exced_h':      min_to_hhmm(exced_hr_min),
+        'total_km':     total_km,
+        'exced_km':     exced_km,
+        'desloc_km':    desloc_km,
+        'hr_exc':       float(hr_exc),
+        'km_exc':       float(km_exc),
+        'subtotal_km':  float(km_exc),
+        'subtotal_h':   float(hr_exc),
+        'despesas':     float(despesas),
+        'escolta':      float(escolta),
+        'desloc_val':   0.0,
+        'pedagio':      float(pedagio),
+        'total':        float(total),
     }
 
 

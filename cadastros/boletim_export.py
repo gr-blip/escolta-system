@@ -1,73 +1,93 @@
 """
 cadastros/boletim_export.py
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Sistema de Gestão de Escolta – DEMARK SEGURANÇA
-Geração de Boletim de Medição em PDF e XLSX
-
-Funções públicas:
-    gerar_pdf_bytes(cliente, periodo, missoes, totais)  → bytes
-    gerar_xlsx_bytes(cliente, periodo, missoes, totais) → bytes
-
-Ambas são chamadas pelas views boletim_export_pdf e boletim_export_xlsx
-definidas em views.py.
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Boletim de Medição — PDF (A3 landscape) e XLSX
+Formato conforme modelo aprovado pelo cliente.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 
 import io
 from datetime import datetime
 
-# ─── Identidade visual ───────────────────────────────────────────────────────
-EMPRESA_NOME    = "DEMARK SEGURANÇA PRIVADA LTDA – DEPTO. DE ESCOLTA ARMADA"
-SISTEMA_MODELO  = "BoletimMedicao.BoletimMedicao21"
+# ─── Identidade visual ──────────────────────────────────────────────────────
+EMPRESA_NOME = "JR SEGURANÇA E VIGILÂNCIA PATRIMONIAL LTDA – DEPTO. DE ESCOLTA ARMADA"
 
-# Paleta de cores (hex sem '#')
-_AZUL_ESC  = "1A3A5C"
-_AZUL_MED  = "2563A8"
-_CINZA_CAB = "D0D8E4"
-_CINZA_LIN = "F2F5F9"
-_VERDE     = "217A3C"
-_BRANCO    = "FFFFFF"
-_FUNDO_HDR = "EBF2FA"
-_FUNDO_TOT = "DBE8F5"
-_CINZA_ROD = "888888"
+# Cores (hex sem '#')
+_AZUL_HDR   = "1A3A5C"   # cabeçalho título
+_AZUL_COL   = "1F4E79"   # header das colunas
+_BRANCO     = "FFFFFF"
+_CINZA_LIN  = "F2F5F9"   # linhas pares
+_ROSA       = "FFB3BA"   # col 9 – Data Hora Encerramento
+_ROSA_CLR   = "FFD6DA"   # dados col 9
+_AMARELO    = "FFFF00"   # col 10 – Total de Horas
+_AMAR_CLR   = "FFFACD"   # dados col 10
+_VERMELHO   = "FF0000"   # header col 22 – TOTAL OS
+_VERM_CLR   = "FFE0E0"   # dados col 22
+_LARANJA    = "FF8C00"   # header cols 25 e 28 – TOTAL km/h
+_LARA_CLR   = "FFF0D0"   # dados cols 25 e 28
+_VERDE_TOT  = "1A6B35"   # linha VALOR BRUTO
+_FUNDO_TOT  = "D6E4F0"   # linha de totais
+_CINZA_ROD  = "888888"
 
-# Definição das colunas: (título, largura relativa para PDF, largura em chars para XLSX)
-# Estrutura conforme XLSX do usuário: Nº | O.S | Agentes | Origem | Destino | Viatura | Escoltado
-# | Previsão Início | Chegada Operação | Início Operação | Término Operação
-# | Total Horas | Franq Horas | Exced Horas | Total Km | Franq Km | Exced Km | Desloc
-# | Hr Exc(R$) | Km Exc(R$) | Escolta(R$) | Desloc(R$) | Pedágio(R$) | TOTAL(R$)
+# ─── Definição das 33 colunas ───────────────────────────────────────────────
+# (título, largura_pdf_rel, largura_xlsx_chars, alinhamento xlsx: L/C/R)
 _COLUNAS = [
-    ("Nº",                  5,  5),
-    ("O.S",                 9,  12),
-    ("Agentes",            30,  35),
-    ("Origem",             20,  20),
-    ("Destino",            20,  20),
-    ("Viatura",            10,  12),
-    ("Escoltado",          10,  12),
-    ("Previsão\nInício",  16,  18),
-    ("Chegada\nOperação", 16,  18),
-    ("Início\nOperação",  16,  18),
-    ("Término\nOperação", 16,  18),
-    ("Total\nHoras",      10,  10),
-    ("Franq\nHoras",      10,  10),
-    ("Exced\nHoras",      10,  10),
-    ("Total\nKm",          9,  10),
-    ("Franq\nKm",          9,  10),
-    ("Exced\nKm",          9,  10),
-    ("Desloc",              7,   8),
-    ("Hr Exc\n(R$)",      11,  12),
-    ("Km Exc\n(R$)",      11,  12),
-    ("Escolta\n(R$)",     14,  14),
-    ("Desloc\n(R$)",      11,  12),
-    ("Pedágio\n(R$)",     11,  12),
-    ("TOTAL\n(R$)",       14,  14),
+    # Bloco 1 — Identificação
+    ("Ordem\nServiço",                   6,  10, 'C'),
+    ("Cliente",                         14,  18, 'L'),
+    ("Prestador\nServiço",              10,  14, 'L'),
+    ("Placa",                            5,   8, 'C'),
+    ("Veículo\nEscoltado",               8,  10, 'C'),
+    # Bloco 2 — Datas
+    ("Data Hora\nAgendamento VTR",      11,  18, 'C'),
+    ("Data Hora\nChegada VTR",          11,  18, 'C'),
+    ("Data Hora\nInício",               11,  18, 'C'),
+    ("Data Hora\nEncerramento",         11,  18, 'C'),   # col 9 → ROSA
+    ("Total de\nHoras",                  7,   9, 'C'),   # col 10 → AMARELO
+    # Bloco 3 — Hodômetros
+    ("Base\nKm",                         6,   9, 'R'),
+    ("Hodômetro\nInicial",               7,  10, 'R'),
+    ("Hodômetro\nFinal",                 7,  10, 'R'),
+    ("Total\nKm",                        5,   8, 'R'),
+    # Bloco 4 — Origem / Destino
+    ("Cidade\nOrigem",                  10,  14, 'L'),
+    ("UF",                               3,   4, 'C'),
+    ("Cidade\nDestino",                 10,  14, 'L'),
+    ("UF",                               3,   4, 'C'),
+    # Bloco 5 — Franquia
+    ("Valor Franquia\nContratada (R$)",  9,  13, 'R'),
+    ("Franquia\nContratada de Km",       7,  10, 'R'),
+    ("Franquia\nContratada de HORAS",    7,  10, 'C'),
+    # Bloco 6 — KM Excedente
+    ("TOTAL\nOS",                        6,   9, 'R'),   # col 22 → VERMELHO
+    ("KM\nexcedente",                    5,   8, 'R'),
+    ("$ POR km\nexcedente",              6,   9, 'R'),
+    ("TOTAL",                            6,   9, 'R'),   # col 25 → LARANJA
+    # Bloco 7 — Horas Excedentes
+    ("Horas\nexcedentes",                6,   9, 'C'),
+    ("$ POR\nHoras Excedente",           6,   9, 'R'),
+    ("TOTAL",                            6,   9, 'R'),   # col 28 → LARANJA
+    # Bloco 8 — Encerramento
+    ("Despesas\nExtra Franquia",         7,  11, 'R'),
+    ("Fechamento\nCOM / SEM",            8,  12, 'C'),
+    ("Data de\nPagamento",               8,  12, 'C'),
+    ("NOTA\nFISCAL",                     6,   9, 'C'),
+    ("TOTAL",                            8,  11, 'R'),   # col 33 — TOTAL GERAL
 ]
 
-# Índices (0-based) das colunas de valor monetário
-_IDX_MOEDA = {18, 19, 20, 21, 22, 23}
+# Índices 0-based com cor especial
+_IDX_ROSA    = 8   # Data Hora Encerramento
+_IDX_AMAR    = 9   # Total de Horas
+_IDX_VERM    = 21  # TOTAL OS
+_IDX_LARA1   = 24  # TOTAL km
+_IDX_LARA2   = 27  # TOTAL horas
+_IDX_TOTAL   = 32  # TOTAL geral
+
+# Índices de colunas monetárias (R$) — 0-based
+_IDX_MOEDA = {18, 21, 23, 24, 26, 27, 28, 32}
 
 
-# ─── Helpers ─────────────────────────────────────────────────────────────────
+# ─── Helpers ────────────────────────────────────────────────────────────────
 
 def _fmt_brl(valor) -> str:
     try:
@@ -80,160 +100,227 @@ def _fmt_brl(valor) -> str:
 
 
 def _missao_to_row(m: dict) -> list:
+    """Converte dict da missão para lista de 33 valores (mesma ordem de _COLUNAS)."""
     return [
-        m.get("n", ""),
-        m.get("os", ""),
-        m.get("agentes", "---"),
-        m.get("origem", ""),
-        m.get("destino", ""),
-        m.get("viatura", "---"),
-        m.get("escoltado", "---"),
-        m.get("programada", ""),
-        m.get("chegada", ""),
-        m.get("inicio", ""),
-        m.get("termino", ""),
-        m.get("total_h", ""),
-        m.get("franq_h", ""),
-        m.get("exced_h", ""),
-        m.get("total_km", 0),
-        m.get("franq_km", 0),
-        m.get("exced_km", 0),
-        m.get("desloc", 0),
-        m.get("hr_exc", 0.0),
-        m.get("km_exc", 0.0),
-        m.get("escolta", 0.0),
-        m.get("desloc_val", 0.0),
-        m.get("pedagio", 0.0),
-        m.get("total", 0.0),
+        m.get('os',          ''),    # 0
+        m.get('cliente',     ''),    # 1
+        m.get('prestador',   ''),    # 2
+        m.get('placa',       ''),    # 3
+        m.get('escoltado',   ''),    # 4
+        m.get('agendamento', ''),    # 5
+        m.get('chegada_vtr', ''),    # 6
+        m.get('inicio_op',   ''),    # 7
+        m.get('termino_op',  ''),    # 8  ← ROSA
+        m.get('total_h',     ''),    # 9  ← AMARELO
+        m.get('base_km',     ''),    # 10
+        m.get('hod_ini',     ''),    # 11
+        m.get('hod_fim',     ''),    # 12
+        m.get('total_km',    0),     # 13
+        m.get('cidade_ori',  ''),    # 14
+        m.get('uf_ori',      ''),    # 15
+        m.get('cidade_dst',  ''),    # 16
+        m.get('uf_dst',      ''),    # 17
+        m.get('valor_franq', 0.0),   # 18
+        m.get('franq_km',    0),     # 19
+        m.get('franq_horas', ''),    # 20
+        m.get('total_os',    0.0),   # 21 ← VERMELHO
+        m.get('exced_km',    0),     # 22
+        m.get('taxa_km',     0.0),   # 23
+        m.get('subtotal_km', 0.0),   # 24 ← LARANJA
+        m.get('exced_h',     ''),    # 25
+        m.get('taxa_hora',   0.0),   # 26
+        m.get('subtotal_h',  0.0),   # 27 ← LARANJA
+        m.get('despesas',    0.0),   # 28
+        m.get('fechamento',  ''),    # 29
+        m.get('dt_pagamento',''),    # 30
+        m.get('nota_fiscal', ''),    # 31
+        m.get('total',       0.0),   # 32 ← TOTAL
     ]
 
 
-# ─── PDF ─────────────────────────────────────────────────────────────────────
+# ─── PDF (A3 landscape) ─────────────────────────────────────────────────────
 
 def gerar_pdf_bytes(cliente: str, periodo: str, missoes: list, totais: dict) -> bytes:
-    """Retorna o PDF do Boletim como bytes prontos para HttpResponse."""
-    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib.pagesizes import A3, landscape
     from reportlab.lib import colors
     from reportlab.lib.units import mm
     from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 
-    c_azul  = colors.HexColor(f"#{_AZUL_ESC}")
-    c_chdr  = colors.HexColor(f"#{_CINZA_CAB}")
-    c_clin  = colors.HexColor(f"#{_CINZA_LIN}")
-    c_verde = colors.HexColor(f"#{_VERDE}")
-    c_fhdr  = colors.HexColor(f"#{_FUNDO_HDR}")
-    c_ftot  = colors.HexColor(f"#{_FUNDO_TOT}")
+    c_azul   = colors.HexColor(f"#{_AZUL_HDR}")
+    c_col    = colors.HexColor(f"#{_AZUL_COL}")
+    c_cinza  = colors.HexColor(f"#{_CINZA_LIN}")
+    c_rosa_h = colors.HexColor(f"#{_ROSA}")
+    c_rosa_d = colors.HexColor(f"#{_ROSA_CLR}")
+    c_amar_h = colors.HexColor(f"#{_AMARELO}")
+    c_amar_d = colors.HexColor(f"#{_AMAR_CLR}")
+    c_verm_h = colors.HexColor(f"#{_VERMELHO}")
+    c_verm_d = colors.HexColor(f"#{_VERM_CLR}")
+    c_lara_h = colors.HexColor(f"#{_LARANJA}")
+    c_lara_d = colors.HexColor(f"#{_LARA_CLR}")
+    c_vtot   = colors.HexColor(f"#{_VERDE_TOT}")
+    c_ftot   = colors.HexColor(f"#{_FUNDO_TOT}")
+    c_bord   = colors.HexColor('#B0BBC8')
 
     buf = io.BytesIO()
-    doc = SimpleDocTemplate(buf, pagesize=landscape(A4),
+    doc = SimpleDocTemplate(buf, pagesize=landscape(A3),
                             leftMargin=8*mm, rightMargin=8*mm,
                             topMargin=8*mm, bottomMargin=8*mm)
-    W = landscape(A4)[0] - 16*mm
+    W = landscape(A3)[0] - 16*mm
 
-    def _st(name, size=7, bold=False, align=TA_LEFT, color=colors.black, leading=9):
+    def _st(name, size=6, bold=False, align=TA_LEFT, color=colors.black, leading=7):
         return ParagraphStyle(name, fontSize=size,
                               fontName='Helvetica-Bold' if bold else 'Helvetica',
                               alignment=align, textColor=color, leading=leading)
 
-    st_titulo  = _st('t1', 12, True,  TA_CENTER, c_azul, 14)
-    st_empresa = _st('t2',  7, True,  TA_RIGHT,  c_azul,  9)
-    st_cliente = _st('t3',  8, True,  TA_LEFT,   c_azul)
-    st_cell    = _st('c1',  6, False, TA_LEFT,   colors.black, 7)
-    st_cell_r  = _st('c2',  6, False, TA_RIGHT,  colors.black, 7)
-    st_cell_bv = _st('c3',  6, True,  TA_RIGHT,  c_verde, 7)
-    st_hdr_col = _st('h1',5.5, True,  TA_CENTER, c_azul,  6.5)
-    st_tot_l   = _st('tl',5.5, True,  TA_LEFT,   c_azul,  7)
-    st_tot_v   = _st('tv',5.5, True,  TA_RIGHT,  c_verde, 7)
-    st_rodape  = _st('rd',  6, False, TA_CENTER, colors.HexColor(f"#{_CINZA_ROD}"))
+    st_titulo = _st('tt', 13, True, TA_CENTER, c_azul, 16)
+    st_emp    = _st('te',  7, True, TA_RIGHT,  c_azul,  9)
+    st_cli    = _st('tc',  8, True, TA_LEFT,   c_azul)
+    st_hdr    = _st('th',  5, True, TA_CENTER, colors.white, 6)
+    st_L      = _st('tL',  5, False, TA_LEFT,  colors.black, 6)
+    st_R      = _st('tR',  5, False, TA_RIGHT, colors.black, 6)
+    st_C      = _st('tC',  5, False, TA_CENTER,colors.black, 6)
+    st_bR     = _st('bR',  5, True,  TA_RIGHT, c_vtot, 6)
+    st_bL     = _st('bL',  5, True,  TA_LEFT,  c_vtot, 6)
+    st_rod    = _st('rd',  6, False, TA_CENTER, colors.HexColor(f"#{_CINZA_ROD}"))
 
     story = []
-    data_geracao = datetime.now().strftime("%d/%m/%Y %H:%M")
-    n_regs = totais.get("missoes", len(missoes))
+    data_ger = datetime.now().strftime("%d/%m/%Y %H:%M")
+    n_regs   = totais.get('missoes', len(missoes))
 
     # Cabeçalho
-    cab_data = [[
+    hdr = [[
         Paragraph("<b>BOLETIM DE MEDIÇÃO</b>", st_titulo),
-        Paragraph(
-            f"<b>{EMPRESA_NOME}</b><br/>"
-            f"Período: {periodo} – Total Registros: {n_regs:03d}",
-            st_empresa),
+        Paragraph(f"<b>{EMPRESA_NOME}</b><br/>Período: {periodo} &nbsp;|&nbsp; {n_regs:03d} registros", st_emp),
     ]]
-    t_cab = Table(cab_data, colWidths=[W * 0.55, W * 0.45])
-    t_cab.setStyle(TableStyle([
-        ('VALIGN',      (0,0), (-1,-1), 'MIDDLE'),
-        ('LINEBELOW',   (0,0), (-1,-1), 1, c_azul),
-        ('BACKGROUND',  (0,0), (-1,-1), c_fhdr),
-        ('BOTTOMPADDING',(0,0),(-1,-1), 4),
+    t_hdr = Table(hdr, colWidths=[W * 0.5, W * 0.5])
+    t_hdr.setStyle(TableStyle([
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('BACKGROUND', (0,0), (-1,-1), colors.HexColor('#EBF2FA')),
+        ('LINEBELOW', (0,0), (-1,-1), 1, c_azul),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 4),
     ]))
-    story.append(t_cab)
+    story.append(t_hdr)
     story.append(Spacer(1, 2*mm))
-    story.append(Paragraph(f"<b>Cliente: {cliente}</b>", st_cliente))
+    story.append(Paragraph(f"<b>Cliente: {cliente}</b>", st_cli))
     story.append(Spacer(1, 2*mm))
 
     # Larguras proporcionais
-    raw_w = [c[1] for c in _COLUNAS]
-    col_w = [r * (W / sum(raw_w)) for r in raw_w]
+    raw_w  = [c[1] for c in _COLUNAS]
+    col_w  = [r * (W / sum(raw_w)) for r in raw_w]
 
-    # Linha de cabeçalho
-    header_row = [Paragraph(f"<b>{c[0]}</b>", st_hdr_col) for c in _COLUNAS]
+    # Cabeçalho das colunas
+    def _hdr_cell(i, col):
+        title  = col[0]
+        # cor do header baseada no índice
+        if i == _IDX_ROSA:
+            bg = c_rosa_h; fc = colors.black
+        elif i == _IDX_AMAR:
+            bg = c_amar_h; fc = colors.black
+        elif i == _IDX_VERM:
+            bg = c_verm_h; fc = colors.white
+        elif i in (_IDX_LARA1, _IDX_LARA2):
+            bg = c_lara_h; fc = colors.white
+        else:
+            bg = c_col; fc = colors.white
+        return Paragraph(f"<b>{title}</b>",
+                         _st(f'h{i}', 4.5, True, TA_CENTER, fc, 5.5))
+
+    header_row = [_hdr_cell(i, c) for i, c in enumerate(_COLUNAS)]
     rows = [header_row]
 
     # Linhas de dados
-    for m in missoes:
+    _aligns = [c[3] for c in _COLUNAS]
+    for ri, m in enumerate(missoes):
         vals = _missao_to_row(m)
-        row = []
+        row  = []
         for i, v in enumerate(vals):
-            if i == 23:
-                row.append(Paragraph(f"<b>{_fmt_brl(v)}</b>", st_cell_bv))
-            elif i in _IDX_MOEDA:
-                row.append(Paragraph(_fmt_brl(v), st_cell_r))
-            elif i >= 13:
-                row.append(Paragraph(str(v), st_cell_r))
+            al = _aligns[i]
+            st = st_R if al == 'R' else (st_C if al == 'C' else st_L)
+            if i in _IDX_MOEDA:
+                cell = Paragraph(_fmt_brl(v), st_R)
+            elif i == _IDX_TOTAL:
+                cell = Paragraph(f"<b>{_fmt_brl(v)}</b>",
+                                 _st(f'd{i}', 5, True, TA_RIGHT, c_vtot, 6))
             else:
-                row.append(Paragraph(str(v), st_cell))
+                cell = Paragraph(str(v) if v != '' else '—', st)
+            row.append(cell)
         rows.append(row)
 
-    # Linha de totais
-    _T = {
-        0:  lambda: Paragraph(f"<b>TOTAL {totais.get('missoes','')} OS</b>", st_tot_l),
-        11: lambda: Paragraph(f"<b>{totais.get('total_h','')}</b>",  st_tot_l),
-        13: lambda: Paragraph(f"<b>{totais.get('exced_h','')}</b>",  st_tot_l),
-        14: lambda: Paragraph(f"<b>{totais.get('total_km','')}</b>", st_tot_l),
-        16: lambda: Paragraph(f"<b>{totais.get('exced_km','')}</b>", st_tot_l),
-        17: lambda: Paragraph(f"<b>{totais.get('desloc_km','')}</b>",st_tot_l),
-        18: lambda: Paragraph(f"<b>{_fmt_brl(totais.get('hr_exc',0))}</b>",    st_tot_v),
-        19: lambda: Paragraph(f"<b>{_fmt_brl(totais.get('km_exc',0))}</b>",    st_tot_v),
-        20: lambda: Paragraph(f"<b>{_fmt_brl(totais.get('escolta',0))}</b>",   st_tot_v),
-        21: lambda: Paragraph(f"<b>{_fmt_brl(totais.get('desloc_val',0))}</b>",st_tot_v),
-        22: lambda: Paragraph(f"<b>{_fmt_brl(totais.get('pedagio',0))}</b>",   st_tot_v),
-        23: lambda: Paragraph(f"<b>{_fmt_brl(totais.get('total',0))}</b>",     st_tot_v),
-    }
-    tot_row = [_T[i]() if i in _T else Paragraph("", st_tot_l) for i in range(len(_COLUNAS))]
-    rows.append(tot_row)
+    # Linha de totais gerais
+    def _tv(k, moeda=True):
+        v = totais.get(k, 0)
+        return Paragraph(f"<b>{_fmt_brl(v) if moeda else v}</b>", st_bR)
+
+    tot_vals = [''] * len(_COLUNAS)
+    tot_vals[0]  = Paragraph(f"<b>TOTAL — {n_regs:03d} OS</b>", st_bL)
+    tot_vals[9]  = Paragraph(f"<b>{totais.get('total_h','')}</b>",   st_bR)
+    tot_vals[13] = Paragraph(f"<b>{totais.get('total_km','')}</b>",  st_bR)
+    tot_vals[21] = _tv('subtotal_km')
+    tot_vals[22] = Paragraph(f"<b>{totais.get('exced_km','')}</b>",  st_bR)
+    tot_vals[24] = _tv('subtotal_km')
+    tot_vals[25] = Paragraph(f"<b>{totais.get('exced_h','')}</b>",   st_bR)
+    tot_vals[27] = _tv('subtotal_h')
+    tot_vals[28] = _tv('despesas')
+    tot_vals[32] = _tv('total')
+    rows.append(tot_vals)
+
+    # VALOR BRUTO
+    vb_row = [''] * len(_COLUNAS)
+    vb_row[31] = Paragraph("<b>VALOR BRUTO</b>",
+                           _st('vbl', 6, True, TA_RIGHT, c_vtot, 7))
+    vb_row[32] = Paragraph(f"<b>R$ {_fmt_brl(totais.get('total', 0))}</b>",
+                           _st('vbv', 6, True, TA_RIGHT, c_vtot, 7))
+    rows.append(vb_row)
 
     tabela = Table(rows, colWidths=col_w, repeatRows=1)
-    style_cmds = [
-        ('BACKGROUND',  (0,0),  (-1,0),  c_chdr),
-        ('GRID',        (0,0),  (-1,-1), 0.3, colors.HexColor('#B0BBC8')),
-        ('VALIGN',      (0,0),  (-1,-1), 'MIDDLE'),
-        ('TOPPADDING',  (0,0),  (-1,-1), 2),
-        ('BOTTOMPADDING',(0,0), (-1,-1), 2),
-        ('LEFTPADDING', (0,0),  (-1,-1), 2),
-        ('RIGHTPADDING',(0,0),  (-1,-1), 2),
-        ('BACKGROUND',  (0,-1), (-1,-1), c_ftot),
-        ('LINEABOVE',   (0,-1), (-1,-1), 1.2, c_azul),
+    n_data = len(rows) - 3  # rows sem header, totais e valor bruto
+
+    cmds = [
+        ('GRID',         (0,0),  (-1,-2), 0.3, c_bord),
+        ('VALIGN',       (0,0),  (-1,-1), 'MIDDLE'),
+        ('TOPPADDING',   (0,0),  (-1,-1), 1),
+        ('BOTTOMPADDING',(0,0),  (-1,-1), 1),
+        ('LEFTPADDING',  (0,0),  (-1,-1), 2),
+        ('RIGHTPADDING', (0,0),  (-1,-1), 2),
+        # Linha de totais
+        ('BACKGROUND',   (0,-2), (-1,-2), c_ftot),
+        ('LINEABOVE',    (0,-2), (-1,-2), 1.2, c_azul),
+        # Linha VALOR BRUTO
+        ('BACKGROUND',   (0,-1), (-1,-1), colors.white),
+        ('LINEABOVE',    (0,-1), (-1,-1), 0.5, c_bord),
+        # Cores especiais no header (row 0)
+        ('BACKGROUND',   (_IDX_ROSA,  0), (_IDX_ROSA,  0), c_rosa_h),
+        ('BACKGROUND',   (_IDX_AMAR,  0), (_IDX_AMAR,  0), c_amar_h),
+        ('BACKGROUND',   (_IDX_VERM,  0), (_IDX_VERM,  0), c_verm_h),
+        ('BACKGROUND',   (_IDX_LARA1, 0), (_IDX_LARA1, 0), c_lara_h),
+        ('BACKGROUND',   (_IDX_LARA2, 0), (_IDX_LARA2, 0), c_lara_h),
+        # Cor padrão das outras colunas no header
+        ('BACKGROUND',   (0, 0), (-1, 0), c_col),
+        # Reaplicar cores especiais por cima (ORDER matters em ReportLab)
+        ('BACKGROUND',   (_IDX_ROSA,  0), (_IDX_ROSA,  0), c_rosa_h),
+        ('BACKGROUND',   (_IDX_AMAR,  0), (_IDX_AMAR,  0), c_amar_h),
+        ('BACKGROUND',   (_IDX_VERM,  0), (_IDX_VERM,  0), c_verm_h),
+        ('BACKGROUND',   (_IDX_LARA1, 0), (_IDX_LARA1, 0), c_lara_h),
+        ('BACKGROUND',   (_IDX_LARA2, 0), (_IDX_LARA2, 0), c_lara_h),
     ]
-    for i in range(1, len(rows) - 1):
-        if i % 2 == 0:
-            style_cmds.append(('BACKGROUND', (0,i), (-1,i), c_clin))
-    tabela.setStyle(TableStyle(style_cmds))
+
+    # Cores especiais nas linhas de dados
+    for ri in range(1, n_data + 1):
+        base_bg = c_cinza if ri % 2 == 0 else colors.white
+        cmds.append(('BACKGROUND', (0, ri), (-1, ri), base_bg))
+        cmds.append(('BACKGROUND', (_IDX_ROSA,  ri), (_IDX_ROSA,  ri), c_rosa_d))
+        cmds.append(('BACKGROUND', (_IDX_AMAR,  ri), (_IDX_AMAR,  ri), c_amar_d))
+        cmds.append(('BACKGROUND', (_IDX_VERM,  ri), (_IDX_VERM,  ri), c_verm_d))
+        cmds.append(('BACKGROUND', (_IDX_LARA1, ri), (_IDX_LARA1, ri), c_lara_d))
+        cmds.append(('BACKGROUND', (_IDX_LARA2, ri), (_IDX_LARA2, ri), c_lara_d))
+
+    tabela.setStyle(TableStyle(cmds))
     story.append(tabela)
     story.append(Spacer(1, 3*mm))
     story.append(Paragraph(
-        f"Gerado por: WMS | Modelo: {SISTEMA_MODELO} | Data: {data_geracao} | {EMPRESA_NOME}",
-        st_rodape))
+        f"Gerado em: {data_ger} | {EMPRESA_NOME}", st_rod))
 
     doc.build(story)
     return buf.getvalue()
@@ -242,7 +329,6 @@ def gerar_pdf_bytes(cliente: str, periodo: str, missoes: list, totais: dict) -> 
 # ─── XLSX ────────────────────────────────────────────────────────────────────
 
 def gerar_xlsx_bytes(cliente: str, periodo: str, missoes: list, totais: dict) -> bytes:
-    """Retorna o XLSX do Boletim como bytes prontos para HttpResponse."""
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     from openpyxl.utils import get_column_letter
@@ -251,126 +337,166 @@ def gerar_xlsx_bytes(cliente: str, periodo: str, missoes: list, totais: dict) ->
     ws = wb.active
     ws.title = "Boletim de Medição"
 
-    def _borda(tipo='thin'):
-        s = Side(style=tipo, color='B0BBC8')
+    N  = len(_COLUNAS)
+    LC = get_column_letter(N)
+
+    def _fill(hex6):
+        return PatternFill('solid', fgColor=hex6)
+
+    def _borda(tipo='thin', cor='B0BBC8'):
+        s = Side(style=tipo, color=cor)
         return Border(left=s, right=s, top=s, bottom=s)
 
-    def _fill(hex_color):
-        return PatternFill('solid', fgColor=hex_color)
+    def _font(bold=False, size=8, color='000000', italic=False):
+        return Font(name='Arial', bold=bold, size=size, color=color, italic=italic)
 
-    n_cols   = len(_COLUNAS)
-    last_col = get_column_letter(n_cols)
-    data_geracao = datetime.now().strftime("%d/%m/%Y %H:%M")
-    n_regs = totais.get("missoes", len(missoes))
+    def _align(h='left', wrap=False):
+        return Alignment(horizontal=h, vertical='center', wrap_text=wrap)
 
-    # ── L1: Título ─────────────────────────────────────────────────────────
-    ws.merge_cells(f'A1:{last_col}1')
+    data_ger = datetime.now().strftime("%d/%m/%Y %H:%M")
+    n_regs   = totais.get('missoes', len(missoes))
+
+    # ── Linha 1: Título ────────────────────────────────────────────────────
+    ws.merge_cells(f'A1:{LC}1')
     ws['A1'] = "BOLETIM DE MEDIÇÃO"
-    ws['A1'].font      = Font(name='Arial', bold=True, size=14, color=_AZUL_ESC)
-    ws['A1'].alignment = Alignment(horizontal='center', vertical='center')
-    ws['A1'].fill      = _fill(_FUNDO_HDR)
-    ws.row_dimensions[1].height = 24
+    ws['A1'].font      = _font(bold=True, size=14, color=_AZUL_HDR)
+    ws['A1'].alignment = _align('center')
+    ws['A1'].fill      = _fill('EBF2FA')
+    ws.row_dimensions[1].height = 26
 
-    # ── L2: Empresa + Período ──────────────────────────────────────────────
-    mid = n_cols // 2
+    # ── Linha 2: Empresa + Período ─────────────────────────────────────────
+    mid = N // 2
     ws.merge_cells(f'A2:{get_column_letter(mid)}2')
     ws['A2'] = EMPRESA_NOME
-    ws['A2'].font      = Font(name='Arial', bold=True, size=8, color=_AZUL_ESC)
-    ws['A2'].alignment = Alignment(horizontal='left', vertical='center')
-    ws['A2'].fill      = _fill(_FUNDO_HDR)
+    ws['A2'].font      = _font(bold=True, size=8, color=_AZUL_HDR)
+    ws['A2'].alignment = _align('left')
+    ws['A2'].fill      = _fill('EBF2FA')
 
-    c_per = get_column_letter(mid + 1)
-    ws.merge_cells(f'{c_per}2:{last_col}2')
-    ws[f'{c_per}2'] = f"Período: {periodo} – Total: {n_regs:03d} registros"
-    ws[f'{c_per}2'].font      = Font(name='Arial', size=8, color=_AZUL_ESC)
-    ws[f'{c_per}2'].alignment = Alignment(horizontal='right', vertical='center')
-    ws[f'{c_per}2'].fill      = _fill(_FUNDO_HDR)
+    c2 = get_column_letter(mid + 1)
+    ws.merge_cells(f'{c2}2:{LC}2')
+    ws[f'{c2}2'] = f"Período: {periodo}  |  {n_regs:03d} registros"
+    ws[f'{c2}2'].font      = _font(size=8, color=_AZUL_HDR)
+    ws[f'{c2}2'].alignment = _align('right')
+    ws[f'{c2}2'].fill      = _fill('EBF2FA')
     ws.row_dimensions[2].height = 18
 
-    # ── L3: Cliente ────────────────────────────────────────────────────────
-    ws.merge_cells(f'A3:{last_col}3')
+    # ── Linha 3: Cliente ───────────────────────────────────────────────────
+    ws.merge_cells(f'A3:{LC}3')
     ws['A3'] = f"Cliente: {cliente}"
-    ws['A3'].font      = Font(name='Arial', bold=True, size=9, color=_AZUL_ESC)
-    ws['A3'].alignment = Alignment(horizontal='left', vertical='center')
-    ws['A3'].fill      = _fill(_FUNDO_HDR)
+    ws['A3'].font      = _font(bold=True, size=9, color=_AZUL_HDR)
+    ws['A3'].alignment = _align('left')
+    ws['A3'].fill      = _fill('EBF2FA')
     ws.row_dimensions[3].height = 18
 
-    # ── L4: Cabeçalho das colunas ──────────────────────────────────────────
-    ROW_HDR = 4
-    for ci, (col_name, _, col_w) in enumerate(_COLUNAS, start=1):
-        cell = ws.cell(row=ROW_HDR, column=ci, value=col_name)
-        cell.font      = Font(name='Arial', bold=True, size=8, color=_BRANCO)
-        cell.fill      = _fill(_AZUL_ESC)
-        cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-        cell.border    = _borda()
+    # ── Linha 4: Cabeçalho das colunas ────────────────────────────────────
+    HDR_ROW = 4
+    # Mapa de cores dos headers especiais (1-based)
+    _hdr_bg = {
+        _IDX_ROSA  + 1: (_ROSA,     '000000'),
+        _IDX_AMAR  + 1: (_AMARELO,  '000000'),
+        _IDX_VERM  + 1: (_VERMELHO, _BRANCO),
+        _IDX_LARA1 + 1: (_LARANJA,  _BRANCO),
+        _IDX_LARA2 + 1: (_LARANJA,  _BRANCO),
+    }
+
+    for ci, (nome, _, col_w, _al) in enumerate(_COLUNAS, start=1):
+        cel = ws.cell(row=HDR_ROW, column=ci, value=nome)
+        bg, fc = _hdr_bg.get(ci, (_AZUL_COL, _BRANCO))
+        cel.font      = _font(bold=True, size=8, color=fc)
+        cel.fill      = _fill(bg)
+        cel.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+        cel.border    = _borda()
         ws.column_dimensions[get_column_letter(ci)].width = col_w
-    ws.row_dimensions[ROW_HDR].height = 32
+    ws.row_dimensions[HDR_ROW].height = 34
 
-    # ── Dados ──────────────────────────────────────────────────────────────
-    COLS_MOEDA_XL = {i + 1 for i in _IDX_MOEDA}  # 1-based
-    # Colunas de horas (1-based): Total Horas=12, Franq Horas=13, Exced Horas=14
-    COLS_HORAS_XL = {12, 13, 14}
-    for ri, m in enumerate(missoes, start=ROW_HDR + 1):
+    # ── Linhas de dados ────────────────────────────────────────────────────
+    # Mapa de cores das células de dados especiais (1-based col)
+    _dat_bg = {
+        _IDX_ROSA  + 1: _ROSA_CLR,
+        _IDX_AMAR  + 1: _AMAR_CLR,
+        _IDX_VERM  + 1: _VERM_CLR,
+        _IDX_LARA1 + 1: _LARA_CLR,
+        _IDX_LARA2 + 1: _LARA_CLR,
+    }
+    _aligns = [c[3] for c in _COLUNAS]
+    _moeda1 = {i + 1 for i in _IDX_MOEDA}   # 1-based
+
+    for ri, m in enumerate(missoes, start=HDR_ROW + 1):
         vals = _missao_to_row(m)
-        bg   = _CINZA_LIN if ri % 2 == 0 else _BRANCO
+        base_bg = _CINZA_LIN if ri % 2 == 0 else _BRANCO
         for ci, val in enumerate(vals, start=1):
-            is_total = (ci == n_cols)  # last column = TOTAL (R$)
-            # Horas devem ser gravadas como texto puro (evita interpretação timedelta)
-            if ci in COLS_HORAS_XL:
-                val = str(val) if val else '00:00'
-            cell = ws.cell(row=ri, column=ci, value=val)
-            if ci in COLS_HORAS_XL:
-                cell.data_type = 's'  # força string
-                cell.number_format = '@'
-            cell.font   = Font(name='Arial', size=7, bold=is_total,
-                               color=(_VERDE if is_total else "000000"))
-            cell.fill   = _fill(bg)
-            cell.border = _borda()
-            cell.alignment = Alignment(
-                horizontal='right' if ci >= 12 else 'left',
-                vertical='center', wrap_text=(ci <= 4))
-            if ci in COLS_MOEDA_XL:
-                cell.number_format = '#,##0.00'
-        ws.row_dimensions[ri].height = 22
+            is_total_col = (ci == _IDX_TOTAL + 1)
+            # Horas: manter como texto
+            is_hora = (ci in {_IDX_AMAR + 1, 26})  # total_h e exced_h
+            if is_hora and val == '':
+                val = '00:00'
+            bg  = _dat_bg.get(ci, base_bg)
+            al  = _aligns[ci - 1]
+            cel = ws.cell(row=ri, column=ci, value=val)
+            if is_hora:
+                cel.number_format = '@'
+                cel.data_type     = 's'
+            cel.font      = _font(bold=is_total_col, size=7,
+                                  color=(_VERDE_TOT if is_total_col else '000000'))
+            cel.fill      = _fill(bg)
+            cel.border    = _borda()
+            cel.alignment = _align('right' if al == 'R' else ('center' if al == 'C' else 'left'),
+                                   wrap=(ci <= 5))
+            if ci in _moeda1 and not is_hora:
+                cel.number_format = '#,##0.00'
+        ws.row_dimensions[ri].height = 20
 
-    # ── Linha de totais ────────────────────────────────────────────────────
-    ROW_TOT = ROW_HDR + 1 + len(missoes)
-    tot_vals = [
-        f"TOTAL MISSÕES: {totais.get('missoes','')}", '', '', '', '', '', '',
-        '', '', '', '',
-        totais.get('total_h',''), '', totais.get('exced_h',''),
-        totais.get('total_km',''), '', totais.get('exced_km',''), totais.get('desloc_km',''),
-        totais.get('hr_exc', 0),  totais.get('km_exc', 0),
-        totais.get('escolta', 0), totais.get('desloc_val', 0),
-        totais.get('pedagio', 0), totais.get('total', 0),
-    ]
-    for ci, val in enumerate(tot_vals, start=1):
-        is_val = ci in COLS_MOEDA_XL
-        if ci in COLS_HORAS_XL:
-            val = str(val) if val else ''
-        cell = ws.cell(row=ROW_TOT, column=ci, value=val)
-        if ci in COLS_HORAS_XL:
-            cell.data_type = 's'
-            cell.number_format = '@'
-        cell.font   = Font(name='Arial', bold=True, size=8,
-                           color=(_VERDE if is_val else _AZUL_ESC))
-        cell.fill   = _fill(_FUNDO_TOT)
-        cell.border = _borda('medium')
-        cell.alignment = Alignment(
-            horizontal='right' if ci >= 12 else 'left', vertical='center')
-        if ci in COLS_MOEDA_XL:
-            cell.number_format = '#,##0.00'
-    ws.row_dimensions[ROW_TOT].height = 20
+    # ── Linha de Totais ────────────────────────────────────────────────────
+    TOT_ROW = HDR_ROW + 1 + len(missoes)
+    tot_map = {
+        1:  f"TOTAL — {n_regs:03d} OS",
+        10: totais.get('total_h', ''),
+        14: totais.get('total_km', 0),
+        22: totais.get('exced_km', 0),
+        25: totais.get('subtotal_km', 0),
+        23: totais.get('exced_km', 0),
+        26: totais.get('exced_h', ''),
+        28: totais.get('subtotal_h', 0),
+        29: totais.get('despesas', 0),
+        33: totais.get('total', 0),
+    }
+    for ci in range(1, N + 1):
+        val = tot_map.get(ci, '')
+        is_h = ci in {10, 26}
+        cel = ws.cell(row=TOT_ROW, column=ci, value=val)
+        if is_h:
+            cel.number_format = '@'
+            cel.data_type = 's'
+        cel.font   = _font(bold=True, size=8,
+                           color=(_VERDE_TOT if ci in _moeda1 else _AZUL_HDR))
+        cel.fill   = _fill(_FUNDO_TOT)
+        cel.border = _borda('medium', '1A3A5C')
+        cel.alignment = _align('right' if ci >= 10 else 'left')
+        if ci in _moeda1 and not is_h:
+            cel.number_format = '#,##0.00'
+    ws.row_dimensions[TOT_ROW].height = 22
 
-    # ── Rodapé ─────────────────────────────────────────────────────────────
-    ROW_ROD = ROW_TOT + 1
-    ws.merge_cells(f'A{ROW_ROD}:{last_col}{ROW_ROD}')
-    ws[f'A{ROW_ROD}'] = (
-        f"Gerado por: WMS | Modelo: {SISTEMA_MODELO} | "
-        f"Data: {data_geracao} | {EMPRESA_NOME}"
-    )
-    ws[f'A{ROW_ROD}'].font      = Font(name='Arial', size=7, italic=True, color=_CINZA_ROD)
-    ws[f'A{ROW_ROD}'].alignment = Alignment(horizontal='center')
+    # ── VALOR BRUTO ────────────────────────────────────────────────────────
+    VB_ROW = TOT_ROW + 1
+    ws.merge_cells(f'A{VB_ROW}:{get_column_letter(N-1)}{VB_ROW}')
+    ws[f'A{VB_ROW}'] = "VALOR BRUTO"
+    ws[f'A{VB_ROW}'].font      = _font(bold=True, size=10, color=_BRANCO)
+    ws[f'A{VB_ROW}'].fill      = _fill(_VERDE_TOT)
+    ws[f'A{VB_ROW}'].alignment = _align('right')
+
+    vb_cel = ws.cell(row=VB_ROW, column=N, value=totais.get('total', 0))
+    vb_cel.font          = _font(bold=True, size=10, color=_BRANCO)
+    vb_cel.fill          = _fill(_VERDE_TOT)
+    vb_cel.alignment     = _align('right')
+    vb_cel.number_format = 'R$ #,##0.00'
+    ws.row_dimensions[VB_ROW].height = 24
+
+    # ── Rodapé ────────────────────────────────────────────────────────────
+    ROD = VB_ROW + 1
+    ws.merge_cells(f'A{ROD}:{LC}{ROD}')
+    ws[f'A{ROD}'] = f"Gerado em: {data_ger}  |  {EMPRESA_NOME}"
+    ws[f'A{ROD}'].font      = _font(size=7, italic=True, color=_CINZA_ROD)
+    ws[f'A{ROD}'].alignment = _align('center')
 
     ws.freeze_panes = 'A5'
 
