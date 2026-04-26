@@ -620,9 +620,7 @@
       {% for foto in item.fotos %}
       <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border);background:var(--bg3)">
         <img src="{{ foto.foto.url }}" alt="Foto veículo" style="width:100%;height:140px;object-fit:cover;display:block">
-        {% if foto.legenda %}
-        <div style="padding:5px 8px;font-size:10px;color:var(--text3)">{{ foto.legenda }}</div>
-        {% endif %}
+        <div style="padding:5px 8px;font-size:10px;color:var(--text3)">{{ foto.get_momento_display }}</div>
       </div>
       {% endfor %}
     </div>
