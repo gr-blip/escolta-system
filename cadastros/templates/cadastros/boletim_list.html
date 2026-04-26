@@ -172,7 +172,16 @@
           </td>
           <td style="color:var(--text2)">{{ b.numero_nota|default:"—" }}</td>
           <td>
-            {% if b.status == 'aberto' %}<span class="badge badge-amber">Em Aberto</span>
+            {% if b.os.status == 'cancelada' %}
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <span class="badge badge-red">OS Cancelada</span>
+                {% if b.os.tipo_cancelamento == 'com_deslocamento' %}
+                  <span style="font-size:10px;color:var(--text3)">c/ deslocamento</span>
+                {% elif b.os.tipo_cancelamento == 'sem_deslocamento' %}
+                  <span style="font-size:10px;color:var(--text3)">s/ deslocamento</span>
+                {% endif %}
+              </div>
+            {% elif b.status == 'aberto' %}<span class="badge badge-amber">Em Aberto</span>
             {% elif b.status == 'faturado' %}<span class="badge badge-green">Faturado</span>
             {% else %}<span class="badge badge-red">Cancelado</span>{% endif %}
           </td>

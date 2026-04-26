@@ -268,12 +268,29 @@ class OrdemServico(models.Model):
     observacoes     = models.TextField(blank=True, verbose_name='Observações')
     status          = models.CharField(max_length=20, choices=STATUS_CHOICES, default='aberta', verbose_name='Status')
     finalizada_em   = models.DateTimeField(null=True, blank=True, verbose_name='Finalizada em')
+
+    TIPO_CANCELAMENTO_CHOICES = [
+        ('com_deslocamento',  'Com Deslocamento'),
+        ('sem_deslocamento',  'Sem Deslocamento'),
+    ]
+    tipo_cancelamento = models.CharField(
+        max_length=20,
+        choices=TIPO_CANCELAMENTO_CHOICES,
+        null=True, blank=True,
+        verbose_name='Tipo de Cancelamento',
+    )
+    cancelada_em    = models.DateTimeField(null=True, blank=True, verbose_name='Cancelada em')
+
     criado_em       = models.DateTimeField(auto_now_add=True)
     atualizado_em   = models.DateTimeField(auto_now=True)
 
     @property
     def is_finalizada(self):
         return self.status == 'finalizada'
+
+    @property
+    def is_cancelada(self):
+        return self.status == 'cancelada'
 
     class Meta:
         verbose_name = 'Ordem de Serviço'

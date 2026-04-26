@@ -814,12 +814,51 @@ def os_detalhe(request, pk):
 
 @login_required
 def os_delete(request, pk):
-    os = get_object_or_404(OrdemServico, pk=pk)
-    if request.method == 'POST':
-        os.delete()
-        messages.success(request, 'OS removida.')
+    """Mantido por compatibilidade — redireciona para os_cancelar."""
+    return redirect('os_cancelar', pk=pk)
+
+
+@login_required
+def os_cancelar(request, pk):
+    """
+    Cancela uma OS sem excluí-la do banco.
+    POST com campo 'tipo': 'com_deslocamento' | 'sem_deslocamento'.
+    Após cancelar, cria um BoletimMedicao (se não existir) para que o
+    financeiro consiga visualizar a OS cancelada no Boletim de Medição.
+    """
+    from django.utils import timezone
+
+    os_obj = get_object_or_404(OrdemServico, pk=pk)
+
+    if os_obj.status == 'cancelada':
+        messages.warning(request, 'Esta OS já está cancelada.')
         return redirect('os_list')
-    return render(request, 'cadastros/confirm_delete.html', {'obj': os, 'tipo': 'Ordem de Serviço'})
+
+    if os_obj.status == 'finalizada':
+        messages.error(request, 'Não é possível cancelar uma OS já finalizada.')
+        return redirect('os_list')
+
+    if request.method == 'POST':
+        tipo = request.POST.get('tipo', '')
+        if tipo not in ('com_deslocamento', 'sem_deslocamento'):
+            messages.error(request, 'Selecione o tipo de cancelamento.')
+            return redirect('os_cancelar', pk=pk)
+
+        os_obj.status = 'cancelada'
+        os_obj.tipo_cancelamento = tipo
+        os_obj.cancelada_em = timezone.now()
+        os_obj.save()
+
+        # Garante que a OS apareça no Boletim de Medição para o financeiro
+        from .models import BoletimMedicao
+        if not hasattr(os_obj, 'boletim'):
+            BoletimMedicao.objects.create(os=os_obj)
+
+        tipo_label = 'com deslocamento' if tipo == 'com_deslocamento' else 'sem deslocamento'
+        messages.success(request, f'OS {os_obj.numero} cancelada ({tipo_label}).')
+        return redirect('os_list')
+
+    return render(request, 'cadastros/os_cancelar.html', {'os': os_obj})
 
 
 # ── OS OPERACIONAL + VEÍCULOS ─────────────────────────────────────────────────
@@ -1846,8 +1885,10 @@ def boletim_list(request):
     clientes_filtro = request.GET.getlist('clientes')
     data_ini = request.GET.get('data_ini', '')
     data_fim = request.GET.get('data_fim', '')
-    # Criar boletins automaticamente para OS finalizadas que ainda nao tem boletim
-    os_sem_boletim = OrdemServico.objects.filter(status='finalizada').exclude(boletim__isnull=False)
+    # Criar boletins automaticamente para OS finalizadas ou canceladas sem boletim ainda
+    os_sem_boletim = OrdemServico.objects.filter(
+        status__in=['finalizada', 'cancelada']
+    ).exclude(boletim__isnull=False)
     for os_obj in os_sem_boletim:
         BoletimMedicao.objects.get_or_create(os=os_obj)
     boletins = BoletimMedicao.objects.select_related('os', 'os__cliente', 'os__equipe', 'tabela_preco').all()

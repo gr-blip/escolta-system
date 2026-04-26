@@ -127,8 +127,18 @@
   OS Finalizada em {{ os.finalizada_em|date:"d/m/Y H:i"|default:"—" }} — Esta OS está bloqueada e não pode ser editada.
 </div>
 {% endif %}
+{% if not novo and os.status == 'cancelada' %}
+<div class="banner-finalizada" style="background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3);color:var(--red)">
+  <svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  OS Cancelada em {{ os.cancelada_em|date:"d/m/Y H:i"|default:"—" }}
+  {% if os.tipo_cancelamento == 'com_deslocamento' %} — <strong>Com Deslocamento</strong>
+  {% elif os.tipo_cancelamento == 'sem_deslocamento' %} — <strong>Sem Deslocamento</strong>
+  {% endif %}
+  — Visível no Boletim de Medição para o financeiro.
+</div>
+{% endif %}
 
-<form method="post" {% if not novo and os.status == 'finalizada' %}class="os-bloqueada"{% endif %}>
+<form method="post" {% if not novo and os.status in 'finalizada,cancelada' %}class="os-bloqueada"{% endif %}>
 {% csrf_token %}
 <div class="os-wrap">
 

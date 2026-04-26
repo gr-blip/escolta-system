@@ -1,4 +1,4 @@
-﻿from django.urls import path
+from django.urls import path
 from . import views
 
 urlpatterns = [
@@ -55,22 +55,24 @@ urlpatterns += [
 
 # Ordens de Servico
 urlpatterns += [
-    path('operacional/os/',                              views.os_list,              name='os_list'),
-    path('operacional/os/nova/',                         views.os_nova,              name='os_nova'),
-    path('operacional/os/nova/detalhe/',                 views.os_detalhe_novo,      name='os_detalhe_novo'),
-    path('operacional/os/<int:pk>/',                     views.os_detalhe,           name='os_detalhe'),
-    path('operacional/os/<int:pk>/excluir/',             views.os_delete,            name='os_delete'),
-    path('operacional/os/<int:pk>/operacional/',         views.os_operacional_save,  name='os_operacional_save'),
-    path('operacional/os/<int:pk>/print/',               views.os_print,             name='os_print'),
-    path('operacional/os/<int:pk>/email/',               views.os_email_html,        name='os_email_html'),
-    path('operacional/os/<int:pk>/finalizar/',           views.os_finalizar,         name='os_finalizar'),
-    # Omnilink — rastreamento OS (endpoints AJAX por OS)
-    path('operacional/os/<int:pk>/rastreamento/posicao/',  views.omnilink_posicao_atual, name='omnilink_posicao_atual'),
-    path('operacional/os/<int:pk>/rastreamento/historico/', views.omnilink_historico,    name='omnilink_historico'),
-    # Omnilink — página de frota (todas as viaturas)
+    path('operacional/os/',                               views.os_list,              name='os_list'),
+    path('operacional/os/nova/',                          views.os_nova,              name='os_nova'),
+    path('operacional/os/nova/detalhe/',                  views.os_detalhe_novo,      name='os_detalhe_novo'),
+    path('operacional/os/<int:pk>/',                      views.os_detalhe,           name='os_detalhe'),
+    path('operacional/os/<int:pk>/excluir/',              views.os_delete,            name='os_delete'),
+    path('operacional/os/<int:pk>/cancelar/',             views.os_cancelar,          name='os_cancelar'),
+    path('operacional/os/<int:pk>/operacional/',          views.os_operacional_save,  name='os_operacional_save'),
+    path('operacional/os/<int:pk>/print/',                views.os_print,             name='os_print'),
+    path('operacional/os/<int:pk>/email/',                views.os_email_html,        name='os_email_html'),
+    path('operacional/os/<int:pk>/finalizar/',            views.os_finalizar,         name='os_finalizar'),
+    path('operacional/os/<int:pk>/gerar-link/',           views.os_gerar_link,        name='os_gerar_link'),
+    path('operacional/os/<int:pk>/desativar-link/',       views.os_desativar_link,    name='os_desativar_link'),
+    # Omnilink
+    path('operacional/os/<int:pk>/rastreamento/posicao/',   views.omnilink_posicao_atual, name='omnilink_posicao_atual'),
+    path('operacional/os/<int:pk>/rastreamento/historico/', views.omnilink_historico,     name='omnilink_historico'),
     path('operacional/rastreamento/',          views.omnilink_frota,          name='omnilink_frota'),
     path('operacional/rastreamento/posicoes/', views.omnilink_frota_posicoes, name='omnilink_frota_posicoes'),
-    # Omnilink — espelhamentos
+    # Espelhamentos
     path('operacional/espelhamentos/',           views.espelhamento_list,           name='espelhamento_list'),
     path('operacional/espelhamentos/listar/',    views.espelhamento_listar_ajax,    name='espelhamento_listar_ajax'),
     path('operacional/espelhamentos/centrais/',  views.espelhamento_centrais_ajax,  name='espelhamento_centrais_ajax'),
@@ -80,80 +82,54 @@ urlpatterns += [
     path('operacional/espelhamentos/debug/',     views.espelhamento_debug_ajax,     name='espelhamento_debug_ajax'),
 ]
 
-# Faturamento — Tabela de Precos
+# OS - Link externo do agente (field)
+urlpatterns += [
+    path('os/field/<uuid:token>/',                                 views.os_field_link,                  name='os_field_link'),
+    path('os/field/<uuid:token>/marco/salvar/',                    views.os_field_marco_salvar,          name='os_field_marco_salvar'),
+    path('os/field/<uuid:token>/foto-marco/',                      views.os_field_foto_marco,            name='os_field_foto_marco'),
+    path('os/field/<uuid:token>/foto-marco/<int:foto_pk>/delete/', views.os_field_foto_marco_delete,     name='os_field_foto_marco_delete'),
+    path('os/field/<uuid:token>/parada/salvar/',                   views.os_field_parada_salvar,         name='os_field_parada_salvar'),
+    path('os/field/<uuid:token>/parada/<int:pk>/delete/',          views.os_field_parada_delete,         name='os_field_parada_delete'),
+    path('os/field/<uuid:token>/incidente/salvar/',                views.os_field_incidente_salvar,      name='os_field_incidente_salvar'),
+    path('os/field/<uuid:token>/incidente/<int:pk>/delete/',       views.os_field_incidente_delete,      name='os_field_incidente_delete'),
+    path('os/field/<uuid:token>/foto-veiculo/',                    views.os_field_foto_veiculo,          name='os_field_foto_veiculo'),
+    path('os/field/<uuid:token>/foto-veiculo/<int:foto_pk>/delete/', views.os_field_foto_veiculo_delete, name='os_field_foto_veiculo_delete'),
+    path('os/field/<uuid:token>/troca-motorista/salvar/',          views.os_field_troca_motorista,       name='os_field_troca_motorista'),
+    path('os/field/<uuid:token>/troca-motorista/<int:pk>/delete/', views.os_field_troca_motorista_delete, name='os_field_troca_motorista_delete'),
+    path('os/field/<uuid:token>/assinatura/',                      views.os_field_assinatura,            name='os_field_assinatura'),
+    path('os/field/<uuid:token>/despesa/salvar/',                  views.os_field_despesa_salvar,        name='os_field_despesa_salvar'),
+    path('os/field/<uuid:token>/despesa/<int:pk>/delete/',         views.os_field_despesa_delete,        name='os_field_despesa_delete'),
+    path('os/field/<uuid:token>/pedagio/salvar/',                  views.os_field_pedagio_salvar,        name='os_field_pedagio_salvar'),
+    path('os/field/<uuid:token>/veiculo/salvar/',                  views.os_field_veiculo_salvar,        name='os_field_veiculo_salvar'),
+    path('os/field/<uuid:token>/veiculo/<int:pk>/delete/',         views.os_field_veiculo_delete,        name='os_field_veiculo_delete'),
+]
+
+# Faturamento
 urlpatterns += [
     path('faturamento/tabelas/',                   views.tabela_preco_list,   name='tabela_preco_list'),
     path('faturamento/tabelas/nova/',              views.tabela_preco_create, name='tabela_preco_create'),
     path('faturamento/tabelas/<int:pk>/editar/',   views.tabela_preco_edit,   name='tabela_preco_edit'),
     path('faturamento/tabelas/<int:pk>/excluir/',  views.tabela_preco_delete, name='tabela_preco_delete'),
-
-    # OS - Gerar/Desativar link externo
-    path('operacional/os/<int:pk>/gerar-link/', views.os_gerar_link, name='os_gerar_link'),
-    path('operacional/os/<int:pk>/desativar-link/', views.os_desativar_link, name='os_desativar_link'),
-
-    # OS - Link externo do agente
-    path('os/field/<uuid:token>/', views.os_field_link, name='os_field_link'),
-    path('os/field/<uuid:token>/marco/salvar/', views.os_field_marco_salvar, name='os_field_marco_salvar'),
-
-    path('os/field/<uuid:token>/foto-marco/', views.os_field_foto_marco, name='os_field_foto_marco'),
-    path('os/field/<uuid:token>/foto-marco/<int:foto_pk>/delete/', views.os_field_foto_marco_delete, name='os_field_foto_marco_delete'),
-    path('os/field/<uuid:token>/parada/salvar/', views.os_field_parada_salvar, name='os_field_parada_salvar'),
-    path('os/field/<uuid:token>/parada/<int:pk>/delete/', views.os_field_parada_delete, name='os_field_parada_delete'),
-    path('os/field/<uuid:token>/incidente/salvar/', views.os_field_incidente_salvar, name='os_field_incidente_salvar'),
-    path('os/field/<uuid:token>/incidente/<int:pk>/delete/', views.os_field_incidente_delete, name='os_field_incidente_delete'),
-    path('os/field/<uuid:token>/foto-veiculo/', views.os_field_foto_veiculo, name='os_field_foto_veiculo'),
-    path('os/field/<uuid:token>/foto-veiculo/<int:foto_pk>/delete/', views.os_field_foto_veiculo_delete, name='os_field_foto_veiculo_delete'),
-    path('os/field/<uuid:token>/troca-motorista/salvar/', views.os_field_troca_motorista, name='os_field_troca_motorista'),
-    path('os/field/<uuid:token>/troca-motorista/<int:pk>/delete/', views.os_field_troca_motorista_delete, name='os_field_troca_motorista_delete'),
-    path('os/field/<uuid:token>/assinatura/', views.os_field_assinatura, name='os_field_assinatura'),
-    path('os/field/<uuid:token>/despesa/salvar/', views.os_field_despesa_salvar, name='os_field_despesa_salvar'),
-    path('os/field/<uuid:token>/despesa/<int:pk>/delete/', views.os_field_despesa_delete, name='os_field_despesa_delete'),
-    path('os/field/<uuid:token>/pedagio/salvar/', views.os_field_pedagio_salvar, name='os_field_pedagio_salvar'),
-    path('os/field/<uuid:token>/veiculo/salvar/', views.os_field_veiculo_salvar, name='os_field_veiculo_salvar'),
-    path('os/field/<uuid:token>/veiculo/<int:pk>/delete/', views.os_field_veiculo_delete, name='os_field_veiculo_delete'),
-
-    # Equipes
-    path('operacional/equipes/', views.equipe_list, name='equipe_list'),
-    path('operacional/equipes/nova/', views.equipe_create, name='equipe_create'),
-    path('operacional/equipes/<int:pk>/editar/', views.equipe_edit, name='equipe_edit'),
-    path('operacional/equipes/<int:pk>/excluir/', views.equipe_delete, name='equipe_delete'),
-    path('operacional/equipes/<int:pk>/finalizar/', views.equipe_finalizar, name='equipe_finalizar'),
-
-    # OS
-    path('operacional/os/', views.os_list, name='os_list'),
-    path('operacional/os/nova/', views.os_nova, name='os_nova'),
-    path('operacional/os/<int:pk>/', views.os_detalhe, name='os_detalhe'),
-    path('operacional/os/<int:pk>/excluir/', views.os_delete, name='os_delete'),
-    path('operacional/os/<int:pk>/finalizar/', views.os_finalizar, name='os_finalizar'),
-    path('operacional/os/<int:pk>/salvar/', views.os_operacional_save, name='os_operacional_save'),
-    path('operacional/os/<int:pk>/print/', views.os_print, name='os_print'),
-    path('operacional/os/<int:pk>/email/', views.os_email_html, name='os_email_html'),
-
-    # Tabela de Precos
-    path('tabelas-preco/', views.tabela_preco_list, name='tabela_preco_list'),
-    path('tabelas-preco/nova/', views.tabela_preco_create, name='tabela_preco_create'),
-    path('tabelas-preco/<int:pk>/editar/', views.tabela_preco_edit, name='tabela_preco_edit'),
-    path('tabelas-preco/<int:pk>/excluir/', views.tabela_preco_delete, name='tabela_preco_delete'),
-
-    # Boletim
-    path('boletim/', views.boletim_list, name='boletim_list'),
-    path('boletim/<int:pk>/', views.boletim_detalhe, name='boletim_detalhe'),
-    path('boletim/export/pdf/', views.boletim_export_pdf, name='boletim_export_pdf'),
+    path('boletim/',             views.boletim_list,        name='boletim_list'),
+    path('boletim/<int:pk>/',    views.boletim_detalhe,     name='boletim_detalhe'),
+    path('boletim/export/pdf/',  views.boletim_export_pdf,  name='boletim_export_pdf'),
     path('boletim/export/xlsx/', views.boletim_export_xlsx, name='boletim_export_xlsx'),
+]
 
-    # Usuarios
-    path('usuarios/', views.usuario_list, name='usuario_list'),
-    path('usuarios/novo/', views.usuario_create, name='usuario_create'),
-    path('usuarios/<int:pk>/editar/', views.usuario_edit, name='usuario_edit'),
-    path('usuarios/<int:pk>/senha/', views.usuario_senha, name='usuario_senha'),
+# Usuarios
+urlpatterns += [
+    path('usuarios/',                  views.usuario_list,   name='usuario_list'),
+    path('usuarios/novo/',             views.usuario_create, name='usuario_create'),
+    path('usuarios/<int:pk>/editar/',  views.usuario_edit,   name='usuario_edit'),
+    path('usuarios/<int:pk>/senha/',   views.usuario_senha,  name='usuario_senha'),
     path('usuarios/<int:pk>/excluir/', views.usuario_delete, name='usuario_delete'),
 ]
 
-# Patrimonial — cadastro de vigilantes e porteiros
+# Patrimonial
 urlpatterns += [
-    path('patrimonial/funcionarios/',                      views.funcionario_patrimonial_list,   name='funcionario_patrimonial_list'),
-    path('patrimonial/funcionarios/novo/',                 views.funcionario_patrimonial_create, name='funcionario_patrimonial_create'),
-    path('patrimonial/funcionarios/<int:pk>/',             views.funcionario_patrimonial_detail, name='funcionario_patrimonial_detail'),
-    path('patrimonial/funcionarios/<int:pk>/editar/',      views.funcionario_patrimonial_edit,   name='funcionario_patrimonial_edit'),
-    path('patrimonial/funcionarios/<int:pk>/excluir/',     views.funcionario_patrimonial_delete, name='funcionario_patrimonial_delete'),
+    path('patrimonial/funcionarios/',                  views.funcionario_patrimonial_list,   name='funcionario_patrimonial_list'),
+    path('patrimonial/funcionarios/novo/',             views.funcionario_patrimonial_create, name='funcionario_patrimonial_create'),
+    path('patrimonial/funcionarios/<int:pk>/',         views.funcionario_patrimonial_detail, name='funcionario_patrimonial_detail'),
+    path('patrimonial/funcionarios/<int:pk>/editar/',  views.funcionario_patrimonial_edit,   name='funcionario_patrimonial_edit'),
+    path('patrimonial/funcionarios/<int:pk>/excluir/', views.funcionario_patrimonial_delete, name='funcionario_patrimonial_delete'),
 ]
