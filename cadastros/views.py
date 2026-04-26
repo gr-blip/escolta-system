@@ -504,15 +504,67 @@ from .models import OrdemServico
 
 @login_required
 def os_list(request):
-    q = request.GET.get('q', '')
+    """
+    Listagem de Ordens de Serviço.
+
+    Por padrão (sem filtros), esconde OS com status='finalizada' ou 'cancelada'
+    — finalizadas ficam visíveis na tela de Boletim de Medição, canceladas
+    só fazem sentido via consulta explícita.
+
+    Quando qualquer filtro é aplicado (q, data_de, data_ate ou clientes), a
+    lista passa a mostrar TODOS os status, incluindo finalizadas/canceladas,
+    pra permitir consulta histórica.
+    """
+    from django.utils.dateparse import parse_date
+
+    q = request.GET.get('q', '').strip()
+    data_de_str = request.GET.get('data_de', '').strip()
+    data_ate_str = request.GET.get('data_ate', '').strip()
+    # Multi-select de clientes: espera `clientes=1&clientes=7&...`.
+    # getlist preserva múltiplos valores do mesmo name no GET.
+    # Sanitização: aceita só dígitos pra não explodir o queryset com valor
+    # inválido vindo de URL manipulada.
+    clientes_ids = [c for c in request.GET.getlist('clientes') if c.isdigit()]
+
+    # parse_date retorna None se a string estiver vazia ou mal formatada
+    data_de = parse_date(data_de_str) if data_de_str else None
+    data_ate = parse_date(data_ate_str) if data_ate_str else None
+
     ordens = OrdemServico.objects.select_related('cliente', 'equipe').all()
+
+    tem_filtro = bool(q or data_de or data_ate or clientes_ids)
+
     if q:
         ordens = ordens.filter(
             Q(numero__icontains=q) |
             Q(cliente__razao_social__icontains=q) |
             Q(solicitante__icontains=q)
         )
-    return render(request, 'cadastros/os_list.html', {'ordens': ordens, 'q': q})
+    if data_de:
+        ordens = ordens.filter(previsao_inicio__date__gte=data_de)
+    if data_ate:
+        ordens = ordens.filter(previsao_inicio__date__lte=data_ate)
+    if clientes_ids:
+        ordens = ordens.filter(cliente_id__in=clientes_ids)
+
+    if not tem_filtro:
+        # Sem filtros: esconde finalizadas (vão pra Boletim) e canceladas.
+        ordens = ordens.exclude(status__in=['finalizada', 'cancelada'])
+
+    # Lista completa (ativos + inativos) pro dropdown do filtro.
+    # Inativos entram pra permitir consulta histórica de OS de clientes
+    # que foram desativados depois. O template marca visualmente inativos.
+    todos_clientes = Cliente.objects.all().order_by('razao_social')
+
+    return render(request, 'cadastros/os_list.html', {
+        'ordens': ordens,
+        'q': q,
+        'data_de': data_de_str,
+        'data_ate': data_ate_str,
+        'tem_filtro': tem_filtro,
+        'todos_clientes': todos_clientes,
+        'clientes_selecionados': clientes_ids,  # lista de strings de IDs
+    })
 
 
 @login_required
