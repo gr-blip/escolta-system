@@ -393,7 +393,8 @@ body{
           </tr>
         </thead>
         <tbody>
-          {% for v in os.veiculos.all %}
+          {% for item in veiculos_print %}
+          {% with v=item.veiculo %}
           {% if v.placa_cavalo or v.veiculo or v.motorista %}
           <tr>
             <td class="center">{{ v.ordem }}</td>
@@ -403,7 +404,19 @@ body{
             <td class="num">{{ v.placa_carreta2|default:"—" }}</td>
             <td>{{ v.motorista|default:"—" }}</td>
           </tr>
+          {% if item.fotos %}
+          <tr>
+            <td colspan="6" style="padding:8px 10px;background:#fafafa">
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                {% for foto in item.fotos %}
+                <img src="{{ foto.foto.url }}" alt="Foto veículo" style="height:90px;border-radius:6px;object-fit:cover;border:1px solid #e0e0e0">
+                {% endfor %}
+              </div>
+            </td>
+          </tr>
           {% endif %}
+          {% endif %}
+          {% endwith %}
           {% endfor %}
         </tbody>
       </table>

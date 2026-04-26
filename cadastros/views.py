@@ -796,6 +796,16 @@ def os_detalhe(request, pk):
         for foto in FotoMarco.objects.filter(os=os):
             fotos_marco[foto.marco] = foto.foto.url
 
+    # Assinaturas digitais
+    assinaturas_lista = list(AssinaturaOS.objects.filter(os=os).order_by('tipo'))
+
+    # Veículos escoltados com fotos
+    from .models import VeiculoEscoltado, FotoVeiculoEscoltado
+    veiculos_print = []
+    for v in os.veiculos.order_by('ordem'):
+        fotos = list(FotoVeiculoEscoltado.objects.filter(veiculo=v))
+        veiculos_print.append({'veiculo': v, 'fotos': fotos})
+
     return render(request, 'cadastros/os_detalhe.html', {
         'os': os,
         'clientes': clientes,
@@ -809,6 +819,8 @@ def os_detalhe(request, pk):
         'veiculo_slots': veiculo_slots,
         'fotos_marco': fotos_marco,
         'fotos_marco_lista': MARCOS_LISTA,
+        'assinaturas_lista': assinaturas_lista,
+        'veiculos_print': veiculos_print,
     })
 
 
