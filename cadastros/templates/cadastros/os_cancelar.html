@@ -1,77 +1,60 @@
-{% extends 'base_novo.html' %}
+{% extends 'cadastros/base.html' %}
 {% block title %}Cancelar OS {{ os.numero }}{% endblock %}
+{% block page_title %}Cancelar Ordem de Serviço{% endblock %}
 
 {% block content %}
-<div style="max-width:480px;margin:48px auto;padding:0 16px">
+<div class="delete-box">
+  <div class="card">
+    <div style="text-align:center;padding:16px 0">
 
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:32px">
-
-    <!-- Ícone de aviso -->
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
-      <div style="width:40px;height:40px;border-radius:50%;background:rgba(239,68,68,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
-          <path d="M10 3l8 14H2L10 3z" stroke="var(--red)" stroke-width="1.5" stroke-linejoin="round"/>
-          <path d="M10 8v4M10 14.5v.5" stroke="var(--red)" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- Ícone de cancelamento -->
+      <div style="width:52px;height:52px;background:var(--red-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+        <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <path d="M6 6l12 12M18 6L6 18" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </div>
-      <div>
-        <div style="font-size:16px;font-weight:600;color:var(--text1)">Cancelar Ordem de Serviço</div>
-        <div style="font-size:13px;color:var(--text3);margin-top:2px">{{ os.numero }} — {{ os.cliente }}</div>
-      </div>
+
+      <h2 style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:4px">Cancelar OS {{ os.numero }}</h2>
+      <p style="color:var(--text2);font-size:13px;margin-bottom:20px">{{ os.cliente }}</p>
+
+      <p style="color:var(--text2);font-size:13px;margin-bottom:20px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;text-align:left">
+        Selecione o motivo. A OS sairá do painel operacional e ficará disponível
+        no <strong>Boletim de Medição</strong> para o financeiro com o tipo de cancelamento registrado.
+      </p>
+
+      <form method="post" style="text-align:left">
+        {% csrf_token %}
+
+        <!-- Opção: com deslocamento -->
+        <label style="display:flex;align-items:flex-start;gap:12px;padding:14px;border:1px solid var(--border);border-radius:8px;cursor:pointer;margin-bottom:10px">
+          <input type="radio" name="tipo" value="com_deslocamento" required style="margin-top:3px;accent-color:#ef4444;flex-shrink:0">
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--text)">Cancelado com Deslocamento</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:2px">
+              A equipe saiu para a operação mas o serviço foi cancelado. Pode haver custos a faturar.
+            </div>
+          </div>
+        </label>
+
+        <!-- Opção: sem deslocamento -->
+        <label style="display:flex;align-items:flex-start;gap:12px;padding:14px;border:1px solid var(--border);border-radius:8px;cursor:pointer;margin-bottom:24px">
+          <input type="radio" name="tipo" value="sem_deslocamento" required style="margin-top:3px;accent-color:#ef4444;flex-shrink:0">
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--text)">Cancelado sem Deslocamento</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:2px">
+              O serviço foi cancelado antes de qualquer deslocamento da equipe. Sem custos operacionais.
+            </div>
+          </div>
+        </label>
+
+        <!-- Botões -->
+        <div style="display:flex;gap:10px;justify-content:center">
+          <button type="submit" class="btn btn-danger">Confirmar Cancelamento</button>
+          <a href="javascript:history.back()" class="btn btn-secondary">Voltar</a>
+        </div>
+      </form>
+
     </div>
-
-    <p style="font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.6">
-      Selecione o motivo do cancelamento. A OS será removida do painel operacional
-      e enviada para o <strong>Boletim de Medição</strong>, onde o financeiro poderá
-      consultá-la com o tipo de cancelamento registrado.
-    </p>
-
-    <form method="post">
-      {% csrf_token %}
-
-      <!-- Opção: com deslocamento -->
-      <label style="display:flex;align-items:flex-start;gap:12px;padding:16px;border:1px solid var(--border);border-radius:8px;cursor:pointer;margin-bottom:10px;transition:border-color .15s"
-             onmouseover="this.style.borderColor='var(--red)'"
-             onmouseout="this.style.borderColor='var(--border)'">
-        <input type="radio" name="tipo" value="com_deslocamento" required
-               style="margin-top:2px;accent-color:var(--red)">
-        <div>
-          <div style="font-size:14px;font-weight:600;color:var(--text1)">Cancelado com Deslocamento</div>
-          <div style="font-size:12px;color:var(--text3);margin-top:2px">
-            A equipe saiu para a operação mas o serviço foi cancelado. Pode haver custos a faturar.
-          </div>
-        </div>
-      </label>
-
-      <!-- Opção: sem deslocamento -->
-      <label style="display:flex;align-items:flex-start;gap:12px;padding:16px;border:1px solid var(--border);border-radius:8px;cursor:pointer;margin-bottom:24px;transition:border-color .15s"
-             onmouseover="this.style.borderColor='var(--red)'"
-             onmouseout="this.style.borderColor='var(--border)'">
-        <input type="radio" name="tipo" value="sem_deslocamento" required
-               style="margin-top:2px;accent-color:var(--red)">
-        <div>
-          <div style="font-size:14px;font-weight:600;color:var(--text1)">Cancelado sem Deslocamento</div>
-          <div style="font-size:12px;color:var(--text3);margin-top:2px">
-            O serviço foi cancelado antes de qualquer deslocamento da equipe. Sem custos operacionais.
-          </div>
-        </div>
-      </label>
-
-      <!-- Botões -->
-      <div style="display:flex;gap:10px">
-        <a href="{% url 'os_list' %}"
-           style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px;text-align:center;font-size:13px;color:var(--text2);text-decoration:none;transition:background .15s"
-           onmouseover="this.style.background='var(--hover)'" onmouseout="this.style.background=''">
-          Voltar
-        </a>
-        <button type="submit"
-                style="flex:1;padding:10px;background:rgba(239,68,68,.15);border:1px solid var(--red);border-radius:8px;color:var(--red);font-size:13px;font-weight:600;cursor:pointer;transition:background .15s"
-                onmouseover="this.style.background='rgba(239,68,68,.25)'" onmouseout="this.style.background='rgba(239,68,68,.15)'">
-          Confirmar Cancelamento
-        </button>
-      </div>
-    </form>
-
   </div>
 </div>
 {% endblock %}
