@@ -805,3 +805,127 @@ def descobrir_metodos_wsdl() -> list[str]:
         return sorted(client.service._operations)
     except Exception as e:
         return [f"ERRO: {e}"]
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# NOVA ESTRATÉGIA: ObtemAllPosicoesAtuais
+# Retorna posição ATUAL de todas as viaturas numa única chamada.
+# Identificação por placa (ID_OBJECT_TRACKER) — sem necessidade de hex MCT.
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _coord_decimal(coord) -> float:
+    """Converte coordenada Omnilink para decimal. Aceita decimal direto ou formato gg_mm_ss_d_O."""
+    if not coord:
+        return 0.0
+    s = str(coord).strip()
+    if '_' not in s:
+        try:
+            return float(s.replace(',', '.'))
+        except (ValueError, TypeError):
+            return 0.0
+    try:
+        p = s.split('_')
+        dec = float(p[0]) + float(p[1]) / 60 + (float(p[2]) + float(p[3]) / 10) / 3600
+        if len(p) > 4 and p[4].upper() in ('S', 'W'):
+            dec = -dec
+        return round(dec, 6)
+    except Exception:
+        return 0.0
+
+
+def _parse_posicoes_atuais_xml(xml_str: str) -> list:
+    """Parser do XML de ObtemAllPosicoesAtuais.
+    Retorna lista de dicts normalizados para o formato interno."""
+    if not xml_str:
+        return []
+    try:
+        txt = str(xml_str).strip()
+        if not txt.startswith('<?xml') and not txt.startswith('<root'):
+            txt = f'<root>{txt}</root>'
+        root = ET.fromstring(txt)
+    except ET.ParseError as e:
+        logger.error(f"_parse_posicoes_atuais_xml: XML inválido: {e}")
+        return []
+
+    posicoes = []
+    for pos in root.iter():
+        if pos.tag.split('}')[-1] != 'Posicao':
+            continue
+        d = {elem.tag.split('}')[-1]: (elem.text or '').strip() for elem in pos}
+
+        placa = (d.get('ID_OBJECT_TRACKER') or d.get('Placa') or '').strip().upper()
+        lat   = _coord_decimal(d.get('Latitude') or d.get('latitude') or '')
+        lng   = _coord_decimal(d.get('Longitude') or d.get('longitude') or '')
+
+        try:
+            vel = float(d.get('VEL', '0') or 0)
+        except (ValueError, TypeError):
+            vel = 0.0
+
+        try:
+            odo_raw = (d.get('ODOMETER') or d.get('Hodometro') or
+                       d.get('HODOMETRO') or d.get('Odometro') or '0')
+            odo_v   = float(odo_raw)
+            odo     = round(odo_v / 1000.0, 1) if odo_v > 10000 else odo_v
+        except (ValueError, TypeError):
+            odo = 0.0
+
+        ign_raw = d.get('IGNITION') or d.get('Ignicao') or ''
+        ignicao = True if ign_raw == '1' else (False if ign_raw == '0' else None)
+
+        # Endereço — prefere campos específicos, fallback para ENDERECO
+        rua    = d.get('LOGRADOURO') or d.get('RUA') or d.get('ENDERECO', '').split(',')[0].strip()
+        bairro = d.get('BAIRRO', '')
+        cidade = d.get('CIDADE') or d.get('MUNICIPIO') or d.get('CITY') or ''
+
+        posicoes.append({
+            'placa':       placa,
+            'lat':         lat,
+            'lng':         lng,
+            'velocidade':  vel,
+            'odometro':    odo,
+            'ignicao':     ignicao,
+            'data_hora':   (d.get('DATA') or '').split('.')[0],
+            'gps':         d.get('GPS', ''),
+            'direcao':     d.get('DIR', ''),
+            'endereco':    d.get('ENDERECO', ''),
+            'rua':         rua,
+            'bairro':      bairro,
+            'cidade':      cidade,
+            'id_terminal': d.get('ID_OBJECT_TRACKER', ''),
+        })
+    return posicoes
+
+
+def get_todas_posicoes_atuais() -> list:
+    """Chama ObtemAllPosicoesAtuais — retorna posição atual de todas as viaturas.
+    Cache de 60 s. Retorna lista vazia em caso de erro (sem exceção)."""
+    cache_key = 'omnilink_posicoes_atuais_v1'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        logger.debug(f"Cache hit posicoes_atuais: {len(cached)} viaturas")
+        return cached
+    try:
+        client  = _get_client()
+        xml_str = client.service.ObtemAllPosicoesAtuais(Usuario=USUARIO, Senha=SENHA_MD5)
+        raw     = str(xml_str) if xml_str else ''
+        logger.info(f"ObtemAllPosicoesAtuais -> {len(raw)} chars: {raw[:300]}")
+        posicoes = _parse_posicoes_atuais_xml(raw)
+        placas   = sorted({p['placa'] for p in posicoes if p['placa']})
+        logger.info(f"ObtemAllPosicoesAtuais -> {len(posicoes)} viaturas: {placas}")
+        if posicoes:
+            cache.set(cache_key, posicoes, 60)
+        return posicoes
+    except Exception as e:
+        logger.error(f"get_todas_posicoes_atuais: {e}")
+        return []
+
+
+def get_posicao_por_placa(placa: str) -> dict | None:
+    """Retorna a posição atual de uma viatura pela placa.
+    Usa o cache compartilhado de get_todas_posicoes_atuais."""
+    placa_norm = placa.strip().upper()
+    for pos in get_todas_posicoes_atuais():
+        if pos['placa'] == placa_norm:
+            return pos
+    return None

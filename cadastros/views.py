@@ -1059,9 +1059,10 @@ def os_email_html(request, pk):
 
 @login_required
 def omnilink_posicao_atual(request, pk):
-    """AJAX — retorna última posição GPS da viatura da OS."""
+    """AJAX — retorna posição atual GPS da viatura da OS.
+    Tenta ObtemAllPosicoesAtuais (por placa) primeiro; fallback ObtemEventosNormais."""
     from django.http import JsonResponse
-    from .omnilink import get_ultima_posicao
+    from .omnilink import get_posicao_por_placa, get_ultima_posicao
 
     os_obj = get_object_or_404(OrdemServico, pk=pk)
     viatura = os_obj.equipe.viatura if os_obj.equipe else None
@@ -1073,15 +1074,18 @@ def omnilink_posicao_atual(request, pk):
     import logging as _logging
     _log = _logging.getLogger(__name__)
 
-    dados = get_ultima_posicao(mct_id)
+    # Tenta método novo (por placa) — mais preciso e mais rápido
+    dados = None
+    if viatura and viatura.placa:
+        dados = get_posicao_por_placa(viatura.placa)
+
+    # Fallback: método antigo por MCT ID
+    if dados is None and mct_id:
+        dados = get_ultima_posicao(mct_id)
+
     if not dados:
-        from .omnilink import _mct_id_to_terminal
-        try:
-            id_term = _mct_id_to_terminal(mct_id)
-        except Exception:
-            id_term = '?'
-        _log.warning(f"omnilink_posicao_atual: sem dados para MCT={mct_id} IdTerminal={id_term}")
-        return JsonResponse({'ok': False, 'erro': f'Sem posição recente para viatura {mct_id} (IdTerminal: {id_term}). Verifique se o rastreador transmitiu posições.'})
+        _log.warning(f"omnilink_posicao_atual: sem dados para viatura MCT={mct_id}")
+        return JsonResponse({'ok': False, 'erro': f'Sem posição atual para esta viatura. Verifique se o rastreador está transmitindo.'})
 
     return JsonResponse({'ok': True, 'mct_id': mct_id, **dados})
 
@@ -1201,45 +1205,61 @@ def omnilink_frota(request):
 @login_required
 def omnilink_frota_posicoes(request):
     """
-    AJAX — retorna a última posição de todas as viaturas com MCT ID.
-    Usa o buffer compartilhado _get_eventos_normais() (uma só chamada API).
+    AJAX — retorna a posição atual de todas as viaturas.
+    Usa ObtemAllPosicoesAtuais (placa como chave). Fallback para
+    ObtemEventosNormais (MCT ID → hex) se o novo método não retornar dados.
     """
     from django.http import JsonResponse
     from .models import Viatura
-    from .omnilink import _get_eventos_normais, _mct_id_to_terminal
+    from .omnilink import get_todas_posicoes_atuais, _get_eventos_normais, _mct_id_to_terminal
 
     viaturas = Viatura.objects.filter(mct_id__isnull=False).exclude(mct_id='')
 
-    # Obtém todos os eventos de uma vez (cache compartilhado)
-    todos_eventos = _get_eventos_normais()
+    # ── Estratégia principal: ObtemAllPosicoesAtuais ──────────────────────────
+    posicoes_atuais = get_todas_posicoes_atuais()
+    pos_por_placa   = {p['placa']: p for p in posicoes_atuais if p.get('placa')}
 
-    # Indexa o último evento por id_terminal para lookup O(1)
+    # ── Fallback: buffer de eventos normais (se o novo método não retornar nada)
+    usar_fallback = not pos_por_placa
     ultimo_por_terminal: dict = {}
-    for ev in todos_eventos:
-        tid = ev.get('id_terminal', '')
-        if tid:
-            ultimo_por_terminal[tid] = ev   # mantém sempre o mais recente (lista é ordenada por tempo)
+    if usar_fallback:
+        logger.info("omnilink_frota_posicoes: ObtemAllPosicoesAtuais sem dados — usando fallback ObtemEventosNormais")
+        todos_eventos = _get_eventos_normais()
+        for ev in todos_eventos:
+            tid = ev.get('id_terminal', '')
+            if tid:
+                ultimo_por_terminal[tid] = ev
 
     resultado = []
     for v in viaturas:
-        try:
-            id_terminal = _mct_id_to_terminal(v.mct_id)
-        except Exception:
-            id_terminal = None
+        placa_norm = (v.placa or '').strip().upper()
 
-        ev = ultimo_por_terminal.get(id_terminal) if id_terminal else None
+        # Tenta pelo novo método (por placa)
+        pos = pos_por_placa.get(placa_norm)
+
+        # Fallback por MCT ID → hex
+        if pos is None and usar_fallback:
+            try:
+                id_terminal = _mct_id_to_terminal(v.mct_id)
+                ev = ultimo_por_terminal.get(id_terminal)
+                if ev:
+                    pos = ev
+            except Exception:
+                pass
+
         resultado.append({
-            'mct_id':      v.mct_id,
-            'id_terminal': id_terminal,
-            'placa':       v.placa,
-            'modelo':      v.marca_modelo,
-            'lat':         ev['lat']       if ev else None,
-            'lng':         ev['lng']       if ev else None,
-            'velocidade':  ev['velocidade'] if ev else None,
-            'odometro':    ev['odometro']  if ev else None,
-            'ignicao':     ev['ignicao']   if ev else None,
-            'data_hora':   ev['data_hora'] if ev else None,
-            'online':      ev is not None,
+            'mct_id':     v.mct_id,
+            'placa':      v.placa,
+            'modelo':     v.marca_modelo,
+            'lat':        pos.get('lat')        if pos else None,
+            'lng':        pos.get('lng')        if pos else None,
+            'velocidade': pos.get('velocidade') if pos else None,
+            'odometro':   pos.get('odometro')   if pos else None,
+            'ignicao':    pos.get('ignicao')    if pos else None,
+            'data_hora':  pos.get('data_hora')  if pos else None,
+            'endereco':   pos.get('endereco')   if pos else '',
+            'cidade':     pos.get('cidade')     if pos else '',
+            'online':     pos is not None,
         })
 
     return JsonResponse({'ok': True, 'viaturas': resultado})
