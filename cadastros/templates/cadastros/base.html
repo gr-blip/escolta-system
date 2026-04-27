@@ -44,6 +44,7 @@
   </div>
 
   <nav aria-label="Navegação principal">
+  {% with nivel=request.user.perfil.nivel|default:'operador' %}
 
     <div class="nav-group" data-group="principal">
       <button type="button" class="nav-section" onclick="toggleNavGroup(this)">
@@ -58,6 +59,7 @@
       </div>
     </div>
 
+    {% if nivel != 'financeiro' %}
     <div class="nav-group" data-group="cadastros">
       <button type="button" class="nav-section" onclick="toggleNavGroup(this)">
         <span>Cadastros</span>
@@ -128,7 +130,9 @@
         </a>
       </div>
     </div>
+    {% endif %}
 
+    {% if nivel == 'admin' or nivel == 'developer' or nivel == 'financeiro' %}
     <div class="nav-group" data-group="faturamento">
       <button type="button" class="nav-section" onclick="toggleNavGroup(this)">
         <span>Faturamento</span>
@@ -145,6 +149,7 @@
         </a>
       </div>
     </div>
+    {% endif %}
 
     <div class="nav-group" data-group="configuracoes">
       <button type="button" class="nav-section" onclick="toggleNavGroup(this)">
@@ -159,6 +164,7 @@
       </div>
     </div>
 
+  {% endwith %}
   </nav>
 
   <div class="sidebar-footer">
@@ -331,16 +337,4 @@ function toggleNavGroup(btn){
   });
   // Libera a animação no próximo frame
   requestAnimationFrame(function(){
-    requestAnimationFrame(function(){
-      if(sidebar) sidebar.classList.remove('nav-booting');
-    });
-  });
-})();
-</script>
-
-<script src="{% static 'cadastros/toasts.js' %}"></script>
-
-{% block extra_js %}{% endblock %}
-
-</body>
-</html>
+    requestAnimationF

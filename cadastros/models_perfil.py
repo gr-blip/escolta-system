@@ -23,9 +23,10 @@ from django.dispatch import receiver
 
 class PerfilUsuario(models.Model):
     NIVEL_CHOICES = [
-        ('developer', 'Developer'),
-        ('admin',     'Administrador'),
-        ('operador',  'Operador'),
+        ('developer',  'Developer'),
+        ('admin',      'Administrador'),
+        ('operador',   'Operador'),
+        ('financeiro', 'Financeiro'),
     ]
 
     user   = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil')
@@ -69,5 +70,4 @@ def salvar_perfil_automatico(sender, instance, **kwargs):
     if hasattr(instance, 'perfil'):
         try:
             instance.perfil.save()
-        except (OperationalError, ProgrammingError):
-            pass
+        except (OperationalErr

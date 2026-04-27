@@ -32,6 +32,7 @@
         <select name="nivel">
           <option value="operador" {% if form.nivel.value == 'operador' or not form.nivel.value %}selected{% endif %}>Operador</option>
           <option value="admin" {% if form.nivel.value == 'admin' %}selected{% endif %}>Administrador</option>
+          <option value="financeiro" {% if form.nivel.value == 'financeiro' %}selected{% endif %}>Financeiro</option>
         </select>
       </div>
       {% endif %}
@@ -89,18 +90,11 @@
       <div style="display:grid;gap:6px">
         <div><span style="font-weight:600;color:var(--text)">Operador</span> — acesso a cadastros e operacional (agentes, viaturas, equipes, ordens de serviço)</div>
         <div><span style="font-weight:600;color:var(--green)">Administrador</span> — acesso total incluindo faturamento, tabelas de preços e boletins</div>
+        <div><span style="font-weight:600;color:#f59e0b">Financeiro</span> — acesso exclusivo ao módulo de faturamento (boletins e tabelas de preço)</div>
       </div>
     </div>
     {% endif %}
 
     <div style="display:flex;gap:10px;margin-top:20px">
       <button type="submit" class="btn btn-primary">
-        <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        {% if obj %}Salvar alterações{% else %}Criar usuário{% endif %}
-      </button>
-      <a href="{% url 'usuario_list' %}" class="btn btn-secondary">Cancelar</a>
-    </div>
-  </form>
-</div>
-{% endblock %}
-
+        <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" stroke="currentColor" stroke-width="1.8" 

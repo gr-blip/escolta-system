@@ -1838,6 +1838,9 @@ from .models import TabelaPreco, BoletimMedicao
 
 @login_required
 def tabela_preco_list(request):
+    if not _pode_faturamento(request.user):
+        messages.error(request, 'Sem permissão para acessar Faturamento.')
+        return redirect('dashboard')
     q = request.GET.get('q', '')
     tabelas = TabelaPreco.objects.select_related('cliente').all()
     if q:
@@ -1849,6 +1852,9 @@ def tabela_preco_list(request):
 
 @login_required
 def tabela_preco_create(request):
+    if not _pode_faturamento(request.user):
+        messages.error(request, 'Sem permissão para acessar Faturamento.')
+        return redirect('dashboard')
     clientes = Cliente.objects.all().order_by('razao_social')
     if request.method == 'POST':
         try:
@@ -1881,6 +1887,9 @@ def tabela_preco_create(request):
 
 @login_required
 def tabela_preco_edit(request, pk):
+    if not _pode_faturamento(request.user):
+        messages.error(request, 'Sem permissão para acessar Faturamento.')
+        return redirect('dashboard')
     tabela = get_object_or_404(TabelaPreco, pk=pk)
     clientes = Cliente.objects.all().order_by('razao_social')
     if request.method == 'POST':
@@ -1915,6 +1924,9 @@ def tabela_preco_edit(request, pk):
 
 @login_required
 def tabela_preco_delete(request, pk):
+    if not _pode_faturamento(request.user):
+        messages.error(request, 'Sem permissão para acessar Faturamento.')
+        return redirect('dashboard')
     tabela = get_object_or_404(TabelaPreco, pk=pk)
     if request.method == 'POST':
         tabela.delete()
@@ -1929,6 +1941,9 @@ def tabela_preco_delete(request, pk):
 
 @login_required
 def boletim_list(request):
+    if not _pode_faturamento(request.user):
+        messages.error(request, 'Sem permissão para acessar Faturamento.')
+        return redirect('dashboard')
     from datetime import datetime
     q = request.GET.get('q', '')
     status_filtro = request.GET.get('status', '')
@@ -2453,6 +2468,13 @@ def _is_admin_or_developer(user):
 
 def _is_developer(user):
     return _get_nivel(user) == 'developer'
+
+def _is_financeiro(user):
+    return _get_nivel(user) == 'financeiro'
+
+def _pode_faturamento(user):
+    """Financeiro, admin e developer têm acesso ao módulo de faturamento."""
+    return _get_nivel(user) in ('financeiro', 'admin', 'developer')
 
 
 @login_required
@@ -3524,52 +3546,4 @@ def funcionario_patrimonial_list(request):
         'status_filtro': status_filtro,
         'total': qs.count(),
     }
-    return render(request, 'cadastros/funcionario_patrimonial_list.html', context)
-
-
-@login_required
-def funcionario_patrimonial_create(request):
-    form = FuncionarioPatrimonialForm(request.POST or None, request.FILES or None)
-    if form.is_valid():
-        form.save()
-        messages.success(request, 'Funcionario cadastrado com sucesso!')
-        return redirect('funcionario_patrimonial_list')
-    return render(request, 'cadastros/funcionario_patrimonial_form.html', {
-        'form': form,
-        'titulo': 'Novo Funcionario Patrimonial',
-    })
-
-
-@login_required
-def funcionario_patrimonial_edit(request, pk):
-    func = get_object_or_404(FuncionarioPatrimonial, pk=pk)
-    form = FuncionarioPatrimonialForm(request.POST or None, request.FILES or None, instance=func)
-    if form.is_valid():
-        form.save()
-        messages.success(request, 'Funcionario atualizado com sucesso!')
-        return redirect('funcionario_patrimonial_list')
-    return render(request, 'cadastros/funcionario_patrimonial_form.html', {
-        'form': form,
-        'titulo': 'Editar Funcionario Patrimonial',
-        'obj': func,
-    })
-
-
-@login_required
-def funcionario_patrimonial_detail(request, pk):
-    func = get_object_or_404(FuncionarioPatrimonial, pk=pk)
-    return render(request, 'cadastros/funcionario_patrimonial_detail.html', {'obj': func})
-
-
-@login_required
-def funcionario_patrimonial_delete(request, pk):
-    func = get_object_or_404(FuncionarioPatrimonial, pk=pk)
-    if request.method == 'POST':
-        func.delete()
-        messages.success(request, 'Funcionario removido.')
-        return redirect('funcionario_patrimonial_list')
-    return render(request, 'cadastros/confirm_delete.html', {
-        'obj': func,
-        'tipo': 'Funcionario Patrimonial',
-    })
-
+    return render(request, 'cadastros
