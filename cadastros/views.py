@@ -284,7 +284,8 @@ def cliente_list(request):
     if q:
         clientes = clientes.filter(Q(razao_social__icontains=q) | Q(cnpj__icontains=q))
     return render(request, 'cadastros/cliente_list.html', {
-        'clientes': clientes, 'q': q, 'mostrar_inativos': mostrar_inativos
+        'clientes': clientes, 'q': q, 'mostrar_inativos': mostrar_inativos,
+        'is_admin': _is_admin_or_developer(request.user),
     })
 
 
@@ -319,6 +320,34 @@ def cliente_inativar(request, pk):
         messages.success(request, f'Cliente {status} com sucesso.')
         return redirect('cliente_list')
     return render(request, 'cadastros/cliente_inativar.html', {'obj': cliente})
+
+
+@login_required
+def cliente_deletar_definitivo(request, pk):
+    """Exclusão permanente do cliente — somente admin/developer.
+    Bloqueado se houver OS ou tabelas de preço vinculadas."""
+    if not _is_admin_or_developer(request.user):
+        messages.error(request, 'Sem permissão para esta ação.')
+        return redirect('cliente_list')
+
+    cliente = get_object_or_404(Cliente, pk=pk)
+
+    if request.method == 'POST':
+        total_os = cliente.ordens_servico.count()
+        total_tp = cliente.tabelas_preco.count()
+        if total_os or total_tp:
+            msgs = []
+            if total_os: msgs.append(f'{total_os} Ordem(ns) de Serviço')
+            if total_tp: msgs.append(f'{total_tp} Tabela(s) de Preço')
+            messages.error(request,
+                f'Não é possível excluir: cliente possui {" e ".join(msgs)} vinculada(s).')
+            return redirect('cliente_list')
+        nome = cliente.razao_social
+        cliente.delete()
+        messages.success(request, f'Cliente "{nome}" excluído definitivamente.')
+        return redirect('cliente_list')
+
+    return render(request, 'cadastros/cliente_deletar_confirm.html', {'obj': cliente})
 
 
 # ── COLETES ───────────────────────────────────────────────────────────────────

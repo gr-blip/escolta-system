@@ -34,6 +34,7 @@ urlpatterns = [
     path('clientes/novo/', views.cliente_create, name='cliente_create'),
     path('clientes/<int:pk>/editar/', views.cliente_edit, name='cliente_edit'),
     path('clientes/<int:pk>/excluir/', views.cliente_inativar, name='cliente_delete'),
+    path('clientes/<int:pk>/deletar/', views.cliente_deletar_definitivo, name='cliente_deletar_definitivo'),
 ]
 
 # Coletes
