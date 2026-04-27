@@ -50,6 +50,48 @@ def _os_por_dia(n_dias=14):
     }
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Endpoint JSON: OS por cliente com filtro de data (usado pelo gráfico do dashboard)
+# ─────────────────────────────────────────────────────────────────────────────
+@login_required
+def dashboard_os_por_cliente(request):
+    from .models import OrdemServico
+    from django.db.models import Count as _Count
+
+    hoje = timezone.localdate()
+
+    raw_ini = request.GET.get('inicio', '')
+    raw_fim = request.GET.get('fim', '')
+
+    try:
+        dt_ini = date.fromisoformat(raw_ini) if raw_ini else hoje.replace(day=1)
+    except ValueError:
+        dt_ini = hoje.replace(day=1)
+
+    try:
+        dt_fim = date.fromisoformat(raw_fim) if raw_fim else hoje
+    except ValueError:
+        dt_fim = hoje
+
+    qs = (
+        OrdemServico.objects
+        .filter(criado_em__date__gte=dt_ini, criado_em__date__lte=dt_fim)
+        .values('cliente__razao_social')
+        .annotate(total=_Count('id'))
+        .order_by('-total')[:20]
+    )
+
+    labels = [item['cliente__razao_social'] or '—' for item in qs]
+    values = [item['total'] for item in qs]
+
+    return JsonResponse({
+        'labels': labels,
+        'values': values,
+        'inicio': dt_ini.isoformat(),
+        'fim':    dt_fim.isoformat(),
+    })
+
+
 @login_required
 def dashboard(request):
     hoje = date.today()

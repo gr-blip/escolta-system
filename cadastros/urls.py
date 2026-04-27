@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
+    path('dashboard/os-por-cliente/', views.dashboard_os_por_cliente, name='dashboard_os_por_cliente'),
 
     # Agentes
     path('agentes/', views.agente_list, name='agente_list'),

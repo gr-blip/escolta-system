@@ -61,6 +61,31 @@
 
 </div>
 
+<!-- ── GRÁFICO: OS POR CLIENTE ── -->
+<div class="card" style="margin-bottom:20px">
+  <div class="card-title" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+    <span style="display:flex;align-items:center;gap:8px">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M17 20H4a2 2 0 01-2-2V6a2 2 0 012-2h13M17 20l5-5-5-5M22 15H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      OS por Cliente
+    </span>
+    <form id="form-os-cliente" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap" onsubmit="return false">
+      <label style="font-size:12px;color:var(--text2);font-weight:500">De</label>
+      <input type="date" id="ini-os-cliente" style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg3);color:var(--text);font-size:12px">
+      <label style="font-size:12px;color:var(--text2);font-weight:500">Até</label>
+      <input type="date" id="fim-os-cliente" style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg3);color:var(--text);font-size:12px">
+      <button type="button" onclick="carregarOsCliente()" class="btn btn-secondary" style="padding:4px 14px;font-size:12px">Filtrar</button>
+    </form>
+  </div>
+  <div style="position:relative;min-height:260px">
+    <canvas id="chartOsCliente" aria-label="OS por cliente"></canvas>
+    <div id="os-cliente-empty" style="display:none;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:13px">
+      Nenhuma OS no período selecionado.
+    </div>
+  </div>
+</div>
+
 <!-- ── ALERTAS DE VENCIMENTO ── -->
 {% if alertas_cnh or alertas_cnv or alertas_coletes %}
 <div style="margin-bottom:20px">
@@ -307,6 +332,105 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 });
+</script>
+
+<!-- ── Gráfico OS por Cliente (AJAX + Chart.js) ── -->
+<script defer>
+(function () {
+  var URL_OS_CLIENTE = "{% url 'dashboard_os_por_cliente' %}";
+  var chartInstance = null;
+
+  function defaultDates() {
+    var hoje = new Date();
+    var y = hoje.getFullYear();
+    var m = String(hoje.getMonth() + 1).padStart(2, '0');
+    var d = String(hoje.getDate()).padStart(2, '0');
+    return { ini: y + '-' + m + '-01', fim: y + '-' + m + '-' + d };
+  }
+
+  function carregarOsCliente() {
+    var ini = document.getElementById('ini-os-cliente').value;
+    var fim = document.getElementById('fim-os-cliente').value;
+    if (!ini || !fim) { var def = defaultDates(); ini = def.ini; fim = def.fim; }
+
+    fetch(URL_OS_CLIENTE + '?inicio=' + ini + '&fim=' + fim)
+      .then(function (r) { return r.json(); })
+      .then(function (data) { renderChart(data); })
+      .catch(function (e) { console.error('OS por cliente:', e); });
+  }
+
+  window.carregarOsCliente = carregarOsCliente;
+
+  function renderChart(data) {
+    var emptyEl = document.getElementById('os-cliente-empty');
+    var canvas  = document.getElementById('chartOsCliente');
+    if (!canvas) return;
+
+    if (!data.labels || data.labels.length === 0) {
+      canvas.style.display = 'none';
+      emptyEl.style.display = 'flex';
+      if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+      return;
+    }
+
+    canvas.style.display = 'block';
+    emptyEl.style.display = 'none';
+
+    var barH = 34;
+    canvas.parentElement.style.minHeight = Math.max(220, data.labels.length * barH + 40) + 'px';
+
+    var css       = getComputedStyle(document.documentElement);
+    var colorText = (css.getPropertyValue('--text2') || '#9db0cd').trim();
+    var colorGrid = (css.getPropertyValue('--border') || 'rgba(255,255,255,.08)').trim();
+    var colorBlue = (css.getPropertyValue('--blue-light') || '#3b82f6').trim();
+
+    if (chartInstance) { chartInstance.destroy(); }
+
+    chartInstance = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [{
+          label: 'Ordens de Serviço',
+          data: data.values,
+          backgroundColor: colorBlue,
+          borderRadius: 5,
+          maxBarThickness: 24,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function (ctx) { return '  ' + ctx.parsed.x + ' OS'; }
+            }
+          }
+        },
+        scales: {
+          x: { beginAtZero: true, grid: { color: colorGrid }, ticks: { color: colorText, precision: 0 } },
+          y: { grid: { display: false }, ticks: { color: colorText, font: { size: 12 } } }
+        }
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (typeof Chart === 'undefined') return;
+    var d = defaultDates();
+    document.getElementById('ini-os-cliente').value = d.ini;
+    document.getElementById('fim-os-cliente').value = d.fim;
+    ['ini-os-cliente', 'fim-os-cliente'].forEach(function (id) {
+      document.getElementById(id).addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') carregarOsCliente();
+      });
+    });
+    carregarOsCliente();
+  });
+})();
 </script>
 
 {% endblock %}
