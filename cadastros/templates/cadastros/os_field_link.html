@@ -606,7 +606,7 @@ function salvarVeiculo(token) {
   fd.append('placa_carreta', placaCar);
   fd.append('placa_carreta2',placaCar2);
   fd.append('motorista',     motorista);
-  fd.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+  fd.append('csrfmiddlewaretoken', typeof CSRF !== 'undefined' ? CSRF : '');
 
   fetch(`/os/field/${token}/veiculo/salvar/`, { method: 'POST', body: fd })
     .then(r => r.json())
@@ -680,7 +680,7 @@ function salvarVeiculo(token) {
 function deletarVeiculo(token, pk, cardId) {
   if (!confirm('Remover este veículo escoltado?')) return;
   const fd = new FormData();
-  fd.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+  fd.append('csrfmiddlewaretoken', typeof CSRF !== 'undefined' ? CSRF : '');
   fetch(`/os/field/${token}/veiculo/${pk}/delete/`, { method: 'POST', body: fd })
     .then(r => r.json())
     .then(data => {
