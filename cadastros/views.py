@@ -905,13 +905,14 @@ def os_operacional_save(request, pk):
             return None
 
     # Salvar / atualizar OSOperacional
+    # update_fields explícito → GPS coords do agente nunca são sobrescritos
     op, _ = OSOperacional.objects.get_or_create(os=os_obj)
-    op.numero_folha       = request.POST.get('numero_folha', '')
-    op.inicio_viagem      = parse_dt(request.POST.get('inicio_viagem'))
-    op.chegada_operacao   = parse_dt(request.POST.get('chegada_operacao'))
-    op.inicio_operacao    = parse_dt(request.POST.get('inicio_operacao'))
-    op.termino_operacao   = parse_dt(request.POST.get('termino_operacao'))
-    op.termino_viagem     = parse_dt(request.POST.get('termino_viagem'))
+    op.numero_folha        = request.POST.get('numero_folha', '')
+    op.inicio_viagem       = parse_dt(request.POST.get('inicio_viagem'))
+    op.chegada_operacao    = parse_dt(request.POST.get('chegada_operacao'))
+    op.inicio_operacao     = parse_dt(request.POST.get('inicio_operacao'))
+    op.termino_operacao    = parse_dt(request.POST.get('termino_operacao'))
+    op.termino_viagem      = parse_dt(request.POST.get('termino_viagem'))
     op.km_inicio_viagem    = parse_int(request.POST.get('km_inicio_viagem'))
     op.km_chegada_operacao = parse_int(request.POST.get('km_chegada_operacao'))
     op.km_inicio_operacao  = parse_int(request.POST.get('km_inicio_operacao'))
@@ -924,6 +925,16 @@ def os_operacional_save(request, pk):
             op.pedagio = float(pedagio_val)
         except ValueError:
             pass
+
+    # Salva APENAS os campos editáveis pelo operador — GPS do agente intocado
+    op.save(update_fields=[
+        'numero_folha',
+        'inicio_viagem', 'chegada_operacao', 'inicio_operacao',
+        'termino_operacao', 'termino_viagem',
+        'km_inicio_viagem', 'km_chegada_operacao', 'km_inicio_operacao',
+        'km_termino_operacao', 'km_termino_viagem',
+        'pedagio',
+    ])
 
     # Salvar veículos escoltados (máx 4)
     os_obj.veiculos.all().delete()
@@ -944,36 +955,7 @@ def os_operacional_save(request, pk):
                 motorista=motorista,
             )
 
-    status_atual = os_obj.status
-    if status_atual != 'cancelada':
-        if op.termino_viagem:
-            os_obj.status = 'concluida'
-        elif op.termino_operacao:
-            os_obj.status = 'encerrando'
-        elif op.chegada_operacao or op.inicio_operacao:
-            os_obj.status = 'em_operacao'
-        elif op.inicio_viagem:
-            os_obj.status = 'em_viagem'
-        else:
-            os_obj.status = 'aberta'
-        os_obj.save(update_fields=['status'])
-
-    status_atual = os_obj.status
-    if status_atual != 'cancelada':
-        if op.termino_viagem:
-            os_obj.status = 'concluida'
-        elif op.termino_operacao:
-            os_obj.status = 'encerrando'
-        elif op.chegada_operacao or op.inicio_operacao:
-            os_obj.status = 'em_operacao'
-        elif op.inicio_viagem:
-            os_obj.status = 'em_viagem'
-        else:
-            os_obj.status = 'aberta'
-        os_obj.save(update_fields=['status'])
-
-    status_atual = os_obj.status
-    if status_atual != 'cancelada':
+    if os_obj.status != 'cancelada':
         if op.termino_viagem:
             os_obj.status = 'concluida'
         elif op.termino_operacao:
