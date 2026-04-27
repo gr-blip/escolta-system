@@ -27,8 +27,7 @@
 <!-- MAPA -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<div id="mapa-frota" style="height:460px;margin:0 0 0 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)"></div>
+<div id="mapa-frota" style="height:460px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)"></div>
 
 <!-- TABELA -->
 <div style="padding:16px 24px 32px">
@@ -41,37 +40,33 @@
       <table id="tabela-frota" style="width:100%;border-collapse:collapse;font-size:13px">
         <thead>
           <tr style="background:var(--bg3)">
-            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Status</th>
-            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Viatura</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Ignição</th>
             <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Placa</th>
             <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">MCT ID</th>
             <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Velocidade</th>
-            <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Odômetro</th>
-            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Ignição</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Endereço</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Município</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Há</th>
             <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Última transmissão</th>
-            <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Mapa</th>
           </tr>
         </thead>
         <tbody id="tbody-frota">
           {% for v in viaturas %}
-          <tr data-mct="{{ v.mct_id }}" style="border-top:1px solid var(--border)">
-            <td style="padding:10px 14px"><span class="badge-status" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--border)"></span></td>
-            <td style="padding:10px 14px;color:var(--text1);font-weight:500">{{ v.marca_modelo }}</td>
-            <td style="padding:10px 14px;color:var(--text1);font-family:monospace;font-weight:600">{{ v.placa }}</td>
-            <td style="padding:10px 14px;color:var(--text3);font-family:monospace;font-size:12px">{{ v.mct_id }}</td>
+          <tr data-placa="{{ v.placa }}" data-mct="{{ v.mct_id }}"
+              onclick="centralizarPorPlaca('{{ v.placa }}')"
+              style="border-top:1px solid var(--border);cursor:pointer;transition:background .15s"
+              onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+            <td class="td-ign" style="padding:10px 14px;color:var(--text3)">—</td>
+            <td style="padding:10px 14px;color:var(--text1);font-family:monospace;font-weight:700;font-size:14px">{{ v.placa }}</td>
+            <td style="padding:10px 14px;color:var(--text3);font-family:monospace;font-size:11px">{{ v.mct_id }}</td>
             <td class="td-vel" style="padding:10px 14px;text-align:right;color:var(--text2)">—</td>
-            <td class="td-odo" style="padding:10px 14px;text-align:right;color:var(--text2)">—</td>
-            <td class="td-ign" style="padding:10px 14px;color:var(--text2)">—</td>
-            <td class="td-hora" style="padding:10px 14px;color:var(--text3);font-size:12px">—</td>
-            <td style="padding:10px 14px;text-align:center">
-              <button class="btn-ver-mapa" data-mct="{{ v.mct_id }}" onclick="centralizarViatura('{{ v.mct_id }}')"
-                style="padding:4px 10px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);border-radius:6px;font-size:11px;cursor:pointer;opacity:.5" disabled>
-                📍
-              </button>
-            </td>
+            <td class="td-end" style="padding:10px 14px;color:var(--text2);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</td>
+            <td class="td-cid" style="padding:10px 14px;color:var(--text2)">—</td>
+            <td class="td-ha"  style="padding:10px 14px;font-size:12px;white-space:nowrap">—</td>
+            <td class="td-hora" style="padding:10px 14px;color:var(--text3);font-size:12px;white-space:nowrap">—</td>
           </tr>
           {% empty %}
-          <tr><td colspan="9" style="padding:24px;text-align:center;color:var(--text3)">Nenhuma viatura com MCT ID cadastrado.</td></tr>
+          <tr><td colspan="8" style="padding:24px;text-align:center;color:var(--text3)">Nenhuma viatura com MCT ID cadastrado.</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -83,27 +78,41 @@
 (function(){
   // ── Mapa ─────────────────────────────────────────────────────────────────
   const mapa = L.map('mapa-frota').setView([-15.8, -47.9], 5);
-  // CartoDB Voyager — sem restrição de Referer (funciona em Railway/produção)
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 19
+    subdomains: 'abcd', maxZoom: 19
   }).addTo(mapa);
 
-  const marcadores = {};  // mct_id → L.Marker
+  const marcadores = {};  // placa → L.Marker
 
   function iconeViatura(online, ignicao, velocidade) {
-    let cor = '#6b7280';   // cinza — sem sinal
+    let cor = '#9ca3af';
     if (online) {
-      if (ignicao && velocidade > 0) cor = '#10b981';   // verde — em movimento
-      else if (ignicao)              cor = '#f59e0b';   // amarelo — ligado parado
-      else                           cor = '#3b82f6';   // azul — desligado c/ sinal
+      if (ignicao && velocidade > 0) cor = '#10b981';
+      else if (ignicao)              cor = '#f59e0b';
+      else                           cor = '#3b82f6';
     }
     return L.divIcon({
       className: '',
       iconAnchor: [9, 9],
       html: `<div style="width:18px;height:18px;background:${cor};border:3px solid #fff;border-radius:50%;box-shadow:0 1px 6px rgba(0,0,0,.4)"></div>`
     });
+  }
+
+  // ── Tempo atrás ────────────────────────────────────────────────────────────
+  function tempoAtras(dataHoraStr) {
+    if (!dataHoraStr) return { texto: '—', cor: 'var(--text3)' };
+    // Suporta "2026-04-27 07:00:21" ou "2026-04-27T07:00:21"
+    const s = dataHoraStr.replace('T', ' ').replace(/\.\d+$/, '');
+    const dt = new Date(s.replace(' ', 'T'));
+    if (isNaN(dt)) return { texto: dataHoraStr.substring(0, 16), cor: 'var(--text3)' };
+    const diffMin = Math.floor((Date.now() - dt.getTime()) / 60000);
+    let texto, cor;
+    if (diffMin < 1)        { texto = 'agora';                       cor = '#10b981'; }
+    else if (diffMin < 60)  { texto = `há ${diffMin} min`;           cor = diffMin < 10 ? '#10b981' : '#f59e0b'; }
+    else if (diffMin < 1440){ texto = `há ${Math.floor(diffMin/60)}h ${diffMin%60}min`; cor = '#f59e0b'; }
+    else                    { texto = `há ${Math.floor(diffMin/1440)} dia(s)`; cor = '#ef4444'; }
+    return { texto, cor };
   }
 
   // ── Atualização de dados ──────────────────────────────────────────────────
@@ -127,13 +136,9 @@
           atualizarMarcador(v);
         });
 
-        // Ajusta zoom para englobar todas as viaturas com posição
         const coords = data.viaturas.filter(v => v.lat && v.lng).map(v => [v.lat, v.lng]);
-        if (coords.length === 1) {
-          mapa.setView(coords[0], 13);
-        } else if (coords.length > 1) {
-          mapa.fitBounds(coords, {padding: [40, 40]});
-        }
+        if (coords.length === 1)     mapa.setView(coords[0], 13);
+        else if (coords.length > 1)  mapa.fitBounds(coords, {padding: [40, 40]});
 
         const agora = new Date().toLocaleTimeString('pt-BR');
         document.getElementById('status-txt').textContent = `Atualizado às ${agora} — ${online} viatura(s) com sinal`;
@@ -148,56 +153,81 @@
   window.atualizarFrota = atualizarFrota;
 
   function atualizarLinha(v) {
-    const tr = document.querySelector(`tr[data-mct="${v.mct_id}"]`);
+    const placa = (v.placa || '').trim().toUpperCase();
+    const tr = document.querySelector(`tr[data-placa="${placa}"]`)
+            || document.querySelector(`tr[data-mct="${v.mct_id}"]`);
     if (!tr) return;
 
-    // Badge status
-    const badge = tr.querySelector('.badge-status');
-    badge.style.background = v.online
-      ? (v.ignicao && v.velocidade > 0 ? '#10b981' : v.ignicao ? '#f59e0b' : '#3b82f6')
-      : '#d1d5db';
-    badge.title = v.online ? (v.ignicao ? 'Ligado' : 'Desligado') : 'Sem sinal recente';
-
-    tr.querySelector('.td-vel').textContent  = v.online && v.velocidade != null ? v.velocidade + ' km/h' : '—';
-    tr.querySelector('.td-odo').textContent  = v.online && v.odometro  != null ? v.odometro  + ' km'   : '—';
-    tr.querySelector('.td-ign').textContent  = v.online ? (v.ignicao ? '🟢 Ligada' : '🔴 Desligada') : '—';
-    tr.querySelector('.td-hora').textContent = v.data_hora ? v.data_hora.substring(0, 16).replace('T', ' ') : '—';
-
-    const btnVer = tr.querySelector('.btn-ver-mapa');
-    if (v.lat && v.lng) {
-      btnVer.disabled = false;
-      btnVer.style.opacity = '1';
+    // Ignição
+    const tdIgn = tr.querySelector('.td-ign');
+    if (v.online) {
+      const corDot = v.ignicao ? '#10b981' : '#ef4444';
+      const label  = v.ignicao ? 'Ligada' : 'Desligada';
+      tdIgn.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px">
+        <span style="width:9px;height:9px;border-radius:50%;background:${corDot};flex-shrink:0"></span>
+        <span style="color:var(--text2)">${label}</span>
+      </span>`;
+    } else {
+      tdIgn.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px">
+        <span style="width:9px;height:9px;border-radius:50%;background:#9ca3af;flex-shrink:0"></span>
+        <span style="color:var(--text3)">Sem sinal</span>
+      </span>`;
     }
+
+    // Velocidade
+    tr.querySelector('.td-vel').textContent = v.online && v.velocidade != null
+      ? v.velocidade + ' km/h' : '—';
+
+    // Endereço
+    const end = v.endereco || v.rua || '';
+    tr.querySelector('.td-end').textContent = end || '—';
+    tr.querySelector('.td-end').title = end;
+
+    // Município
+    tr.querySelector('.td-cid').textContent = v.cidade || '—';
+
+    // Há (tempo atrás)
+    const ta = tempoAtras(v.data_hora);
+    const tdHa = tr.querySelector('.td-ha');
+    tdHa.textContent = ta.texto;
+    tdHa.style.color = ta.cor;
+
+    // Última transmissão
+    tr.querySelector('.td-hora').textContent = v.data_hora
+      ? v.data_hora.substring(0, 16).replace('T', ' ') : '—';
   }
 
   function atualizarMarcador(v) {
     if (!v.lat || !v.lng) return;
-
+    const placa = (v.placa || '').trim().toUpperCase();
     const ic = iconeViatura(v.online, v.ignicao, v.velocidade);
-    const popup = `<b>${v.modelo}</b><br>Placa: ${v.placa}<br>MCT: ${v.mct_id}<br>`
-      + `Vel: ${v.velocidade ?? '—'} km/h &nbsp;|&nbsp; `
-      + `Ign: ${v.ignicao ? '🟢 Ligada' : '🔴 Desligada'}<br>`
-      + `<small style="color:#888">${v.data_hora ? v.data_hora.substring(0,16).replace('T',' ') : '—'}</small>`;
+    const end = v.endereco || v.rua || '—';
+    const cid = v.cidade || '';
+    const ta  = tempoAtras(v.data_hora);
+    const popup = `<div style="font-size:13px;min-width:180px">
+      <b style="font-size:14px">${placa}</b>
+      <div style="color:#666;font-size:11px;margin-bottom:6px">${v.modelo || ''} · ${v.mct_id || ''}</div>
+      <div>🔑 ${v.ignicao ? '<span style="color:#10b981">Ligada</span>' : '<span style="color:#ef4444">Desligada</span>'} &nbsp; ${v.velocidade ?? 0} km/h</div>
+      <div style="margin-top:4px;color:#555">📍 ${end}${cid ? ', ' + cid : ''}</div>
+      <div style="margin-top:4px;color:#888;font-size:11px">${ta.texto} · ${v.data_hora ? v.data_hora.substring(0,16).replace('T',' ') : '—'}</div>
+    </div>`;
 
-    if (marcadores[v.mct_id]) {
-      marcadores[v.mct_id].setLatLng([v.lat, v.lng]).setIcon(ic).setPopupContent(popup);
+    if (marcadores[placa]) {
+      marcadores[placa].setLatLng([v.lat, v.lng]).setIcon(ic).setPopupContent(popup);
     } else {
-      marcadores[v.mct_id] = L.marker([v.lat, v.lng], {icon: ic})
-        .addTo(mapa).bindPopup(popup);
+      marcadores[placa] = L.marker([v.lat, v.lng], {icon: ic}).addTo(mapa).bindPopup(popup);
     }
   }
 
-  window.centralizarViatura = function(mct_id) {
-    const m = marcadores[mct_id];
+  window.centralizarPorPlaca = function(placa) {
+    const m = marcadores[(placa || '').trim().toUpperCase()];
     if (m) { mapa.setView(m.getLatLng(), 15); m.openPopup(); }
   };
 
-  // Animação do ícone de refresh
   const style = document.createElement('style');
   style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
   document.head.appendChild(style);
 
-  // Carrega automaticamente ao abrir a página
   setTimeout(atualizarFrota, 300);
 })();
 </script>
