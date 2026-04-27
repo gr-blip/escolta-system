@@ -3421,10 +3421,7 @@ def os_field_pedagio_salvar(request, token):
         op.save(update_fields=['pedagio'])
         return JsonResponse({'ok': True, 'pedagio': str(op.pedagio)})
     return JsonResponse({'ok': False}, status=405)
-# ─────────────────────────────────────────────────────────────────────────────
-# ADICIONAR ao final de cadastros/views.py
-# ─────────────────────────────────────────────────────────────────────────────
-
+@csrf_exempt
 def os_field_veiculo_salvar(request, token):
     """Cria ou edita um VeiculoEscoltado via AJAX (link externo do agente)."""
     from .models import VeiculoEscoltado, OSOperacional
@@ -3469,6 +3466,7 @@ def os_field_veiculo_salvar(request, token):
     })
 
 
+@csrf_exempt
 def os_field_veiculo_delete(request, token, pk):
     """Deleta um VeiculoEscoltado via AJAX (link externo do agente)."""
     from .models import VeiculoEscoltado, OSOperacional
