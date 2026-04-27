@@ -97,4 +97,12 @@
 
     <div style="display:flex;gap:10px;margin-top:20px">
       <button type="submit" class="btn btn-primary">
-        <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" stroke="currentColor" stroke-width="1.8" 
+        <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        {% if obj %}Salvar alterações{% else %}Criar usuário{% endif %}
+      </button>
+      <a href="{% url 'usuario_list' %}" class="btn btn-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+

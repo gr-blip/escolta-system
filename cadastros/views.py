@@ -3546,4 +3546,52 @@ def funcionario_patrimonial_list(request):
         'status_filtro': status_filtro,
         'total': qs.count(),
     }
-    return render(request, 'cadastros
+    return render(request, 'cadastros/funcionario_patrimonial_list.html', context)
+
+
+@login_required
+def funcionario_patrimonial_create(request):
+    form = FuncionarioPatrimonialForm(request.POST or None, request.FILES or None)
+    if form.is_valid():
+        form.save()
+        messages.success(request, 'Funcionario cadastrado com sucesso!')
+        return redirect('funcionario_patrimonial_list')
+    return render(request, 'cadastros/funcionario_patrimonial_form.html', {
+        'form': form,
+        'titulo': 'Novo Funcionario Patrimonial',
+    })
+
+
+@login_required
+def funcionario_patrimonial_edit(request, pk):
+    func = get_object_or_404(FuncionarioPatrimonial, pk=pk)
+    form = FuncionarioPatrimonialForm(request.POST or None, request.FILES or None, instance=func)
+    if form.is_valid():
+        form.save()
+        messages.success(request, 'Funcionario atualizado com sucesso!')
+        return redirect('funcionario_patrimonial_list')
+    return render(request, 'cadastros/funcionario_patrimonial_form.html', {
+        'form': form,
+        'titulo': 'Editar Funcionario Patrimonial',
+        'obj': func,
+    })
+
+
+@login_required
+def funcionario_patrimonial_detail(request, pk):
+    func = get_object_or_404(FuncionarioPatrimonial, pk=pk)
+    return render(request, 'cadastros/funcionario_patrimonial_detail.html', {'obj': func})
+
+
+@login_required
+def funcionario_patrimonial_delete(request, pk):
+    func = get_object_or_404(FuncionarioPatrimonial, pk=pk)
+    if request.method == 'POST':
+        func.delete()
+        messages.success(request, 'Funcionario removido.')
+        return redirect('funcionario_patrimonial_list')
+    return render(request, 'cadastros/confirm_delete.html', {
+        'obj': func,
+        'tipo': 'Funcionario Patrimonial',
+    })
+

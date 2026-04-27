@@ -337,4 +337,16 @@ function toggleNavGroup(btn){
   });
   // Libera a animação no próximo frame
   requestAnimationFrame(function(){
-    requestAnimationF
+    requestAnimationFrame(function(){
+      if(sidebar) sidebar.classList.remove('nav-booting');
+    });
+  });
+})();
+</script>
+
+<script src="{% static 'cadastros/toasts.js' %}"></script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

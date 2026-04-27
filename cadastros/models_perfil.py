@@ -70,4 +70,5 @@ def salvar_perfil_automatico(sender, instance, **kwargs):
     if hasattr(instance, 'perfil'):
         try:
             instance.perfil.save()
-        except (OperationalErr
+        except (OperationalError, ProgrammingError):
+            pass
