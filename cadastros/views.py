@@ -1211,7 +1211,8 @@ def omnilink_frota_posicoes(request):
     """
     from django.http import JsonResponse
     from .models import Viatura
-    from .omnilink import get_todas_posicoes_atuais, _get_eventos_normais, _mct_id_to_terminal
+    from .omnilink import (get_todas_posicoes_atuais, _get_eventos_normais,
+                           _mct_id_to_terminal, _reverse_geocode)
 
     viaturas = Viatura.objects.filter(mct_id__isnull=False).exclude(mct_id='')
 
@@ -1247,6 +1248,12 @@ def omnilink_frota_posicoes(request):
             except Exception:
                 pass
 
+        # Geocodificação reversa via Nominatim quando cidade não vem da API
+        cidade = pos.get('cidade', '') if pos else ''
+        if pos and not cidade and pos.get('lat') and pos.get('lng'):
+            geo = _reverse_geocode(pos['lat'], pos['lng'])
+            cidade = geo.get('cidade', '')
+
         resultado.append({
             'mct_id':     v.mct_id,
             'placa':      v.placa,
@@ -1258,7 +1265,7 @@ def omnilink_frota_posicoes(request):
             'ignicao':    pos.get('ignicao')    if pos else None,
             'data_hora':  pos.get('data_hora')  if pos else None,
             'endereco':   pos.get('endereco')   if pos else '',
-            'cidade':     pos.get('cidade')     if pos else '',
+            'cidade':     cidade,
             'online':     pos is not None,
         })
 

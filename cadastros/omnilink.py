@@ -808,6 +808,62 @@ def descobrir_metodos_wsdl() -> list[str]:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# GEOCODIFICAÇÃO REVERSA — Nominatim (OpenStreetMap)
+# Converte lat/lng em município confiável. Cache 12h por coordenada arredondada.
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _reverse_geocode(lat: float, lng: float) -> dict:
+    """Geocodificação reversa via Nominatim (OSM). Retorna dict com 'cidade' e 'estado'.
+
+    Cache 12 h por coordenada arredondada a 3 casas decimais (~111 m de precisão).
+    Respeita o limite de uso da Nominatim (sem burst — cache agressivo).
+    """
+    import urllib.request
+    import json as _json
+
+    if not lat or not lng or (lat == 0.0 and lng == 0.0):
+        return {'cidade': '', 'estado': ''}
+
+    lat_r = round(lat, 3)
+    lng_r = round(lng, 3)
+    cache_key = f'geocode_{lat_r}_{lng_r}'
+
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    try:
+        url = (
+            f'https://nominatim.openstreetmap.org/reverse'
+            f'?lat={lat}&lon={lng}&format=json&accept-language=pt-BR'
+        )
+        req = urllib.request.Request(
+            url,
+            headers={'User-Agent': 'SistemaEscolta/1.0 (gr@gruposmith.seg.br)'}
+        )
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = _json.loads(resp.read().decode())
+
+        addr   = data.get('address', {})
+        cidade = (
+            addr.get('city') or addr.get('town') or addr.get('village') or
+            addr.get('municipality') or addr.get('county') or ''
+        )
+        estado = addr.get('state', '')
+
+        resultado = {'cidade': cidade, 'estado': estado}
+        cache.set(cache_key, resultado, 43200)   # 12 horas
+        logger.debug(f'_reverse_geocode({lat_r},{lng_r}): {cidade}/{estado}')
+        return resultado
+
+    except Exception as e:
+        logger.warning(f'_reverse_geocode({lat},{lng}): {e}')
+        resultado = {'cidade': '', 'estado': ''}
+        cache.set(cache_key, resultado, 1800)    # falha: cache 30 min para não bater de novo
+        return resultado
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # NOVA ESTRATÉGIA: ObtemAllPosicoesAtuais
 # Retorna posição ATUAL de todas as viaturas numa única chamada.
 # Identificação por placa (ID_OBJECT_TRACKER) — sem necessidade de hex MCT.
