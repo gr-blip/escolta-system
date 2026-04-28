@@ -961,6 +961,10 @@ class FuncionarioPatrimonial(models.Model):
     data_admissao = models.DateField(blank=True, null=True, verbose_name='Data de admissao')
     registro_drt = models.CharField(max_length=30, blank=True, verbose_name='Registro DRT/MTE')
 
+    # Curso de formacao / reciclagem
+    curso = models.CharField(max_length=200, blank=True, verbose_name='Curso')
+    curso_validade = models.DateField(blank=True, null=True, verbose_name='Validade do Curso')
+
     # Funcao/cargo + status
     funcao = models.CharField(max_length=30, choices=FUNCAO_CHOICES, blank=True, verbose_name='Funcao')
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='ativo', verbose_name='Status')
@@ -1004,7 +1008,12 @@ class FuncionarioPatrimonial(models.Model):
         return self._status_validade(self.cnh_validade)
 
     @property
+    def curso_status_vencimento(self):
+        return self._status_validade(self.curso_validade)
+
+    @property
     def tem_alerta_vencimento(self):
         """True se qualquer documento esta vencido ou vencendo."""
         return (self.cnv_status_vencimento in ('vencido', 'vencendo')
-                or self.cnh_status_vencimento in ('vencido', 'vencendo'))
+                or self.cnh_status_vencimento in ('vencido', 'vencendo')
+                or self.curso_status_vencimento in ('vencido', 'vencendo'))

@@ -58,6 +58,14 @@
         {% else %}<span style="color:var(--text)">{{ obj.cnv_validade|date:"d/m/Y" }}</span>{% endif %}
       {% else %}<span style="color:var(--text3)">—</span>{% endif %}
     </div></div>
+    <div style="grid-column:span 2"><div style="color:var(--text3);font-size:11px;text-transform:uppercase">Curso</div><div style="color:var(--text)">{{ obj.curso|default:"—" }}</div></div>
+    <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">Validade do Curso</div><div>
+      {% if obj.curso_validade %}
+        {% if obj.curso_status_vencimento == 'vencido' %}<span class="badge badge-red">{{ obj.curso_validade|date:"d/m/Y" }} — vencido</span>
+        {% elif obj.curso_status_vencimento == 'vencendo' %}<span class="badge badge-amber">{{ obj.curso_validade|date:"d/m/Y" }} — vencendo</span>
+        {% else %}<span style="color:var(--text)">{{ obj.curso_validade|date:"d/m/Y" }}</span>{% endif %}
+      {% else %}<span style="color:var(--text3)">—</span>{% endif %}
+    </div></div>
   </div>
 </div>
 

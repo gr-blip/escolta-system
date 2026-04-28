@@ -112,5 +112,7 @@ class FuncionarioPatrimonialForm(forms.ModelForm):
             'posto_trabalho':  forms.TextInput(attrs={'placeholder': 'Ex: Portaria Condominio Alpha'}),
             'data_admissao':   forms.DateInput(attrs={'type': 'date'}),
             'registro_drt':    forms.TextInput(attrs={'placeholder': 'Nr DRT/MTE'}),
+            'curso':           forms.TextInput(attrs={'placeholder': 'Ex: Curso de Formacao de Vigilante'}),
+            'curso_validade':  forms.DateInput(attrs={'type': 'date'}),
             'observacoes':     forms.Textarea(attrs={'rows': 3, 'placeholder': 'Observacoes sobre o funcionario...'}),
         }
