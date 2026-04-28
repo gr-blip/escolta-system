@@ -11,11 +11,11 @@ class AgenteForm(forms.ModelForm):
             'cpf': forms.TextInput(attrs={'placeholder': '000.000.000-00'}),
             'rg': forms.TextInput(attrs={'placeholder': '0000000'}),
             'telefone': forms.TextInput(attrs={'placeholder': '(62) 99999-0000'}),
-            'data_nascimento': forms.DateInput(attrs={'type': 'date'}),
+            'data_nascimento': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'cnh': forms.TextInput(attrs={'placeholder': '00000000000'}),
-            'cnh_validade': forms.DateInput(attrs={'type': 'date'}),
+            'cnh_validade': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'cnv': forms.TextInput(attrs={'placeholder': '00000/0000'}),
-            'cnv_validade': forms.DateInput(attrs={'type': 'date'}),
+            'cnv_validade': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'observacoes': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Observacoes sobre o agente...'}),
         }
 
@@ -33,8 +33,8 @@ class ViaturaForm(forms.ModelForm):
             'mct_id': forms.TextInput(attrs={'placeholder': '2261451'}),
             'renavam': forms.TextInput(attrs={'placeholder': '00000000000'}),
             'chassi': forms.TextInput(attrs={'placeholder': '9BWZZZ...'}),
-            'crlv_validade': forms.DateInput(attrs={'type': 'date'}),
-            'seguro_validade': forms.DateInput(attrs={'type': 'date'}),
+            'crlv_validade': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'seguro_validade': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'observacoes': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Manutencoes, equipamentos instalados...'}),
         }
 
@@ -61,8 +61,8 @@ class ArmamentoForm(forms.ModelForm):
             'numero_serie': forms.TextInput(attrs={'placeholder': 'TQ000000'}),
             'numero_cano': forms.TextInput(attrs={'placeholder': 'Numero do cano'}),
             'registro_cr': forms.TextInput(attrs={'placeholder': 'Nr de registro'}),
-            'registro_validade': forms.DateInput(attrs={'type': 'date'}),
-            'data_aquisicao': forms.DateInput(attrs={'type': 'date'}),
+            'registro_validade': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'data_aquisicao': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
         }
 
 
@@ -91,7 +91,7 @@ class ColeteForm(forms.ModelForm):
         widgets = {
             'marca':     forms.TextInput(attrs={'placeholder': 'Ex: BLINTEC'}),
             'numeracao': forms.TextInput(attrs={'placeholder': 'Ex: 442 15206'}),
-            'validade':  forms.DateInput(attrs={'type': 'date'}),
+            'validade':  forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
         }
 
 
@@ -104,15 +104,15 @@ class FuncionarioPatrimonialForm(forms.ModelForm):
             'cpf':             forms.TextInput(attrs={'placeholder': '000.000.000-00'}),
             'rg':              forms.TextInput(attrs={'placeholder': '0000000'}),
             'telefone':        forms.TextInput(attrs={'placeholder': '(62) 99999-0000'}),
-            'data_nascimento': forms.DateInput(attrs={'type': 'date'}),
+            'data_nascimento': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'cnh':             forms.TextInput(attrs={'placeholder': '00000000000'}),
-            'cnh_validade':    forms.DateInput(attrs={'type': 'date'}),
+            'cnh_validade':    forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'cnv':             forms.TextInput(attrs={'placeholder': '00000/0000'}),
-            'cnv_validade':    forms.DateInput(attrs={'type': 'date'}),
+            'cnv_validade':    forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'posto_trabalho':  forms.TextInput(attrs={'placeholder': 'Ex: Portaria Condominio Alpha'}),
-            'data_admissao':   forms.DateInput(attrs={'type': 'date'}),
+            'data_admissao':   forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'registro_drt':    forms.TextInput(attrs={'placeholder': 'Nr DRT/MTE'}),
             'curso':           forms.TextInput(attrs={'placeholder': 'Ex: Curso de Formacao de Vigilante'}),
-            'curso_validade':  forms.DateInput(attrs={'type': 'date'}),
+            'curso_validade':  forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'observacoes':     forms.Textarea(attrs={'rows': 3, 'placeholder': 'Observacoes sobre o funcionario...'}),
         }
