@@ -45,6 +45,7 @@
           <th>Posto</th>
           <th>Val. CNH</th>
           <th>Val. CNV</th>
+          <th>Val. Curso</th>
           <th>Status</th>
           <th style="width:110px">Ações</th>
         </tr>
@@ -95,6 +96,19 @@
             {% endif %}
           </td>
           <td>
+            {% if f.curso_validade %}
+              {% if f.curso_status_vencimento == 'vencido' %}
+                <span class="badge badge-red">{{ f.curso_validade|date:"d/m/Y" }}</span>
+              {% elif f.curso_status_vencimento == 'vencendo' %}
+                <span class="badge badge-amber">{{ f.curso_validade|date:"d/m/Y" }}</span>
+              {% else %}
+                <span style="color:var(--text2)">{{ f.curso_validade|date:"d/m/Y" }}</span>
+              {% endif %}
+            {% else %}
+              <span style="color:var(--text3)">—</span>
+            {% endif %}
+          </td>
+          <td>
             {% if f.status == 'ativo' %}<span class="badge badge-green">Ativo</span>
             {% elif f.status == 'afastado' %}<span class="badge badge-amber">Afastado</span>
             {% else %}<span class="badge badge-gray">Inativo</span>{% endif %}
@@ -114,7 +128,7 @@
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="9" style="text-align:center;color:var(--text3);padding:32px">Nenhum funcionário encontrado.</td></tr>
+        <tr><td colspan="10" style="text-align:center;color:var(--text3);padding:32px">Nenhum funcionário encontrado.</td></tr>
         {% endfor %}
       </tbody>
     </table>
