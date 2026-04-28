@@ -3558,8 +3558,61 @@ def os_field_veiculo_delete(request, token, pk):
 # ─────────────────────────────────────────────────────────────────────────────
 # PATRIMONIAL — cadastro de vigilantes patrimoniais e porteiros
 # Modulo independente de OS/escolta. CRUD puro com filtros e alertas de
-# vencimento de documentos (CNV, CNH).
+# vencimento de documentos (CNV, CNH, Curso).
 # ─────────────────────────────────────────────────────────────────────────────
+
+@login_required
+def patrimonial_dashboard(request):
+    """Painel de avisos do módulo patrimonial — vencimentos próximos (60 dias)."""
+    hoje = date.today()
+    limite = hoje + timedelta(days=60)
+
+    ativos = FuncionarioPatrimonial.objects.filter(status='ativo')
+
+    alertas_cnh = (
+        ativos
+        .exclude(cnh_validade__isnull=True)
+        .filter(cnh_validade__lte=limite)
+        .order_by('cnh_validade')
+        .only('id', 'nome', 'cnh_validade', 'posto_trabalho')
+    )
+    alertas_cnv = (
+        ativos
+        .exclude(cnv_validade__isnull=True)
+        .filter(cnv_validade__lte=limite)
+        .order_by('cnv_validade')
+        .only('id', 'nome', 'cnv_validade', 'posto_trabalho')
+    )
+    alertas_curso = (
+        ativos
+        .exclude(curso_validade__isnull=True)
+        .filter(curso_validade__lte=limite)
+        .order_by('curso_validade')
+        .only('id', 'nome', 'curso', 'curso_validade', 'posto_trabalho')
+    )
+
+    total        = FuncionarioPatrimonial.objects.count()
+    total_ativos = ativos.count()
+    total_afastados = FuncionarioPatrimonial.objects.filter(status='afastado').count()
+    total_alertas = (
+        ativos.filter(
+            Q(cnh_validade__lte=limite, cnh_validade__isnull=False)
+            | Q(cnv_validade__lte=limite, cnv_validade__isnull=False)
+            | Q(curso_validade__lte=limite, curso_validade__isnull=False)
+        ).distinct().count()
+    )
+
+    return render(request, 'cadastros/patrimonial_dashboard.html', {
+        'hoje':             hoje,
+        'alertas_cnh':      alertas_cnh,
+        'alertas_cnv':      alertas_cnv,
+        'alertas_curso':    alertas_curso,
+        'total':            total,
+        'total_ativos':     total_ativos,
+        'total_afastados':  total_afastados,
+        'total_alertas':    total_alertas,
+    })
+
 
 @login_required
 def funcionario_patrimonial_list(request):

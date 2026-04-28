@@ -1,0 +1,162 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}Painel Patrimonial{% endblock %}
+{% block page_title %}Painel Patrimonial{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / Patrimonial / Painel{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'funcionario_patrimonial_list' %}" class="btn btn-secondary">Ver Funcionários</a>
+  <a href="{% url 'funcionario_patrimonial_create' %}" class="btn btn-primary">
+    <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    Novo Funcionário
+  </a>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── CARDS DE TOTAIS ── -->
+<div class="stats-grid" style="margin-bottom:20px">
+  <div class="stat-card">
+    <div class="stat-label">Total de funcionários</div>
+    <div class="stat-value">{{ total }}</div>
+    <div class="stat-sub"><a href="{% url 'funcionario_patrimonial_list' %}" style="color:var(--blue-light);text-decoration:none">Ver todos →</a></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Ativos</div>
+    <div class="stat-value" style="color:var(--green,#22c55e)">{{ total_ativos }}</div>
+    <div class="stat-sub"><a href="{% url 'funcionario_patrimonial_list' %}?status=ativo" style="color:var(--blue-light);text-decoration:none">Ver ativos →</a></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Afastados</div>
+    <div class="stat-value" style="color:var(--amber,#f59e0b)">{{ total_afastados }}</div>
+    <div class="stat-sub"><a href="{% url 'funcionario_patrimonial_list' %}?status=afastado" style="color:var(--blue-light);text-decoration:none">Ver afastados →</a></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Com alerta de vencimento</div>
+    <div class="stat-value" style="color:{% if total_alertas > 0 %}var(--red){% else %}var(--green,#22c55e){% endif %}">{{ total_alertas }}</div>
+    <div class="stat-sub" style="color:var(--text3);font-size:11px">Documentos vencem em até 60 dias</div>
+  </div>
+</div>
+
+<!-- ── ALERTAS ── -->
+{% if alertas_cnh or alertas_cnv or alertas_curso %}
+<div>
+  <h2 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px">
+    <span style="font-size:18px">⚠️</span> Alertas de Vencimento
+    <span style="font-size:11px;font-weight:400;color:var(--text3)">(próximos 60 dias ou já vencidos — apenas funcionários ativos)</span>
+  </h2>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px">
+
+    <!-- CNH -->
+    {% if alertas_cnh %}
+    <div class="card" style="border-left:3px solid #f59e0b;padding:0">
+      <div class="card-title" style="color:#b45309;padding:14px 16px 10px">
+        🪪 CNH — Próximas a Vencer
+        <span style="margin-left:auto;background:#fef3c7;color:#b45309;font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px">{{ alertas_cnh|length }}</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Funcionário</th><th>Posto</th><th>Validade</th><th>Situação</th></tr>
+          </thead>
+          <tbody>
+            {% for f in alertas_cnh %}
+            <tr>
+              <td><a href="{% url 'funcionario_patrimonial_edit' f.pk %}" style="color:var(--blue-light);text-decoration:none;font-weight:600">{{ f.nome }}</a></td>
+              <td style="color:var(--text2);font-size:12px">{{ f.posto_trabalho|default:"—" }}</td>
+              <td style="font-family:monospace;font-size:12px">{{ f.cnh_validade|date:"d/m/Y" }}</td>
+              <td>
+                {% if f.cnh_validade < hoje %}
+                  <span class="badge badge-red">Vencida</span>
+                {% else %}
+                  <span class="badge badge-amber">Vence em {{ f.cnh_validade|timeuntil:hoje }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- CNV -->
+    {% if alertas_cnv %}
+    <div class="card" style="border-left:3px solid #ef4444;padding:0">
+      <div class="card-title" style="color:#b91c1c;padding:14px 16px 10px">
+        🔫 CNV — Próximas a Vencer
+        <span style="margin-left:auto;background:#fee2e2;color:#b91c1c;font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px">{{ alertas_cnv|length }}</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Funcionário</th><th>Posto</th><th>Validade</th><th>Situação</th></tr>
+          </thead>
+          <tbody>
+            {% for f in alertas_cnv %}
+            <tr>
+              <td><a href="{% url 'funcionario_patrimonial_edit' f.pk %}" style="color:var(--blue-light);text-decoration:none;font-weight:600">{{ f.nome }}</a></td>
+              <td style="color:var(--text2);font-size:12px">{{ f.posto_trabalho|default:"—" }}</td>
+              <td style="font-family:monospace;font-size:12px">{{ f.cnv_validade|date:"d/m/Y" }}</td>
+              <td>
+                {% if f.cnv_validade < hoje %}
+                  <span class="badge badge-red">Vencida</span>
+                {% else %}
+                  <span class="badge badge-amber">Vence em {{ f.cnv_validade|timeuntil:hoje }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Curso -->
+    {% if alertas_curso %}
+    <div class="card" style="border-left:3px solid #8b5cf6;padding:0">
+      <div class="card-title" style="color:#6d28d9;padding:14px 16px 10px">
+        🎓 Curso — Próximos a Vencer
+        <span style="margin-left:auto;background:#ede9fe;color:#6d28d9;font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px">{{ alertas_curso|length }}</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Funcionário</th><th>Curso</th><th>Posto</th><th>Validade</th><th>Situação</th></tr>
+          </thead>
+          <tbody>
+            {% for f in alertas_curso %}
+            <tr>
+              <td><a href="{% url 'funcionario_patrimonial_edit' f.pk %}" style="color:var(--blue-light);text-decoration:none;font-weight:600">{{ f.nome }}</a></td>
+              <td style="color:var(--text2);font-size:12px">{{ f.curso|default:"—" }}</td>
+              <td style="color:var(--text2);font-size:12px">{{ f.posto_trabalho|default:"—" }}</td>
+              <td style="font-family:monospace;font-size:12px">{{ f.curso_validade|date:"d/m/Y" }}</td>
+              <td>
+                {% if f.curso_validade < hoje %}
+                  <span class="badge badge-red">Vencido</span>
+                {% else %}
+                  <span class="badge badge-amber">Vence em {{ f.curso_validade|timeuntil:hoje }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% else %}
+<div style="background:rgba(5,150,105,.08);border:1px solid rgba(5,150,105,.3);border-radius:10px;padding:16px 20px;display:flex;align-items:center;gap:12px">
+  <span style="font-size:24px">✅</span>
+  <div>
+    <div style="font-size:14px;color:#065f46;font-weight:600">Tudo em dia!</div>
+    <div style="font-size:12px;color:#065f46;margin-top:2px">Nenhum documento vencido ou vencendo nos próximos 60 dias.</div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
