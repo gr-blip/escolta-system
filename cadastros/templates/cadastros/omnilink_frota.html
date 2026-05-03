@@ -1,234 +1,366 @@
-{% extends 'cadastros/base.html' %}
-{% block title %}Rastreamento Omnilink{% endblock %}
-{% block page_title %}Rastreamento{% endblock %}
-{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / Operacional / Rastreamento{% endblock %}
-
-{% block content %}
-<div style="padding:20px 24px 0">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-    <div>
-      <h1 style="font-size:20px;font-weight:700;color:var(--text1);margin:0;display:flex;align-items:center;gap:8px">
-        <svg width="20" height="20" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/><line x1="8" y1="1.5" x2="8" y2="4" stroke="currentColor" stroke-width="1.3"/><line x1="8" y1="12" x2="8" y2="14.5" stroke="currentColor" stroke-width="1.3"/><line x1="1.5" y1="8" x2="4" y2="8" stroke="currentColor" stroke-width="1.3"/><line x1="12" y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.3"/></svg>
-        Rastreamento Omnilink
-      </h1>
-      <p style="font-size:12px;color:var(--text3);margin:4px 0 0">Posições em tempo real de todas as viaturas</p>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <span id="status-txt" style="font-size:12px;color:var(--text3)">Aguardando atualização…</span>
-      <button onclick="atualizarFrota()" id="btn-atualizar"
-        style="padding:7px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
-        <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M13.5 8A5.5 5.5 0 112.5 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2.5 2v3.5H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Atualizar
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- MAPA -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rastreamento — JR Segurança</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<div id="mapa-frota" style="height:460px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)"></div>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f7f7f5;color:#1a1a1a;font-size:13px;height:100vh;overflow:hidden}
 
-<!-- TABELA -->
-<div style="padding:16px 24px 32px">
-  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden">
-    <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-      <span style="font-size:14px;font-weight:600;color:var(--text1)">Viaturas cadastradas</span>
-      <span id="cnt-online" style="font-size:12px;color:var(--text3)">—</span>
-    </div>
-    <div style="overflow-x:auto">
-      <table id="tabela-frota" style="width:100%;border-collapse:collapse;font-size:13px">
-        <thead>
-          <tr style="background:var(--bg3)">
-            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Ignição</th>
-            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Placa</th>
-            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">MCT ID</th>
-            <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Velocidade</th>
-            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Endereço</th>
-            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Município</th>
-            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Há</th>
-            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Última transmissão</th>
-          </tr>
-        </thead>
-        <tbody id="tbody-frota">
-          {% for v in viaturas %}
-          <tr data-placa="{{ v.placa }}" data-mct="{{ v.mct_id }}"
-              onclick="centralizarPorPlaca('{{ v.placa }}')"
-              style="border-top:1px solid var(--border);cursor:pointer;transition:background .15s"
-              onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
-            <td class="td-ign" style="padding:10px 14px;color:var(--text3)">—</td>
-            <td style="padding:10px 14px;color:var(--text1);font-family:monospace;font-weight:700;font-size:14px">{{ v.placa }}</td>
-            <td style="padding:10px 14px;color:var(--text3);font-family:monospace;font-size:11px">{{ v.mct_id }}</td>
-            <td class="td-vel" style="padding:10px 14px;text-align:right;color:var(--text2)">—</td>
-            <td class="td-end" style="padding:10px 14px;color:var(--text2);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</td>
-            <td class="td-cid" style="padding:10px 14px;color:var(--text2)">—</td>
-            <td class="td-ha"  style="padding:10px 14px;font-size:12px;white-space:nowrap">—</td>
-            <td class="td-hora" style="padding:10px 14px;color:var(--text3);font-size:12px;white-space:nowrap">—</td>
-          </tr>
-          {% empty %}
-          <tr><td colspan="8" style="padding:24px;text-align:center;color:var(--text3)">Nenhuma viatura com MCT ID cadastrado.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+/* ── Header ── */
+header{background:#fff;border-bottom:1px solid #e4e4de;padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between;z-index:1000;position:relative;gap:12px}
+.hd-left{display:flex;align-items:center;gap:12px;min-width:0}
+.hd-logo{font-size:13px;font-weight:700;color:#111;white-space:nowrap;letter-spacing:.3px}
+.hd-logo span{color:#2563eb}
+a.btn-voltar{padding:5px 12px;border:1px solid #ddd;border-radius:6px;background:#fff;font-size:12px;cursor:pointer;color:#555;font-weight:500;text-decoration:none;white-space:nowrap}
+a.btn-voltar:hover{background:#f0f0ec;color:#111}
+
+/* ── Summary dots ── */
+.summary{display:flex;gap:12px;font-size:12px;align-items:center;flex-shrink:0}
+.summary-item{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15);flex-shrink:0}
+.dot-red{background:#dc2626}.dot-yellow{background:#eab308}.dot-green{background:#16a34a}.dot-gray{background:#9ca3af}
+
+/* ── Buttons ── */
+button.btn{padding:5px 12px;border:1px solid #ddd;border-radius:6px;background:#fff;font-size:12px;cursor:pointer;color:#333;font-weight:500;white-space:nowrap}
+button.btn:hover{background:#f0f0ec}
+button.btn.primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+button.btn.primary:hover{background:#333}
+#countdown{font-size:11px;color:#16a34a;font-weight:500;min-width:40px;text-align:right}
+#last-update{font-size:11px;color:#aaa;white-space:nowrap}
+
+/* ── Layout ── */
+.layout{display:flex;height:calc(100vh - 52px)}
+#map{flex:1;height:100%;background:#e6ecf2;z-index:1}
+
+/* ── Sidebar ── */
+#sidebar{width:320px;height:100%;background:#fff;border-left:1px solid #e4e4de;overflow-y:auto;padding:0;flex-shrink:0;z-index:2}
+.sb-header{padding:12px 14px 8px;border-bottom:1px solid #f0f0ec;position:sticky;top:0;background:#fff;z-index:1}
+.sb-title{font-size:11px;color:#888;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.sb-item{padding:11px 14px;border-bottom:1px solid #f0f0ec;cursor:pointer;transition:background .1s;border-left:4px solid transparent;display:flex;flex-direction:column;gap:3px}
+.sb-item:hover{background:#fafaf8}
+.sb-item.amarela{border-left-color:#eab308}
+.sb-item.verde{border-left-color:#16a34a}
+.sb-item.cinza{border-left-color:#9ca3af}
+.sb-placa{font-weight:700;letter-spacing:.5px;font-size:14px}
+.sb-status{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;letter-spacing:.4px;margin:2px 0}
+.sb-st-amarela{background:#fef3c7;color:#92400e}
+.sb-st-verde{background:#dcfce7;color:#15803d}
+.sb-st-cinza{background:#f3f4f6;color:#6b7280}
+.sb-detail{font-size:11px;color:#666;line-height:1.4}
+.sb-meta{font-size:10px;color:#999;margin-top:1px}
+.sb-empty{padding:30px 20px;text-align:center;color:#aaa;font-size:12px}
+
+/* ── Legenda (overlay mapa) ── */
+.legenda{position:absolute;bottom:20px;left:20px;background:rgba(255,255,255,.95);border:1px solid #e4e4de;border-radius:10px;padding:10px 14px;box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:500;font-size:11px}
+.legenda-title{font-weight:600;color:#666;margin-bottom:6px;text-transform:uppercase;font-size:10px;letter-spacing:.4px}
+.legenda-item{display:flex;align-items:center;gap:7px;padding:2px 0}
+
+/* ── Popup ── */
+.popup-placa{font-weight:700;font-size:14px;letter-spacing:.5px}
+.popup-status{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;text-transform:uppercase;margin-top:4px}
+.popup-amarela{background:#fef9c3;color:#854d0e;border:1px solid #fde047}
+.popup-verde{background:#dcfce7;color:#15803d;border:1px solid #86efac}
+.popup-cinza{background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db}
+.popup-info{margin-top:6px;font-size:11px;color:#444;line-height:1.5}
+.popup-info b{color:#000}
+
+/* ── Dark mode ── */
+body.dark{background:#0f1419;color:#e6e6e6}
+body.dark header{background:#1a1f24;border-bottom-color:#2a3037}
+body.dark .hd-logo{color:#fff}
+body.dark a.btn-voltar{background:#1a1f24;color:#ccc;border-color:#2a3037}
+body.dark a.btn-voltar:hover{background:#2a3037;color:#fff}
+body.dark button.btn{background:#1a1f24;color:#e6e6e6;border-color:#2a3037}
+body.dark button.btn:hover{background:#2a3037}
+body.dark button.btn.primary{background:#fff;color:#0f1419;border-color:#fff}
+body.dark #sidebar{background:#1a1f24;border-left-color:#2a3037}
+body.dark .sb-header{background:#1a1f24;border-bottom-color:#2a3037}
+body.dark .sb-title{color:#666}
+body.dark .sb-item{border-bottom-color:#2a3037}
+body.dark .sb-item:hover{background:#22282e}
+body.dark .sb-detail{color:#aaa}
+body.dark .sb-meta{color:#666}
+body.dark .legenda{background:rgba(26,31,36,.95);border-color:#2a3037;color:#e6e6e6}
+body.dark .legenda-title{color:#999}
+body.dark #last-update{color:#555}
+body.dark #countdown{color:#16a34a}
+body.dark .summary-item{color:#bbb}
+body.dark .popup-info b{color:#fff}
+body.dark .popup-info{color:#bbb}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd-left">
+    <a href="{% url 'dashboard' %}" class="btn-voltar">← Sistema</a>
+    <div class="hd-logo">JR <span>SEGURANÇA</span> · Rastreamento</div>
   </div>
+
+  <div class="summary" id="summary">
+    <span style="color:#aaa;font-size:12px">Aguardando…</span>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+    <span id="countdown"></span>
+    <span id="last-update"></span>
+    <button class="btn" id="btn-tema" onclick="alternarTema()" title="Alternar tema">🌙</button>
+    <button class="btn primary" onclick="carregar(true)" id="btn-atualizar">↻ Atualizar</button>
+  </div>
+</header>
+
+<div class="layout">
+  <div id="map"></div>
+  <aside id="sidebar">
+    <div class="sb-header">
+      <div class="sb-title" id="sb-title">Viaturas</div>
+    </div>
+    <div id="sb-list"><div class="sb-empty">Carregando…</div></div>
+  </aside>
+</div>
+
+<!-- Legenda (posicionada sobre o mapa) -->
+<div class="legenda" style="position:fixed;bottom:20px;left:20px">
+  <div class="legenda-title">Legenda</div>
+  <div class="legenda-item"><span class="dot dot-yellow"></span> Ignição ligada (em movimento)</div>
+  <div class="legenda-item"><span class="dot dot-green"></span> Disponível (sinal recente)</div>
+  <div class="legenda-item"><span class="dot dot-gray"></span> Sem sinal (&gt;1h)</div>
 </div>
 
 <script>
-(function(){
-  // ── Mapa ─────────────────────────────────────────────────────────────────
-  const mapa = L.map('mapa-frota').setView([-15.8, -47.9], 5);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd', maxZoom: 19
-  }).addTo(mapa);
+const REFRESH_MS = 60000;
+const API_URL    = '{% url "omnilink_frota_posicoes" %}';
 
-  const marcadores = {};  // placa → L.Marker
+const TILES = {
+  claro:  { url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', subdomains:'abcd', maxZoom:19 },
+  escuro: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',            subdomains:'abcd', maxZoom:20 },
+};
 
-  function iconeViatura(online, ignicao, velocidade) {
-    let cor = '#9ca3af';
-    if (online) {
-      if (ignicao && velocidade > 0) cor = '#10b981';
-      else if (ignicao)              cor = '#f59e0b';
-      else                           cor = '#3b82f6';
-    }
-    return L.divIcon({
-      className: '',
-      iconAnchor: [9, 9],
-      html: `<div style="width:18px;height:18px;background:${cor};border:3px solid #fff;border-radius:50%;box-shadow:0 1px 6px rgba(0,0,0,.4)"></div>`
-    });
-  }
+const BRASIL_BOUNDS = [[-34.5, -74.5], [6.5, -32.0]];
+const map = L.map('map', {
+  zoomControl: true,
+  attributionControl: true,
+  maxBounds: BRASIL_BOUNDS,
+  maxBoundsViscosity: 0.8,
+  minZoom: 4,
+}).fitBounds(BRASIL_BOUNDS);
 
-  // ── Tempo atrás ────────────────────────────────────────────────────────────
-  function tempoAtras(dataHoraStr) {
-    if (!dataHoraStr) return { texto: '—', cor: 'var(--text3)' };
-    // Suporta "2026-04-27 07:00:21" ou "2026-04-27T07:00:21"
-    const s = dataHoraStr.replace('T', ' ').replace(/\.\d+$/, '');
-    const dt = new Date(s.replace(' ', 'T'));
-    if (isNaN(dt)) return { texto: dataHoraStr.substring(0, 16), cor: 'var(--text3)' };
-    const diffMin = Math.floor((Date.now() - dt.getTime()) / 60000);
-    let texto, cor;
-    if (diffMin < 1)        { texto = 'agora';                       cor = '#10b981'; }
-    else if (diffMin < 60)  { texto = `há ${diffMin} min`;           cor = diffMin < 10 ? '#10b981' : '#f59e0b'; }
-    else if (diffMin < 1440){ texto = `há ${Math.floor(diffMin/60)}h ${diffMin%60}min`; cor = '#f59e0b'; }
-    else                    { texto = `há ${Math.floor(diffMin/1440)} dia(s)`; cor = '#ef4444'; }
-    return { texto, cor };
-  }
+let camadaTile = null;
 
-  // ── Atualização de dados ──────────────────────────────────────────────────
-  function atualizarFrota() {
-    const btn = document.getElementById('btn-atualizar');
-    btn.disabled = true;
-    btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 16 16" style="animation:spin .8s linear infinite"><path d="M13.5 8A5.5 5.5 0 112.5 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2.5 2v3.5H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Atualizando…';
-    document.getElementById('status-txt').textContent = 'Consultando API Omnilink…';
+function aplicarTema(tema) {
+  if (camadaTile) map.removeLayer(camadaTile);
+  const cfg = TILES[tema] || TILES.claro;
+  camadaTile = L.tileLayer(cfg.url, cfg).addTo(map);
+  document.body.classList.toggle('dark', tema === 'escuro');
+  const btn = document.getElementById('btn-tema');
+  if (btn) btn.textContent = tema === 'escuro' ? '☀️' : '🌙';
+  try { localStorage.setItem('jr_mapa_tema', tema); } catch {}
+}
 
-    fetch('/operacional/rastreamento/posicoes/')
-      .then(r => r.json())
-      .then(data => {
-        btn.disabled = false;
-        btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M13.5 8A5.5 5.5 0 112.5 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2.5 2v3.5H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Atualizar';
-        if (!data.ok) { document.getElementById('status-txt').textContent = '⚠ Erro ao consultar API'; return; }
+function alternarTema() {
+  const atual = document.body.classList.contains('dark') ? 'escuro' : 'claro';
+  aplicarTema(atual === 'escuro' ? 'claro' : 'escuro');
+}
 
-        let online = 0;
-        data.viaturas.forEach(v => {
-          if (v.online) online++;
-          atualizarLinha(v);
-          atualizarMarcador(v);
-        });
+let temaInicial = 'escuro';
+try { temaInicial = localStorage.getItem('jr_mapa_tema') || 'escuro'; } catch {}
+aplicarTema(temaInicial);
 
-        const coords = data.viaturas.filter(v => v.lat && v.lng).map(v => [v.lat, v.lng]);
-        if (coords.length === 1)     mapa.setView(coords[0], 13);
-        else if (coords.length > 1)  mapa.fitBounds(coords, {padding: [40, 40]});
+/* ── Marcadores ── */
+let marcadores = {};
 
-        const agora = new Date().toLocaleTimeString('pt-BR');
-        document.getElementById('status-txt').textContent = `Atualizado às ${agora} — ${online} viatura(s) com sinal`;
-        document.getElementById('cnt-online').textContent = `${online} com sinal / ${data.viaturas.length} total`;
-      })
-      .catch(() => {
-        btn.disabled = false;
-        btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M13.5 8A5.5 5.5 0 112.5 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2.5 2v3.5H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Atualizar';
-        document.getElementById('status-txt').textContent = '⚠ Falha de conexão';
-      });
-  }
-  window.atualizarFrota = atualizarFrota;
+function classificarCor(v) {
+  if (!v.online) return 'cinza';
+  if (v.ignicao) return 'amarela';
+  return 'verde';
+}
 
-  function atualizarLinha(v) {
-    const placa = (v.placa || '').trim().toUpperCase();
-    const tr = document.querySelector(`tr[data-placa="${placa}"]`)
-            || document.querySelector(`tr[data-mct="${v.mct_id}"]`);
-    if (!tr) return;
+function criarIcone(cor) {
+  const cores = { amarela: '#eab308', verde: '#16a34a', cinza: '#9ca3af' };
+  const c = cores[cor] || '#9ca3af';
+  const pulso = cor === 'amarela' ? `animation:pulse 2s ease-in-out infinite` : '';
+  return L.divIcon({
+    className: '',
+    html: `<div style="width:32px;height:32px;border-radius:50%;border:3px solid ${c};background:rgba(255,255,255,0.92);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.25);${pulso}">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h1l2-4h10l2 4h1a2 2 0 012 2v6a2 2 0 01-2 2h-2" stroke="${c}" stroke-width="1.8" stroke-linejoin="round"/><circle cx="7.5" cy="17.5" r="2.5" stroke="${c}" stroke-width="1.8"/><circle cx="16.5" cy="17.5" r="2.5" stroke="${c}" stroke-width="1.8"/></svg>
+    </div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -18]
+  });
+}
 
-    // Ignição
-    const tdIgn = tr.querySelector('.td-ign');
-    if (v.online) {
-      const corDot = v.ignicao ? '#10b981' : '#ef4444';
-      const label  = v.ignicao ? 'Ligada' : 'Desligada';
-      tdIgn.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px">
-        <span style="width:9px;height:9px;border-radius:50%;background:${corDot};flex-shrink:0"></span>
-        <span style="color:var(--text2)">${label}</span>
-      </span>`;
-    } else {
-      tdIgn.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px">
-        <span style="width:9px;height:9px;border-radius:50%;background:#9ca3af;flex-shrink:0"></span>
-        <span style="color:var(--text3)">Sem sinal</span>
-      </span>`;
-    }
+function tempoAtras(dataHoraStr) {
+  if (!dataHoraStr) return { texto: '—', cor: '#9ca3af' };
+  const dt = new Date(dataHoraStr.replace(' ', 'T'));
+  if (isNaN(dt)) return { texto: dataHoraStr.substring(0,16), cor: '#9ca3af' };
+  const diff = Math.floor((Date.now() - dt.getTime()) / 60000);
+  if (diff < 1)    return { texto: 'agora',                                  cor: '#16a34a' };
+  if (diff < 10)   return { texto: `há ${diff} min`,                         cor: '#16a34a' };
+  if (diff < 60)   return { texto: `há ${diff} min`,                         cor: '#eab308' };
+  if (diff < 1440) return { texto: `há ${Math.floor(diff/60)}h ${diff%60}min`, cor: '#eab308' };
+  return               { texto: `há ${Math.floor(diff/1440)} dia(s)`,        cor: '#ef4444' };
+}
 
-    // Velocidade
-    tr.querySelector('.td-vel').textContent = v.online && v.velocidade != null
-      ? v.velocidade + ' km/h' : '—';
-
-    // Endereço
-    const end = v.endereco || v.rua || '';
-    tr.querySelector('.td-end').textContent = end || '—';
-    tr.querySelector('.td-end').title = end;
-
-    // Município
-    tr.querySelector('.td-cid').textContent = v.cidade || '—';
-
-    // Há (tempo atrás)
-    const ta = tempoAtras(v.data_hora);
-    const tdHa = tr.querySelector('.td-ha');
-    tdHa.textContent = ta.texto;
-    tdHa.style.color = ta.cor;
-
-    // Última transmissão
-    tr.querySelector('.td-hora').textContent = v.data_hora
-      ? v.data_hora.substring(0, 16).replace('T', ' ') : '—';
-  }
-
-  function atualizarMarcador(v) {
-    if (!v.lat || !v.lng) return;
-    const placa = (v.placa || '').trim().toUpperCase();
-    const ic = iconeViatura(v.online, v.ignicao, v.velocidade);
-    const end = v.endereco || v.rua || '—';
-    const cid = v.cidade || '';
-    const ta  = tempoAtras(v.data_hora);
-    const popup = `<div style="font-size:13px;min-width:180px">
-      <b style="font-size:14px">${placa}</b>
-      <div style="color:#666;font-size:11px;margin-bottom:6px">${v.modelo || ''} · ${v.mct_id || ''}</div>
-      <div>🔑 ${v.ignicao ? '<span style="color:#10b981">Ligada</span>' : '<span style="color:#ef4444">Desligada</span>'} &nbsp; ${v.velocidade ?? 0} km/h</div>
-      <div style="margin-top:4px;color:#555">📍 ${end}${cid ? ', ' + cid : ''}</div>
-      <div style="margin-top:4px;color:#888;font-size:11px">${ta.texto} · ${v.data_hora ? v.data_hora.substring(0,16).replace('T',' ') : '—'}</div>
+function montarPopup(v, cor) {
+  const stMap = { amarela:['popup-amarela','EM DESLOCAMENTO'], verde:['popup-verde','DISPONÍVEL'], cinza:['popup-cinza','SEM SINAL'] };
+  const [stCls, stTxt] = stMap[cor] || ['popup-cinza','?'];
+  const loc = [v.endereco, v.cidade].filter(Boolean).join(' — ');
+  const ta  = tempoAtras(v.data_hora);
+  return `
+    <div style="min-width:200px">
+      <div class="popup-placa">${v.placa}</div>
+      <span class="popup-status ${stCls}">${stTxt}</span>
+      <div class="popup-info">
+        <b>${v.velocidade != null ? v.velocidade + ' km/h' : '—'}</b>
+        ${v.ignicao === true ? ' · Ignição <span style="color:#16a34a">ligada</span>' : v.ignicao === false ? ' · Ignição <span style="color:#ef4444">desligada</span>' : ''}
+        <br>${loc || '<span style="color:#999">localização indisponível</span>'}
+        <br><span style="color:#999;font-size:10px">${ta.texto} · ${v.data_hora ? v.data_hora.substring(0,16).replace('T',' ') : '—'}</span>
+      </div>
     </div>`;
+}
 
-    if (marcadores[placa]) {
-      marcadores[placa].setLatLng([v.lat, v.lng]).setIcon(ic).setPopupContent(popup);
-    } else {
-      marcadores[placa] = L.marker([v.lat, v.lng], {icon: ic}).addTo(mapa).bindPopup(popup);
-    }
+/* ── Sidebar ── */
+function renderSidebar(lista) {
+  const el    = document.getElementById('sb-list');
+  const title = document.getElementById('sb-title');
+  title.textContent = `Viaturas (${lista.length})`;
+
+  if (!lista.length) {
+    el.innerHTML = '<div class="sb-empty">Nenhuma viatura cadastrada com MCT ID.</div>';
+    return;
   }
 
-  window.centralizarPorPlaca = function(placa) {
-    const m = marcadores[(placa || '').trim().toUpperCase()];
-    if (m) { mapa.setView(m.getLatLng(), 15); m.openPopup(); }
+  const order = { amarela:0, verde:1, cinza:2 };
+  lista.sort((a,b) => (order[a._cor]??3) - (order[b._cor]??3));
+
+  const stMap = {
+    amarela: ['sb-st-amarela','EM DESLOCAMENTO'],
+    verde:   ['sb-st-verde','DISPONÍVEL'],
+    cinza:   ['sb-st-cinza','SEM SINAL'],
   };
 
-  const style = document.createElement('style');
-  style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
-  document.head.appendChild(style);
+  el.innerHTML = lista.map(v => {
+    const cor = v._cor;
+    const [stCls, stTxt] = stMap[cor] || ['sb-st-cinza','?'];
+    const vel  = v.online && v.velocidade != null ? `${v.velocidade} km/h` : '—';
+    const ign  = v.online ? (v.ignicao ? 'Ignição ligada' : 'Ignição desligada') : 'Sem sinal';
+    const loc  = v.cidade || v.endereco || '—';
+    const ta   = tempoAtras(v.data_hora);
+    return `<div class="sb-item ${cor}" onclick="focarPlaca('${v.placa}')">
+      <span class="sb-placa">${v.placa}</span>
+      <span class="sb-status ${stCls}">${stTxt}</span>
+      <div class="sb-detail">${vel} · ${ign}</div>
+      <div class="sb-detail">${loc}</div>
+      <div class="sb-meta" style="color:${ta.cor}">${ta.texto}</div>
+    </div>`;
+  }).join('');
+}
 
-  setTimeout(atualizarFrota, 300);
-})();
+function focarPlaca(placa) {
+  const m = marcadores[placa];
+  if (!m) return;
+  map.flyTo(m.getLatLng(), 14, { duration: 0.6 });
+  setTimeout(() => m.openPopup(), 650);
+}
+
+/* ── Carregar dados ── */
+async function carregar(manual) {
+  const btnAt = document.getElementById('btn-atualizar');
+  if (manual) {
+    btnAt.textContent = '⏳ Atualizando…';
+    btnAt.disabled = true;
+  }
+
+  try {
+    const r  = await fetch(API_URL);
+    const d  = await r.json();
+    if (!d.ok) throw new Error('API retornou erro');
+
+    /* Classifica cor e popula sidebar */
+    const lista = d.viaturas.map(v => ({ ...v, _cor: classificarCor(v) }));
+    renderSidebar(lista);
+
+    /* Atualiza / cria marcadores */
+    const placasAtivas = new Set();
+    let nAmarela = 0, nVerde = 0, nCinza = 0;
+
+    lista.forEach(v => {
+      const cor = v._cor;
+      if (cor === 'amarela') nAmarela++;
+      else if (cor === 'verde') nVerde++;
+      else nCinza++;
+
+      if (!v.lat || !v.lng) return;
+      placasAtivas.add(v.placa);
+      const ic  = criarIcone(cor);
+      const pop = montarPopup(v, cor);
+      if (marcadores[v.placa]) {
+        marcadores[v.placa].setLatLng([v.lat, v.lng]).setIcon(ic).setPopupContent(pop);
+      } else {
+        marcadores[v.placa] = L.marker([v.lat, v.lng], { icon: ic })
+          .addTo(map).bindPopup(pop, { maxWidth:300, minWidth:200 });
+      }
+    });
+
+    /* Remove marcadores de viaturas que saíram da lista */
+    Object.keys(marcadores).forEach(p => {
+      if (!placasAtivas.has(p)) { map.removeLayer(marcadores[p]); delete marcadores[p]; }
+    });
+
+    /* Ajusta zoom na primeira carga */
+    if (manual && Object.keys(marcadores).length) {
+      const pts = Object.values(marcadores).map(m => m.getLatLng());
+      if (pts.length === 1) map.setView(pts[0], 13);
+      else map.fitBounds(L.latLngBounds(pts), { padding:[40,40], maxZoom:13 });
+    }
+
+    /* Sumário */
+    document.getElementById('summary').innerHTML = `
+      <div class="summary-item"><span class="dot dot-yellow"></span><b>${nAmarela}</b> deslocamento</div>
+      <div class="summary-item"><span class="dot dot-green"></span><b>${nVerde}</b> disponível</div>
+      <div class="summary-item"><span class="dot dot-gray"></span><b>${nCinza}</b> sem sinal</div>
+      <div class="summary-item" style="color:#aaa;font-size:11px">total <b style="color:inherit">${lista.length}</b></div>`;
+
+    const agora = new Date().toLocaleTimeString('pt-BR');
+    document.getElementById('last-update').textContent = `atualizado ${agora}`;
+
+  } catch(e) {
+    document.getElementById('summary').innerHTML = `<span style="color:#dc2626">Erro ao carregar dados</span>`;
+  } finally {
+    btnAt.textContent = '↻ Atualizar';
+    btnAt.disabled = false;
+  }
+}
+
+/* ── Countdown ── */
+let segundos = REFRESH_MS / 1000;
+setInterval(() => {
+  segundos--;
+  const el = document.getElementById('countdown');
+  if (el) el.textContent = `↻ ${segundos}s`;
+  if (segundos <= 0) {
+    segundos = REFRESH_MS / 1000;
+    carregar(false);
+  }
+}, 1000);
+
+/* ── Animação pulso ── */
+const style = document.createElement('style');
+style.textContent = `@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0   rgba(234,179,8,.6); }
+  70%  { box-shadow: 0 0 0 12px rgba(234,179,8,0);  }
+  100% { box-shadow: 0 0 0 0   rgba(234,179,8,0);   }
+}`;
+document.head.appendChild(style);
+
+/* ── Init ── */
+carregar(true);
 </script>
-{% endblock %}
+</body>
+</html>
