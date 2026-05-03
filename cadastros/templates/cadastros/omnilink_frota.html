@@ -95,7 +95,14 @@ body.dark .popup-info{color:#bbb}
 
 /* ── Fix linhas entre tiles do Leaflet ── */
 .leaflet-tile-pane { opacity: 0.99; }
-.leaflet-tile { border: 0 !important; }
+.leaflet-tile {
+  border: 0 !important;
+  -webkit-transform: scale(1.0015) translateZ(0);
+  transform: scale(1.0015) translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  image-rendering: -webkit-optimize-contrast;
+}
 </style>
 </head>
 <body>
@@ -140,9 +147,10 @@ body.dark .popup-info{color:#bbb}
 const REFRESH_MS = 60000;
 const API_URL    = '{% url "omnilink_frota_posicoes" %}';
 
+const TILE_OPTS = { subdomains:'abcd', maxZoom:19, detectRetina:false, updateWhenIdle:true, keepBuffer:4 };
 const TILES = {
-  claro:  { url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', subdomains:'abcd', maxZoom:19 },
-  escuro: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',            subdomains:'abcd', maxZoom:20 },
+  claro:  { url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', ...TILE_OPTS },
+  escuro: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',            ...TILE_OPTS },
 };
 
 const BRASIL_BOUNDS = [[-34.5, -74.5], [6.5, -32.0]];
