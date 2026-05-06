@@ -333,6 +333,9 @@ def cliente_list(request):
 
 @login_required
 def cliente_create(request):
+    if not _is_admin_or_developer(request.user):
+        messages.error(request, 'Sem permissão para cadastrar clientes.')
+        return redirect('cliente_list')
     form = ClienteForm(request.POST or None)
     if form.is_valid():
         form.save()
@@ -343,6 +346,9 @@ def cliente_create(request):
 
 @login_required
 def cliente_edit(request, pk):
+    if not _is_admin_or_developer(request.user):
+        messages.error(request, 'Sem permissão para editar clientes.')
+        return redirect('cliente_list')
     cliente = get_object_or_404(Cliente, pk=pk)
     form = ClienteForm(request.POST or None, instance=cliente)
     if form.is_valid():
@@ -354,6 +360,9 @@ def cliente_edit(request, pk):
 
 @login_required
 def cliente_inativar(request, pk):
+    if not _is_admin_or_developer(request.user):
+        messages.error(request, 'Sem permissão para inativar/reativar clientes.')
+        return redirect('cliente_list')
     cliente = get_object_or_404(Cliente, pk=pk)
     if request.method == 'POST':
         cliente.ativo = not cliente.ativo
