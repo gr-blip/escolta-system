@@ -2385,10 +2385,8 @@ def _boletim_to_missao(idx, b):
         'subtotal_h':   float(b.valor_excedente_hora),   # TOTAL horas (laranja)
         # ── Encerramento ───────────────────────────────────────────
         'despesas':     float(b.acrescimo),
-        'fechamento':   b.observacoes or '',
-        'dt_pagamento': '',
-        'nota_fiscal':  b.numero_nota or 'SEM',
         'total':        float(b.valor_total),
+        'obs':          b.observacoes or '',
     }
 
 
