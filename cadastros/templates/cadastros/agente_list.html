@@ -18,7 +18,7 @@
       <thead>
         <tr>
           <th>Nome</th><th>CPF</th><th>Telefone</th><th>Função</th>
-          <th>Val. CNH</th><th>Val. CNV</th><th>Status</th><th style="width:90px">Ações</th>
+          <th>Val. CNH</th><th>Val. CNV</th><th>Val. Curso</th><th>Status</th><th style="width:90px">Ações</th>
         </tr>
       </thead>
       <tbody>
@@ -30,6 +30,7 @@
           <td style="color:var(--text2)">{{ a.get_funcao_display }}</td>
           <td style="color:var(--text2)">{{ a.cnh_validade|date:"d/m/Y"|default:"—" }}</td>
           <td style="color:var(--text2)">{{ a.cnv_validade|date:"d/m/Y"|default:"—" }}</td>
+          <td style="color:var(--text2)">{{ a.curso_validade|date:"d/m/Y"|default:"—" }}</td>
           <td>
             {% if a.status == 'ativo' %}<span class="badge badge-green">Ativo</span>
             {% elif a.status == 'afastado' %}<span class="badge badge-amber">Afastado</span>

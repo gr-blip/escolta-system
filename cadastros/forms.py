@@ -16,6 +16,8 @@ class AgenteForm(forms.ModelForm):
             'cnh_validade': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'cnv': forms.TextInput(attrs={'placeholder': '00000/0000'}),
             'cnv_validade': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'curso': forms.TextInput(attrs={'placeholder': 'Ex: Curso de Formação de Vigilante'}),
+            'curso_validade': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'observacoes': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Observacoes sobre o agente...'}),
         }
 
