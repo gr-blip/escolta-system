@@ -2343,8 +2343,8 @@ def _boletim_to_missao(idx, b):
             d = localtime(d)
         return d.strftime("%d/%m/%y %H:%M")
 
-    # Prestador: nome da equipe ou fallback
-    prestador = (equipe.nome if equipe and equipe.nome else os_obj.snap_equipe_nome) or 'JR SEGURANÇA'
+    # Prestador: sempre exibe o nome da empresa
+    prestador = 'JR SEGURANÇA'
 
     return {
         # ── Identificação ──────────────────────────────────────────
