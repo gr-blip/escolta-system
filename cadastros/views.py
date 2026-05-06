@@ -911,6 +911,17 @@ def os_delete(request, pk):
 
 
 @login_required
+def os_observacoes_save(request, pk):
+    """Salva apenas o campo observações — funciona mesmo com OS finalizada ou cancelada."""
+    os = get_object_or_404(OrdemServico, pk=pk)
+    if request.method == 'POST':
+        os.observacoes = request.POST.get('observacoes', '')
+        os.save(update_fields=['observacoes'])
+        messages.success(request, 'Observações salvas com sucesso!')
+    return redirect('os_detalhe', pk=pk)
+
+
+@login_required
 def os_cancelar(request, pk):
     """
     Cancela uma OS sem excluí-la do banco.

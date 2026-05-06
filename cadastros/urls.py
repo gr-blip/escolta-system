@@ -67,6 +67,7 @@ urlpatterns += [
     path('operacional/os/<int:pk>/print/',                views.os_print,             name='os_print'),
     path('operacional/os/<int:pk>/email/',                views.os_email_html,        name='os_email_html'),
     path('operacional/os/<int:pk>/finalizar/',            views.os_finalizar,         name='os_finalizar'),
+    path('operacional/os/<int:pk>/observacoes/',          views.os_observacoes_save,  name='os_observacoes_save'),
     path('operacional/os/<int:pk>/gerar-link/',           views.os_gerar_link,        name='os_gerar_link'),
     path('operacional/os/<int:pk>/desativar-link/',       views.os_desativar_link,    name='os_desativar_link'),
     # Omnilink
