@@ -928,6 +928,8 @@ class FuncionarioPatrimonial(models.Model):
         ('porteiro_diurno', 'Porteiro Diurno'),
         ('porteiro_noturno', 'Porteiro Noturno'),
         ('lider_portaria', 'Lider de Portaria'),
+        ('brigadista', 'Brigadista'),
+        ('lider_brigada', 'Lider de Brigada'),
         ('supervisor', 'Supervisor'),
         ('coordenador', 'Coordenador'),
     ]

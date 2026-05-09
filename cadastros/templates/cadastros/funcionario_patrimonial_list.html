@@ -11,8 +11,9 @@
 
     <select name="tipo" style="min-width:150px">
       <option value="">Todos os tipos</option>
-      <option value="vigilante" {% if tipo == 'vigilante' %}selected{% endif %}>Vigilante</option>
-      <option value="porteiro" {% if tipo == 'porteiro' %}selected{% endif %}>Porteiro</option>
+      <option value="vigilante"   {% if tipo == 'vigilante'   %}selected{% endif %}>Vigilante</option>
+      <option value="porteiro"    {% if tipo == 'porteiro'    %}selected{% endif %}>Porteiro</option>
+      <option value="brigadista"  {% if tipo == 'brigadista'  %}selected{% endif %}>Brigadista</option>
     </select>
 
     <select name="status" style="min-width:130px">
