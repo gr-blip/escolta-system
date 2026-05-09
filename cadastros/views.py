@@ -188,6 +188,70 @@ def agente_delete(request, pk):
     return render(request, 'cadastros/confirm_delete.html', {'obj': agente, 'tipo': 'Agente'})
 
 
+@login_required
+def agente_certidao_tjdf(request, pk):
+    """Consulta certidão TJDF via InfoSimples e salva o resultado no agente."""
+    import requests as _req
+    from django.conf import settings
+    from django.utils import timezone
+
+    agente = get_object_or_404(Agente, pk=pk)
+
+    if not agente.cpf:
+        messages.error(request, 'O agente não possui CPF cadastrado.')
+        return redirect('agente_edit', pk=pk)
+
+    token = getattr(settings, 'INFOSIMPLES_TOKEN', '')
+    if not token:
+        messages.error(request, 'Token InfoSimples não configurado. Adicione INFOSIMPLES_TOKEN nas variáveis de ambiente.')
+        return redirect('agente_edit', pk=pk)
+
+    cpf_limpo = ''.join(c for c in agente.cpf if c.isdigit())
+
+    try:
+        resp = _req.post(
+            'https://api.infosimples.com/api/v2/consultas/tribunal/tjdf/nada-consta',
+            json={'token': token, 'cpf': cpf_limpo},
+            timeout=30,
+        )
+        data = resp.json()
+        code = data.get('code', 0)
+
+        if code == 200 and data.get('data'):
+            # Verificar se há pendências nos registros retornados
+            registros = data['data']
+            tem_pendencia = any(
+                r.get('resultado', '').lower() not in ('nada consta', 'nada_consta', '')
+                for r in registros
+            )
+            status = 'pendencias' if tem_pendencia else 'nada_consta'
+            detalhe = str(registros[0]) if registros else ''
+            msg = '⚠️ Certidão com pendências!' if tem_pendencia else '✅ Certidão Nada Consta emitida com sucesso!'
+            level = messages.WARNING if tem_pendencia else messages.SUCCESS
+        elif code == 200:
+            status = 'nada_consta'
+            detalhe = 'Nenhum registro encontrado.'
+            msg = '✅ Nada Consta — nenhum registro encontrado.'
+            level = messages.SUCCESS
+        else:
+            erros = '; '.join(data.get('errors', [str(code)]))
+            status = 'erro'
+            detalhe = erros
+            msg = f'Erro na consulta: {erros}'
+            level = messages.ERROR
+
+        agente.certidao_tjdf_status = status
+        agente.certidao_tjdf_consultado_em = timezone.now()
+        agente.certidao_tjdf_detalhe = detalhe
+        agente.save(update_fields=['certidao_tjdf_status', 'certidao_tjdf_consultado_em', 'certidao_tjdf_detalhe'])
+        messages.add_message(request, level, msg)
+
+    except Exception as e:
+        messages.error(request, f'Falha ao conectar com InfoSimples: {e}')
+
+    return redirect('agente_edit', pk=pk)
+
+
 # ── VIATURAS ─────────────────────────────────────────────────────────────────
 
 @login_required

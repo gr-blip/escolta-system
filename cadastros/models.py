@@ -29,6 +29,10 @@ class Agente(models.Model):
     cnv_validade = models.DateField(blank=True, null=True, verbose_name='Val. CNV')
     curso = models.CharField(max_length=200, blank=True, verbose_name='Curso')
     curso_validade = models.DateField(blank=True, null=True, verbose_name='Val. Curso')
+    # Certidão TJDF — InfoSimples
+    certidao_tjdf_status     = models.CharField(max_length=20, blank=True, verbose_name='Certidão TJDF')
+    certidao_tjdf_consultado_em = models.DateTimeField(blank=True, null=True, verbose_name='Última consulta TJDF')
+    certidao_tjdf_detalhe    = models.TextField(blank=True, verbose_name='Detalhe TJDF')
     funcao = models.CharField(max_length=30, choices=FUNCAO_CHOICES, default='agente_escolta', verbose_name='Funcao')
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='ativo', verbose_name='Status')
     observacoes = models.TextField(blank=True, verbose_name='Observacoes')

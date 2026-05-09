@@ -10,6 +10,7 @@ urlpatterns = [
     path('agentes/novo/', views.agente_create, name='agente_create'),
     path('agentes/<int:pk>/editar/', views.agente_edit, name='agente_edit'),
     path('agentes/<int:pk>/excluir/', views.agente_delete, name='agente_delete'),
+    path('agentes/<int:pk>/certidao-tjdf/', views.agente_certidao_tjdf, name='agente_certidao_tjdf'),
 
     # Viaturas
     path('viaturas/', views.viatura_list, name='viatura_list'),
