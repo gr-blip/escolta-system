@@ -3581,32 +3581,37 @@ def os_field_veiculo_delete(request, token, pk):
 
 @login_required
 def patrimonial_dashboard(request):
-    """Painel de avisos do módulo patrimonial — vencimentos próximos (60 dias)."""
+    """Painel de avisos do módulo patrimonial — vencimentos próximos."""
     hoje = date.today()
-    limite = hoje + timedelta(days=60)
+    limite_padrao    = hoje + timedelta(days=60)   # CNH, CNV e curso não-brigadista
+    limite_brigadista = hoje + timedelta(days=120)  # curso brigadista: 4 meses
 
     ativos = FuncionarioPatrimonial.objects.filter(status='ativo')
 
     alertas_cnh = (
         ativos
         .exclude(cnh_validade__isnull=True)
-        .filter(cnh_validade__lte=limite)
+        .filter(cnh_validade__lte=limite_padrao)
         .order_by('cnh_validade')
         .only('id', 'nome', 'cnh_validade', 'posto_trabalho')
     )
     alertas_cnv = (
         ativos
         .exclude(cnv_validade__isnull=True)
-        .filter(cnv_validade__lte=limite)
+        .filter(cnv_validade__lte=limite_padrao)
         .order_by('cnv_validade')
         .only('id', 'nome', 'cnv_validade', 'posto_trabalho')
     )
+    # Curso: brigadistas alertam 120 dias antes, demais 60 dias antes
     alertas_curso = (
         ativos
         .exclude(curso_validade__isnull=True)
-        .filter(curso_validade__lte=limite)
+        .filter(
+            Q(tipo='brigadista', curso_validade__lte=limite_brigadista)
+            | Q(curso_validade__lte=limite_padrao)
+        )
         .order_by('curso_validade')
-        .only('id', 'nome', 'curso', 'curso_validade', 'posto_trabalho')
+        .only('id', 'nome', 'tipo', 'curso', 'curso_validade', 'posto_trabalho')
     )
 
     total        = FuncionarioPatrimonial.objects.count()
@@ -3614,9 +3619,10 @@ def patrimonial_dashboard(request):
     total_afastados = FuncionarioPatrimonial.objects.filter(status='afastado').count()
     total_alertas = (
         ativos.filter(
-            Q(cnh_validade__lte=limite, cnh_validade__isnull=False)
-            | Q(cnv_validade__lte=limite, cnv_validade__isnull=False)
-            | Q(curso_validade__lte=limite, curso_validade__isnull=False)
+            Q(cnh_validade__lte=limite_padrao,    cnh_validade__isnull=False)
+            | Q(cnv_validade__lte=limite_padrao,   cnv_validade__isnull=False)
+            | Q(tipo='brigadista', curso_validade__lte=limite_brigadista, curso_validade__isnull=False)
+            | Q(curso_validade__lte=limite_padrao, curso_validade__isnull=False)
         ).distinct().count()
     )
 

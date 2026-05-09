@@ -122,18 +122,27 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Funcionário</th><th>Curso</th><th>Posto</th><th>Validade</th><th>Situação</th></tr>
+            <tr><th>Funcionário</th><th>Tipo</th><th>Curso</th><th>Posto</th><th>Validade</th><th>Situação</th></tr>
           </thead>
           <tbody>
             {% for f in alertas_curso %}
             <tr>
               <td><a href="{% url 'funcionario_patrimonial_edit' f.pk %}" style="color:var(--blue-light);text-decoration:none;font-weight:600">{{ f.nome }}</a></td>
+              <td style="font-size:12px">
+                {% if f.tipo == 'brigadista' %}
+                  <span style="background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px">🔥 Brigadista</span>
+                {% else %}
+                  <span style="color:var(--text3);font-size:12px">{{ f.get_tipo_display }}</span>
+                {% endif %}
+              </td>
               <td style="color:var(--text2);font-size:12px">{{ f.curso|default:"—" }}</td>
               <td style="color:var(--text2);font-size:12px">{{ f.posto_trabalho|default:"—" }}</td>
               <td style="font-family:monospace;font-size:12px">{{ f.curso_validade|date:"d/m/Y" }}</td>
               <td>
                 {% if f.curso_validade < hoje %}
                   <span class="badge badge-red">Vencido</span>
+                {% elif f.tipo == 'brigadista' %}
+                  <span class="badge badge-amber">⚠️ Vence em {{ f.curso_validade|timeuntil:hoje }}</span>
                 {% else %}
                   <span class="badge badge-amber">Vence em {{ f.curso_validade|timeuntil:hoje }}</span>
                 {% endif %}

@@ -914,6 +914,7 @@ class FuncionarioPatrimonial(models.Model):
     TIPO_CHOICES = [
         ('vigilante', 'Vigilante Patrimonial'),
         ('porteiro', 'Porteiro'),
+        ('brigadista', 'Brigadista'),
     ]
     STATUS_CHOICES = [
         ('ativo', 'Ativo'),
@@ -983,12 +984,12 @@ class FuncionarioPatrimonial(models.Model):
         return f'{self.nome} ({self.get_tipo_display()})'
 
     @staticmethod
-    def _status_validade(data_validade):
+    def _status_validade(data_validade, dias_alerta=30):
         """
         Retorna o status de vencimento de uma data:
           - 'vencido'  : ja passou
-          - 'vencendo' : vence em <= 30 dias
-          - 'ok'       : vence em mais de 30 dias
+          - 'vencendo' : vence em <= dias_alerta dias
+          - 'ok'       : vence em mais de dias_alerta dias
           - None       : sem data cadastrada
         """
         if not data_validade:
@@ -997,7 +998,7 @@ class FuncionarioPatrimonial(models.Model):
         hoje = date.today()
         if data_validade < hoje:
             return 'vencido'
-        if data_validade <= hoje + timedelta(days=30):
+        if data_validade <= hoje + timedelta(days=dias_alerta):
             return 'vencendo'
         return 'ok'
 
@@ -1011,7 +1012,9 @@ class FuncionarioPatrimonial(models.Model):
 
     @property
     def curso_status_vencimento(self):
-        return self._status_validade(self.curso_validade)
+        # Brigadistas têm alerta 4 meses (120 dias) antes do vencimento
+        dias = 120 if self.tipo == 'brigadista' else 30
+        return self._status_validade(self.curso_validade, dias_alerta=dias)
 
     @property
     def tem_alerta_vencimento(self):
