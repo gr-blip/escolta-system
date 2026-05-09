@@ -201,7 +201,8 @@ def agente_certidao_tjdf(request, pk):
         messages.error(request, 'O agente não possui CPF cadastrado.')
         return redirect('agente_edit', pk=pk)
 
-    token = getattr(settings, 'INFOSIMPLES_TOKEN', '')
+    import os as _os
+    token = _os.environ.get('INFOSIMPLES_TOKEN', '') or getattr(settings, 'INFOSIMPLES_TOKEN', '')
     if not token:
         messages.error(request, 'Token InfoSimples não configurado. Adicione INFOSIMPLES_TOKEN nas variáveis de ambiente.')
         return redirect('agente_edit', pk=pk)
@@ -265,7 +266,8 @@ def agente_certidao_trf(request, pk):
         messages.error(request, 'O agente não possui CPF cadastrado.')
         return redirect('agente_edit', pk=pk)
 
-    token = getattr(settings, 'INFOSIMPLES_TOKEN', '')
+    import os as _os
+    token = _os.environ.get('INFOSIMPLES_TOKEN', '') or getattr(settings, 'INFOSIMPLES_TOKEN', '')
     if not token:
         messages.error(request, 'Token InfoSimples não configurado. Adicione INFOSIMPLES_TOKEN nas variáveis de ambiente.')
         return redirect('agente_edit', pk=pk)
