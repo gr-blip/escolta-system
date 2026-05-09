@@ -67,8 +67,8 @@ else:
 # SESSOES - armazenadas no banco (nao em arquivo local)
 # ---------------------------------------------------------------
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = not DEBUG   # False em localhost, True em produção
+CSRF_COOKIE_SECURE = not DEBUG
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
