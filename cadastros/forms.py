@@ -5,13 +5,19 @@ from .models import Agente, Viatura, Rastreador, Armamento, Cliente, Colete, Fun
 class AgenteForm(forms.ModelForm):
     class Meta:
         model = Agente
-        exclude = ['criado_em', 'atualizado_em']
+        exclude = [
+            'criado_em', 'atualizado_em',
+            'certidao_tjdf_status', 'certidao_tjdf_consultado_em', 'certidao_tjdf_detalhe',
+            'certidao_trf_status',  'certidao_trf_consultado_em',  'certidao_trf_detalhe',
+        ]
         widgets = {
             'nome': forms.TextInput(attrs={'placeholder': 'Ex: Roberto Souza de Jesus'}),
             'cpf': forms.TextInput(attrs={'placeholder': '000.000.000-00'}),
             'rg': forms.TextInput(attrs={'placeholder': '0000000'}),
             'telefone': forms.TextInput(attrs={'placeholder': '(62) 99999-0000'}),
             'data_nascimento': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'nome_mae': forms.TextInput(attrs={'placeholder': 'Ex: Maria Silva de Jesus'}),
+            'nome_pai': forms.TextInput(attrs={'placeholder': 'Ex: João Roberto de Jesus'}),
             'cnh': forms.TextInput(attrs={'placeholder': '00000000000'}),
             'cnh_validade': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'cnv': forms.TextInput(attrs={'placeholder': '00000/0000'}),

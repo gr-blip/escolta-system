@@ -22,6 +22,8 @@ class Agente(models.Model):
     rg = models.CharField(max_length=20, verbose_name='RG')
     telefone = models.CharField(max_length=20, verbose_name='Telefone / Contato')
     data_nascimento = models.DateField(blank=True, null=True, verbose_name='Data de nascimento')
+    nome_mae = models.CharField(max_length=200, blank=True, verbose_name='Nome da mãe')
+    nome_pai = models.CharField(max_length=200, blank=True, verbose_name='Nome do pai')
     cnh = models.CharField(max_length=20, blank=True, verbose_name='CNH')
     cnh_validade = models.DateField(blank=True, null=True, verbose_name='Val. CNH')
     cnh_categoria = models.CharField(max_length=5, blank=True, default='B', verbose_name='Categoria CNH')

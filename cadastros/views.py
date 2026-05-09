@@ -214,7 +214,14 @@ def agente_certidao_tjdf(request, pk):
         primeiro_nome = partes[0] if partes else ''
         resp = _req.post(
             'https://api.infosimples.com/api/v2/consultas/tribunal/tjdf/nada-consta',
-            data={'token': token, 'cpf': cpf_limpo, 'primeiro_nome': primeiro_nome, 'timeout': 600},
+            data={
+                'token': token,
+                'cpf': cpf_limpo,
+                'primeiro_nome': primeiro_nome,
+                'nome_mae': agente.nome_mae or '',
+                'nome_pai': agente.nome_pai or '',
+                'timeout': 600,
+            },
             timeout=65,
         )
         data = resp.json()
@@ -278,11 +285,9 @@ def agente_certidao_trf(request, pk):
     cpf_limpo = ''.join(c for c in agente.cpf if c.isdigit())
 
     try:
-        partes = agente.nome.strip().split()
-        primeiro_nome = partes[0] if partes else ''
         resp = _req.post(
-            'https://api.infosimples.com/api/v2/consultas/tribunal/trf1/nada-consta',
-            data={'token': token, 'cpf': cpf_limpo, 'primeiro_nome': primeiro_nome, 'timeout': 600},
+            'https://api.infosimples.com/api/v2/consultas/tribunal/trf1/certidao',
+            data={'token': token, 'cpf': cpf_limpo, 'timeout': 600},
             timeout=65,
         )
         data = resp.json()
@@ -290,18 +295,16 @@ def agente_certidao_trf(request, pk):
 
         if code == 200 and data.get('data'):
             registros = data['data']
-            tem_pendencia = any(
-                r.get('resultado', '').lower() not in ('nada consta', 'nada_consta', '')
-                for r in registros
-            )
-            status = 'pendencias' if tem_pendencia else 'nada_consta'
-            detalhe = str(registros[0]) if registros else ''
-            msg = '⚠️ Certidão TRF com pendências!' if tem_pendencia else '✅ Certidão TRF Nada Consta emitida!'
-            level = messages.WARNING if tem_pendencia else messages.SUCCESS
+            # TRF1 certidao: campo conseguiu_emitir_certidao_negativa
+            conseguiu = registros[0].get('conseguiu_emitir_certidao_negativa', True) if registros else True
+            status = 'nada_consta' if conseguiu else 'pendencias'
+            detalhe = registros[0].get('mensagem', str(registros[0])) if registros else ''
+            msg = '✅ Certidão TRF Negativa emitida!' if conseguiu else '⚠️ TRF: não foi possível emitir certidão negativa.'
+            level = messages.SUCCESS if conseguiu else messages.WARNING
         elif code == 200:
             status = 'nada_consta'
-            detalhe = 'Nenhum registro encontrado.'
-            msg = '✅ TRF Nada Consta — nenhum registro encontrado.'
+            detalhe = 'Certidão emitida sem registros.'
+            msg = '✅ TRF Certidão Negativa emitida com sucesso.'
             level = messages.SUCCESS
         else:
             errors_list = data.get('errors', [])
