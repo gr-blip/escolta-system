@@ -220,6 +220,7 @@ def agente_certidao_tjdf(request, pk):
                 'primeiro_nome': primeiro_nome,
                 'nome_mae': agente.nome_mae or '',
                 'nome_pai': agente.nome_pai or '',
+                'tipo_certidao': 'criminal',
                 'timeout': 600,
             },
             timeout=65,
