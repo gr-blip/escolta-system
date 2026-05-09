@@ -212,8 +212,8 @@ def agente_certidao_tjdf(request, pk):
     try:
         resp = _req.post(
             'https://api.infosimples.com/api/v2/consultas/tribunal/tjdf/nada-consta',
-            json={'token': token, 'cpf': cpf_limpo},
-            timeout=30,
+            data={'token': token, 'cpf': cpf_limpo, 'timeout': 600},
+            timeout=65,
         )
         data = resp.json()
         code = data.get('code', 0)
@@ -227,18 +227,19 @@ def agente_certidao_tjdf(request, pk):
             )
             status = 'pendencias' if tem_pendencia else 'nada_consta'
             detalhe = str(registros[0]) if registros else ''
-            msg = '⚠️ Certidão com pendências!' if tem_pendencia else '✅ Certidão Nada Consta emitida com sucesso!'
+            msg = '⚠️ Certidão TJDFT com pendências!' if tem_pendencia else '✅ Certidão TJDFT Nada Consta emitida!'
             level = messages.WARNING if tem_pendencia else messages.SUCCESS
         elif code == 200:
             status = 'nada_consta'
             detalhe = 'Nenhum registro encontrado.'
-            msg = '✅ Nada Consta — nenhum registro encontrado.'
+            msg = '✅ TJDFT Nada Consta — nenhum registro encontrado.'
             level = messages.SUCCESS
         else:
-            erros = '; '.join(data.get('errors', [str(code)]))
+            errors_list = data.get('errors', [])
+            erros = '; '.join(errors_list) if errors_list else f'Code {code}: {data}'
             status = 'erro'
             detalhe = erros
-            msg = f'Erro na consulta: {erros}'
+            msg = f'Erro TJDFT: {erros}'
             level = messages.ERROR
 
         agente.certidao_tjdf_status = status
@@ -277,8 +278,8 @@ def agente_certidao_trf(request, pk):
     try:
         resp = _req.post(
             'https://api.infosimples.com/api/v2/consultas/tribunal/trf1/nada-consta',
-            json={'token': token, 'cpf': cpf_limpo},
-            timeout=30,
+            data={'token': token, 'cpf': cpf_limpo, 'timeout': 600},
+            timeout=65,
         )
         data = resp.json()
         code = data.get('code', 0)
@@ -291,18 +292,19 @@ def agente_certidao_trf(request, pk):
             )
             status = 'pendencias' if tem_pendencia else 'nada_consta'
             detalhe = str(registros[0]) if registros else ''
-            msg = '⚠️ Certidão TRF com pendências!' if tem_pendencia else '✅ Certidão TRF Nada Consta emitida com sucesso!'
+            msg = '⚠️ Certidão TRF com pendências!' if tem_pendencia else '✅ Certidão TRF Nada Consta emitida!'
             level = messages.WARNING if tem_pendencia else messages.SUCCESS
         elif code == 200:
             status = 'nada_consta'
             detalhe = 'Nenhum registro encontrado.'
-            msg = '✅ TRF — Nada Consta: nenhum registro encontrado.'
+            msg = '✅ TRF Nada Consta — nenhum registro encontrado.'
             level = messages.SUCCESS
         else:
-            erros = '; '.join(data.get('errors', [str(code)]))
+            errors_list = data.get('errors', [])
+            erros = '; '.join(errors_list) if errors_list else f'Code {code}: {data}'
             status = 'erro'
             detalhe = erros
-            msg = f'Erro na consulta TRF: {erros}'
+            msg = f'Erro TRF: {erros}'
             level = messages.ERROR
 
         agente.certidao_trf_status = status
