@@ -287,24 +287,32 @@ def agente_certidao_trf(request, pk):
     try:
         resp = _req.post(
             'https://api.infosimples.com/api/v2/consultas/tribunal/trf1/certidao',
-            data={'token': token, 'cpf': cpf_limpo, 'timeout': 600},
+            data={
+                'token': token,
+                'cpf': cpf_limpo,
+                'orgao': 'DF',
+                'tipo': 'CRIMINAL',
+                'considera_filiais': 1,
+                'timeout': 600,
+            },
             timeout=65,
         )
         data = resp.json()
         code = data.get('code', 0)
 
         if code == 200 and data.get('data'):
-            registros = data['data']
-            # TRF1 certidao: campo conseguiu_emitir_certidao_negativa
-            conseguiu = registros[0].get('conseguiu_emitir_certidao_negativa', True) if registros else True
+            reg = data['data'][0]
+            conseguiu = reg.get('conseguiu_emitir_certidao_negativa', True)
+            codigo = reg.get('certidao_codigo_com_ano', '')
+            mensagem = reg.get('mensagem', '')
             status = 'nada_consta' if conseguiu else 'pendencias'
-            detalhe = registros[0].get('mensagem', str(registros[0])) if registros else ''
-            msg = '✅ Certidão TRF Negativa emitida!' if conseguiu else '⚠️ TRF: não foi possível emitir certidão negativa.'
+            detalhe = f"Certidão {codigo} — {mensagem}" if codigo else mensagem
+            msg = f'✅ TRF1 Certidão Negativa emitida! Código: {codigo}' if conseguiu else '⚠️ TRF1: não foi possível emitir certidão negativa.'
             level = messages.SUCCESS if conseguiu else messages.WARNING
         elif code == 200:
             status = 'nada_consta'
             detalhe = 'Certidão emitida sem registros.'
-            msg = '✅ TRF Certidão Negativa emitida com sucesso.'
+            msg = '✅ TRF1 Certidão Negativa emitida com sucesso.'
             level = messages.SUCCESS
         else:
             errors_list = data.get('errors', [])
