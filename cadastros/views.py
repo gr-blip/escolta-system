@@ -210,9 +210,11 @@ def agente_certidao_tjdf(request, pk):
     cpf_limpo = ''.join(c for c in agente.cpf if c.isdigit())
 
     try:
+        partes = agente.nome.strip().split()
+        primeiro_nome = partes[0] if partes else ''
         resp = _req.post(
             'https://api.infosimples.com/api/v2/consultas/tribunal/tjdf/nada-consta',
-            data={'token': token, 'cpf': cpf_limpo, 'timeout': 600},
+            data={'token': token, 'cpf': cpf_limpo, 'primeiro_nome': primeiro_nome, 'timeout': 600},
             timeout=65,
         )
         data = resp.json()
@@ -276,9 +278,11 @@ def agente_certidao_trf(request, pk):
     cpf_limpo = ''.join(c for c in agente.cpf if c.isdigit())
 
     try:
+        partes = agente.nome.strip().split()
+        primeiro_nome = partes[0] if partes else ''
         resp = _req.post(
             'https://api.infosimples.com/api/v2/consultas/tribunal/trf1/nada-consta',
-            data={'token': token, 'cpf': cpf_limpo, 'timeout': 600},
+            data={'token': token, 'cpf': cpf_limpo, 'primeiro_nome': primeiro_nome, 'timeout': 600},
             timeout=65,
         )
         data = resp.json()
