@@ -255,7 +255,20 @@ def agente_certidao_tjdf(request, pk):
         agente.certidao_tjdf_status = status
         agente.certidao_tjdf_consultado_em = timezone.now()
         agente.certidao_tjdf_detalhe = detalhe
-        agente.save(update_fields=['certidao_tjdf_status', 'certidao_tjdf_consultado_em', 'certidao_tjdf_detalhe'])
+        update_fields = ['certidao_tjdf_status', 'certidao_tjdf_consultado_em', 'certidao_tjdf_detalhe']
+
+        # Salvar PDF do site_receipt, se disponível
+        import base64 as _b64
+        from django.core.files.base import ContentFile
+        for receipt in data.get('site_receipt', []):
+            if receipt.get('format') == 'pdf' and receipt.get('content'):
+                pdf_bytes = _b64.b64decode(receipt['content'])
+                filename = f'tjdft_{agente.pk}_{timezone.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+                agente.certidao_tjdf_pdf.save(filename, ContentFile(pdf_bytes), save=False)
+                update_fields.append('certidao_tjdf_pdf')
+                break
+
+        agente.save(update_fields=update_fields)
         messages.add_message(request, level, msg)
 
     except Exception as e:
@@ -326,7 +339,20 @@ def agente_certidao_trf(request, pk):
         agente.certidao_trf_status = status
         agente.certidao_trf_consultado_em = timezone.now()
         agente.certidao_trf_detalhe = detalhe
-        agente.save(update_fields=['certidao_trf_status', 'certidao_trf_consultado_em', 'certidao_trf_detalhe'])
+        update_fields = ['certidao_trf_status', 'certidao_trf_consultado_em', 'certidao_trf_detalhe']
+
+        # Salvar PDF do site_receipt, se disponível
+        import base64 as _b64
+        from django.core.files.base import ContentFile
+        for receipt in data.get('site_receipt', []):
+            if receipt.get('format') == 'pdf' and receipt.get('content'):
+                pdf_bytes = _b64.b64decode(receipt['content'])
+                filename = f'trf1_{agente.pk}_{timezone.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+                agente.certidao_trf_pdf.save(filename, ContentFile(pdf_bytes), save=False)
+                update_fields.append('certidao_trf_pdf')
+                break
+
+        agente.save(update_fields=update_fields)
         messages.add_message(request, level, msg)
 
     except Exception as e:
