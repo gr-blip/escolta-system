@@ -680,6 +680,31 @@ def cliente_deletar_definitivo(request, pk):
     return render(request, 'cadastros/cliente_deletar_confirm.html', {'obj': cliente})
 
 
+@login_required
+def cliente_force_delete(request, pk):
+    """Exclusão forçada — apenas developer. Remove OS vinculadas e depois o cliente."""
+    if not _is_developer(request.user):
+        messages.error(request, 'Sem permissão para esta ação.')
+        return redirect('cliente_list')
+
+    cliente = get_object_or_404(Cliente, pk=pk)
+
+    if request.method == 'POST':
+        from .models import OrdemServico as _OS
+        os_count = _OS.objects.filter(cliente=cliente).count()
+        _OS.objects.filter(cliente=cliente).delete()
+        nome = cliente.razao_social
+        cliente.delete()
+        messages.success(request, f'Cliente "{nome}" e {os_count} OS vinculada(s) removidos definitivamente.')
+        return redirect('cliente_list')
+
+    os_list_vinc = OrdemServico.objects.filter(cliente=cliente)
+    return render(request, 'cadastros/cliente_force_delete_confirm.html', {
+        'obj': cliente,
+        'os_list': os_list_vinc,
+    })
+
+
 # ── COLETES ───────────────────────────────────────────────────────────────────
 
 from .forms import ColeteForm

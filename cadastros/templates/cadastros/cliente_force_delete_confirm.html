@@ -1,0 +1,38 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}Exclusão Forçada{% endblock %}
+{% block page_title %}Exclusão Forçada de Cliente{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / <a href="{% url 'cliente_list' %}">Clientes</a> / Exclusão Forçada{% endblock %}
+{% block topbar_actions %}<a href="{% url 'cliente_list' %}" class="btn btn-secondary">← Voltar</a>{% endblock %}
+
+{% block content %}
+<div class="card" style="border:1px solid rgba(239,68,68,.4)">
+  <div class="card-title" style="color:#ef4444">
+    <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 3.5v3m0 2.5h.01" stroke="#ef4444" stroke-width="1.4" stroke-linecap="round"/></svg>
+    Atenção — Esta ação é irreversível
+  </div>
+
+  <p style="color:var(--text2);font-size:13px;margin-bottom:16px">
+    Você está prestes a excluir permanentemente o cliente <strong style="color:var(--text1)">{{ obj.razao_social }}</strong>
+    e <strong style="color:#ef4444">{{ os_list|length }} Ordem(ns) de Serviço</strong> vinculada(s).
+  </p>
+
+  {% if os_list %}
+  <div style="background:var(--bg2);border-radius:6px;padding:12px;margin-bottom:16px">
+    <div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:8px;text-transform:uppercase">OS que serão removidas:</div>
+    {% for os in os_list %}
+    <div style="font-size:12px;color:var(--text2);padding:3px 0;border-bottom:1px solid var(--border)">
+      <strong>#{{ os.numero }}</strong> — {{ os.get_status_display }} — {{ os.previsao_inicio|date:"d/m/Y" }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <form method="post" style="display:flex;gap:10px">
+    {% csrf_token %}
+    <button type="submit" style="background:#ef4444;color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer">
+      Sim, excluir tudo definitivamente
+    </button>
+    <a href="{% url 'cliente_list' %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
+{% endblock %}
