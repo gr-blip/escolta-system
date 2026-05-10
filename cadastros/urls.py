@@ -50,6 +50,7 @@ urlpatterns += [
 
 # Equipes
 urlpatterns += [
+    path('operacional/dashboard/',                        views.dashboard_operacional, name='dashboard_operacional'),
     path('operacional/equipes/',                          views.equipe_list,      name='equipe_list'),
     path('operacional/equipes/nova/',                     views.equipe_create,    name='equipe_create'),
     path('operacional/equipes/<int:pk>/editar/',          views.equipe_edit,      name='equipe_edit'),

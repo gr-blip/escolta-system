@@ -188,6 +188,104 @@ def agente_delete(request, pk):
     return render(request, 'cadastros/confirm_delete.html', {'obj': agente, 'tipo': 'Agente'})
 
 
+def _gerar_certidao_pdf(tipo, agente, status, detalhe, codigo=None, consultado_em=None):
+    """Gera um PDF de certidão usando ReportLab e retorna os bytes."""
+    import io
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.units import cm
+    from reportlab.lib import colors
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.enums import TA_CENTER, TA_LEFT
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4,
+                            leftMargin=2.5*cm, rightMargin=2.5*cm,
+                            topMargin=2.5*cm, bottomMargin=2.5*cm)
+
+    styles = getSampleStyleSheet()
+    cor_verde   = colors.HexColor('#16a34a')
+    cor_amarelo = colors.HexColor('#d97706')
+    cor_cinza   = colors.HexColor('#6b7280')
+    cor_escuro  = colors.HexColor('#111827')
+
+    titulo_style = ParagraphStyle('titulo', fontSize=11, leading=14,
+                                  fontName='Helvetica-Bold', textColor=cor_escuro,
+                                  alignment=TA_CENTER, spaceAfter=4)
+    subtitulo_style = ParagraphStyle('sub', fontSize=9, leading=12,
+                                     fontName='Helvetica', textColor=cor_cinza,
+                                     alignment=TA_CENTER, spaceAfter=2)
+    label_style = ParagraphStyle('label', fontSize=8, fontName='Helvetica-Bold',
+                                 textColor=cor_cinza, spaceAfter=1)
+    valor_style = ParagraphStyle('valor', fontSize=10, fontName='Helvetica',
+                                 textColor=cor_escuro, spaceAfter=8)
+    resultado_style = ParagraphStyle('res', fontSize=14, fontName='Helvetica-Bold',
+                                     textColor=cor_verde, alignment=TA_CENTER, spaceAfter=6)
+    rodape_style = ParagraphStyle('rodape', fontSize=7, fontName='Helvetica',
+                                  textColor=cor_cinza, alignment=TA_CENTER)
+
+    nomes_tipo = {
+        'TJDFT': ('Certidão de Nada Consta', 'Tribunal de Justiça do Distrito Federal e dos Territórios'),
+        'TRF1':  ('Certidão Negativa Criminal', 'Tribunal Regional Federal — 1ª Região (Seção DF)'),
+    }
+    nome_certidao, nome_tribunal = nomes_tipo.get(tipo, (tipo, tipo))
+
+    resultado_label = '✓  NADA CONSTA' if status == 'nada_consta' else '⚠  PENDÊNCIAS ENCONTRADAS'
+    resultado_cor   = cor_verde if status == 'nada_consta' else cor_amarelo
+    resultado_style.textColor = resultado_cor
+
+    cpf_fmt = agente.cpf
+    if len(''.join(c for c in agente.cpf if c.isdigit())) == 11:
+        d = ''.join(c for c in agente.cpf if c.isdigit())
+        cpf_fmt = f'{d[:3]}.{d[3:6]}.{d[6:9]}-{d[9:]}'
+
+    data_consulta = consultado_em.strftime('%d/%m/%Y às %H:%M') if consultado_em else '—'
+
+    story = []
+    story.append(Paragraph('JR SEGURANÇA', titulo_style))
+    story.append(Paragraph('Depto. de Escolta Armada', subtitulo_style))
+    story.append(Spacer(1, 0.3*cm))
+    story.append(HRFlowable(width='100%', thickness=1, color=cor_escuro))
+    story.append(Spacer(1, 0.4*cm))
+    story.append(Paragraph(nome_certidao.upper(), titulo_style))
+    story.append(Paragraph(nome_tribunal, subtitulo_style))
+    story.append(Spacer(1, 0.5*cm))
+
+    dados = [
+        [Paragraph('AGENTE', label_style),   Paragraph(agente.nome.upper(), valor_style)],
+        [Paragraph('CPF', label_style),       Paragraph(cpf_fmt, valor_style)],
+        [Paragraph('CONSULTA', label_style),  Paragraph(data_consulta, valor_style)],
+    ]
+    if codigo:
+        dados.append([Paragraph('CÓDIGO DA CERTIDÃO', label_style), Paragraph(codigo, valor_style)])
+
+    t = Table(dados, colWidths=[3.5*cm, 12*cm])
+    t.setStyle(TableStyle([
+        ('VALIGN',     (0, 0), (-1, -1), 'TOP'),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('TOPPADDING',    (0, 0), (-1, -1), 2),
+    ]))
+    story.append(t)
+    story.append(Spacer(1, 0.5*cm))
+    story.append(HRFlowable(width='100%', thickness=0.5, color=cor_cinza))
+    story.append(Spacer(1, 0.5*cm))
+    story.append(Paragraph(resultado_label, resultado_style))
+    if detalhe and status != 'nada_consta':
+        story.append(Spacer(1, 0.2*cm))
+        story.append(Paragraph(detalhe, ParagraphStyle('det', fontSize=8, textColor=cor_cinza,
+                                                        fontName='Helvetica', alignment=TA_CENTER)))
+    story.append(Spacer(1, 1*cm))
+    story.append(HRFlowable(width='100%', thickness=0.5, color=cor_cinza))
+    story.append(Spacer(1, 0.2*cm))
+    story.append(Paragraph(
+        f'Documento gerado em {data_consulta} pelo Sistema de Gestão JR Segurança.<br/>'
+        'Consulta realizada via InfoSimples API. Este documento é um comprovante interno de consulta.',
+        rodape_style))
+
+    doc.build(story)
+    return buffer.getvalue()
+
+
 @login_required
 def agente_certidao_tjdf(request, pk):
     """Consulta certidão TJDF via InfoSimples e salva o resultado no agente."""
@@ -257,16 +355,19 @@ def agente_certidao_tjdf(request, pk):
         agente.certidao_tjdf_detalhe = detalhe
         update_fields = ['certidao_tjdf_status', 'certidao_tjdf_consultado_em', 'certidao_tjdf_detalhe']
 
-        # Salvar PDF do site_receipt, se disponível
-        import base64 as _b64
-        from django.core.files.base import ContentFile
-        for receipt in data.get('site_receipt', []):
-            if receipt.get('format') == 'pdf' and receipt.get('content'):
-                pdf_bytes = _b64.b64decode(receipt['content'])
-                filename = f'tjdft_{agente.pk}_{timezone.now().strftime("%Y%m%d_%H%M%S")}.pdf'
-                agente.certidao_tjdf_pdf.save(filename, ContentFile(pdf_bytes), save=False)
-                update_fields.append('certidao_tjdf_pdf')
-                break
+        # Gerar PDF interno com ReportLab
+        if status != 'erro':
+            from django.core.files.base import ContentFile
+            pdf_bytes = _gerar_certidao_pdf(
+                tipo='TJDFT',
+                agente=agente,
+                status=status,
+                detalhe=detalhe,
+                consultado_em=agente.certidao_tjdf_consultado_em,
+            )
+            filename = f'tjdft_{agente.pk}_{timezone.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+            agente.certidao_tjdf_pdf.save(filename, ContentFile(pdf_bytes), save=False)
+            update_fields.append('certidao_tjdf_pdf')
 
         agente.save(update_fields=update_fields)
         messages.add_message(request, level, msg)
@@ -341,16 +442,21 @@ def agente_certidao_trf(request, pk):
         agente.certidao_trf_detalhe = detalhe
         update_fields = ['certidao_trf_status', 'certidao_trf_consultado_em', 'certidao_trf_detalhe']
 
-        # Salvar PDF do site_receipt, se disponível
-        import base64 as _b64
-        from django.core.files.base import ContentFile
-        for receipt in data.get('site_receipt', []):
-            if receipt.get('format') == 'pdf' and receipt.get('content'):
-                pdf_bytes = _b64.b64decode(receipt['content'])
-                filename = f'trf1_{agente.pk}_{timezone.now().strftime("%Y%m%d_%H%M%S")}.pdf'
-                agente.certidao_trf_pdf.save(filename, ContentFile(pdf_bytes), save=False)
-                update_fields.append('certidao_trf_pdf')
-                break
+        # Gerar PDF interno com ReportLab
+        if status != 'erro':
+            from django.core.files.base import ContentFile
+            codigo_certidao = detalhe.split(' — ')[0].replace('Certidão ', '') if 'Certidão ' in detalhe else ''
+            pdf_bytes = _gerar_certidao_pdf(
+                tipo='TRF1',
+                agente=agente,
+                status=status,
+                detalhe=detalhe,
+                codigo=codigo_certidao,
+                consultado_em=agente.certidao_trf_consultado_em,
+            )
+            filename = f'trf1_{agente.pk}_{timezone.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+            agente.certidao_trf_pdf.save(filename, ContentFile(pdf_bytes), save=False)
+            update_fields.append('certidao_trf_pdf')
 
         agente.save(update_fields=update_fields)
         messages.add_message(request, level, msg)
@@ -619,6 +725,77 @@ def colete_delete(request, pk):
 
 
 # ── EQUIPES ───────────────────────────────────────────────────────────────────
+
+@login_required
+def dashboard_operacional(request):
+    """Dashboard operacional: OS por mês (8 meses) + OS por cliente no mês selecionado."""
+    from django.db.models import Count as _Count
+    from django.db.models.functions import TruncMonth
+    import calendar
+
+    hoje = timezone.localdate()
+
+    # ── Gráfico de barras: OS por mês (últimos 8 meses) ──────────────────────
+    meses_labels = []
+    meses_totais = []
+    MESES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+
+    for i in range(7, -1, -1):
+        ano  = hoje.year  - ((hoje.month - 1 - i) < 0 and 1 or 0)
+        mes  = ((hoje.month - 1 - i) % 12) + 1
+        total = OrdemServico.objects.filter(
+            criado_em__year=ano,
+            criado_em__month=mes,
+        ).exclude(status='cancelada').count()
+        meses_labels.append(f'{MESES_PT[mes-1].upper()} DE {ano}')
+        meses_totais.append(total)
+
+    # ── Gráfico de pizza: OS por cliente no mês selecionado ──────────────────
+    periodo = request.GET.get('periodo', f'{hoje.year}-{hoje.month}')
+    try:
+        ano_sel, mes_sel = [int(x) for x in periodo.split('-')]
+        mes_sel = max(1, min(12, mes_sel))
+    except Exception:
+        ano_sel, mes_sel = hoje.year, hoje.month
+
+    qs_pizza = (
+        OrdemServico.objects
+        .filter(criado_em__year=ano_sel, criado_em__month=mes_sel)
+        .exclude(status='cancelada')
+        .values('cliente__razao_social')
+        .annotate(total=_Count('id'))
+        .order_by('-total')
+    )
+    pizza_labels = [r['cliente__razao_social'] or '—' for r in qs_pizza]
+    pizza_values = [r['total'] for r in qs_pizza]
+    pizza_total  = sum(pizza_values)
+
+    mes_sel_label = f'{MESES_PT[mes_sel-1]} de {ano_sel}'
+
+    # Opções de mês para o seletor (últimos 12 meses)
+    meses_opcoes = []
+    for i in range(11, -1, -1):
+        a = hoje.year  - ((hoje.month - 1 - i) < 0 and 1 or 0)
+        m = ((hoje.month - 1 - i) % 12) + 1
+        meses_opcoes.append({'ano': a, 'mes': m,
+                             'label': f'{MESES_PT[m-1]} de {a}',
+                             'val': f'{a}-{m}',
+                             'sel': (a == ano_sel and m == mes_sel)})
+
+    return render(request, 'cadastros/dashboard_operacional.html', {
+        'meses_labels': meses_labels,
+        'meses_totais': meses_totais,
+        'pizza_labels': pizza_labels,
+        'pizza_values': pizza_values,
+        'pizza_total':  pizza_total,
+        'pizza_rows':   list(zip(pizza_labels, pizza_values)),
+        'mes_sel_label': mes_sel_label,
+        'mes_sel': mes_sel,
+        'ano_sel': ano_sel,
+        'meses_opcoes': meses_opcoes,
+    })
+
 
 @login_required
 def equipe_list(request):
