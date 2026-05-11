@@ -63,6 +63,8 @@
           <td>
             {% if f.tipo == 'vigilante' %}
               <span class="badge badge-blue">Vigilante</span>
+            {% elif f.tipo == 'brigadista' %}
+              <span class="badge badge-amber">Brigadista</span>
             {% else %}
               <span class="badge badge-gray">Porteiro</span>
             {% endif %}
