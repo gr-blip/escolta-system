@@ -87,7 +87,7 @@
 </div>
 
 <!-- ── ALERTAS DE VENCIMENTO ── -->
-{% if alertas_cnh or alertas_cnv or alertas_coletes %}
+{% if alertas_cnh or alertas_cnv or alertas_curso or alertas_coletes %}
 <div style="margin-bottom:20px">
   <h2 style="font-size:14px;font-weight:700;color:var(--text1);margin-bottom:12px;display:flex;align-items:center;gap:8px">
     <span style="font-size:18px">⚠️</span> Alertas de Vencimento
@@ -143,6 +143,35 @@
                   <span class="badge badge-red">Vencida</span>
                 {% else %}
                   <span class="badge badge-amber">Vence em {{ a.cnv_validade|timeuntil:hoje }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- CURSO -->
+    {% if alertas_curso %}
+    <div class="card" style="border-left:3px solid #10b981">
+      <div class="card-title" style="color:#065f46">
+        🎓 Curso — Próximos a Vencer
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Agente</th><th>Validade</th><th>Situação</th></tr></thead>
+          <tbody>
+            {% for a in alertas_curso %}
+            <tr>
+              <td><a href="{% url 'agente_edit' a.pk %}" style="color:var(--blue-light);text-decoration:none">{{ a.nome }}</a></td>
+              <td style="font-family:monospace;font-size:12px">{{ a.curso_validade|date:"d/m/Y" }}</td>
+              <td>
+                {% if a.curso_validade < hoje %}
+                  <span class="badge badge-red">Vencido</span>
+                {% else %}
+                  <span class="badge badge-amber">Vence em {{ a.curso_validade|timeuntil:hoje }}</span>
                 {% endif %}
               </td>
             </tr>
@@ -397,40 +426,4 @@ document.addEventListener('DOMContentLoaded', function () {
           borderRadius: 5,
           maxBarThickness: 24,
         }]
-      },
-      options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: function (ctx) { return '  ' + ctx.parsed.x + ' OS'; }
-            }
-          }
-        },
-        scales: {
-          x: { beginAtZero: true, grid: { color: colorGrid }, ticks: { color: colorText, precision: 0 } },
-          y: { grid: { display: false }, ticks: { color: colorText, font: { size: 12 } } }
-        }
-      }
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', function () {
-    if (typeof Chart === 'undefined') return;
-    var d = defaultDates();
-    document.getElementById('ini-os-cliente').value = d.ini;
-    document.getElementById('fim-os-cliente').value = d.fim;
-    ['ini-os-cliente', 'fim-os-cliente'].forEach(function (id) {
-      document.getElementById(id).addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') carregarOsCliente();
-      });
-    });
-    carregarOsCliente();
-  });
-})();
-</script>
-
-{% endblock %}
+      },

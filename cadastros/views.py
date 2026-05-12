@@ -117,6 +117,16 @@ def dashboard(request):
         .only('id', 'nome', 'cnv_validade')
     )
 
+    # Curso vencido ou vencendo em até 60 dias (agentes ativos)
+    alertas_curso = (
+        Agente.objects
+        .filter(status='ativo')
+        .exclude(curso_validade__isnull=True)
+        .filter(curso_validade__lte=limite)
+        .order_by('curso_validade')
+        .only('id', 'nome', 'curso_validade')
+    )
+
     # Coletes vencidos ou vencendo em até 2 meses — com .only()
     alertas_coletes = (
         Colete.objects
@@ -137,6 +147,7 @@ def dashboard(request):
                                     .only('id', 'placa', 'marca_modelo', 'status'),
         'alertas_cnh': alertas_cnh,
         'alertas_cnv': alertas_cnv,
+        'alertas_curso': alertas_curso,
         'alertas_coletes': alertas_coletes,
         'hoje': hoje,
         # NOVO — dados para os gráficos Chart.js do dashboard.html
@@ -4079,13 +4090,4 @@ def funcionario_patrimonial_detail(request, pk):
 
 @login_required
 def funcionario_patrimonial_delete(request, pk):
-    func = get_object_or_404(FuncionarioPatrimonial, pk=pk)
-    if request.method == 'POST':
-        func.delete()
-        messages.success(request, 'Funcionario removido.')
-        return redirect('funcionario_patrimonial_list')
-    return render(request, 'cadastros/confirm_delete.html', {
-        'obj': func,
-        'tipo': 'Funcionario Patrimonial',
-    })
-
+  
