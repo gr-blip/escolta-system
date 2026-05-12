@@ -131,7 +131,8 @@ class Command(BaseCommand):
         economia_kb = 0
 
         for nome_model, ModelClass in MODELOS:
-            self.stdout.write(f'Processando {nome_model}...')
+            total_model = ModelClass.objects.exclude(foto='').count()
+            self.stdout.write(f'Processando {nome_model}... ({total_model} registros com foto)')
             queryset = ModelClass.objects.exclude(foto='').order_by('id')
 
             for obj in queryset.iterator():
@@ -140,13 +141,15 @@ class Command(BaseCommand):
 
                 try:
                     caminho = obj.foto.path
-                except Exception:
+                except Exception as e:
+                    self.stdout.write(f'  [ERRO path] {nome_model} #{obj.pk} foto={obj.foto.name!r}: {e}')
                     continue
 
                 resultado = _recomprimir_arquivo(caminho, dry_run=dry_run)
 
                 if resultado is None:
                     total_ignoradas += 1
+                    self.stdout.write(f'  [SKIP] {nome_model} #{obj.pk}: arquivo ausente ou < {LIMITE_SKIP_KB}KB')
                     continue
 
                 antes, depois, novo_caminho = resultado
