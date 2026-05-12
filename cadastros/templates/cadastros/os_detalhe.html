@@ -558,7 +558,7 @@
       <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
         <span style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;text-align:center">{{ marco_label }}</span>
         {% if fotos_marco|get_item:marco_key %}
-        <img src="{{ fotos_marco|get_item:marco_key }}" style="width:100%;height:100px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+        <img src="{{ fotos_marco|get_item:marco_key }}" loading="lazy" style="width:100%;height:100px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
         {% else %}
         <div style="width:100%;height:100px;border-radius:8px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3)">Sem foto</div>
         {% endif %}
@@ -630,7 +630,7 @@
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
       {% for foto in item.fotos %}
       <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border);background:var(--bg3)">
-        <img src="{{ foto.foto.url }}" alt="Foto veículo" style="width:100%;height:140px;object-fit:cover;display:block">
+        <img src="{{ foto.foto.url }}" alt="Foto veículo" loading="lazy" style="width:100%;height:140px;object-fit:cover;display:block">
         <div style="padding:5px 8px;font-size:10px;color:var(--text3)">{{ foto.get_momento_display }}</div>
       </div>
       {% endfor %}
@@ -655,7 +655,7 @@
           {{ a.get_tipo_display }}
         </div>
         <div style="background:#fff;padding:8px;text-align:center">
-          <img src="{{ a.imagem.url }}" alt="Assinatura" style="max-height:80px;max-width:100%;object-fit:contain">
+          <img src="{{ a.imagem.url }}" alt="Assinatura" loading="lazy" style="max-height:80px;max-width:100%;object-fit:contain">
         </div>
         <div style="padding:6px 10px;font-size:11px;color:var(--text2);border-top:1px solid var(--border)">
           {{ a.nome }}<br>

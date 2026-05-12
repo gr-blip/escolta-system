@@ -13,6 +13,55 @@ from .forms import AgenteForm, ViaturaForm, RastreadorForm, ArmamentoForm, Clien
     FuncionarioPatrimonialForm
 
 
+# ── COMPRESSÃO DE IMAGENS ─────────────────────────────────────────────────────
+def _comprimir_imagem(arquivo, max_largura=1280, qualidade=72):
+    """Comprime e redimensiona imagem antes de salvar. Retorna InMemoryUploadedFile."""
+    import io
+    from PIL import Image, ExifTags
+    from django.core.files.uploadedfile import InMemoryUploadedFile
+
+    try:
+        img = Image.open(arquivo)
+
+        # Corrige orientação EXIF (fotos de celular costumam vir rotacionadas)
+        try:
+            for tag, val in img._getexif().items():
+                if ExifTags.TAGS.get(tag) == 'Orientation':
+                    if val == 3:
+                        img = img.rotate(180, expand=True)
+                    elif val == 6:
+                        img = img.rotate(270, expand=True)
+                    elif val == 8:
+                        img = img.rotate(90, expand=True)
+                    break
+        except Exception:
+            pass
+
+        # Converte para RGB (necessário para salvar como JPEG)
+        if img.mode in ('RGBA', 'P', 'LA'):
+            img = img.convert('RGB')
+
+        # Redimensiona se maior que max_largura mantendo proporção
+        if img.width > max_largura:
+            ratio = max_largura / img.width
+            nova_altura = int(img.height * ratio)
+            img = img.resize((max_largura, nova_altura), Image.LANCZOS)
+
+        buffer = io.BytesIO()
+        img.save(buffer, format='JPEG', quality=qualidade, optimize=True)
+        buffer.seek(0)
+
+        nome = arquivo.name.rsplit('.', 1)[0] + '.jpg'
+        return InMemoryUploadedFile(
+            buffer, 'ImageField', nome,
+            'image/jpeg', buffer.getbuffer().nbytes, None
+        )
+    except Exception:
+        # Se falhar por qualquer motivo, usa o arquivo original
+        arquivo.seek(0)
+        return arquivo
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Helper: situação da frota em 1 query usando Case/When
 # ─────────────────────────────────────────────────────────────────────────────
@@ -3456,6 +3505,8 @@ def os_field_foto_marco(request, token):
     if marco not in MARCOS_VALIDOS or not foto:
         return JsonResponse({'ok': False, 'erro': 'Dados inválidos.'}, status=400)
 
+    foto = _comprimir_imagem(foto)
+
     # Se já existe foto para este marco, apaga o arquivo físico e reutiliza o registro
     existente = FotoMarco.objects.filter(os=op.os, marco=marco).first()
     if existente:
@@ -3666,6 +3717,7 @@ def os_field_foto_veiculo(request, token):
         return JsonResponse({'ok': False, 'erro': 'Dados inválidos.'}, status=400)
 
     veiculo = get_object_or_404(VeiculoEscoltado, pk=veiculo_pk, os=op.os)
+    foto = _comprimir_imagem(foto)
     obj = FotoVeiculoEscoltado.objects.create(veiculo=veiculo, momento=momento, foto=foto)
     return JsonResponse({'ok': True, 'id': obj.pk, 'url': obj.foto.url})
 
@@ -4044,14 +4096,14 @@ def funcionario_patrimonial_list(request):
     if status_filtro in ('ativo', 'afastado', 'inativo'):
         qs = qs.filter(status=status_filtro)
 
-    context = {
-        'funcionarios': qs,
+    total = qs.count()
+    return render(request, 'cadastros/funcionario_patrimonial_list.html', {
+        'funcionarios': qs.order_by('nome'),
         'q': q,
         'tipo': tipo,
         'status_filtro': status_filtro,
-        'total': qs.count(),
-    }
-    return render(request, 'cadastros/funcionario_patrimonial_list.html', context)
+        'total': total,
+    })
 
 
 @login_required
@@ -4059,11 +4111,11 @@ def funcionario_patrimonial_create(request):
     form = FuncionarioPatrimonialForm(request.POST or None, request.FILES or None)
     if form.is_valid():
         form.save()
-        messages.success(request, 'Funcionario cadastrado com sucesso!')
+        messages.success(request, 'Funcionário cadastrado com sucesso!')
         return redirect('funcionario_patrimonial_list')
     return render(request, 'cadastros/funcionario_patrimonial_form.html', {
         'form': form,
-        'titulo': 'Novo Funcionario Patrimonial',
+        'titulo': 'Novo Funcionário Patrimonial',
     })
 
 
@@ -4073,11 +4125,11 @@ def funcionario_patrimonial_edit(request, pk):
     form = FuncionarioPatrimonialForm(request.POST or None, request.FILES or None, instance=func)
     if form.is_valid():
         form.save()
-        messages.success(request, 'Funcionario atualizado com sucesso!')
+        messages.success(request, 'Funcionário atualizado com sucesso!')
         return redirect('funcionario_patrimonial_list')
     return render(request, 'cadastros/funcionario_patrimonial_form.html', {
         'form': form,
-        'titulo': 'Editar Funcionario Patrimonial',
+        'titulo': 'Editar Funcionário Patrimonial',
         'obj': func,
     })
 
