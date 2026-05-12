@@ -426,4 +426,40 @@ document.addEventListener('DOMContentLoaded', function () {
           borderRadius: 5,
           maxBarThickness: 24,
         }]
-      },
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function (ctx) { return '  ' + ctx.parsed.x + ' OS'; }
+            }
+          }
+        },
+        scales: {
+          x: { beginAtZero: true, grid: { color: colorGrid }, ticks: { color: colorText, precision: 0 } },
+          y: { grid: { display: false }, ticks: { color: colorText, font: { size: 12 } } }
+        }
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (typeof Chart === 'undefined') return;
+    var d = defaultDates();
+    document.getElementById('ini-os-cliente').value = d.ini;
+    document.getElementById('fim-os-cliente').value = d.fim;
+    ['ini-os-cliente', 'fim-os-cliente'].forEach(function (id) {
+      document.getElementById(id).addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') carregarOsCliente();
+      });
+    });
+    carregarOsCliente();
+  });
+})();
+</script>
+
+{% endblock %}
