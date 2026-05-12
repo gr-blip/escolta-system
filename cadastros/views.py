@@ -4090,4 +4090,12 @@ def funcionario_patrimonial_detail(request, pk):
 
 @login_required
 def funcionario_patrimonial_delete(request, pk):
-  
+    func = get_object_or_404(FuncionarioPatrimonial, pk=pk)
+    if request.method == 'POST':
+        func.delete()
+        messages.success(request, 'Funcionário removido.')
+        return redirect('funcionario_patrimonial_list')
+    return render(request, 'cadastros/confirm_delete.html', {
+        'obj': func,
+        'cancel_url': 'funcionario_patrimonial_list',
+    })
