@@ -1739,24 +1739,33 @@ def omnilink_frota_posicoes(request):
             if tid:
                 ultimo_por_terminal[tid] = ev
 
-    # ── Viaturas em operação: OS com status em_operacao ou encerrando ───────────
+    # ── Viaturas em operação: OS com status em_operacao OU marcos indicando op. ativa ─
+    from django.db.models import Q as _Q
     from .models import OrdemServico
-    # Fonte 1: snap_viatura_placa (salvo na atribuição da equipe — mais confiável)
-    # Fonte 2: equipe→viatura (fallback para OS antigas sem snap preenchido)
+    # Detecta por dois caminhos:
+    # 1) status da OS (em_operacao / encerrando)
+    # 2) marcos OSOperacional: chegada/início preenchidos e termino_viagem vazio
+    #    (cobre OS cujo status não foi atualizado corretamente)
     placas_em_operacao = set()
-    _debug_os = []
-    for os_obj in OrdemServico.objects.filter(
-        status__in=['em_operacao', 'encerrando'],
-    ).select_related('equipe__viatura'):
-        snap = (os_obj.snap_viatura_placa or '').strip().upper()
-        eq = os_obj.equipe
-        viat = eq.viatura if eq else None
-        via_equipe = (viat.placa or '').strip().upper() if viat else ''
-        placa = snap or via_equipe
-        _debug_os.append({
-            'os': os_obj.numero, 'status': os_obj.status,
-            'snap': snap, 'via_equipe': via_equipe, 'placa_final': placa,
-        })
+    _qs = OrdemServico.objects.filter(
+        _Q(status__in=['em_operacao', 'encerrando']) |
+        _Q(
+            operacional__chegada_operacao__isnull=False,
+            operacional__termino_viagem__isnull=True,
+        ) |
+        _Q(
+            operacional__inicio_operacao__isnull=False,
+            operacional__termino_viagem__isnull=True,
+        )
+    ).exclude(
+        status__in=['concluida', 'finalizada', 'cancelada']
+    ).select_related('equipe__viatura').distinct()
+    for os_obj in _qs:
+        placa = (os_obj.snap_viatura_placa or '').strip().upper()
+        if not placa:
+            eq = os_obj.equipe
+            viat = eq.viatura if eq else None
+            placa = (viat.placa or '').strip().upper() if viat else ''
         if placa:
             placas_em_operacao.add(placa)
 
@@ -1799,7 +1808,7 @@ def omnilink_frota_posicoes(request):
             'em_operacao':  placa_norm in placas_em_operacao,
         })
 
-    return JsonResponse({'ok': True, 'viaturas': resultado, '_debug': {'placas': list(placas_em_operacao), 'os': _debug_os}})
+    return JsonResponse({'ok': True, 'viaturas': resultado})
 
 
 # ══════════════════════════════════════════════════════════════════════════════
