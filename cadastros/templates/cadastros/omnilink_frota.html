@@ -98,6 +98,17 @@ body.dark .popup-info{color:#bbb}
 body.dark .sb-st-azul{background:#1e3a5f;color:#93c5fd}
 body.dark .popup-azul{background:#1e3a5f;color:#93c5fd;border-color:#2563eb}
 
+/* ── OS Info block ── */
+.sb-os-info{background:#eff6ff;border-radius:6px;padding:6px 8px;margin-top:4px;font-size:10px;color:#1e40af;line-height:1.55;border:1px solid #bfdbfe}
+.sb-os-info .os-num{font-weight:700;font-size:11px;margin-bottom:2px}
+.sb-os-info .os-rota{color:#1d4ed8;font-weight:500}
+.sb-os-info .os-eq{color:#374151}
+body.dark .sb-os-info{background:#1e3a5f;border-color:#2563eb;color:#93c5fd}
+body.dark .sb-os-info .os-rota{color:#bfdbfe}
+body.dark .sb-os-info .os-eq{color:#9ca3af}
+.popup-os-info{background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:7px 9px;margin-top:7px;font-size:11px;color:#1e40af;line-height:1.6}
+.popup-os-info .os-num{font-weight:700;font-size:12px;margin-bottom:3px}
+
 /* ── Fix linhas entre tiles do Leaflet ── */
 .leaflet-tile-pane { opacity: 0.99; will-change: transform; }
 .leaflet-tile { will-change: transform; transform: translateZ(0); }
@@ -224,6 +235,16 @@ function montarPopup(v, cor) {
   const [stCls, stTxt] = stMap[cor] || ['popup-cinza','?'];
   const loc = [v.endereco, v.cidade].filter(Boolean).join(' — ');
   const ta  = tempoAtras(v.data_hora);
+  let osHtml = '';
+  if (v.os_info) {
+    const o = v.os_info;
+    osHtml = `<div class="popup-os-info">
+      <div class="os-num">OS ${o.os_numero}${o.cliente ? ' · ' + o.cliente : ''}</div>
+      ${o.origem && o.destino ? `<div>${o.origem} → ${o.destino}</div>` : ''}
+      ${o.agentes ? `<div style="color:#374151">👥 ${o.agentes}</div>` : ''}
+      ${o.inicio ? `<div style="color:#6b7280;font-size:10px">Saída: ${o.inicio}</div>` : ''}
+    </div>`;
+  }
   return `
     <div style="min-width:200px">
       <div class="popup-placa">${v.placa}</div>
@@ -234,6 +255,7 @@ function montarPopup(v, cor) {
         <br>${loc || '<span style="color:#999">localização indisponível</span>'}
         <br><span style="color:#999;font-size:10px">${ta.texto} · ${v.data_hora ? v.data_hora.substring(0,16).replace('T',' ') : '—'}</span>
       </div>
+      ${osHtml}
     </div>`;
 }
 
@@ -265,12 +287,23 @@ function renderSidebar(lista) {
     const ign  = v.online ? (v.ignicao ? 'Ignição ligada' : 'Ignição desligada') : 'Sem sinal';
     const loc  = v.cidade || v.endereco || '—';
     const ta   = tempoAtras(v.data_hora);
+    let osHtml = '';
+    if (v.os_info) {
+      const o = v.os_info;
+      osHtml = `<div class="sb-os-info">
+        <div class="os-num">OS ${o.os_numero}${o.cliente ? ' · ' + o.cliente : ''}</div>
+        ${o.origem && o.destino ? `<div class="os-rota">${o.origem} → ${o.destino}</div>` : ''}
+        ${o.agentes ? `<div class="os-eq">👥 ${o.agentes}</div>` : ''}
+        ${o.inicio ? `<div style="font-size:9px;color:#6b7280">Saída: ${o.inicio}</div>` : ''}
+      </div>`;
+    }
     return `<div class="sb-item ${cor}" onclick="focarPlaca('${v.placa}')">
       <span class="sb-placa">${v.placa}</span>
       <span class="sb-status ${stCls}">${stTxt}</span>
       <div class="sb-detail">${vel} · ${ign}</div>
       <div class="sb-detail">${loc}</div>
       <div class="sb-meta" style="color:${ta.cor}">${ta.texto}</div>
+      ${osHtml}
     </div>`;
   }).join('');
 }

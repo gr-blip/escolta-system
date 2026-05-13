@@ -1747,6 +1747,7 @@ def omnilink_frota_posicoes(request):
     # 2) marcos OSOperacional: chegada/início preenchidos e termino_viagem vazio
     #    (cobre OS cujo status não foi atualizado corretamente)
     placas_em_operacao = set()
+    placa_para_os = {}  # placa → dados da OS para exibir no mapa
     _qs = OrdemServico.objects.filter(
         _Q(status__in=['em_operacao', 'encerrando']) |
         _Q(
@@ -1759,15 +1760,44 @@ def omnilink_frota_posicoes(request):
         )
     ).exclude(
         status__in=['concluida', 'finalizada', 'cancelada']
-    ).select_related('equipe__viatura').distinct()
+    ).select_related('equipe__viatura', 'cliente').prefetch_related('operacional').distinct()
     for os_obj in _qs:
         placa = (os_obj.snap_viatura_placa or '').strip().upper()
         if not placa:
             eq = os_obj.equipe
             viat = eq.viatura if eq else None
             placa = (viat.placa or '').strip().upper() if viat else ''
-        if placa:
-            placas_em_operacao.add(placa)
+        if not placa:
+            continue
+        placas_em_operacao.add(placa)
+        if placa not in placa_para_os:
+            # Monta info da OS para exibição
+            cliente_nome = ''
+            if os_obj.cliente:
+                cliente_nome = os_obj.cliente.nome_fantasia or os_obj.cliente.razao_social or ''
+            agentes = ' / '.join(filter(None, [
+                os_obj.snap_agente1_nome, os_obj.snap_agente2_nome
+            ]))
+            try:
+                op = os_obj.operacional
+                inicio_dt = op.inicio_viagem or os_obj.previsao_inicio
+            except Exception:
+                op = None
+                inicio_dt = os_obj.previsao_inicio
+            inicio_str = ''
+            if inicio_dt:
+                try:
+                    inicio_str = inicio_dt.strftime('%d/%m, %H:%M')
+                except Exception:
+                    pass
+            placa_para_os[placa] = {
+                'os_numero': os_obj.numero or '',
+                'cliente':   cliente_nome,
+                'origem':    f"{os_obj.cidade_origem}/{os_obj.uf_origem}",
+                'destino':   f"{os_obj.cidade_destino}/{os_obj.uf_destino}",
+                'agentes':   agentes,
+                'inicio':    inicio_str,
+            }
 
     resultado = []
     for v in viaturas:
@@ -1806,6 +1836,7 @@ def omnilink_frota_posicoes(request):
             'cidade':       cidade,
             'online':       pos is not None,
             'em_operacao':  placa_norm in placas_em_operacao,
+            'os_info':      placa_para_os.get(placa_norm),
         })
 
     return JsonResponse({'ok': True, 'viaturas': resultado})
