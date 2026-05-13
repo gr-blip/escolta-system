@@ -1741,11 +1741,17 @@ def omnilink_frota_posicoes(request):
 
     # ── Viaturas em operação: OS com status em_operacao ou encerrando ───────────
     from .models import OrdemServico
-    os_ativas = OrdemServico.objects.filter(
+    placas_em_operacao = set()
+    for os_obj in OrdemServico.objects.filter(
         status__in=['em_operacao', 'encerrando'],
-        equipe__viatura__isnull=False,
-    ).select_related('equipe__viatura').values_list('equipe__viatura__placa', flat=True)
-    placas_em_operacao = set(p.strip().upper() for p in os_ativas if p)
+        equipe__isnull=False,
+    ).select_related('equipe__viatura'):
+        try:
+            placa = os_obj.equipe.viatura.placa
+            if placa:
+                placas_em_operacao.add(placa.strip().upper())
+        except Exception:
+            pass
 
     resultado = []
     for v in viaturas:
