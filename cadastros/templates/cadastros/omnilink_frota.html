@@ -23,7 +23,7 @@ a.btn-voltar:hover{background:#f0f0ec;color:#111}
 .summary{display:flex;gap:12px;font-size:12px;align-items:center;flex-shrink:0}
 .summary-item{display:flex;align-items:center;gap:5px;white-space:nowrap}
 .dot{width:10px;height:10px;border-radius:50%;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15);flex-shrink:0}
-.dot-red{background:#dc2626}.dot-yellow{background:#eab308}.dot-green{background:#16a34a}.dot-gray{background:#9ca3af}
+.dot-red{background:#dc2626}.dot-yellow{background:#eab308}.dot-green{background:#16a34a}.dot-gray{background:#9ca3af}.dot-blue{background:#2563eb}
 
 /* ── Buttons ── */
 button.btn{padding:5px 12px;border:1px solid #ddd;border-radius:6px;background:#fff;font-size:12px;cursor:pointer;color:#333;font-weight:500;white-space:nowrap}
@@ -46,11 +46,13 @@ button.btn.primary:hover{background:#333}
 .sb-item.amarela{border-left-color:#eab308}
 .sb-item.verde{border-left-color:#16a34a}
 .sb-item.cinza{border-left-color:#9ca3af}
+.sb-item.azul{border-left-color:#2563eb}
 .sb-placa{font-weight:700;letter-spacing:.5px;font-size:14px}
 .sb-status{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;letter-spacing:.4px;margin:2px 0}
 .sb-st-amarela{background:#fef3c7;color:#92400e}
 .sb-st-verde{background:#dcfce7;color:#15803d}
 .sb-st-cinza{background:#f3f4f6;color:#6b7280}
+.sb-st-azul{background:#dbeafe;color:#1d4ed8}
 .sb-detail{font-size:11px;color:#666;line-height:1.4}
 .sb-meta{font-size:10px;color:#999;margin-top:1px}
 .sb-empty{padding:30px 20px;text-align:center;color:#aaa;font-size:12px}
@@ -66,6 +68,7 @@ button.btn.primary:hover{background:#333}
 .popup-amarela{background:#fef9c3;color:#854d0e;border:1px solid #fde047}
 .popup-verde{background:#dcfce7;color:#15803d;border:1px solid #86efac}
 .popup-cinza{background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db}
+.popup-azul{background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd}
 .popup-info{margin-top:6px;font-size:11px;color:#444;line-height:1.5}
 .popup-info b{color:#000}
 
@@ -92,6 +95,8 @@ body.dark #countdown{color:#16a34a}
 body.dark .summary-item{color:#bbb}
 body.dark .popup-info b{color:#fff}
 body.dark .popup-info{color:#bbb}
+body.dark .sb-st-azul{background:#1e3a5f;color:#93c5fd}
+body.dark .popup-azul{background:#1e3a5f;color:#93c5fd;border-color:#2563eb}
 
 /* ── Fix linhas entre tiles do Leaflet ── */
 .leaflet-tile-pane { opacity: 0.99; will-change: transform; }
@@ -131,8 +136,9 @@ body.dark .popup-info{color:#bbb}
 <!-- Legenda (posicionada sobre o mapa) -->
 <div class="legenda" style="position:fixed;bottom:20px;left:20px">
   <div class="legenda-title">Legenda</div>
-  <div class="legenda-item"><span class="dot dot-yellow"></span> Ignição ligada (em movimento)</div>
-  <div class="legenda-item"><span class="dot dot-green"></span> Disponível (sinal recente)</div>
+  <div class="legenda-item"><span class="dot dot-blue"></span> Em Operação (OS ativa)</div>
+  <div class="legenda-item"><span class="dot dot-yellow"></span> Em Deslocamento</div>
+  <div class="legenda-item"><span class="dot dot-green"></span> Disponível</div>
   <div class="legenda-item"><span class="dot dot-gray"></span> Sem sinal (&gt;1h)</div>
 </div>
 
@@ -181,14 +187,15 @@ let marcadores = {};
 
 function classificarCor(v) {
   if (!v.online) return 'cinza';
+  if (v.em_operacao) return 'azul';
   if (v.ignicao) return 'amarela';
   return 'verde';
 }
 
 function criarIcone(cor) {
-  const cores = { amarela: '#eab308', verde: '#16a34a', cinza: '#9ca3af' };
+  const cores = { amarela: '#eab308', verde: '#16a34a', cinza: '#9ca3af', azul: '#2563eb' };
   const c = cores[cor] || '#9ca3af';
-  const pulso = cor === 'amarela' ? `animation:pulse 2s ease-in-out infinite` : '';
+  const pulso = (cor === 'amarela' || cor === 'azul') ? `animation:pulse 2s ease-in-out infinite` : '';
   return L.divIcon({
     className: '',
     html: `<div style="width:32px;height:32px;border-radius:50%;border:3px solid ${c};background:rgba(255,255,255,0.92);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.25);${pulso}">
@@ -213,7 +220,7 @@ function tempoAtras(dataHoraStr) {
 }
 
 function montarPopup(v, cor) {
-  const stMap = { amarela:['popup-amarela','EM DESLOCAMENTO'], verde:['popup-verde','DISPONÍVEL'], cinza:['popup-cinza','SEM SINAL'] };
+  const stMap = { amarela:['popup-amarela','EM DESLOCAMENTO'], verde:['popup-verde','DISPONÍVEL'], cinza:['popup-cinza','SEM SINAL'], azul:['popup-azul','EM OPERAÇÃO'] };
   const [stCls, stTxt] = stMap[cor] || ['popup-cinza','?'];
   const loc = [v.endereco, v.cidade].filter(Boolean).join(' — ');
   const ta  = tempoAtras(v.data_hora);
@@ -241,13 +248,14 @@ function renderSidebar(lista) {
     return;
   }
 
-  const order = { amarela:0, verde:1, cinza:2 };
-  lista.sort((a,b) => (order[a._cor]??3) - (order[b._cor]??3));
+  const order = { azul:0, amarela:1, verde:2, cinza:3 };
+  lista.sort((a,b) => (order[a._cor]??4) - (order[b._cor]??4));
 
   const stMap = {
     amarela: ['sb-st-amarela','EM DESLOCAMENTO'],
     verde:   ['sb-st-verde','DISPONÍVEL'],
     cinza:   ['sb-st-cinza','SEM SINAL'],
+    azul:    ['sb-st-azul','EM OPERAÇÃO'],
   };
 
   el.innerHTML = lista.map(v => {
@@ -293,11 +301,12 @@ async function carregar(manual) {
 
     /* Atualiza / cria marcadores */
     const placasAtivas = new Set();
-    let nAmarela = 0, nVerde = 0, nCinza = 0;
+    let nAmarela = 0, nVerde = 0, nCinza = 0, nAzul = 0;
 
     lista.forEach(v => {
       const cor = v._cor;
-      if (cor === 'amarela') nAmarela++;
+      if (cor === 'azul')   nAzul++;
+      else if (cor === 'amarela') nAmarela++;
       else if (cor === 'verde') nVerde++;
       else nCinza++;
 
@@ -327,6 +336,7 @@ async function carregar(manual) {
 
     /* Sumário */
     document.getElementById('summary').innerHTML = `
+      <div class="summary-item"><span class="dot dot-blue"></span><b>${nAzul}</b> em operação</div>
       <div class="summary-item"><span class="dot dot-yellow"></span><b>${nAmarela}</b> deslocamento</div>
       <div class="summary-item"><span class="dot dot-green"></span><b>${nVerde}</b> disponível</div>
       <div class="summary-item"><span class="dot dot-gray"></span><b>${nCinza}</b> sem sinal</div>

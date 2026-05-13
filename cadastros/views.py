@@ -1739,6 +1739,14 @@ def omnilink_frota_posicoes(request):
             if tid:
                 ultimo_por_terminal[tid] = ev
 
+    # ── Viaturas em operação: OS com status em_operacao ou encerrando ───────────
+    from .models import OrdemServico
+    os_ativas = OrdemServico.objects.filter(
+        status__in=['em_operacao', 'encerrando'],
+        equipe__viatura__isnull=False,
+    ).select_related('equipe__viatura').values_list('equipe__viatura__placa', flat=True)
+    placas_em_operacao = set(p.strip().upper() for p in os_ativas if p)
+
     resultado = []
     for v in viaturas:
         placa_norm = (v.placa or '').strip().upper()
@@ -1763,18 +1771,19 @@ def omnilink_frota_posicoes(request):
             cidade = geo.get('cidade', '')
 
         resultado.append({
-            'mct_id':     v.mct_id,
-            'placa':      v.placa,
-            'modelo':     v.marca_modelo,
-            'lat':        pos.get('lat')        if pos else None,
-            'lng':        pos.get('lng')        if pos else None,
-            'velocidade': pos.get('velocidade') if pos else None,
-            'odometro':   pos.get('odometro')   if pos else None,
-            'ignicao':    pos.get('ignicao')    if pos else None,
-            'data_hora':  pos.get('data_hora')  if pos else None,
-            'endereco':   pos.get('endereco')   if pos else '',
-            'cidade':     cidade,
-            'online':     pos is not None,
+            'mct_id':       v.mct_id,
+            'placa':        v.placa,
+            'modelo':       v.marca_modelo,
+            'lat':          pos.get('lat')        if pos else None,
+            'lng':          pos.get('lng')        if pos else None,
+            'velocidade':   pos.get('velocidade') if pos else None,
+            'odometro':     pos.get('odometro')   if pos else None,
+            'ignicao':      pos.get('ignicao')    if pos else None,
+            'data_hora':    pos.get('data_hora')  if pos else None,
+            'endereco':     pos.get('endereco')   if pos else '',
+            'cidade':       cidade,
+            'online':       pos is not None,
+            'em_operacao':  placa_norm in placas_em_operacao,
         })
 
     return JsonResponse({'ok': True, 'viaturas': resultado})
