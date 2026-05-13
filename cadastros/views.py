@@ -1741,15 +1741,19 @@ def omnilink_frota_posicoes(request):
 
     # ── Viaturas em operação: OS com status em_operacao ou encerrando ───────────
     from .models import OrdemServico
-    # Usa snap_viatura_placa (salvo no momento da atribuição da equipe)
-    # É mais confiável que equipe→viatura, que pode ser null se a equipe foi alterada.
-    placas_em_operacao = set(
-        p.strip().upper()
-        for p in OrdemServico.objects.filter(
-            status__in=['em_operacao', 'encerrando'],
-        ).exclude(snap_viatura_placa='').values_list('snap_viatura_placa', flat=True)
-        if p and p.strip()
-    )
+    # Fonte 1: snap_viatura_placa (salvo na atribuição da equipe — mais confiável)
+    # Fonte 2: equipe→viatura (fallback para OS antigas sem snap preenchido)
+    placas_em_operacao = set()
+    for os_obj in OrdemServico.objects.filter(
+        status__in=['em_operacao', 'encerrando'],
+    ).select_related('equipe__viatura'):
+        placa = (os_obj.snap_viatura_placa or '').strip().upper()
+        if not placa:
+            eq = os_obj.equipe
+            viat = eq.viatura if eq else None
+            placa = (viat.placa or '').strip().upper() if viat else ''
+        if placa:
+            placas_em_operacao.add(placa)
 
     resultado = []
     for v in viaturas:
