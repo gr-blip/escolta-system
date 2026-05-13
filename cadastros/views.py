@@ -1742,16 +1742,21 @@ def omnilink_frota_posicoes(request):
     # ── Viaturas em operação: OS com status em_operacao ou encerrando ───────────
     from .models import OrdemServico
     placas_em_operacao = set()
+    _debug_os = []
     for os_obj in OrdemServico.objects.filter(
         status__in=['em_operacao', 'encerrando'],
-        equipe__isnull=False,
     ).select_related('equipe__viatura'):
-        try:
-            placa = os_obj.equipe.viatura.placa
-            if placa:
-                placas_em_operacao.add(placa.strip().upper())
-        except Exception:
-            pass
+        eq = os_obj.equipe
+        viat = eq.viatura if eq else None
+        placa = viat.placa if viat else None
+        _debug_os.append({
+            'os': os_obj.numero,
+            'status': os_obj.status,
+            'equipe': str(eq) if eq else None,
+            'viatura_placa': placa,
+        })
+        if placa:
+            placas_em_operacao.add(placa.strip().upper())
 
     resultado = []
     for v in viaturas:
@@ -1792,7 +1797,7 @@ def omnilink_frota_posicoes(request):
             'em_operacao':  placa_norm in placas_em_operacao,
         })
 
-    return JsonResponse({'ok': True, 'viaturas': resultado})
+    return JsonResponse({'ok': True, 'viaturas': resultado, '_debug': {'placas_em_operacao': list(placas_em_operacao), 'os_ativas': _debug_os}})
 
 
 # ══════════════════════════════════════════════════════════════════════════════
