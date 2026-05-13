@@ -1744,14 +1744,19 @@ def omnilink_frota_posicoes(request):
     # Fonte 1: snap_viatura_placa (salvo na atribuição da equipe — mais confiável)
     # Fonte 2: equipe→viatura (fallback para OS antigas sem snap preenchido)
     placas_em_operacao = set()
+    _debug_os = []
     for os_obj in OrdemServico.objects.filter(
         status__in=['em_operacao', 'encerrando'],
     ).select_related('equipe__viatura'):
-        placa = (os_obj.snap_viatura_placa or '').strip().upper()
-        if not placa:
-            eq = os_obj.equipe
-            viat = eq.viatura if eq else None
-            placa = (viat.placa or '').strip().upper() if viat else ''
+        snap = (os_obj.snap_viatura_placa or '').strip().upper()
+        eq = os_obj.equipe
+        viat = eq.viatura if eq else None
+        via_equipe = (viat.placa or '').strip().upper() if viat else ''
+        placa = snap or via_equipe
+        _debug_os.append({
+            'os': os_obj.numero, 'status': os_obj.status,
+            'snap': snap, 'via_equipe': via_equipe, 'placa_final': placa,
+        })
         if placa:
             placas_em_operacao.add(placa)
 
@@ -1794,7 +1799,7 @@ def omnilink_frota_posicoes(request):
             'em_operacao':  placa_norm in placas_em_operacao,
         })
 
-    return JsonResponse({'ok': True, 'viaturas': resultado})
+    return JsonResponse({'ok': True, 'viaturas': resultado, '_debug': {'placas': list(placas_em_operacao), 'os': _debug_os}})
 
 
 # ══════════════════════════════════════════════════════════════════════════════
