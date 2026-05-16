@@ -46,14 +46,15 @@ def main():
         # ── 2. Backup da mídia via Railway CLI ──────────────────────────
         print(f"Iniciando backup de mídia → {media_backup_file}")
         cmd_media = (
-            f'RAILWAY_TOKEN={railway_token} '
             f'railway run '
             f'--project {project_id} '
             f'--environment production '
             f'--service web '
             f'-- tar czf - /app/media > {media_backup_file}'
         )
-        run_command(cmd_media, shell=True)
+        env_media = os.environ.copy()
+        env_media['RAILWAY_TOKEN'] = railway_token
+        run_command(cmd_media, shell=True, env=env_media)
 
         # Verifica se o arquivo tem conteúdo real (tar vazio = algo deu errado)
         size_media = os.path.getsize(media_backup_file)
