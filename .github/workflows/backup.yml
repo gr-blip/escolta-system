@@ -3,7 +3,7 @@ name: Daily Backup to Google Drive
 on:
   schedule:
     - cron: '0 6 * * *'  # 06:00 UTC = 03:00 Brasília
-  workflow_dispatch:       # disparo manual pela aba Actions
+  workflow_dispatch:
 
 jobs:
   backup:
@@ -45,9 +45,10 @@ jobs:
 
       - name: Run Backup Script
         env:
-          DATABASE_URL:     ${{ secrets.DATABASE_URL }}
-          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
-          GCP_SA_KEY_JSON:  ${{ secrets.GCP_SA_KEY_JSON }}
-          RAILWAY_TOKEN:    ${{ secrets.RAILWAY_TOKEN }}
-          RAILWAY_APP_URL:  ${{ secrets.RAILWAY_APP_URL }}
+          DATABASE_URL:        ${{ secrets.DATABASE_URL }}
+          GDRIVE_FOLDER_ID:    ${{ secrets.GDRIVE_FOLDER_ID }}
+          GCP_SA_KEY_JSON:     ${{ secrets.GCP_SA_KEY_JSON }}
+          RAILWAY_TOKEN:       ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_APP_URL:     ${{ secrets.RAILWAY_APP_URL }}
+          RAILWAY_PROJECT_ID:  ${{ secrets.RAILWAY_PROJECT_ID }}
         run: python backup_drive_standalone.py

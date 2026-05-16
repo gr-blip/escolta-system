@@ -18,20 +18,26 @@ def main():
     folder_id     = os.getenv('GDRIVE_FOLDER_ID')
     railway_token = os.getenv('RAILWAY_TOKEN')
     app_url       = os.getenv('RAILWAY_APP_URL')
+    project_id    = os.getenv('RAILWAY_PROJECT_ID')
 
-    if not all([db_url, google_json, folder_id, railway_token, app_url]):
+    if not all([db_url, google_json, folder_id, railway_token, app_url, project_id]):
         print("Erro: variáveis de ambiente incompletas.")
+        print(f"  DATABASE_URL: {'OK' if db_url else 'FALTANDO'}")
+        print(f"  GCP_SA_KEY_JSON: {'OK' if google_json else 'FALTANDO'}")
+        print(f"  GDRIVE_FOLDER_ID: {'OK' if folder_id else 'FALTANDO'}")
+        print(f"  RAILWAY_TOKEN: {'OK' if railway_token else 'FALTANDO'}")
+        print(f"  RAILWAY_APP_URL: {'OK' if app_url else 'FALTANDO'}")
+        print(f"  RAILWAY_PROJECT_ID: {'OK' if project_id else 'FALTANDO'}")
         exit(1)
 
-    timestamp        = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-    db_backup_file   = f'db_backup_{timestamp}.sql.gz'
-    media_backup_file= f'media_backup_{timestamp}.tar.gz'
+    timestamp         = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    db_backup_file    = f'db_backup_{timestamp}.sql.gz'
+    media_backup_file = f'media_backup_{timestamp}.tar.gz'
 
     try:
         # ── 1. Backup do banco ──────────────────────────────────────────
         print(f"Iniciando backup do banco → {db_backup_file}")
         env = os.environ.copy()
-        # pg_dump aceita a URL via --dbname=
         cmd_db = f'pg_dump --dbname="{db_url}" | gzip > {db_backup_file}'
         run_command(cmd_db, shell=True, env=env)
         size_db = os.path.getsize(db_backup_file) / 1_048_576
@@ -39,8 +45,13 @@ def main():
 
         # ── 2. Backup da mídia via Railway CLI ──────────────────────────
         print(f"Iniciando backup de mídia → {media_backup_file}")
-        # railway run executa dentro do container e faz stream do tar
-        cmd_media = f'railway run --service web -- tar czf - /app/media > {media_backup_file}'
+        cmd_media = (
+            f'RAILWAY_TOKEN={railway_token} '
+            f'railway run '
+            f'--project {project_id} '
+            f'--service web '
+            f'-- tar czf - /app/media > {media_backup_file}'
+        )
         run_command(cmd_media, shell=True)
 
         # Verifica se o arquivo tem conteúdo real (tar vazio = algo deu errado)
