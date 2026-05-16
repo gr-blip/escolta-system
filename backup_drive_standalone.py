@@ -45,27 +45,26 @@ def main():
 
         # ── 2. Backup da mídia via Railway CLI ──────────────────────────
         print(f"Iniciando backup de mídia → {media_backup_file}")
-        env_media = os.environ.copy()
-        env_media['RAILWAY_TOKEN'] = railway_token
         
-        # Mudança crucial: usamos lista de argumentos e redirecionamos o stdout via Python
-        # para evitar que o shell do GitHub Actions perca a variável de ambiente RAILWAY_TOKEN
+        # Injeção nativa de contexto para o Railway CLI
+        env_railway = os.environ.copy()
+        env_railway['RAILWAY_TOKEN'] = railway_token
+        env_railway['RAILWAY_PROJECT_ID'] = project_id
+        env_railway['RAILWAY_ENVIRONMENT'] = 'production'
+        
+        # Simplificamos o comando: railway run agora usa as envs acima automaticamente
         cmd_media = [
             'railway', 'run',
-            '--project', project_id,
-            '--environment', 'production',
-            '--service', 'web',
             '--', 'tar', 'czf', '-', '/app/media'
         ]
         
-        print(f"  Executando comando de streaming de mídia...")
+        print(f"  Executando stream de mídia via contexto de ambiente...")
         with open(media_backup_file, 'wb') as f_out:
-            result = subprocess.run(cmd_media, stdout=f_out, stderr=subprocess.PIPE, env=env_media)
+            result = subprocess.run(cmd_media, stdout=f_out, stderr=subprocess.PIPE, env=env_railway)
         
         if result.returncode != 0:
             raise Exception(f"railway run falhou:\n{result.stderr.decode()}")
 
-        # Verifica se o arquivo tem conteúdo real (tar vazio = algo deu errado)
         size_media = os.path.getsize(media_backup_file)
         if size_media < 100:
             raise Exception("Arquivo de mídia muito pequeno — o tar provavelmente falhou silenciosamente.")
