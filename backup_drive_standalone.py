@@ -49,6 +49,7 @@ def main():
             f'RAILWAY_TOKEN={railway_token} '
             f'railway run '
             f'--project {project_id} '
+            f'--environment production '
             f'--service web '
             f'-- tar czf - /app/media > {media_backup_file}'
         )
