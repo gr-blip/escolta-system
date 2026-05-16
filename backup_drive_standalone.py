@@ -45,16 +45,25 @@ def main():
 
         # ── 2. Backup da mídia via Railway CLI ──────────────────────────
         print(f"Iniciando backup de mídia → {media_backup_file}")
-        cmd_media = (
-            f'railway run '
-            f'--project {project_id} '
-            f'--environment production '
-            f'--service web '
-            f'-- tar czf - /app/media > {media_backup_file}'
-        )
         env_media = os.environ.copy()
         env_media['RAILWAY_TOKEN'] = railway_token
-        run_command(cmd_media, shell=True, env=env_media)
+        
+        # Mudança crucial: usamos lista de argumentos e redirecionamos o stdout via Python
+        # para evitar que o shell do GitHub Actions perca a variável de ambiente RAILWAY_TOKEN
+        cmd_media = [
+            'railway', 'run',
+            '--project', project_id,
+            '--environment', 'production',
+            '--service', 'web',
+            '--', 'tar', 'czf', '-', '/app/media'
+        ]
+        
+        print(f"  Executando comando de streaming de mídia...")
+        with open(media_backup_file, 'wb') as f_out:
+            result = subprocess.run(cmd_media, stdout=f_out, stderr=subprocess.PIPE, env=env_media)
+        
+        if result.returncode != 0:
+            raise Exception(f"railway run falhou:\n{result.stderr.decode()}")
 
         # Verifica se o arquivo tem conteúdo real (tar vazio = algo deu errado)
         size_media = os.path.getsize(media_backup_file)
