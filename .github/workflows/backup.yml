@@ -33,8 +33,8 @@ jobs:
 
       - name: Install Railway CLI
         run: |
-          curl -fsSL https://railway.app/install.sh | sh
-          echo "$HOME/.railway/bin" >> $GITHUB_PATH
+          curl -fsSL https://railway.app/install.sh | bash
+          echo "/root/.railway/bin" >> $GITHUB_PATH
 
       - name: Run Backup Script
         env:
