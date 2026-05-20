@@ -153,21 +153,21 @@
             {% for proc in processos %}
               <div class="processo-card">
                 <div class="processo-header">
-                  <span class="processo-numero">{{ proc.process_number|default:proc.numero|default:"#" }}</span>
-                  {% with ramo=proc.law_branch|default:proc.area|default:"" %}
+                  <span class="processo-numero">{{ proc.process_number|default:"#" }}</span>
+                  {% with ramo=proc.law_branch|default:"" %}
                     <span class="ramo-badge {% if 'penal' in ramo|lower or 'criminal' in ramo|lower %}ramo-penal{% elif 'civil' in ramo|lower or 'cível' in ramo|lower %}ramo-civil{% elif 'trabalh' in ramo|lower %}ramo-trabalho{% elif 'administr' in ramo|lower %}ramo-admin{% else %}ramo-outro{% endif %}">{{ ramo|default:"—" }}</span>
                   {% endwith %}
-                  <span style="color:var(--text3);font-size:12px">{{ proc.court|default:proc.tribunal|default:"" }} {{ proc.state|default:proc.uf|default:"" }}</span>
+                  <span style="color:var(--text3);font-size:12px">{{ proc.court|default:"" }} {{ proc.state|default:"" }}</span>
                 </div>
 
                 <div class="processo-grid">
                   <div>
                     <div class="campo-label">Classe</div>
-                    <div class="campo-valor">{{ proc.procedural_class|default:proc.classeProcessual.nome|default:proc.classeProcessual|default:"—" }}</div>
+                    <div class="campo-valor">{{ proc.procedural_class|default:"—" }}</div>
                   </div>
                   <div>
                     <div class="campo-label">Segmento / Área</div>
-                    <div class="campo-valor">{{ proc.segment|default:proc.area|default:"—" }}</div>
+                    <div class="campo-valor">{{ proc.segment|default:"—" }}</div>
                   </div>
                   <div>
                     <div class="campo-label">Órgão julgador</div>
@@ -175,11 +175,11 @@
                   </div>
                   <div>
                     <div class="campo-label">Status do processo</div>
-                    <div class="campo-valor">{{ proc.process_status|default:proc.statusObservacao|default:"—" }}</div>
+                    <div class="campo-valor">{{ proc.process_status|default:"—" }}</div>
                   </div>
                   <div>
                     <div class="campo-label">Data autuação</div>
-                    <div class="campo-valor">{% if proc.filing_date or proc.dataAutuacao %}{{ proc.filing_date|default:proc.dataAutuacao }}{% else %}—{% endif %}</div>
+                    <div class="campo-valor">{% if proc.filing_date %}{{ proc.filing_date }}{% else %}—{% endif %}</div>
                   </div>
                   <div>
                     <div class="campo-label">Valor da causa</div>
@@ -188,7 +188,7 @@
                 </div>
 
                 <!-- Partes -->
-                {% with parties=proc.parties|default:proc.partes %}
+                {% with parties=proc.parties %}
                   {% if parties %}
                     <div class="partes-lista">
                       <div class="campo-label" style="margin-bottom:4px">Partes</div>
