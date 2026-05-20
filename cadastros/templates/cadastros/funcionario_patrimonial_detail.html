@@ -202,7 +202,7 @@
                 {% endwith %}
 
                 <!-- Assuntos -->
-                {% with subjects=proc.subjects|default:proc.assuntosCNJ %}
+                {% with subjects=proc.assuntos %}
                   {% if subjects %}
                     <div style="margin-top:8px">
                       <div class="campo-label" style="margin-bottom:4px">Assuntos</div>
