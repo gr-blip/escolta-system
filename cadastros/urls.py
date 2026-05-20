@@ -141,8 +141,6 @@ urlpatterns += [
     path('patrimonial/funcionarios/<int:pk>/editar/',  views.funcionario_patrimonial_edit,   name='funcionario_patrimonial_edit'),
     path('patrimonial/funcionarios/<int:pk>/excluir/', views.funcionario_patrimonial_delete, name='funcionario_patrimonial_delete'),
 
-    # Processos judiciais (DriverID)
-    path('patrimonial/processos/',                        views.consulta_processo_list,       name='consulta_processo_list'),
-    path('patrimonial/processos/<int:pk>/',               views.consulta_processo_detail,     name='consulta_processo_detail'),
-    path('patrimonial/processos/<int:pk>/reconsultar/',   views.consulta_processo_reconsultar, name='consulta_processo_reconsultar'),
+    # Reconsultar processos judiciais (DriverID) — inline no detail
+    path('patrimonial/funcionarios/<int:pk>/reconsultar/', views.consulta_processo_reconsultar, name='consulta_processo_reconsultar'),
 ]

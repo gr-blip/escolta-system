@@ -47,7 +47,7 @@ class ColeteAdmin(admin.ModelAdmin):
 
 @admin.register(ConsultaProcesso)
 class ConsultaProcessoAdmin(admin.ModelAdmin):
-    list_display = ['cpf', 'nome_retornado', 'status_cpf', 'total_processos', 'funcionario', 'criado_em']
-    list_filter = ['status_cpf']
-    search_fields = ['cpf', 'nome_retornado']
+    list_display = ['funcionario', 'status_cpf', 'total_processos', 'origem', 'criado_em']
+    list_filter = ['status_cpf', 'origem']
+    search_fields = ['cpf', 'nome_retornado', 'funcionario__nome']
     readonly_fields = ['resultado_json', 'transaction_id']

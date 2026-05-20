@@ -88,6 +88,7 @@ class Command(BaseCommand):
                         },
                     }},
                     transaction_id=resultado['transaction_id'],
+                    origem='auto_agendado',
                 )
 
                 # Gerar PDF

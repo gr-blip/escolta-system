@@ -1048,6 +1048,12 @@ class FuncionarioPatrimonial(models.Model):
 # ══════════════════════════════════════════════════════════════════════════════
 
 class ConsultaProcesso(models.Model):
+    ORIGEM_CHOICES = [
+        ('auto_save', 'Auto (salvamento)'),
+        ('auto_agendado', 'Auto (agendado)'),
+        ('manual', 'Manual'),
+    ]
+
     funcionario = models.ForeignKey(FuncionarioPatrimonial, on_delete=models.CASCADE, related_name='consultas_processo')
     cpf = models.CharField(max_length=14)
     nome_retornado = models.CharField(max_length=200, blank=True)
@@ -1056,6 +1062,7 @@ class ConsultaProcesso(models.Model):
     resultado_json = models.JSONField(default=dict)  # resposta completa da API
     pdf_file = models.FileField(upload_to='consultas_processo/', blank=True, null=True)
     transaction_id = models.CharField(max_length=50, blank=True)
+    origem = models.CharField(max_length=20, choices=ORIGEM_CHOICES, default='manual')
     solicitante = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
