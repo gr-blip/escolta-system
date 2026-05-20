@@ -237,7 +237,7 @@ def consultar_cpf(cpf: str) -> dict:
         'cpf':               cpf_limpo,
         'nome':              result_data.get('name', ''),
         'status_cpf':        result_data.get('documentStatusMessage', result_data.get('documentStatus', '')),
-        'total_processos':   total,
+        'total_processos':   len(processos_detalhados),
         'processos':         processos_detalhados,
         'resultado_completo': resultado,
         'transaction_id':    tx_id,
