@@ -160,7 +160,7 @@ const API_URL    = '{% url "omnilink_frota_posicoes" %}';
 const TILE_OPTS = { maxZoom:20, detectRetina:false, keepBuffer:4 };
 const TILES = {
   claro:  { url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', attribution:'© OpenStreetMap', ...TILE_OPTS },
-  escuro: { url: 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png', attribution:'© Stadia Maps © OpenStreetMap', ...TILE_OPTS },
+  escuro: { url: 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', attribution:'© CARTO © OpenStreetMap', ...TILE_OPTS },
 };
 
 const BRASIL_BOUNDS = [[-34.5, -74.5], [6.5, -32.0]];
