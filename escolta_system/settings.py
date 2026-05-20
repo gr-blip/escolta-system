@@ -106,6 +106,11 @@ DRIVERID_API_URL    = config('URL_API_DO_DRIVERID',  default='https://api.driver
 DRIVERID_EMAIL      = config('DRIVERID_EMAIL',       default='')
 DRIVERID_PASSWORD   = config('DRIVERID_SENHA',       default='')
 
+# DEBUG temporário — remover após diagnóstico
+import logging as _dbg
+_dbg.warning(f'[DRIVERID DEBUG] API_URL={DRIVERID_API_URL!r} EMAIL={DRIVERID_EMAIL!r} PASSWORD={"***" if DRIVERID_PASSWORD else "VAZIO"}')
+_dbg.warning(f'[DRIVERID DEBUG] env DRIVERID_SENHA={os.environ.get("DRIVERID_SENHA", "NAO DEFINIDA")!r}')
+
 # ══════════════════════════════ AUTH ══════════════════════════════
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
