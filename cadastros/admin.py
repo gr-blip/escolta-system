@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Agente, Viatura, Rastreador, Armamento, Cliente
+from .models import Agente, Viatura, Rastreador, Armamento, Cliente, ConsultaProcesso
 
 
 @admin.register(Agente)
@@ -43,3 +43,11 @@ class ColeteAdmin(admin.ModelAdmin):
     list_display = ['marca', 'numeracao', 'protecao', 'validade']
     list_filter = ['protecao']
     search_fields = ['marca', 'numeracao']
+
+
+@admin.register(ConsultaProcesso)
+class ConsultaProcessoAdmin(admin.ModelAdmin):
+    list_display = ['cpf', 'nome_retornado', 'status_cpf', 'total_processos', 'funcionario', 'criado_em']
+    list_filter = ['status_cpf']
+    search_fields = ['cpf', 'nome_retornado']
+    readonly_fields = ['resultado_json', 'transaction_id']

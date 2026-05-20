@@ -101,6 +101,11 @@ CACHES = {
     }
 }
 
+# ══════════════════════════════ DRIVERID API ══════════════════════════════
+DRIVERID_API_URL    = config('URL_API_DO_DRIVERID',  default='https://api.driverid.dev/v1')
+DRIVERID_EMAIL      = config('DRIVERID_EMAIL',       default='')
+DRIVERID_PASSWORD   = config('DRIVERID_SENHA',       default='')
+
 # ══════════════════════════════ AUTH ══════════════════════════════
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

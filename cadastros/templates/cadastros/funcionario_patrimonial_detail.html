@@ -85,6 +85,45 @@
 </div>
 {% endif %}
 
+<!-- Processos Judiciais -->
+<div class="card">
+  <div class="card-title">
+    <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><rect x="2" y="1" width="12" height="14" rx="1.5" stroke="currentColor" stroke-width="1.4"/><line x1="5" y1="5" x2="11" y2="5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="5" y1="8" x2="11" y2="8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="5" y1="11" x2="8" y2="11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    Processos Judiciais
+  </div>
+  {% with uc=obj.ultima_consulta_processo %}
+    {% if uc %}
+      <div class="form-grid form-grid-3">
+        <div>
+          <div style="color:var(--text3);font-size:11px;text-transform:uppercase">Status CPF</div>
+          <div><span class="badge" style="background:{% if uc.status_cpf|upper == 'REGULAR' %}#dcfce7;color:#166534{% else %}#fee2e2;color:#991b1b{% endif %}">{{ uc.status_cpf }}</span></div>
+        </div>
+        <div>
+          <div style="color:var(--text3);font-size:11px;text-transform:uppercase">Processos</div>
+          <div>
+            {% if uc.total_processos > 0 %}
+              <span class="badge" style="background:#fef3c7;color:#92400e">{{ uc.total_processos }} processo{{ uc.total_processos|pluralize }}</span>
+            {% else %}
+              <span class="badge" style="background:#f3f4f6;color:#6b7280">Nenhum</span>
+            {% endif %}
+          </div>
+        </div>
+        <div>
+          <div style="color:var(--text3);font-size:11px;text-transform:uppercase">Última consulta</div>
+          <div style="color:var(--text)">{{ uc.criado_em|date:"d/m/Y H:i" }}</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <a href="{% url 'consulta_processo_detail' uc.pk %}" class="btn btn-secondary">Ver detalhes completos</a>
+        <a href="{% url 'consulta_processo_reconsultar' uc.pk %}" class="btn btn-secondary" style="color:#2563eb;border-color:#2563eb">Consultar agora</a>
+      </div>
+    {% else %}
+      <div style="color:var(--text3);padding:12px 0">Nenhuma consulta realizada para este CPF.</div>
+      <a href="{% url 'consulta_processo_list' %}" class="btn btn-secondary">Ir para consultas</a>
+    {% endif %}
+  {% endwith %}
+</div>
+
 <div style="color:var(--text3);font-size:12px;margin-top:12px">
   Cadastrado em {{ obj.criado_em|date:"d/m/Y H:i" }} · Atualizado em {{ obj.atualizado_em|date:"d/m/Y H:i" }}
 </div>

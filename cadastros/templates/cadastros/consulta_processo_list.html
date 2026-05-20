@@ -1,0 +1,73 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}Processos Judiciais — Consultas{% endblock %}
+{% block page_title %}Processos Judiciais{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / Patrimonial / <a href="{% url 'patrimonial_dashboard' %}">Painel</a> / Processos{% endblock %}
+
+{% block content %}
+<div class="search-bar">
+  <form method="get" style="display:flex;gap:10px;flex-wrap:wrap;flex:1;align-items:center">
+    <input type="text" name="q" value="{{ q }}" placeholder="Buscar por CPF, nome ou funcionário..." style="flex:1;min-width:220px">
+
+    <select name="status" style="min-width:150px">
+      <option value="">Todos os status</option>
+      <option value="regular" {% if status_filtro == 'regular' %}selected{% endif %}>Regular</option>
+      <option value="irregular" {% if status_filtro == 'irregular' %}selected{% endif %}>Irregular / Alerta</option>
+    </select>
+
+    <button type="submit" class="btn btn-secondary">Filtrar</button>
+    {% if q or status_filtro %}
+      <a href="{% url 'consulta_processo_list' %}" class="btn btn-secondary">Limpar</a>
+    {% endif %}
+  </form>
+</div>
+
+<div style="overflow-x:auto">
+<table>
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Funcionário</th>
+      <th>CPF</th>
+      <th>Nome retornado</th>
+      <th>Status CPF</th>
+      <th>Processos</th>
+      <th style="text-align:right">Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for c in consultas %}
+    <tr>
+      <td>{{ c.criado_em|date:"d/m/Y H:i" }}</td>
+      <td>
+        {% if c.funcionario %}
+          <a href="{% url 'funcionario_patrimonial_detail' c.funcionario.pk %}" style="color:var(--blue)">{{ c.funcionario.nome }}</a>
+        {% else %}—{% endif %}
+      </td>
+      <td>{{ c.cpf }}</td>
+      <td>{{ c.nome_retornado|default:"—" }}</td>
+      <td>
+        {% if c.status_cpf %}
+          <span class="badge" style="background:{% if c.status_cpf|upper == 'REGULAR' %}#dcfce7;color:#166534{% else %}#fee2e2;color:#991b1b{% endif %};font-size:11px">{{ c.status_cpf }}</span>
+        {% else %}—{% endif %}
+      </td>
+      <td>
+        {% if c.total_processos > 0 %}
+          <span class="badge" style="background:#fef3c7;color:#92400e;font-size:11px">{{ c.total_processos }} processo{{ c.total_processos|pluralize }}</span>
+        {% elif c.status_cpf %}
+          <span class="badge" style="background:#f3f4f6;color:#6b7280;font-size:11px">Nenhum processo</span>
+        {% else %}—{% endif %}
+      </td>
+      <td style="text-align:right;white-space:nowrap">
+        <a href="{% url 'consulta_processo_detail' c.pk %}" class="btn btn-secondary" style="font-size:11px">Ver detalhes</a>
+        {% if c.pdf_file %}
+          <a href="{{ c.pdf_file.url }}" class="btn btn-secondary" style="font-size:11px" target="_blank">PDF</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px">Nenhuma consulta registrada.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

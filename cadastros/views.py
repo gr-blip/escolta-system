@@ -8,7 +8,8 @@ from django.utils import timezone
 from datetime import date, timedelta
 from .models import Agente, Viatura, Rastreador, Armamento, Cliente, Colete, Equipe, \
     FotoMarco, Parada, FotoParada, Incidente, FotoIncidente, FotoVeiculoEscoltado, \
-    TrocaMotorista, FotoTrocaMotorista, AssinaturaOS, DespesaOS, FuncionarioPatrimonial
+    TrocaMotorista, FotoTrocaMotorista, AssinaturaOS, DespesaOS, FuncionarioPatrimonial, \
+    ConsultaProcesso
 from .forms import AgenteForm, ViaturaForm, RastreadorForm, ArmamentoForm, ClienteForm, \
     FuncionarioPatrimonialForm
 
@@ -4153,14 +4154,14 @@ def funcionario_patrimonial_list(request):
             | Q(rg__icontains=q)
             | Q(posto_trabalho__icontains=q)
         )
-    if tipo in ('vigilante', 'porteiro'):
+    if tipo in ('vigilante', 'porteiro', 'brigadista'):
         qs = qs.filter(tipo=tipo)
     if status_filtro in ('ativo', 'afastado', 'inativo'):
         qs = qs.filter(status=status_filtro)
 
     total = qs.count()
     return render(request, 'cadastros/funcionario_patrimonial_list.html', {
-        'funcionarios': qs.order_by('nome'),
+        'funcionarios': qs.prefetch_related('consultas_processo').order_by('nome'),
         'q': q,
         'tipo': tipo,
         'status_filtro': status_filtro,
@@ -4213,3 +4214,98 @@ def funcionario_patrimonial_delete(request, pk):
         'obj': func,
         'cancel_url': 'funcionario_patrimonial_list',
     })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CONSULTA PROCESSO — Integração DriverID
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def consulta_processo_list(request):
+    """Lista todas as consultas de processo judiciais."""
+    consultas = ConsultaProcesso.objects.select_related('funcionario', 'solicitante').all()
+
+    q = request.GET.get('q', '').strip()
+    if q:
+        consultas = consultas.filter(
+            Q(cpf__icontains=q) | Q(nome_retornado__icontains=q) |
+            Q(funcionario__nome__icontains=q)
+        )
+
+    status_filtro = request.GET.get('status', '').strip()
+    if status_filtro == 'regular':
+        consultas = consultas.filter(status_cpf__iexact='REGULAR')
+    elif status_filtro == 'irregular':
+        consultas = consultas.exclude(status_cpf__iexact='REGULAR').exclude(status_cpf='')
+
+    return render(request, 'cadastros/consulta_processo_list.html', {
+        'consultas': consultas,
+        'q': q,
+        'status_filtro': status_filtro,
+    })
+
+
+@login_required
+def consulta_processo_detail(request, pk):
+    """Detalhe da consulta com todos os processos."""
+    consulta = get_object_or_404(ConsultaProcesso, pk=pk)
+
+    # Extrair processos do resultado_json
+    resultado = consulta.resultado_json or {}
+    data = resultado.get('data', {})
+
+    # Formato detalhado: data.data[]
+    processos = data.get('data', [])
+    if not processos:
+        # Formato básico: data.result.processos[]
+        result = data.get('result', {})
+        processos = result.get('processos', [])
+
+    return render(request, 'cadastros/consulta_processo_detail.html', {
+        'consulta': consulta,
+        'processos': processos,
+    })
+
+
+@login_required
+def consulta_processo_reconsultar(request, pk):
+    """Força nova consulta para o funcionário desta consulta."""
+    from .services.driverid_service import consultar_cpf, DriverIDError
+    from .pdf_processo import gerar_pdf_consulta
+    from django.core.files.base import ContentFile
+
+    consulta_antiga = get_object_or_404(ConsultaProcesso, pk=pk)
+    func = consulta_antiga.funcionario
+
+    try:
+        resultado = consultar_cpf(func.cpf)
+        nova = ConsultaProcesso.objects.create(
+            funcionario=func,
+            cpf=resultado['cpf'],
+            nome_retornado=resultado['nome'],
+            status_cpf=resultado['status_cpf'],
+            total_processos=resultado['total_processos'],
+            resultado_json={'data': {'data': resultado['processos'],
+                                      'result': {'name': resultado['nome'],
+                                                  'documentStatusMessage': resultado['status_cpf']}}},
+            transaction_id=resultado['transaction_id'],
+            solicitante=request.user if request.user.is_authenticated else None,
+        )
+
+        # Gerar PDF
+        pdf_buf = gerar_pdf_consulta(nova)
+        nova.pdf_file.save(
+            f'consulta_{func.cpf}_{nova.criado_em:%Y%m%d_%H%M}.pdf',
+            ContentFile(pdf_buf.read()),
+            save=True,
+        )
+
+        messages.success(request, f'Consulta atualizada: {resultado["status_cpf"]} — {resultado["total_processos"]} processo(s).')
+        return redirect('consulta_processo_detail', pk=nova.pk)
+
+    except DriverIDError as e:
+        messages.error(request, f'Erro na consulta: {e}')
+        return redirect('consulta_processo_detail', pk=pk)
+    except Exception as e:
+        messages.error(request, f'Erro inesperado: {e}')
+        return redirect('consulta_processo_detail', pk=pk)

@@ -1,0 +1,192 @@
+{% extends 'cadastros/base.html' %}
+{% load cadastros_extras %}
+{% block title %}Consulta {{ consulta.cpf }} — Processos{% endblock %}
+{% block page_title %}Consulta de Processos{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'dashboard' %}">Início</a> /
+  Patrimonial /
+  <a href="{% url 'consulta_processo_list' %}">Processos</a> /
+  {{ consulta.cpf }}
+{% endblock %}
+
+{% block topbar_actions %}
+  {% if consulta.pdf_file %}
+    <a href="{{ consulta.pdf_file.url }}" class="btn btn-primary" target="_blank">
+      <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M3 7v4h8V7M7 10V2M4 7l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Baixar PDF
+    </a>
+  {% endif %}
+  <a href="{% url 'consulta_processo_reconsultar' consulta.pk %}" class="btn btn-secondary" style="color:#2563eb;border-color:#2563eb">
+    <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M12.5 2.5v4h-4M1.5 11.5v-4h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.3 9.7A5.3 5.3 0 0 1 7 1.5a5.3 5.3 0 0 1 4.7 8.2M11.7 4.3A5.3 5.3 0 0 1 7 12.5a5.3 5.3 0 0 1-4.7-8.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Reconsultar
+  </a>
+  <a href="{% url 'consulta_processo_list' %}" class="btn btn-secondary">← Voltar</a>
+{% endblock %}
+
+{% block content %}
+<style>
+  .ramo-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+  .ramo-penal{background:#fee2e2;color:#991b1b}
+  .ramo-civil{background:#dbeafe;color:#1e40af}
+  .ramo-trabalho{background:#ede9fe;color:#5b21b6}
+  .ramo-admin{background:#cffafe;color:#155e75}
+  .ramo-outro{background:#f3f4f6;color:#6b7280}
+  .processo-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:14px}
+  .processo-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+  .processo-numero{font-size:13px;font-weight:700;color:var(--text)}
+  .processo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px}
+  .campo-label{font-size:10px;text-transform:uppercase;color:var(--text3);letter-spacing:.3px}
+  .campo-valor{font-size:13px;color:var(--text);margin-bottom:4px}
+  .partes-lista{margin-top:10px}
+  .partes-lista li{font-size:12px;color:var(--text);padding:2px 0;list-style:none}
+  .partes-lista li::before{content:'•';color:var(--text3);margin-right:6px}
+</style>
+
+<!-- Dados do funcionário -->
+<div class="card" style="margin-bottom:16px">
+  <div class="card-title">
+    <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    Dados da Consulta
+  </div>
+  <div class="form-grid form-grid-2">
+    <div>
+      <div class="campo-label">Funcionário</div>
+      <div class="campo-valor">
+        {% if consulta.funcionario %}
+          <a href="{% url 'funcionario_patrimonial_detail' consulta.funcionario.pk %}" style="color:var(--blue)">{{ consulta.funcionario.nome }}</a>
+        {% else %}—{% endif %}
+      </div>
+    </div>
+    <div>
+      <div class="campo-label">CPF</div>
+      <div class="campo-valor">{{ consulta.cpf }}</div>
+    </div>
+    <div>
+      <div class="campo-label">Nome retornado pela API</div>
+      <div class="campo-valor">{{ consulta.nome_retornado|default:"—" }}</div>
+    </div>
+    <div>
+      <div class="campo-label">Status CPF</div>
+      <div class="campo-valor">
+        {% if consulta.status_cpf %}
+          <span class="badge" style="background:{% if consulta.status_cpf|upper == 'REGULAR' %}#dcfce7;color:#166534{% else %}#fee2e2;color:#991b1b{% endif %}">{{ consulta.status_cpf }}</span>
+        {% else %}—{% endif %}
+      </div>
+    </div>
+    <div>
+      <div class="campo-label">Total de processos</div>
+      <div class="campo-valor">
+        {% if consulta.total_processos > 0 %}
+          <span class="badge" style="background:#fef3c7;color:#92400e">{{ consulta.total_processos }} processo{{ consulta.total_processos|pluralize }}</span>
+        {% else %}
+          <span class="badge" style="background:#f3f4f6;color:#6b7280">Nenhum processo</span>
+        {% endif %}
+      </div>
+    </div>
+    <div>
+      <div class="campo-label">Data da consulta</div>
+      <div class="campo-valor">{{ consulta.criado_em|date:"d/m/Y H:i" }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Processos -->
+{% if processos %}
+<div class="card-title" style="margin-bottom:10px">
+  <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><rect x="2" y="1" width="12" height="14" rx="1.5" stroke="currentColor" stroke-width="1.4"/><line x1="5" y1="5" x2="11" y2="5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="5" y1="8" x2="11" y2="8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="5" y1="11" x2="8" y2="11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+  Processos ({{ processos|length }})
+</div>
+
+{% for proc in processos %}
+<div class="processo-card">
+  <!-- Cabeçalho -->
+  <div class="processo-header">
+    <span class="processo-numero">{{ proc.process_number|default:proc.numero|default:"#" }}</span>
+    {% with ramo=proc.law_branch|default:proc.area|default:"" %}
+      <span class="ramo-badge {% if 'penal' in ramo|lower or 'criminal' in ramo|lower %}ramo-penal{% elif 'civil' in ramo|lower or 'cível' in ramo|lower %}ramo-civil{% elif 'trabalh' in ramo|lower %}ramo-trabalho{% elif 'administr' in ramo|lower %}ramo-admin{% else %}ramo-outro{% endif %}">{{ ramo|default:"—" }}</span>
+    {% endwith %}
+    <span style="color:var(--text3);font-size:12px">{{ proc.court|default:proc.tribunal|default:"" }} {{ proc.state|default:proc.uf|default:"" }}</span>
+  </div>
+
+  <!-- Dados -->
+  <div class="processo-grid">
+    <div>
+      <div class="campo-label">Classe</div>
+      <div class="campo-valor">{{ proc.procedural_class|default:proc.classeProcessual.nome|default:proc.classeProcessual|default:"—" }}</div>
+    </div>
+    <div>
+      <div class="campo-label">Segmento / Área</div>
+      <div class="campo-valor">{{ proc.segment|default:proc.area|default:"—" }}</div>
+    </div>
+    <div>
+      <div class="campo-label">Órgão julgador</div>
+      <div class="campo-valor">{{ proc.judging_body|default:"—" }}</div>
+    </div>
+    <div>
+      <div class="campo-label">Status do processo</div>
+      <div class="campo-valor">{{ proc.process_status|default:proc.statusObservacao|default:"—" }}</div>
+    </div>
+    <div>
+      <div class="campo-label">Data autuação</div>
+      <div class="campo-valor">
+        {% with d=proc.filing_date|default:proc.dataAutuacao|default:"—" %}
+          {% if d != "—" %}{{ d|iso_to_date }}{% else %}—{% endif %}
+        {% endwith %}
+      </div>
+    </div>
+    <div>
+      <div class="campo-label">Data distribuição</div>
+      <div class="campo-valor">
+        {% with d=proc.distribution_date|default:"—" %}
+          {% if d != "—" %}{{ d|iso_to_date }}{% else %}—{% endif %}
+        {% endwith %}
+      </div>
+    </div>
+    <div>
+      <div class="campo-label">Valor da causa</div>
+      <div class="campo-valor">{% if proc.claim_value %}R$ {{ proc.claim_value|floatformat:2 }}{% else %}—{% endif %}</div>
+    </div>
+    <div>
+      <div class="campo-label">Justiça gratuita</div>
+      <div class="campo-valor">{% if proc.free_justice %}Sim{% else %}Não{% endif %}</div>
+    </div>
+  </div>
+
+  <!-- Partes -->
+  {% with parties=proc.parties|default:proc.partes %}
+    {% if parties %}
+    <div class="partes-lista">
+      <div class="campo-label" style="margin-bottom:4px">Partes</div>
+      <ul class="partes-lista" style="margin:0;padding:0">
+        {% for p in parties %}
+          <li>{{ p.name|default:p.nome|default:"—" }} — {{ p.role|default:p.papel|default:"" }}{% if p.side or p.lado %} ({{ p.side|default:p.lado }}){% endif %}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Assuntos -->
+  {% with subjects=proc.subjects|default:proc.assuntosCNJ %}
+    {% if subjects %}
+    <div style="margin-top:8px">
+      <div class="campo-label" style="margin-bottom:4px">Assuntos</div>
+      {% for a in subjects %}
+        <span style="font-size:12px;color:var(--text)">
+          {{ a.subject_title|default:a.titulo|default:"" }}
+          {% if a.is_primary or a.principal %}<span style="color:var(--text3);font-size:10px">(principal)</span>{% endif %}
+          {% if not forloop.last %}, {% endif %}
+        </span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+</div>
+{% endfor %}
+
+{% else %}
+<div class="card" style="text-align:center;padding:30px;color:var(--text3)">
+  Nenhum processo encontrado para este CPF.
+</div>
+{% endif %}
+{% endblock %}

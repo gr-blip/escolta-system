@@ -1036,3 +1036,34 @@ class FuncionarioPatrimonial(models.Model):
         return (self.cnv_status_vencimento in ('vencido', 'vencendo')
                 or self.cnh_status_vencimento in ('vencido', 'vencendo')
                 or self.curso_status_vencimento in ('vencido', 'vencendo'))
+
+    @property
+    def ultima_consulta_processo(self):
+        """Retorna a ConsultaProcesso mais recente deste funcionário."""
+        return self.consultas_processo.order_by('-criado_em').first()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CONSULTA PROCESSO — Integração DriverID (processos judiciais por CPF)
+# ══════════════════════════════════════════════════════════════════════════════
+
+class ConsultaProcesso(models.Model):
+    funcionario = models.ForeignKey(FuncionarioPatrimonial, on_delete=models.CASCADE, related_name='consultas_processo')
+    cpf = models.CharField(max_length=14)
+    nome_retornado = models.CharField(max_length=200, blank=True)
+    status_cpf = models.CharField(max_length=30, blank=True)  # REGULAR, IRREGULAR, etc
+    total_processos = models.PositiveIntegerField(default=0)
+    resultado_json = models.JSONField(default=dict)  # resposta completa da API
+    pdf_file = models.FileField(upload_to='consultas_processo/', blank=True, null=True)
+    transaction_id = models.CharField(max_length=50, blank=True)
+    solicitante = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-criado_em']
+        verbose_name = 'Consulta de Processo'
+        verbose_name_plural = 'Consultas de Processos'
+
+    def __str__(self):
+        return f'{self.cpf} — {self.status_cpf} ({self.total_processos} proc.)'
