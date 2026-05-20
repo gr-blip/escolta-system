@@ -1,4 +1,5 @@
-﻿from django.shortcuts import render, redirect, get_object_or_404
+﻿import logging
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
@@ -12,6 +13,8 @@ from .models import Agente, Viatura, Rastreador, Armamento, Cliente, Colete, Equ
     ConsultaProcesso
 from .forms import AgenteForm, ViaturaForm, RastreadorForm, ArmamentoForm, ClienteForm, \
     FuncionarioPatrimonialForm
+
+logger = logging.getLogger(__name__)
 
 
 # ── COMPRESSÃO DE IMAGENS ─────────────────────────────────────────────────────
@@ -4258,8 +4261,10 @@ def consulta_processo_reconsultar(request, pk):
         messages.success(request, f'Consulta atualizada: {resultado["status_cpf"]} — {resultado["total_processos"]} processo(s).')
 
     except DriverIDError as e:
+        logger.error(f'DriverID erro na consulta do funcionário {pk}: {e}')
         messages.error(request, f'Erro na consulta: {e}')
     except Exception as e:
+        logger.error(f'Erro inesperado na consulta DriverID do funcionário {pk}: {e}', exc_info=True)
         messages.error(request, f'Erro inesperado: {e}')
 
     return redirect('funcionario_patrimonial_detail', pk=pk)
