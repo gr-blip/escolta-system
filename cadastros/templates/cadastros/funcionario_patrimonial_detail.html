@@ -194,7 +194,7 @@
                       <div class="campo-label" style="margin-bottom:4px">Partes</div>
                       <ul class="partes-lista" style="margin:0;padding:0">
                         {% for p in parties %}
-                          <li>{{ p.name|default:p.nome|default:"—" }} — {{ p.role|default:p.papel|default:"" }}{% if p.side or p.lado %} ({{ p.side|default:p.lado }}){% endif %}</li>
+                          <li>{{ p.name|default:"—" }} — {{ p.role|default:"" }}{% if p.side %} ({{ p.side }}){% endif %}</li>
                         {% endfor %}
                       </ul>
                     </div>
