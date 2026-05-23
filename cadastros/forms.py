@@ -113,6 +113,7 @@ class FuncionarioPatrimonialForm(forms.ModelForm):
             'cpf':             forms.TextInput(attrs={'placeholder': '000.000.000-00'}),
             'rg':              forms.TextInput(attrs={'placeholder': '0000000'}),
             'telefone':        forms.TextInput(attrs={'placeholder': '(62) 99999-0000'}),
+            'nome_mae':        forms.TextInput(attrs={'placeholder': 'Nome completo da mãe'}),
             'data_nascimento': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'cnh':             forms.TextInput(attrs={'placeholder': '00000000000'}),
             'cnh_validade':    forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),

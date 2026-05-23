@@ -28,6 +28,7 @@
         <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">RG</div><div style="color:var(--text)">{{ obj.rg|default:"—" }}</div></div>
         <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">Telefone</div><div style="color:var(--text)">{{ obj.telefone|default:"—" }}</div></div>
         <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">Data nasc.</div><div style="color:var(--text)">{{ obj.data_nascimento|date:"d/m/Y"|default:"—" }}</div></div>
+        <div style="grid-column:span 2"><div style="color:var(--text3);font-size:11px;text-transform:uppercase">Nome da Mãe</div><div style="color:var(--text)">{{ obj.nome_mae|default:"—" }}</div></div>
         <div><div style="color:var(--text3);font-size:11px;text-transform:uppercase">Status</div><div>
           {% if obj.status == 'ativo' %}<span class="badge badge-green">Ativo</span>
           {% elif obj.status == 'afastado' %}<span class="badge badge-amber">Afastado</span>
