@@ -7,8 +7,8 @@ class AgenteForm(forms.ModelForm):
         model = Agente
         exclude = [
             'criado_em', 'atualizado_em',
-            'certidao_tjdf_status', 'certidao_tjdf_consultado_em', 'certidao_tjdf_detalhe',
-            'certidao_trf_status',  'certidao_trf_consultado_em',  'certidao_trf_detalhe',
+            'certidao_tjdf_status', 'certidao_tjdf_consultado_em', 'certidao_tjdf_detalhe', 'certidao_tjdf_pdf',
+            'certidao_trf_status',  'certidao_trf_consultado_em',  'certidao_trf_detalhe', 'certidao_trf_pdf',
         ]
         widgets = {
             'nome': forms.TextInput(attrs={'placeholder': 'Ex: Roberto Souza de Jesus'}),
