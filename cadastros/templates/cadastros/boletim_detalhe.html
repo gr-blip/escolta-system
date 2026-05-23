@@ -65,14 +65,14 @@
           <div>{{ os.previsao_inicio|date:"d/m/Y H:i" }}</div>
         </div>
         <div>
-          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Previsão Fim</div>
-          <div>{{ os.previsao_fim|date:"d/m/Y H:i"|default:"—" }}</div>
-        </div>
-        <div>
           <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Status OS</div>
           <div><span class="badge badge-green">{{ os.get_status_display }}</span></div>
         </div>
         {% if op %}
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Início Operação</div>
+          <div>{{ op.inicio_operacao|date:"d/m/Y H:i"|default:"—" }}</div>
+        </div>
         <div>
           <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Chegada Operação</div>
           <div>{{ op.chegada_operacao|date:"d/m/Y H:i"|default:"—" }}</div>
