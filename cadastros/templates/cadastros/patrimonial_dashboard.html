@@ -3,10 +3,10 @@
 {% block page_title %}Painel Patrimonial{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / Patrimonial / Painel{% endblock %}
 {% block topbar_actions %}
-  <a href="{% url 'funcionario_patrimonial_list' %}" class="btn btn-secondary">Ver Funcionários</a>
+  <a href="{% url 'funcionario_patrimonial_list' %}" class="btn btn-secondary">Ver JR Segurança</a>
   <a href="{% url 'funcionario_patrimonial_create' %}" class="btn btn-primary">
     <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    Novo Funcionário
+    Novo Agente
   </a>
 {% endblock %}
 
@@ -15,7 +15,7 @@
 <!-- ── CARDS DE TOTAIS ── -->
 <div class="stats-grid" style="margin-bottom:20px">
   <div class="stat-card">
-    <div class="stat-label">Total de funcionários</div>
+    <div class="stat-label">Total de agentes</div>
     <div class="stat-value">{{ total }}</div>
     <div class="stat-sub"><a href="{% url 'funcionario_patrimonial_list' %}" style="color:var(--blue-light);text-decoration:none">Ver todos →</a></div>
   </div>
@@ -41,7 +41,7 @@
 <div>
   <h2 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px">
     <span style="font-size:18px">⚠️</span> Alertas de Vencimento
-    <span style="font-size:11px;font-weight:400;color:var(--text3)">(próximos 60 dias ou já vencidos — apenas funcionários ativos)</span>
+    <span style="font-size:11px;font-weight:400;color:var(--text3)">(próximos 60 dias ou já vencidos — apenas agentes ativos)</span>
   </h2>
 
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px">
@@ -56,7 +56,7 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Funcionário</th><th>Posto</th><th>Validade</th><th>Situação</th></tr>
+            <tr><th>Agente</th><th>Posto</th><th>Validade</th><th>Situação</th></tr>
           </thead>
           <tbody>
             {% for f in alertas_cnh %}
@@ -89,7 +89,7 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Funcionário</th><th>Posto</th><th>Validade</th><th>Situação</th></tr>
+            <tr><th>Agente</th><th>Posto</th><th>Validade</th><th>Situação</th></tr>
           </thead>
           <tbody>
             {% for f in alertas_cnv %}
@@ -122,7 +122,7 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Funcionário</th><th>Tipo</th><th>Curso</th><th>Posto</th><th>Validade</th><th>Situação</th></tr>
+            <tr><th>Agente</th><th>Tipo</th><th>Curso</th><th>Posto</th><th>Validade</th><th>Situação</th></tr>
           </thead>
           <tbody>
             {% for f in alertas_curso %}

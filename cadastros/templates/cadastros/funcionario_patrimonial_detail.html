@@ -1,7 +1,7 @@
 {% extends 'cadastros/base.html' %}
 {% block title %}{{ obj.nome }}{% endblock %}
 {% block page_title %}{{ obj.nome }}{% endblock %}
-{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / Patrimonial / <a href="{% url 'funcionario_patrimonial_list' %}">Funcionários</a> / {{ obj.nome }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / Patrimonial / <a href="{% url 'funcionario_patrimonial_list' %}">JR Segurança</a> / {{ obj.nome }}{% endblock %}
 {% block topbar_actions %}
   <a href="{% url 'funcionario_patrimonial_edit' obj.pk %}" class="btn btn-primary">Editar</a>
   <a href="{% url 'funcionario_patrimonial_list' %}" class="btn btn-secondary">← Voltar</a>

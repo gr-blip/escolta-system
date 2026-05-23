@@ -1,7 +1,7 @@
 {% extends 'cadastros/base.html' %}
 {% block title %}{{ titulo }}{% endblock %}
 {% block page_title %}{{ titulo }}{% endblock %}
-{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / Patrimonial / <a href="{% url 'funcionario_patrimonial_list' %}">Funcionários</a> / {{ titulo }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / Patrimonial / <a href="{% url 'funcionario_patrimonial_list' %}">JR Segurança</a> / {{ titulo }}{% endblock %}
 {% block topbar_actions %}<a href="{% url 'funcionario_patrimonial_list' %}" class="btn btn-secondary">← Voltar</a>{% endblock %}
 
 {% block content %}
@@ -70,7 +70,7 @@
   {% endif %}
 
   <div style="display:flex;gap:10px;margin-top:16px">
-    <button type="submit" class="btn btn-primary">Salvar Funcionário</button>
+    <button type="submit" class="btn btn-primary">Salvar Agente</button>
     <a href="{% url 'funcionario_patrimonial_list' %}" class="btn btn-secondary">Cancelar</a>
   </div>
 </form>

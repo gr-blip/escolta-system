@@ -6,7 +6,7 @@ Management command para consulta periódica de processos judiciais via DriverID.
 Executa via cron a cada 2 meses:
   python manage.py consultar_processos
 
-Busca funcionários patrimoniais ativos com última consulta > 60 dias (ou sem consulta),
+Busca agentes patrimoniais ativos com última consulta > 60 dias (ou sem consulta),
 chama a API DriverID, salva o resultado e gera PDF.
 """
 
@@ -27,13 +27,13 @@ DIAS_RECONSULTA = 60
 
 
 class Command(BaseCommand):
-    help = 'Consulta processos judiciais de funcionários patrimoniais via DriverID (cron a cada 2 meses)'
+    help = 'Consulta processos judiciais de agentes patrimoniais via DriverID (cron a cada 2 meses)'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--force',
             action='store_true',
-            help='Força consulta de TODOS os funcionários, ignorando o intervalo de 60 dias.',
+            help='Força consulta de TODOS os agentes, ignorando o intervalo de 60 dias.',
         )
         parser.add_argument(
             '--cpf',
@@ -49,19 +49,19 @@ class Command(BaseCommand):
             funcionarios = FuncionarioPatrimonial.objects.filter(
                 cpf__contains=options['cpf'].replace('.', '').replace('-', '')
             )
-            self.stdout.write(f'Modo CPF único: {funcionarios.count()} funcionário(s) encontrado(s)')
+            self.stdout.write(f'Modo CPF único: {funcionarios.count()} agente(s) encontrado(s)')
         elif options['force']:
             funcionarios = FuncionarioPatrimonial.objects.filter(status='ativo')
-            self.stdout.write(f'Modo FORCE: consultando TODOS os {funcionarios.count()} funcionários ativos')
+            self.stdout.write(f'Modo FORCE: consultando TODOS os {funcionarios.count()} agentes ativos')
         else:
-            # Funcionários ativos sem consulta ou com última consulta > 60 dias
+            # Agentes ativos sem consulta ou com última consulta > 60 dias
             funcionarios = FuncionarioPatrimonial.objects.filter(status='ativo').exclude(
                 consultas_processo__criado_em__gte=limite
             )
-            self.stdout.write(f'Funcionários ativos sem consulta recente (>{DIAS_RECONSULTA} dias): {funcionarios.count()}')
+            self.stdout.write(f'Agentes ativos sem consulta recente (>{DIAS_RECONSULTA} dias): {funcionarios.count()}')
 
         if not funcionarios.exists():
-            self.stdout.write(self.style.WARNING('Nenhum funcionário para consultar.'))
+            self.stdout.write(self.style.WARNING('Nenhum agente para consultar.'))
             return
 
         total = funcionarios.count()
