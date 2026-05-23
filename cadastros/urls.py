@@ -135,12 +135,12 @@ urlpatterns += [
 # Patrimonial
 urlpatterns += [
     path('patrimonial/',                               views.patrimonial_dashboard,           name='patrimonial_dashboard'),
-    path('patrimonial/funcionarios/',                  views.funcionario_patrimonial_list,   name='funcionario_patrimonial_list'),
-    path('patrimonial/funcionarios/novo/',             views.funcionario_patrimonial_create, name='funcionario_patrimonial_create'),
-    path('patrimonial/funcionarios/<int:pk>/',         views.funcionario_patrimonial_detail, name='funcionario_patrimonial_detail'),
-    path('patrimonial/funcionarios/<int:pk>/editar/',  views.funcionario_patrimonial_edit,   name='funcionario_patrimonial_edit'),
-    path('patrimonial/funcionarios/<int:pk>/excluir/', views.funcionario_patrimonial_delete, name='funcionario_patrimonial_delete'),
+    path('patrimonial/jr-seguranca/',                  views.funcionario_patrimonial_list,   name='funcionario_patrimonial_list'),
+    path('patrimonial/jr-seguranca/novo/',             views.funcionario_patrimonial_create, name='funcionario_patrimonial_create'),
+    path('patrimonial/jr-seguranca/<int:pk>/',         views.funcionario_patrimonial_detail, name='funcionario_patrimonial_detail'),
+    path('patrimonial/jr-seguranca/<int:pk>/editar/',  views.funcionario_patrimonial_edit,   name='funcionario_patrimonial_edit'),
+    path('patrimonial/jr-seguranca/<int:pk>/excluir/', views.funcionario_patrimonial_delete, name='funcionario_patrimonial_delete'),
 
     # Reconsultar processos judiciais (DriverID) — inline no detail
-    path('patrimonial/funcionarios/<int:pk>/reconsultar/', views.consulta_processo_reconsultar, name='consulta_processo_reconsultar'),
+    path('patrimonial/jr-seguranca/<int:pk>/reconsultar/', views.consulta_processo_reconsultar, name='consulta_processo_reconsultar'),
 ]
