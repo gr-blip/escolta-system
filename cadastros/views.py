@@ -192,7 +192,7 @@ def dashboard(request):
     context = {
         'total_agentes': Agente.objects.filter(status='ativo').count(),
         'total_viaturas': Viatura.objects.filter(status='ativa').count(),
-        'total_clientes': Cliente.objects.count(),
+        'total_clientes': Cliente.objects.filter(ativo=True).count(),
         'total_armamentos': Armamento.objects.count(),
         'agentes_recentes': Agente.objects.order_by('-criado_em')[:5]
                                           .only('id', 'nome', 'funcao', 'status'),
@@ -1997,7 +1997,7 @@ def espelhamento_listar_ajax(request):
                 'nome_central': e.nome_central or e.cnpj_destino or e.id_central or '—',
                 'cnpj_central': e.cnpj_destino,
                 'id_central':   e.id_central,
-                'data_cad':     e.data_criacao.strftime('%Y-%m-%d %H:%M:%S'),
+                'data_cad':     timezone.localtime(e.data_criacao).strftime('%Y-%m-%d %H:%M:%S'),
                 'data_exp':     e.data_expiracao,
                 'status_aceite': '0',   # default: aguardando (será enriquecido abaixo via API)
                 'status':       '',
