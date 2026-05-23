@@ -540,7 +540,9 @@ class BoletimMedicao(models.Model):
         if not tabela or not op:
             return
         inicio_base = self.os.previsao_inicio
-        if op.chegada_operacao and op.chegada_operacao > self.os.previsao_inicio:
+        if op.inicio_operacao and self.os.previsao_inicio and op.inicio_operacao < self.os.previsao_inicio:
+            inicio_base = op.inicio_operacao
+        elif op.chegada_operacao and op.chegada_operacao > self.os.previsao_inicio:
             inicio_base = op.chegada_operacao
         fim_base = op.termino_operacao
         if inicio_base and fim_base and fim_base > inicio_base:
