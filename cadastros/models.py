@@ -43,6 +43,11 @@ class Agente(models.Model):
     certidao_trf_pdf            = models.FileField(upload_to='certidoes/', blank=True, null=True, verbose_name='PDF TRF')
     funcao = models.CharField(max_length=30, choices=FUNCAO_CHOICES, default='agente_escolta', verbose_name='Funcao')
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='ativo', verbose_name='Status')
+    endereco = models.TextField(
+        blank=True,
+        default='STRC TRECHO 4, BLOCO F, LOTE 02, ZONA INDUSTRIAL - SIA, Brasília - DF, 71225-540',
+        verbose_name='Endereço'
+    )
     observacoes = models.TextField(blank=True, verbose_name='Observacoes')
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
