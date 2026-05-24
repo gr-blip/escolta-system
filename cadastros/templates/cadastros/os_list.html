@@ -383,5 +383,174 @@
   }
 })();</script>
 
-{% endblock %}
+{% if not tem_filtro %}
+<div style="background:var(--blue-bg, #0f1830);border:1px solid #1a3a8f;border-left:3px solid var(--blue-light, #4d8df0);color:var(--text2);border-radius:6px;padding:10px 14px;margin:10px 0;font-size:12px;display:flex;align-items:center;gap:10px">
+  <svg width="14" height="14" fill="none" viewBox="0 0 14 14" style="flex-shrink:0"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 4v3.5M7 10v.01" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+  <span>OS <b>Finalizadas</b> e <b>Canceladas</b> estao em <a href="{% url 'boletim_list' %}" style="color:var(--blue-light, #4d8df0);text-decoration:underline">Boletim de Medicao</a>. Aplique filtro (busca ou data) para exibi-las nesta lista.</span>
+</div>
+{% endif %}
 
+<div class="card" style="padding:0">
+  {% if ordens %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>N OS</th>
+          <th>Cliente</th>
+          <th>Solicitante</th>
+          <th>Origem -> Destino</th>
+          <th>Tipo</th>
+          <th>Previsao Inicio</th>
+          <th>Equipe</th>
+          <th>Status</th>
+          <th>Acoes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in ordens %}
+        <tr>
+          <td><strong style="color:var(--blue-light)">OS-{{ o.numero }}</strong></td>
+          <td style="color:var(--text)">{{ o.cliente.razao_social }}</td>
+          <td style="color:var(--text2)">{{ o.solicitante|default:"---" }}</td>
+          <td style="font-size:12px">
+            {% if o.cidade_origem %}
+            <span style="color:var(--text)">{{ o.cidade_origem }}/{{ o.uf_origem }}</span>
+            <span style="color:var(--text3)"> -> </span>
+            <span style="color:var(--text)">{{ o.cidade_destino }}/{{ o.uf_destino }}</span>
+            {% else %}---{% endif %}
+          </td>
+          <td><span class="badge badge-gray">{{ o.get_tipo_viagem_display }}</span></td>
+          <td style="color:var(--text2);font-size:12px">{{ o.previsao_inicio|date:"d/m/Y H:i" }}</td>
+          <td style="color:var(--text2)">{{ o.equipe.nome|default:"---" }}</td>
+          <td>
+            {% if o.status == 'aberta' %}<span class="badge badge-blue">Aberta</span>
+            {% elif o.status == 'em_viagem' %}<span class="badge badge-amber">Em Viagem</span>
+            {% elif o.status == 'em_operacao' %}<span class="badge badge-orange">Em Operacao</span>
+            {% elif o.status == 'encerrando' %}<span class="badge badge-purple">Encerrando</span>
+            {% elif o.status == 'concluida' %}<span class="badge badge-green">Concluida</span>
+            {% elif o.status == 'finalizada' %}<span class="badge badge-finalizada">Finalizada</span>
+            {% elif o.status == 'cancelada' %}<span class="badge badge-red">Cancelada</span>
+            {% else %}<span class="badge badge-gray">{{ o.get_status_display }}</span>{% endif %}
+          </td>
+          <td>
+            <div style="display:flex;gap:6px;align-items:center">
+              <a href="{% url 'os_detalhe' o.pk %}" class="btn-icon" title="Editar OS">
+                <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M9.5 2.5l2 2-7 7H2.5v-2l7-7z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 4l2 2" stroke="currentColor" stroke-width="1.3"/></svg>
+              </a>
+              <a href="{% url 'os_print' o.pk %}" target="_blank" class="btn-icon" title="Imprimir PDF">
+                <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="3" y="1" width="8" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="2" y="5" width="10" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="4" y="8" width="6" height="3" rx=".5" stroke="currentColor" stroke-width="1.1"/><circle cx="10.5" cy="7.5" r=".7" fill="currentColor"/></svg>
+              </a>
+              <button type="button" class="btn-icon btn-copiar" title="Copiar dados"
+                style="color:var(--amber);border-color:#3a2a10;background:var(--amber-bg)"
+                data-pk="{{ o.pk }}"
+                data-num="{{ o.numero }}"
+                data-cliente="{{ o.cliente.razao_social }}"
+                data-solicitante="{{ o.solicitante|default:'---' }}"
+                data-contato="{{ o.telefone_contato|default:'---' }}"
+                data-forma="{{ o.forma_solicitacao|default:'---' }}"
+                data-data="{{ o.previsao_inicio|date:'d/m/Y' }}"
+                data-hora="{{ o.previsao_inicio|date:'H:i' }}"
+                data-origem="{{ o.cidade_origem|default:'' }}"
+                data-uf-origem="{{ o.uf_origem|default:'' }}"
+                data-destino="{{ o.cidade_destino|default:'' }}"
+                data-uf-destino="{{ o.uf_destino|default:'' }}"
+                data-dt="{{ o.previsao_inicio|date:'d/m/Y H:i' }}"
+                data-tipo="{{ o.get_tipo_viagem_display }}"
+                data-status="{{ o.get_status_display }}"
+                data-equipe="{{ o.equipe.nome|default:'---' }}"
+                data-agente1="{{ o.equipe.agente1.nome_completo|default:'---' }}"
+                data-cpf1="{{ o.equipe.agente1.cpf|default:'---' }}"
+                data-rg1="{{ o.equipe.agente1.rg|default:'---' }}"
+                data-cnh1="{{ o.equipe.agente1.cnh|default:'---' }}"
+                data-valcnh1="{{ o.equipe.agente1.validade_cnh|date:'d/m/Y'|default:'---' }}"
+                data-cnv1="{{ o.equipe.agente1.cnv|default:'---' }}"
+                data-valcnv1="{{ o.equipe.agente1.validade_cnv|date:'d/m/Y'|default:'---' }}"
+                data-funcao1="{{ o.equipe.agente1.funcao|default:'Agente de Escolta' }}"
+                data-status1="{{ o.equipe.agente1.status|default:'Ativo' }}"
+                data-contato1="{{ o.equipe.agente1.telefone|default:'---' }}"
+                data-foto1="{% if o.equipe.agente1.foto %}{{ request.scheme }}://{{ request.get_host }}{{ o.equipe.agente1.foto.url }}{% endif %}"
+                data-agente2="{{ o.equipe.agente2.nome_completo|default:'' }}"
+                data-cpf2="{{ o.equipe.agente2.cpf|default:'---' }}"
+                data-rg2="{{ o.equipe.agente2.rg|default:'---' }}"
+                data-cnh2="{{ o.equipe.agente2.cnh|default:'---' }}"
+                data-valcnh2="{{ o.equipe.agente2.validade_cnh|date:'d/m/Y'|default:'---' }}"
+                data-cnv2="{{ o.equipe.agente2.cnv|default:'---' }}"
+                data-valcnv2="{{ o.equipe.agente2.validade_cnv|date:'d/m/Y'|default:'---' }}"
+                data-funcao2="{{ o.equipe.agente2.funcao|default:'Agente de Escolta' }}"
+                data-status2="{{ o.equipe.agente2.status|default:'Ativo' }}"
+                data-contato2="{{ o.equipe.agente2.telefone|default:'---' }}"
+                data-foto2="{% if o.equipe.agente2.foto %}{{ request.scheme }}://{{ request.get_host }}{{ o.equipe.agente2.foto.url }}{% endif %}"
+                data-viatura="{{ o.equipe.viatura.marca_modelo|default:'---' }}"
+                data-placa="{{ o.equipe.viatura.placa|default:'---' }}"
+                data-cor="{{ o.equipe.viatura.cor|default:'---' }}"
+                data-frota="{{ o.equipe.viatura.frota|default:'---' }}"
+                data-mct="{{ o.equipe.viatura.mct_id|default:'---' }}">
+                <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="4" y="4" width="8" height="9" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M2 10V2h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              {% if o.status != 'finalizada' %}
+              <a href="{% url 'os_finalizar' o.pk %}" class="btn-icon" style="color:#a855f7;border-color:#3a1a60;background:#1e1030" title="Finalizar OS">
+                <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M2 7l4 4 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+              {% endif %}
+              {% if o.status != 'finalizada' and o.status != 'cancelada' %}
+              <a href="{% url 'os_cancelar' o.pk %}" class="btn-icon" style="color:var(--red);border-color:#3a1515;background:var(--red-bg)" title="Cancelar OS">
+                <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="padding:48px;text-align:center;color:var(--text3)">
+    <svg width="40" height="40" fill="none" viewBox="0 0 40 40" style="margin:0 auto 12px;display:block;opacity:.4"><rect x="5" y="3" width="30" height="34" rx="3" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="13" x2="28" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="12" y1="20" x2="28" y2="20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="12" y1="27" x2="20" y2="27" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <div style="font-size:14px">Nenhuma ordem de servico cadastrada</div>
+    <a href="{% url 'os_nova' %}" class="btn btn-primary" style="margin-top:16px">+ Nova OS</a>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+// ─── Copiar OS ───────────────────────────────────────────────────────────────
+document.querySelectorAll('.btn-copiar').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var d = this.dataset;
+    var pk = d.pk;
+    var toastEl = document.getElementById('toast-copy');
+    fetch('/operacional/os/' + pk + '/email/')
+      .then(function(r){ return r.text(); })
+      .then(function(html){
+        try {
+          var blob = new Blob([html], {type: 'text/html'});
+          var plain = new Blob(['OS-'+d.num+' | '+d.cliente], {type: 'text/plain'});
+          var item = new ClipboardItem({'text/html': blob, 'text/plain': plain});
+          navigator.clipboard.write([item]).then(function(){
+            toastEl.style.display = 'block';
+            setTimeout(function(){ toastEl.style.display='none'; }, 2800);
+          });
+        } catch(e) {
+          navigator.clipboard.writeText(html).then(function(){
+            toastEl.style.display = 'block';
+            setTimeout(function(){ toastEl.style.display='none'; }, 2800);
+          });
+        }
+      })
+      .catch(function(){
+        navigator.clipboard.writeText('OS-'+d.num+' | '+d.cliente);
+        toastEl.style.display = 'block';
+        setTimeout(function(){ toastEl.style.display='none'; }, 2800);
+      });
+  });
+});
+
+// ─── Modal Print ─────────────────────────────────────────────────────────────
+document.getElementById('modal-print').addEventListener('click', function(e){
+  if(e.target===this) this.style.display='none';
+});
+</script>
+
+{% endblock %}
