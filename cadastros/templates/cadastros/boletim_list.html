@@ -3,147 +3,155 @@
 {% block page_title %}Boletins de Medição{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> › Faturamento › Boletins de Medição{% endblock %}
 
+{% block topbar_actions %}
+  <button type="button" class="btn btn-secondary" id="btn-abrir-filtro-bol">
+    <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    Filtro
+    {% if q or status_filtro or clientes_filtro or data_ini or data_fim %}<span style="display:inline-block;width:7px;height:7px;background:#4d8df0;border-radius:50%;margin-left:4px;vertical-align:middle;"></span>{% endif %}
+  </button>
+  {% if q or status_filtro or clientes_filtro or data_ini or data_fim %}
+  <a href="{% url 'boletim_list' %}" class="btn btn-secondary">
+    <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    Limpar
+  </a>
+  {% endif %}
+  {% with qs=request.GET.urlencode %}
+  <a href="{% url 'boletim_export_pdf' %}?{{ qs }}" class="btn" style="background:#c0392b;color:#fff;border-color:#c0392b;" title="Exportar PDF">
+    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/></svg>
+    Exportar PDF
+  </a>
+  <a href="{% url 'boletim_export_xlsx' %}?{{ qs }}" class="btn" style="background:#1a6b35;color:#fff;border-color:#1a6b35;" title="Exportar Excel">
+    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/><path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.641L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219 5.884 6.68z"/></svg>
+    Exportar Excel
+  </a>
+  {% endwith %}
+{% endblock %}
+
 {% block content %}
 <style>
-  .filter-bar { display:flex; gap:10px; flex:1; flex-wrap:wrap; align-items:flex-end; }
-  .filter-group { display:flex; flex-direction:column; gap:4px; }
-  .filter-group label { font-size:11px; color:var(--text3); font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
-  .filter-input { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:8px 10px; color:var(--text); font-size:13px; outline:none; }
-  .filter-input:focus { border-color:var(--primary); }
 
-  /* Multiselect dropdown */
-  .ms-wrapper { position:relative; }
-  .ms-trigger {
-    display:flex; align-items:center; justify-content:space-between; gap:8px;
-    background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius);
-    padding:8px 10px; color:var(--text); font-size:13px; cursor:pointer;
-    min-width:200px; max-width:280px; user-select:none;
-  }
-  .ms-trigger-label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
-  .ms-trigger-arrow { color:var(--text3); font-size:10px; flex-shrink:0; transition:transform .15s; }
-  .ms-wrapper.open .ms-trigger { border-color:var(--primary); }
-  .ms-wrapper.open .ms-trigger-arrow { transform:rotate(180deg); }
-  .ms-dropdown {
-    display:none; position:absolute; top:calc(100% + 4px); left:0; z-index:300;
-    background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius);
-    min-width:100%; max-height:260px; overflow-y:auto;
-    box-shadow:0 6px 20px rgba(0,0,0,.25);
-  }
-  .ms-wrapper.open .ms-dropdown { display:block; }
-  .ms-option {
-    display:flex; align-items:center; gap:10px;
-    padding:8px 14px; cursor:pointer; font-size:13px; color:var(--text);
-    transition:background .1s;
-  }
-  .ms-option:hover { background:var(--bg3); }
-  .ms-option input[type=checkbox] { accent-color:var(--primary); width:14px; height:14px; flex-shrink:0; cursor:pointer; margin:0; }
-  .ms-option span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:1.4; }
-  .ms-divider { display:none; }
-  .ms-select-all { font-size:11px; font-weight:700; color:var(--text3); font-style:normal; letter-spacing:.5px; text-transform:uppercase; background:var(--bg3); border-bottom:1px solid var(--border); }
+<!-- MODAL DE FILTRO -->
+<div id="modal-filtro-bol" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:8000;align-items:center;justify-content:center;backdrop-filter:blur(3px);">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;width:640px;max-width:95vw;box-shadow:0 24px 60px rgba(0,0,0,.6);overflow:hidden;">
 
-  .date-range { display:flex; align-items:center; gap:6px; }
-  .date-range span { font-size:12px; color:var(--text3); }
-</style>
-
-<div class="card">
-  <div class="search-bar">
-    <form method="get" id="filterForm" style="display:flex;gap:12px;flex:1;flex-wrap:wrap;align-items:flex-end;">
-
-      <!-- Busca texto -->
-      <div class="filter-group" style="flex:1;min-width:180px;">
-        <label>Buscar</label>
-        <input type="text" name="q" value="{{ q }}" placeholder="OS, cliente ou solicitante…" class="filter-input">
+    <!-- Cabecalho -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--bg3);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M1.5 3.5h13M4 8h8M6.5 12.5h3" stroke="var(--blue-light,#4d8df0)" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span style="font-size:14px;font-weight:700;color:var(--text);">Filtrar Boletins de Medicao</span>
       </div>
+      <button id="btn-fechar-bol" style="background:none;border:none;color:var(--text3);cursor:pointer;padding:4px;border-radius:4px;font-size:18px;line-height:1;" title="Fechar">&times;</button>
+    </div>
 
-      <!-- Status -->
-      <div class="filter-group">
-        <label>Status</label>
-        <select name="status" class="filter-input">
-          <option value="">Todos os status</option>
-          <option value="aberto"    {% if status_filtro == 'aberto' %}selected{% endif %}>Em Aberto</option>
-          <option value="faturado"  {% if status_filtro == 'faturado' %}selected{% endif %}>Faturado</option>
-          <option value="cancelado" {% if status_filtro == 'cancelado' %}selected{% endif %}>Cancelado</option>
-        </select>
-      </div>
+    <form method="get" id="form-filtro-bol">
+      <div style="padding:20px;display:flex;flex-direction:column;gap:18px;">
 
-      <!-- Clientes multiseleção (sem campo de busca — lista direta) -->
-      <div class="filter-group">
-        <label>Clientes</label>
-        <div class="ms-wrapper" id="msWrapper">
-          <div class="ms-trigger" id="msTrigger" tabindex="0">
-            <span class="ms-trigger-label" id="msLabel">Todos os clientes</span>
-            <span class="ms-trigger-arrow">▼</span>
+        <!-- Busca + Status -->
+        <div style="display:grid;grid-template-columns:1fr auto;gap:14px;align-items:end;">
+          <div>
+            <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);display:block;margin-bottom:6px;">Buscar</label>
+            <input type="text" name="q" value="{{ q }}" placeholder="Numero OS, cliente ou solicitante..."
+              style="width:100%;box-sizing:border-box;height:38px;padding:0 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none;"
+              onfocus="this.style.borderColor='var(--blue-light,#4d8df0)'" onblur="this.style.borderColor='var(--border)'">
           </div>
-          <div class="ms-dropdown" id="msDropdown">
-            <!-- Selecionar todos -->
-            <label class="ms-option ms-select-all" id="msSelectAll">
-              <input type="checkbox" id="msCheckAll"> <span>Selecionar todos</span>
-            </label>
-            <div class="ms-divider"></div>
+          <div>
+            <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);display:block;margin-bottom:6px;">Status</label>
+            <select name="status" style="height:38px;padding:0 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none;min-width:150px;">
+              <option value="">Todos os status</option>
+              <option value="aberto"    {% if status_filtro == 'aberto' %}selected{% endif %}>Em Aberto</option>
+              <option value="faturado"  {% if status_filtro == 'faturado' %}selected{% endif %}>Faturado</option>
+              <option value="cancelado" {% if status_filtro == 'cancelado' %}selected{% endif %}>Cancelado</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Clientes -->
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);">Cliente</label>
+            <div style="display:flex;gap:8px;">
+              <button type="button" id="bol-marcar-todos" style="font-size:10px;color:var(--blue-light,#4d8df0);background:none;border:none;cursor:pointer;font-weight:600;padding:0;">Marcar todos</button>
+              <span style="color:var(--border);">|</span>
+              <button type="button" id="bol-limpar-cli" style="font-size:10px;color:var(--red,#ef4444);background:none;border:none;cursor:pointer;font-weight:600;padding:0;">Limpar</button>
+            </div>
+          </div>
+          <div style="position:relative;margin-bottom:4px;">
+            <svg width="13" height="13" fill="none" viewBox="0 0 14 14" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.4;pointer-events:none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.4"/><line x1="9.5" y1="9.5" x2="12" y2="12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <input type="search" id="bol-busca-cli" placeholder="Buscar cliente..." autocomplete="off"
+              style="width:100%;box-sizing:border-box;height:34px;padding:0 10px 0 30px;background:var(--bg);border:1px solid var(--border);border-radius:6px 6px 0 0;color:var(--text);font-size:12px;outline:none;border-bottom:none;">
+          </div>
+          <div id="bol-lista-cli" style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:0 0 6px 6px;background:var(--bg);">
             {% for cli in todos_clientes %}
-            <label class="ms-option">
+            <label class="bol-cli-item" data-search="{{ cli.razao_social|lower }}"
+              style="display:flex;align-items:center;gap:10px;padding:7px 12px;cursor:pointer;font-size:13px;color:var(--text);border-bottom:1px solid rgba(255,255,255,.04);transition:background .1s;">
               <input type="checkbox" name="clientes" value="{{ cli.id }}"
+                style="width:14px;height:14px;accent-color:var(--blue-light,#4d8df0);flex-shrink:0;cursor:pointer;margin:0;"
                 {% if cli.id|stringformat:"s" in clientes_filtro %}checked{% endif %}>
-              <span title="{{ cli.razao_social }}">{{ cli.razao_social }}</span>
+              <span>{{ cli.razao_social }}</span>
             </label>
             {% empty %}
-            <div style="padding:10px 14px;font-size:12px;color:var(--text3)">Nenhum cliente cadastrado</div>
+            <div style="padding:16px;text-align:center;font-size:12px;color:var(--text3);">Nenhum cliente cadastrado</div>
             {% endfor %}
           </div>
         </div>
+
+        <!-- Datas -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);display:block;margin-bottom:6px;">Data Inicial</label>
+            <input type="date" name="data_ini" value="{{ data_ini }}"
+              style="width:100%;box-sizing:border-box;height:38px;padding:0 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);display:block;margin-bottom:6px;">Data Final</label>
+            <input type="date" name="data_fim" value="{{ data_fim }}"
+              style="width:100%;box-sizing:border-box;height:38px;padding:0 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none;">
+          </div>
+        </div>
+
       </div>
 
-      <!-- Data início previsto -->
-      <div class="filter-group">
-        <label>Início Previsto</label>
-        <div class="date-range">
-          <input type="date" name="data_ini" value="{{ data_ini }}" class="filter-input" title="De">
-          <span>até</span>
-          <input type="date" name="data_fim" value="{{ data_fim }}" class="filter-input" title="Até">
+      <!-- Rodape -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3);">
+        <span id="bol-resumo" style="font-size:12px;color:var(--text3);"></span>
+        <div style="display:flex;gap:8px;">
+          <button type="button" id="btn-fechar-bol-2" class="btn btn-secondary">Fechar</button>
+          <button type="submit" class="btn btn-primary">
+            <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><line x1="9.5" y1="9.5" x2="12.5" y2="12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Buscar
+          </button>
         </div>
       </div>
-
-      <div style="display:flex;gap:6px;align-items:flex-end;">
-        <button type="submit" class="btn btn-secondary">Filtrar</button>
-        {% if q or status_filtro or clientes_filtro or data_ini or data_fim %}
-          <a href="{% url 'boletim_list' %}" class="btn btn-secondary">Limpar</a>
-        {% endif %}
-      </div>
-
     </form>
-
-    <!-- Botões de Exportação -->
-    <div style="display:flex;gap:8px;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
-      <span style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-right:4px;">Exportar resultado:</span>
-      {% with qs=request.GET.urlencode %}
-      <a href="{% url 'boletim_export_pdf' %}?{{ qs }}"
-         title="Gerar Boletim de Medição em PDF (mesmo filtro ativo)"
-         style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;background:#c0392b;color:#fff;font-size:12px;font-weight:600;text-decoration:none;transition:background .15s;"
-         onmouseover="this.style.background='#a93226'" onmouseout="this.style.background='#c0392b'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
-          <path d="M4.603 14.087a.81.81 0 0 1-.438-.42c-.195-.388-.13-.776.08-1.102.198-.307.526-.568.897-.787a7.68 7.68 0 0 1 1.482-.645 19.47 19.47 0 0 0 1.062-2.227 7.269 7.269 0 0 1-.43-1.295c-.086-.4-.119-.796-.046-1.136.075-.354.274-.672.65-.823.192-.077.4-.12.602-.077a.7.7 0 0 1 .477.365c.088.164.12.356.127.538.007.188-.012.396-.047.614-.084.51-.27 1.134-.52 1.794a10.954 10.954 0 0 0 .98 1.686 5.753 5.753 0 0 1 1.334.05c.364.066.734.195.96.465.12.144.193.32.2.518.007.192-.047.382-.138.563a1.04 1.04 0 0 1-.354.416.856.856 0 0 1-.51.138c-.331-.014-.654-.196-.933-.417a5.712 5.712 0 0 1-.911-.95 11.651 11.651 0 0 0-1.997.406 11.307 11.307 0 0 1-1.02 1.51c-.292.35-.609.656-.927.787a.793.793 0 0 1-.58.029z"/>
-        </svg>
-        Exportar PDF
-      </a>
-      <a href="{% url 'boletim_export_xlsx' %}?{{ qs }}"
-         title="Gerar Boletim de Medição em Excel XLSX (mesmo filtro ativo)"
-         style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;background:#1a6b35;color:#fff;font-size:12px;font-weight:600;text-decoration:none;transition:background .15s;"
-         onmouseover="this.style.background='#155228'" onmouseout="this.style.background='#1a6b35'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
-          <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.641L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219 5.884 6.68z"/>
-        </svg>
-        Exportar Excel
-      </a>
-      {% endwith %}
-      <span style="font-size:11px;color:var(--text3);margin-left:4px;">
-        {% if boletins %}{{ boletins|length }} registro{{ boletins|length|pluralize }}{% endif %}
-      </span>
-    </div>
-
   </div>
+</div>
 
+<style>
+#bol-lista-cli::-webkit-scrollbar { width:6px; }
+#bol-lista-cli::-webkit-scrollbar-track { background:transparent; }
+#bol-lista-cli::-webkit-scrollbar-thumb { background:rgba(255,255,255,.1);border-radius:3px; }
+.bol-cli-item:hover { background:rgba(77,141,240,.08)!important; }
+</style>
+
+<!-- Barra de filtro ativo -->
+{% if q or status_filtro or clientes_filtro or data_ini or data_fim %}
+<div style="display:flex;align-items:center;gap:10px;background:rgba(77,141,240,.08);border:1px solid rgba(77,141,240,.2);border-radius:6px;padding:8px 14px;margin-bottom:14px;font-size:12px;">
+  <svg width="14" height="14" fill="none" viewBox="0 0 14 14" style="color:var(--blue-light,#4d8df0);flex-shrink:0"><path d="M1.5 3.5h11M3.5 7h7M5.5 10.5h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  <span style="color:var(--text2);">Filtro ativo:
+    {% if q %}<strong style="color:var(--text);">"{{ q }}"</strong>{% endif %}
+    {% if clientes_filtro %}<strong style="color:var(--text);">{{ clientes_filtro|length }} cliente(s)</strong>{% endif %}
+    {% if status_filtro %}<strong style="color:var(--text);">{{ status_filtro }}</strong>{% endif %}
+    {% if data_ini or data_fim %}<strong style="color:var(--text);">{{ data_ini|default:"..." }} ate {{ data_fim|default:"..." }}</strong>{% endif %}
+    - <em>{{ boletins|length }} resultado(s)</em>
+  </span>
+  <a href="{% url 'boletim_list' %}" style="margin-left:auto;font-size:11px;color:var(--text3);text-decoration:none;display:flex;align-items:center;gap:4px;">
+    <svg width="11" height="11" fill="none" viewBox="0 0 12 12"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    Limpar filtros
+  </a>
+</div>
+{% endif %}
+
+<div class="card" style="padding:0">
   <div class="table-wrap">
     <table>
       <thead>
@@ -201,45 +209,73 @@
 
 <script>
 (function () {
-  const wrapper    = document.getElementById('msWrapper');
-  const trigger    = document.getElementById('msTrigger');
-  const label      = document.getElementById('msLabel');
-  const checkAll   = document.getElementById('msCheckAll');
-  const boxes      = () => [...wrapper.querySelectorAll('input[name=clientes]')];
+  var modal     = document.getElementById('modal-filtro-bol');
+  var btnAbrir  = document.getElementById('btn-abrir-filtro-bol');
+  var btnFechar  = document.getElementById('btn-fechar-bol');
+  var btnFechar2 = document.getElementById('btn-fechar-bol-2');
+  var buscaCli  = document.getElementById('bol-busca-cli');
+  var listaCli  = document.getElementById('bol-lista-cli');
+  var btnTodos  = document.getElementById('bol-marcar-todos');
+  var btnLimpar = document.getElementById('bol-limpar-cli');
+  var resumoEl  = document.getElementById('bol-resumo');
 
-  function updateLabel() {
-    const checked = boxes().filter(c => c.checked);
-    if (checked.length === 0)      label.textContent = 'Todos os clientes';
-    else if (checked.length === 1) label.textContent = checked[0].closest('.ms-option').querySelector('span').textContent.trim();
-    else                           label.textContent = checked.length + ' clientes selecionados';
-    checkAll.checked = checked.length > 0 && checked.length === boxes().length;
-    checkAll.indeterminate = checked.length > 0 && checked.length < boxes().length;
+  function abrirModal() {
+    modal.style.display = 'flex';
+    setTimeout(function () {
+      var inp = document.querySelector('#form-filtro-bol input[name="q"]');
+      if (inp) inp.focus();
+    }, 80);
+    atualizarResumo();
   }
 
-  // Abrir/fechar dropdown
-  trigger.addEventListener('click', function (e) {
-    e.stopPropagation();
-    wrapper.classList.toggle('open');
-  });
-  trigger.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); wrapper.classList.toggle('open'); }
-    if (e.key === 'Escape') wrapper.classList.remove('open');
-  });
-  document.addEventListener('click', function (e) {
-    if (!wrapper.contains(e.target)) wrapper.classList.remove('open');
+  function fecharModal() { modal.style.display = 'none'; }
+
+  function atualizarResumo() {
+    var n = listaCli.querySelectorAll('input[type=checkbox]:checked').length;
+    resumoEl.textContent = n > 0 ? n + ' cliente(s) selecionado(s)' : '';
+  }
+
+  if (btnAbrir)  btnAbrir.addEventListener('click', abrirModal);
+  if (btnFechar)  btnFechar.addEventListener('click', fecharModal);
+  if (btnFechar2) btnFechar2.addEventListener('click', fecharModal);
+
+  modal.addEventListener('click', function (e) { if (e.target === modal) fecharModal(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && modal.style.display === 'flex') fecharModal();
   });
 
-  // Selecionar todos
-  checkAll.addEventListener('change', function () {
-    boxes().forEach(cb => cb.checked = this.checked);
-    updateLabel();
-  });
+  if (buscaCli) {
+    buscaCli.addEventListener('input', function () {
+      var term = this.value.trim().toLowerCase();
+      listaCli.querySelectorAll('.bol-cli-item').forEach(function (item) {
+        item.style.display = (!term || (item.getAttribute('data-search')||'').indexOf(term) !== -1) ? '' : 'none';
+      });
+    });
+  }
 
-  // Atualizar label ao mudar checkbox individual
-  boxes().forEach(cb => cb.addEventListener('change', updateLabel));
+  if (btnTodos) {
+    btnTodos.addEventListener('click', function () {
+      listaCli.querySelectorAll('.bol-cli-item').forEach(function (item) {
+        if (item.style.display === 'none') return;
+        var cb = item.querySelector('input[type=checkbox]');
+        if (cb) cb.checked = true;
+      });
+      atualizarResumo();
+    });
+  }
 
-  // Estado inicial
-  updateLabel();
+  if (btnLimpar) {
+    btnLimpar.addEventListener('click', function () {
+      listaCli.querySelectorAll('input[type=checkbox]').forEach(function (cb) { cb.checked = false; });
+      atualizarResumo();
+    });
+  }
+
+  if (listaCli) {
+    listaCli.addEventListener('change', function (e) {
+      if (e.target.type === 'checkbox') atualizarResumo();
+    });
+  }
 })();
 </script>
 {% endblock %}
