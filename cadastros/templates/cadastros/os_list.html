@@ -8,6 +8,17 @@
     <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
     Nova OS
   </a>
+  <button type="button" class="btn btn-secondary" id="btn-abrir-filtro">
+    <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    Filtro
+    {% if tem_filtro %}<span style="display:inline-block;width:7px;height:7px;background:#4d8df0;border-radius:50%;margin-left:4px;vertical-align:middle;"></span>{% endif %}
+  </button>
+  {% if tem_filtro %}
+  <a href="{% url 'os_list' %}" class="btn btn-secondary" title="Limpar filtros ativos">
+    <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    Limpar
+  </a>
+  {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -164,6 +175,16 @@
 .ms-item[hidden] { display:none; }
 .ms-empty { padding:16px 12px; font-size:12px; color:var(--text2); text-align:center; }
 
+
+.filtro-cli-item:hover { background:rgba(77,141,240,.08)!important; }
+
+/* Barra de status de filtro ativo */
+.filtro-ativo-bar {
+  display:flex;align-items:center;gap:10px;
+  background:rgba(77,141,240,.08);border:1px solid rgba(77,141,240,.2);
+  border-radius:6px;padding:8px 14px;margin-bottom:14px;font-size:12px;
+}
+
 @media print {
   body > *:not(#modal-print) { display:none!important; }
   #modal-print { position:fixed!important; inset:0!important; background:#fff!important; padding:0!important; display:block!important; overflow:visible!important; }
@@ -172,497 +193,195 @@
 }
 </style>
 
-<div class="search-bar">
-  <form method="get" class="os-filter-form">
-    <input type="text" name="q" value="{{ q }}" class="f-search"
-           placeholder="Buscar por numero OS, cliente ou solicitante...">
+<!-- MODAL DE FILTRO -->
+<div id="modal-filtro" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:8000;align-items:center;justify-content:center;backdrop-filter:blur(3px);">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;width:600px;max-width:95vw;box-shadow:0 24px 60px rgba(0,0,0,.6);overflow:hidden;">
 
-    <div class="f-group">
-      <span class="f-label">De</span>
-      <input type="date" name="data_de" value="{{ data_de }}" class="f-date">
+    <!-- Cabecalho do modal -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--bg3);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M1.5 3.5h13M4 8h8M6.5 12.5h3" stroke="var(--blue-light,#4d8df0)" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span style="font-size:14px;font-weight:700;color:var(--text);">Filtrar Ordens de Servico</span>
+      </div>
+      <button id="btn-fechar-filtro" style="background:none;border:none;color:var(--text3);cursor:pointer;padding:4px;border-radius:4px;font-size:18px;line-height:1;" title="Fechar">&times;</button>
     </div>
-    <div class="f-group">
-      <span class="f-label">Até</span>
-      <input type="date" name="data_ate" value="{{ data_ate }}" class="f-date">
-    </div>
 
-    <!-- Dropdown multi-select de clientes -->
-    <div class="f-group">
-      <span class="f-label">Clientes</span>
-      <div class="ms-wrap" id="ms-clientes">
-        <button type="button" class="ms-toggle" id="ms-clientes-toggle" aria-haspopup="true" aria-expanded="false">
-          <span class="ms-toggle-label {% if not clientes_selecionados %}empty{% endif %}" id="ms-clientes-label">
-            {% if clientes_selecionados %}{{ clientes_selecionados|length }} selecionado{{ clientes_selecionados|length|pluralize }}{% else %}Todos os clientes{% endif %}
-          </span>
-          <span class="ms-count {% if clientes_selecionados %}has-selection{% endif %}" id="ms-clientes-count">{{ clientes_selecionados|length }}</span>
-          <span class="ms-caret">▾</span>
-        </button>
+    <form method="get" id="form-filtro">
+      <div style="padding:20px;display:flex;flex-direction:column;gap:18px;">
 
-        <div class="ms-panel" id="ms-clientes-panel" role="listbox">
-          <div class="ms-search-wrap">
-            <input type="search" class="ms-search" id="ms-clientes-search" placeholder="Buscar cliente..." autocomplete="off">
+        <!-- Busca -->
+        <div>
+          <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);display:block;margin-bottom:6px;">Buscar</label>
+          <input type="text" name="q" value="{{ q }}" placeholder="Numero OS, cliente ou solicitante..."
+            style="width:100%;box-sizing:border-box;height:38px;padding:0 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none;"
+            onfocus="this.style.borderColor='var(--blue-light,#4d8df0)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+
+        <!-- Clientes -->
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);">Cliente</label>
+            <div style="display:flex;gap:8px;">
+              <button type="button" id="btn-marcar-todos" style="font-size:10px;color:var(--blue-light,#4d8df0);background:none;border:none;cursor:pointer;font-weight:600;padding:0;">Marcar todos</button>
+              <span style="color:var(--border);">|</span>
+              <button type="button" id="btn-limpar-clientes" style="font-size:10px;color:var(--red,#ef4444);background:none;border:none;cursor:pointer;font-weight:600;padding:0;">Limpar</button>
+            </div>
           </div>
-          <div class="ms-actions">
-            <button type="button" class="ms-action-btn" id="ms-clientes-selecionar-todos">Marcar todos</button>
-            <button type="button" class="ms-action-btn danger" id="ms-clientes-limpar">Limpar seleção</button>
+          <!-- Busca dentro da lista -->
+          <div style="position:relative;margin-bottom:4px;">
+            <svg width="13" height="13" fill="none" viewBox="0 0 14 14" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.4;pointer-events:none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.4"/><line x1="9.5" y1="9.5" x2="12" y2="12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <input type="search" id="busca-cliente-modal" placeholder="Buscar cliente..." autocomplete="off"
+              style="width:100%;box-sizing:border-box;height:34px;padding:0 10px 0 30px;background:var(--bg);border:1px solid var(--border);border-radius:6px 6px 0 0;color:var(--text);font-size:12px;outline:none;border-bottom:none;">
           </div>
-          <div class="ms-list" id="ms-clientes-list">
+          <!-- Lista de checkboxes -->
+          <div id="lista-clientes-modal" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:0 0 6px 6px;background:var(--bg);">
             {% for c in todos_clientes %}
-            <label class="ms-item {% if not c.ativo %}ms-item-inativo{% endif %} {% if c.id|stringformat:'s' in clientes_selecionados %}selected{% endif %}" data-search="{{ c.razao_social|lower }}">
+            <label class="filtro-cli-item" data-search="{{ c.razao_social|lower }}"
+              style="display:flex;align-items:center;gap:10px;padding:7px 12px;cursor:pointer;font-size:13px;color:{% if not c.ativo %}var(--text3){% else %}var(--text){% endif %};border-bottom:1px solid rgba(255,255,255,.04);transition:background .1s;">
               <input type="checkbox" name="clientes" value="{{ c.id }}"
+                style="width:14px;height:14px;accent-color:var(--blue-light,#4d8df0);flex-shrink:0;cursor:pointer;margin:0;"
                 {% if c.id|stringformat:'s' in clientes_selecionados %}checked{% endif %}>
-              <span>{{ c.razao_social }}</span>
+              <span style="flex:1;">{{ c.razao_social }}</span>
+              {% if not c.ativo %}<span style="font-size:10px;color:var(--red,#ef4444);background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);padding:1px 6px;border-radius:8px;font-weight:600;">inativo</span>{% endif %}
             </label>
             {% empty %}
-            <div class="ms-empty">Nenhum cliente cadastrado</div>
+            <div style="padding:16px;text-align:center;font-size:12px;color:var(--text3);">Nenhum cliente cadastrado</div>
             {% endfor %}
           </div>
         </div>
 
-      </div>
-    </div>
+        <!-- Datas -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);display:block;margin-bottom:6px;">Data Inicial</label>
+            <input type="date" name="data_de" value="{{ data_de }}"
+              style="width:100%;box-sizing:border-box;height:38px;padding:0 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);display:block;margin-bottom:6px;">Data Final</label>
+            <input type="date" name="data_ate" value="{{ data_ate }}"
+              style="width:100%;box-sizing:border-box;height:38px;padding:0 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none;">
+          </div>
+        </div>
 
-    <button type="submit" class="btn btn-secondary">Filtrar</button>
-    {% if tem_filtro %}<a href="{% url 'os_list' %}" class="btn btn-secondary">Limpar</a>{% endif %}
-  </form>
+      </div>
+
+      <!-- Rodape com acoes -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg3);">
+        <span id="filtro-resumo" style="font-size:12px;color:var(--text3);"></span>
+        <div style="display:flex;gap:8px;">
+          <button type="button" id="btn-fechar-filtro-2" class="btn btn-secondary">Fechar</button>
+          <button type="submit" class="btn btn-primary">
+            <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><line x1="9.5" y1="9.5" x2="12.5" y2="12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Buscar
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
 
-<script>
-// Dropdown multi-select de clientes: toggle, busca, contador, atalhos.
-(function () {
-  var wrap    = document.getElementById('ms-clientes');
-  if (!wrap) return;
-  var toggle    = document.getElementById('ms-clientes-toggle');
-  var panel     = document.getElementById('ms-clientes-panel');
-  var search    = document.getElementById('ms-clientes-search');
-  var list      = document.getElementById('ms-clientes-list');
-  var count     = document.getElementById('ms-clientes-count');
-  var labelEl   = document.getElementById('ms-clientes-label');
-  var btnTodos  = document.getElementById('ms-clientes-selecionar-todos');
-  var btnLimpar = document.getElementById('ms-clientes-limpar');
-
-  // Helper: sincroniza estado visual (label, count, classe .selected nos
-  // items) a partir dos checkboxes marcados. Chamado em todo change.
-  function sync() {
-    var checked = list.querySelectorAll('input[type=checkbox]:checked');
-    var n = checked.length;
-
-    // Badge numérico
-    count.textContent = n;
-    count.classList.toggle('has-selection', n > 0);
-
-    // Label do botão
-    if (n === 0) {
-      labelEl.textContent = 'Todos os clientes';
-      labelEl.classList.add('empty');
-    } else {
-      labelEl.textContent = n + ' selecionado' + (n > 1 ? 's' : '');
-      labelEl.classList.remove('empty');
-    }
-
-    // Classe .selected nos items (destaque visual)
-    list.querySelectorAll('.ms-item').forEach(function (item) {
-      var cb = item.querySelector('input[type=checkbox]');
-      item.classList.toggle('selected', cb && cb.checked);
-    });
-  }
-
-  // Abre/fecha o painel.
-  toggle.addEventListener('click', function (e) {
-    e.stopPropagation();
-    var isOpen = panel.classList.toggle('open');
-    toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    if (isOpen) { setTimeout(function () { search.focus(); }, 50); }
-  });
-
-  // Click fora do wrap fecha o painel.
-  document.addEventListener('click', function (e) {
-    if (!wrap.contains(e.target)) {
-      panel.classList.remove('open');
-      toggle.setAttribute('aria-expanded', 'false');
-    }
-  });
-
-  // Busca filtra labels pelo data-search (razao_social em lowercase).
-  search.addEventListener('input', function () {
-    var term = this.value.trim().toLowerCase();
-    list.querySelectorAll('.ms-item').forEach(function (item) {
-      var hay = item.getAttribute('data-search') || '';
-      item.hidden = term && hay.indexOf(term) === -1;
-    });
-  });
-
-  // Change em qualquer checkbox da lista re-sincroniza o estado visual.
-  list.addEventListener('change', function (e) {
-    if (e.target.type !== 'checkbox') return;
-    sync();
-  });
-
-  // Atalho: marcar todos os itens VISÍVEIS (respeita filtro de busca).
-  btnTodos.addEventListener('click', function () {
-    list.querySelectorAll('.ms-item').forEach(function (item) {
-      if (item.hidden) return;
-      var cb = item.querySelector('input[type=checkbox]');
-      if (cb && !cb.checked) cb.checked = true;
-    });
-    sync();
-  });
-
-  // Atalho: desmarcar TODOS (ignora filtro — limpa seleção completa).
-  btnLimpar.addEventListener('click', function () {
-    list.querySelectorAll('input[type=checkbox]:checked').forEach(function (cb) {
-      cb.checked = false;
-    });
-    sync();
-  });
-
-})();
-</script>
-
-{% if not tem_filtro %}
-<div style="background:var(--blue-bg, #0f1830);border:1px solid #1a3a8f;border-left:3px solid var(--blue-light, #4d8df0);color:var(--text2);border-radius:6px;padding:10px 14px;margin:10px 0;font-size:12px;display:flex;align-items:center;gap:10px">
-  <svg width="14" height="14" fill="none" viewBox="0 0 14 14" style="flex-shrink:0"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 4v3.5M7 10v.01" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-  <span>OS <b>Finalizadas</b> e <b>Canceladas</b> estão em <a href="{% url 'boletim_list' %}" style="color:var(--blue-light, #4d8df0);text-decoration:underline">Boletim de Medição</a>. Aplique filtro (busca ou data) para exibi-las nesta lista.</span>
+<!-- Barra de filtro ativo -->
+{% if tem_filtro %}
+<div class="filtro-ativo-bar">
+  <svg width="14" height="14" fill="none" viewBox="0 0 14 14" style="color:var(--blue-light,#4d8df0);flex-shrink:0"><path d="M1.5 3.5h11M3.5 7h7M5.5 10.5h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  <span style="color:var(--text2);">Filtro ativo:
+    {% if q %}<strong style="color:var(--text);">"{{ q }}"</strong>{% endif %}
+    {% if clientes_selecionados %}<strong style="color:var(--text);">{{ clientes_selecionados|length }} cliente(s)</strong>{% endif %}
+    {% if data_de or data_ate %}<strong style="color:var(--text);">{{ data_de|default:"..." }} ate {{ data_ate|default:"..." }}</strong>{% endif %}
+  </span>
+  <a href="{% url 'os_list' %}" style="margin-left:auto;font-size:11px;color:var(--text3);text-decoration:none;display:flex;align-items:center;gap:4px;">
+    <svg width="11" height="11" fill="none" viewBox="0 0 12 12"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    Limpar filtros
+  </a>
 </div>
 {% endif %}
 
-<div class="card" style="padding:0">
-  {% if ordens %}
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>N OS</th>
-          <th>Cliente</th>
-          <th>Solicitante</th>
-          <th>Origem → Destino</th>
-          <th>Tipo</th>
-          <th>Previsao Inicio</th>
-          <th>Equipe</th>
-          <th>Status</th>
-          <th>Acoes</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for o in ordens %}
-        <tr>
-          <td><strong style="color:var(--blue-light)">OS-{{ o.numero }}</strong></td>
-          <td style="color:var(--text)">{{ o.cliente.razao_social }}</td>
-          <td style="color:var(--text2)">{{ o.solicitante|default:"—" }}</td>
-          <td style="font-size:12px">
-            {% if o.cidade_origem %}
-            <span style="color:var(--text)">{{ o.cidade_origem }}/{{ o.uf_origem }}</span>
-            <span style="color:var(--text3)"> → </span>
-            <span style="color:var(--text)">{{ o.cidade_destino }}/{{ o.uf_destino }}</span>
-            {% else %}—{% endif %}
-          </td>
-          <td><span class="badge badge-gray">{{ o.get_tipo_viagem_display }}</span></td>
-          <td style="color:var(--text2);font-size:12px">{{ o.previsao_inicio|date:"d/m/Y H:i" }}</td>
-          <td style="color:var(--text2)">{{ o.equipe.nome|default:"—" }}</td>
-          <td>
-            {% if o.status == 'aberta' %}<span class="badge badge-blue">Aberta</span>
-            {% elif o.status == 'em_viagem' %}<span class="badge badge-amber">Em Viagem</span>
-            {% elif o.status == 'em_operacao' %}<span class="badge badge-orange">Em Operação</span>
-            {% elif o.status == 'encerrando' %}<span class="badge badge-purple">Encerrando</span>
-            {% elif o.status == 'concluida' %}<span class="badge badge-green">Concluída</span>
-            {% elif o.status == 'finalizada' %}<span class="badge badge-finalizada">Finalizada</span>
-            {% elif o.status == 'cancelada' %}<span class="badge badge-red">Cancelada</span>
-            {% else %}<span class="badge badge-gray">{{ o.get_status_display }}</span>{% endif %}
-          </td>
-          <td>
-            <div style="display:flex;gap:6px;align-items:center">
-              <a href="{% url 'os_detalhe' o.pk %}" class="btn-icon" title="Editar OS">
-                <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M9.5 2.5l2 2-7 7H2.5v-2l7-7z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 4l2 2" stroke="currentColor" stroke-width="1.3"/></svg>
-              </a>
-              <a href="{% url 'os_print' o.pk %}" target="_blank" class="btn-icon" title="Imprimir PDF">
-                <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="3" y="1" width="8" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="2" y="5" width="10" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="4" y="8" width="6" height="3" rx=".5" stroke="currentColor" stroke-width="1.1"/><circle cx="10.5" cy="7.5" r=".7" fill="currentColor"/></svg>
-              </a>
-              <button type="button" class="btn-icon btn-copiar" title="Copiar dados"
-                style="color:var(--amber);border-color:#3a2a10;background:var(--amber-bg)"
-                data-pk="{{ o.pk }}"
-                data-num="{{ o.numero }}"
-                data-cliente="{{ o.cliente.razao_social }}"
-                data-solicitante="{{ o.solicitante|default:'—' }}"
-                data-contato="{{ o.telefone_contato|default:'—' }}"
-                data-forma="{{ o.forma_solicitacao|default:'—' }}"
-                data-data="{{ o.previsao_inicio|date:'d/m/Y' }}"
-                data-hora="{{ o.previsao_inicio|date:'H:i' }}"
-                data-origem="{{ o.cidade_origem|default:'' }}"
-                data-uf-origem="{{ o.uf_origem|default:'' }}"
-                data-destino="{{ o.cidade_destino|default:'' }}"
-                data-uf-destino="{{ o.uf_destino|default:'' }}"
-                data-dt="{{ o.previsao_inicio|date:'d/m/Y H:i' }}"
-                data-tipo="{{ o.get_tipo_viagem_display }}"
-                data-status="{{ o.get_status_display }}"
-                data-equipe="{{ o.equipe.nome|default:'—' }}"
-                data-agente1="{{ o.equipe.agente1.nome_completo|default:'—' }}"
-                data-cpf1="{{ o.equipe.agente1.cpf|default:'—' }}"
-                data-rg1="{{ o.equipe.agente1.rg|default:'—' }}"
-                data-cnh1="{{ o.equipe.agente1.cnh|default:'—' }}"
-                data-valcnh1="{{ o.equipe.agente1.validade_cnh|date:'d/m/Y'|default:'—' }}"
-                data-cnv1="{{ o.equipe.agente1.cnv|default:'—' }}"
-                data-valcnv1="{{ o.equipe.agente1.validade_cnv|date:'d/m/Y'|default:'—' }}"
-                data-funcao1="{{ o.equipe.agente1.funcao|default:'Agente de Escolta' }}"
-                data-status1="{{ o.equipe.agente1.status|default:'Ativo' }}"
-                data-contato1="{{ o.equipe.agente1.telefone|default:'—' }}"
-                data-foto1="{% if o.equipe.agente1.foto %}{{ request.scheme }}://{{ request.get_host }}{{ o.equipe.agente1.foto.url }}{% endif %}"
-                data-agente2="{{ o.equipe.agente2.nome_completo|default:'' }}"
-                data-cpf2="{{ o.equipe.agente2.cpf|default:'—' }}"
-                data-rg2="{{ o.equipe.agente2.rg|default:'—' }}"
-                data-cnh2="{{ o.equipe.agente2.cnh|default:'—' }}"
-                data-valcnh2="{{ o.equipe.agente2.validade_cnh|date:'d/m/Y'|default:'—' }}"
-                data-cnv2="{{ o.equipe.agente2.cnv|default:'—' }}"
-                data-valcnv2="{{ o.equipe.agente2.validade_cnv|date:'d/m/Y'|default:'—' }}"
-                data-funcao2="{{ o.equipe.agente2.funcao|default:'Agente de Escolta' }}"
-                data-status2="{{ o.equipe.agente2.status|default:'Ativo' }}"
-                data-contato2="{{ o.equipe.agente2.telefone|default:'—' }}"
-                data-foto2="{% if o.equipe.agente2.foto %}{{ request.scheme }}://{{ request.get_host }}{{ o.equipe.agente2.foto.url }}{% endif %}"
-                data-viatura="{{ o.equipe.viatura.marca_modelo|default:'—' }}"
-                data-placa="{{ o.equipe.viatura.placa|default:'—' }}"
-                data-cor="{{ o.equipe.viatura.cor|default:'—' }}"
-                data-frota="{{ o.equipe.viatura.frota|default:'—' }}"
-                data-mct="{{ o.equipe.viatura.mct_id|default:'—' }}">
-                <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="4" y="4" width="8" height="9" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M2 10V2h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-              {% if o.status != 'finalizada' %}
-              <a href="{% url 'os_finalizar' o.pk %}" class="btn-icon" style="color:#a855f7;border-color:#3a1a60;background:#1e1030" title="Finalizar OS">
-                <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M2 7l4 4 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </a>
-              {% endif %}
-              {% if o.status != 'finalizada' and o.status != 'cancelada' %}
-              <a href="{% url 'os_cancelar' o.pk %}" class="btn-icon" style="color:var(--red);border-color:#3a1515;background:var(--red-bg)" title="Cancelar OS">
-                {# Ícone X (cancelar) em vez de lixeira #}
-                <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-              </a>
-              {% endif %}
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% else %}
-  <div style="padding:48px;text-align:center;color:var(--text3)">
-    <svg width="40" height="40" fill="none" viewBox="0 0 40 40" style="margin:0 auto 12px;display:block;opacity:.4"><rect x="5" y="3" width="30" height="34" rx="3" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="13" x2="28" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="12" y1="20" x2="28" y2="20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="12" y1="27" x2="20" y2="27" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    <div style="font-size:14px">Nenhuma ordem de servico cadastrada</div>
-    <a href="{% url 'os_nova' %}" class="btn btn-primary" style="margin-top:16px">+ Nova OS</a>
-  </div>
-  {% endif %}
-</div>
-
 <script>
-function cel(conteudo, extra) {
-  return '<td style="border:1px solid #333;padding:5px 8px;' + (extra||'') + '">' + conteudo + '</td>';
-}
-function cabecalho(txt, span) {
-  var s = span ? 'colspan="'+span+'"' : '';
-  return '<td '+s+' style="border:1px solid #333;padding:4px 8px;background:#e0e0e0;font-weight:bold;font-size:10px;text-transform:uppercase;text-align:center">' + txt + '</td>';
-}
-function linhaOp(sit, dh, km) {
-  return '<tr>' + cel(sit) + cel(dh,'text-align:center') + cel(km,'text-align:center') + '</tr>';
-}
-function gerarHTML(d) {
+// ─── Modal de Filtro ─────────────────────────────────────────────────────────
+(function () {
+  var modal    = document.getElementById('modal-filtro');
+  var btnAbrir = document.getElementById('btn-abrir-filtro');
+  var btnFechar  = document.getElementById('btn-fechar-filtro');
+  var btnFechar2 = document.getElementById('btn-fechar-filtro-2');
+  var buscaCli = document.getElementById('busca-cliente-modal');
+  var listaCli = document.getElementById('lista-clientes-modal');
+  var btnTodos  = document.getElementById('btn-marcar-todos');
+  var btnLimpar = document.getElementById('btn-limpar-clientes');
+  var resumoEl  = document.getElementById('filtro-resumo');
 
-  var W = 'width:700px;font-family:Segoe UI,Arial,sans-serif;font-size:12px;color:#1a1d2e;background:#f1f3f8;border-collapse:collapse';
-  var tdF = 'background:#f8f9fc;border:1px solid #d8dce8;border-radius:6px;padding:8px 10px;vertical-align:top';
-
-  function campo(lbl, v, blue) {
-    return '<td style="'+tdF+';width:auto">'
-      +'<div style="font-size:10px;color:#8a90a8;font-weight:600;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">'+lbl+'</div>'
-      +'<div style="font-size:12px;color:'+(blue?'#2d6be4':'#1a1d2e')+';font-weight:'+(blue?'700':'500')+'">'+((v&&v!=='')?v:'—')+'</div>'
-      +'</td>';
+  function abrirModal() {
+    modal.style.display = 'flex';
+    setTimeout(function () {
+      var inp = document.querySelector('#form-filtro input[name="q"]');
+      if (inp) inp.focus();
+    }, 80);
+    atualizarResumo();
   }
 
-  function spacer() { return '<td style="width:8px"></td>'; }
-
-  function secHead(icon, titulo, right) {
-    return '<tr><td colspan="20" style="background:#f8f9fc;border:1px solid #d8dce8;border-top:3px solid #2d6be4;padding:8px 12px">'
-      +'<table width="100%" style="border-collapse:collapse"><tr>'
-      +'<td style="font-size:11px;font-weight:700;color:#4a5068;text-transform:uppercase;letter-spacing:.05em">'+icon+' '+titulo+'</td>'
-      +(right?'<td style="text-align:right;font-size:12px;font-weight:700;color:#2d6be4">'+right+'</td>':'')
-      +'</tr></table>'
-      +'</td></tr>';
+  function fecharModal() {
+    modal.style.display = 'none';
   }
 
-  function divider() {
-    return '<tr><td colspan="20" style="height:10px"></td></tr>';
+  function atualizarResumo() {
+    var checked = listaCli.querySelectorAll('input[type=checkbox]:checked').length;
+    resumoEl.textContent = checked > 0 ? checked + ' cliente(s) selecionado(s)' : '';
   }
 
-  var html = '<table style="'+W+'">';
+  if (btnAbrir)  btnAbrir.addEventListener('click', abrirModal);
+  if (btnFechar) btnFechar.addEventListener('click', fecharModal);
+  if (btnFechar2) btnFechar2.addEventListener('click', fecharModal);
 
-  // ── HEADER ──────────────────────────────────────────────
-  html += '<tr><td colspan="20" style="background:linear-gradient(135deg,#0d1428,#162040);padding:14px 20px;border-radius:8px 8px 0 0">'
-    +'<table width="100%" style="border-collapse:collapse"><tr>'
-    +'<td>'
-    +'<table style="border-collapse:collapse"><tr>'
-    +'<td style="background:#1a3a8f;width:36px;height:36px;border-radius:8px;text-align:center;vertical-align:middle;font-size:20px">&#128737;</td>'
-    +'<td style="padding-left:10px"><div style="font-size:14px;font-weight:800;color:#fff">LOGIS <span style="color:#4d8df0">SISTEMAS</span></div>'
-    +'<div style="font-size:9px;color:#6b7fa3;letter-spacing:.1em">GESTÃO DE ESCOLTA ARMADA</div></td>'
-    +'</tr></table></td>'
-    +'<td style="text-align:right">'
-    +'<div style="font-size:20px;font-weight:800;color:#4d8df0">OS-'+d.num+'</div>'
-    +'<div style="font-size:10px;color:#6b7fa3">'+d.status+'</div>'
-    +'</td></tr></table>'
-    +'</td></tr>';
-
-  html += divider();
-
-  // ── IDENTIFICAÇÃO DA OS ──────────────────────────────────
-  html += secHead('📋','Identificação da OS','OS-'+d.num+' · '+d.status);
-  html += '<tr>'
-    +campo('Nº OS / Folha','<b style="color:#2d6be4">OS-'+d.num+'</b>')
-    +spacer()
-    +campo('Tipo de Operação',d.tipo)
-    +spacer()
-    +'<td style="'+tdF+'"><div style="font-size:10px;color:#8a90a8;font-weight:600;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">Status</div>'
-    +'<span style="display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:600;background:#dcfce7;color:#16a34a;border:1px solid #bbf7d0">'+d.status+'</span></td>'
-    +'</tr>';
-  html += '<tr><td colspan="20" style="height:6px"></td></tr>';
-  html += '<tr>'
-    +campo('Empresa Contratante','<b>'+d.cliente+'</b>')
-    +spacer()
-    +campo('Solicitante',d.solicitante)
-    +'</tr>';
-  html += '<tr><td colspan="20" style="height:6px"></td></tr>';
-  html += '<tr>'
-    +campo('Data Início',d.data)
-    +spacer()
-    +campo('Hora Início',d.hora)
-    +spacer()
-    +campo('Tel / Contato',d.contato)
-    +spacer()
-    +campo('Forma Solicitação',d.forma)
-    +'</tr>';
-
-  html += divider();
-
-  // ── TRAJETO ──────────────────────────────────────────────
-  html += secHead('🗺️','Trajeto / Rota');
-  html += '<tr>'
-    +campo('Cidade Origem',d.origem)
-    +spacer()
-    +campo('UF',d['uf-origem'])
-    +spacer()
-    +campo('Cidade Destino',d.destino)
-    +spacer()
-    +campo('UF',d['uf-destino'])
-    +'</tr>';
-
-  // ── AGENTE helper ────────────────────────────────────────
-  function agenteCard(n, nome, cpf, rg, contato, cnh, valcnh, cnv, valcnv, funcao, stat, foto) {
-    html += divider();
-    html += secHead('👤','Identificação do Agente '+n, nome);
-
-    // Foto + Nome/CPF
-    html += '<tr>';
-    html += '<td rowspan="4" style="'+tdF+';width:90px;text-align:center;vertical-align:top">';
-    if (foto && foto.length > 5) {
-      html += '<img src="'+foto+'" width="80" height="100" style="object-fit:cover;border-radius:6px;border:1px solid #d8dce8;display:block">';
-    } else {
-      html += '<div style="width:80px;height:100px;background:#eef0f6;border-radius:6px;border:1px solid #d8dce8;text-align:center;line-height:100px;font-size:36px;color:#8a90a8">&#128100;</div>';
-    }
-    html += '</td>';
-    html += spacer();
-    html += campo('Nome Completo','<b style="color:#2d6be4">'+nome+'</b>');
-    html += spacer();
-    html += campo('CPF',cpf);
-    html += '</tr>';
-
-    html += '<tr><td colspan="20" style="height:6px"></td></tr>';
-    html += '<tr>';
-    html += '<td style="width:90px"></td>'+spacer();
-    html += campo('RG',rg);
-    html += spacer()+campo('Contato',contato);
-    html += spacer()+campo('CNH',cnh);
-    html += spacer()+campo('Val. CNH',valcnh);
-    html += '</tr>';
-
-    html += '<tr><td colspan="20" style="height:6px"></td></tr>';
-    html += '<tr>';
-    html += '<td style="width:90px"></td>'+spacer();
-    html += campo('CNV',cnv);
-    html += spacer()+campo('Val. CNV',valcnv);
-    html += spacer()+campo('Função',funcao);
-    html += spacer()+'<td style="'+tdF+'"><div style="font-size:10px;color:#8a90a8;font-weight:600;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">Status</div>'
-      +'<span style="display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:600;background:#dcfce7;color:#16a34a;border:1px solid #bbf7d0">'+(stat||'Ativo')+'</span></td>';
-    html += '</tr>';
-  }
-
-  if (d.agente1 && d.agente1 !== '—')
-    agenteCard(1, d.agente1, d.cpf1, d.rg1, d.contato1, d.cnh1, d.valcnh1, d.cnv1, d.valcnv1, d.funcao1||'Agente de Escolta', d.status1||'Ativo', d.foto1);
-
-  if (d.agente2 && d.agente2 !== '' && d.agente2 !== '—')
-    agenteCard(2, d.agente2, d.cpf2, d.rg2, d.contato2, d.cnh2, d.valcnh2, d.cnv2, d.valcnv2, d.funcao2||'Agente de Escolta', d.status2||'Ativo', d.foto2);
-
-  // ── VIATURA ──────────────────────────────────────────────
-  if (d.viatura && d.viatura !== '—') {
-    html += divider();
-    html += secHead('🚗','Viatura', d.placa);
-    html += '<tr>'
-      +campo('Modelo',d.viatura)
-      +spacer()+campo('Cor',d.cor)
-      +spacer()+campo('Frota',d.frota)
-      +spacer()+campo('Placa',d.placa,true)
-      +spacer()+campo('MCT / ID',d.mct)
-      +'</tr>';
-  }
-
-  // ── FOOTER ───────────────────────────────────────────────
-  html += '<tr><td colspan="20" style="background:#0f1117;padding:10px 20px;border-radius:0 0 8px 8px;text-align:center">'
-    +'<span style="font-size:10px;color:#3a4870;letter-spacing:.06em">LOGIS SISTEMAS — GESTÃO DE ESCOLTA ARMADA</span>'
-    +'</td></tr>';
-
-  html += '</table>';
-  return html;
-}
-
-document.querySelectorAll('.btn-imprimir').forEach(function(btn){
-  btn.addEventListener('click', function(){
-    document.getElementById('print-area').innerHTML = gerarHTML(this.dataset);
-    document.getElementById('modal-print').style.display = 'flex';
+  // Fechar clicando fora
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) fecharModal();
   });
-});
 
-document.querySelectorAll('.btn-copiar').forEach(function(btn){
-  btn.addEventListener('click', function(){
-    var d = this.dataset;
-    var pk = d.pk;
-    var toastEl = document.getElementById('toast-copy');
+  // ESC fecha
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && modal.style.display === 'flex') fecharModal();
+  });
 
-    // Busca o HTML formatado do endpoint
-    fetch('/operacional/os/' + pk + '/email/')
-      .then(function(r){ return r.text(); })
-      .then(function(html){
-        try {
-          var blob = new Blob([html], {type: 'text/html'});
-          var plain = new Blob(['OS-'+d.num+' | '+d.cliente], {type: 'text/plain'});
-          var item = new ClipboardItem({'text/html': blob, 'text/plain': plain});
-          navigator.clipboard.write([item]).then(function(){
-            toastEl.style.display = 'block';
-            setTimeout(function(){ toastEl.style.display='none'; }, 2800);
-          });
-        } catch(e) {
-          // fallback: copia o html como texto
-          navigator.clipboard.writeText(html).then(function(){
-            toastEl.style.display = 'block';
-            setTimeout(function(){ toastEl.style.display='none'; }, 2800);
-          });
-        }
-      })
-      .catch(function(){
-        // fallback simples
-        navigator.clipboard.writeText('OS-'+d.num+' | '+d.cliente);
-        toastEl.style.display = 'block';
-        setTimeout(function(){ toastEl.style.display='none'; }, 2800);
+  // Busca de cliente dentro da lista
+  if (buscaCli) {
+    buscaCli.addEventListener('input', function () {
+      var term = this.value.trim().toLowerCase();
+      listaCli.querySelectorAll('.filtro-cli-item').forEach(function (item) {
+        var hay = item.getAttribute('data-search') || '';
+        item.style.display = (!term || hay.indexOf(term) !== -1) ? '' : 'none';
       });
-  });
-});
+    });
+  }
 
-document.getElementById('modal-print').addEventListener('click', function(e){
-  if(e.target===this) this.style.display='none';
-});
-</script>
+  // Marcar todos visiveis
+  if (btnTodos) {
+    btnTodos.addEventListener('click', function () {
+      listaCli.querySelectorAll('.filtro-cli-item').forEach(function (item) {
+        if (item.style.display === 'none') return;
+        var cb = item.querySelector('input[type=checkbox]');
+        if (cb) cb.checked = true;
+      });
+      atualizarResumo();
+    });
+  }
+
+  // Limpar todos
+  if (btnLimpar) {
+    btnLimpar.addEventListener('click', function () {
+      listaCli.querySelectorAll('input[type=checkbox]').forEach(function (cb) {
+        cb.checked = false;
+      });
+      atualizarResumo();
+    });
+  }
+
+  // Atualiza contador ao marcar/desmarcar
+  if (listaCli) {
+    listaCli.addEventListener('change', function (e) {
+      if (e.target.type === 'checkbox') atualizarResumo();
+    });
+  }
+})();</script>
 
 {% endblock %}
 
