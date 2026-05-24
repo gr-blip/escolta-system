@@ -150,4 +150,11 @@ urlpatterns += [
     path('patrimonial/jrs-facilities/<int:pk>/',         views.jrsfacilities_detail, name='jrsfacilities_detail'),
     path('patrimonial/jrs-facilities/<int:pk>/editar/',  views.jrsfacilities_edit,   name='jrsfacilities_edit'),
     path('patrimonial/jrs-facilities/<int:pk>/excluir/', views.jrsfacilities_delete, name='jrsfacilities_delete'),
+
+    # Freelance
+    path('patrimonial/freelance/',                  views.freelance_list,   name='freelance_list'),
+    path('patrimonial/freelance/novo/',             views.freelance_create, name='freelance_create'),
+    path('patrimonial/freelance/<int:pk>/',         views.freelance_detail, name='freelance_detail'),
+    path('patrimonial/freelance/<int:pk>/editar/',  views.freelance_edit,   name='freelance_edit'),
+    path('patrimonial/freelance/<int:pk>/excluir/', views.freelance_delete, name='freelance_delete'),
 ]

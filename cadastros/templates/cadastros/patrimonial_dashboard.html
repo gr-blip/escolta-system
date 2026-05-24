@@ -5,6 +5,7 @@
 {% block topbar_actions %}
   <a href="{% url 'funcionario_patrimonial_list' %}" class="btn btn-secondary">Ver JR Segurança</a>
   <a href="{% url 'jrsfacilities_list' %}" class="btn btn-secondary">Ver JRS Facilities</a>
+  <a href="{% url 'freelance_list' %}" class="btn btn-secondary">Ver Freelance</a>
   <a href="{% url 'funcionario_patrimonial_create' %}" class="btn btn-primary">
     <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     Novo Agente
@@ -66,6 +67,34 @@
     <div class="stat-label">Inativos</div>
     <div class="stat-value" style="color:var(--text3)">{{ jrs_inativos }}</div>
     <div class="stat-sub"><a href="{% url 'jrsfacilities_list' %}?status=inativo" style="color:var(--blue-light);text-decoration:none">Ver inativos →</a></div>
+  </div>
+</div>
+
+<!-- ── CARDS DE TOTAIS ── FREELANCE ── -->
+<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+  <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+  Freelance
+</div>
+<div class="stats-grid" style="margin-bottom:20px">
+  <div class="stat-card">
+    <div class="stat-label">Total de freelancers</div>
+    <div class="stat-value">{{ fl_total }}</div>
+    <div class="stat-sub"><a href="{% url 'freelance_list' %}" style="color:var(--blue-light);text-decoration:none">Ver todos →</a></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Ativos</div>
+    <div class="stat-value" style="color:var(--green,#22c55e)">{{ fl_ativos }}</div>
+    <div class="stat-sub"><a href="{% url 'freelance_list' %}?status=ativo" style="color:var(--blue-light);text-decoration:none">Ver ativos →</a></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Afastados</div>
+    <div class="stat-value" style="color:var(--amber,#f59e0b)">{{ fl_afastados }}</div>
+    <div class="stat-sub"><a href="{% url 'freelance_list' %}?status=afastado" style="color:var(--blue-light);text-decoration:none">Ver afastados →</a></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Inativos</div>
+    <div class="stat-value" style="color:var(--text3)">{{ fl_inativos }}</div>
+    <div class="stat-sub"><a href="{% url 'freelance_list' %}?status=inativo" style="color:var(--blue-light);text-decoration:none">Ver inativos →</a></div>
   </div>
 </div>
 

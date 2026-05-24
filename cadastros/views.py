@@ -1,4 +1,4 @@
-﻿import logging
+import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
@@ -11,7 +11,7 @@ from .models import Agente, Viatura, Rastreador, Armamento, Cliente, Colete, Equ
     FotoMarco, Parada, FotoParada, Incidente, FotoIncidente, FotoVeiculoEscoltado, \
     TrocaMotorista, FotoTrocaMotorista, AssinaturaOS, DespesaOS, FuncionarioPatrimonial, \
     ConsultaProcesso
-from .forms import AgenteForm, ViaturaForm, RastreadorForm, ArmamentoForm, ClienteForm, \
+from .forms import AgenteForm, ArmamentoForm, ClienteForm, ColeteForm, FreelanceForm, RastreadorForm, ViaturaForm, \
     FuncionarioPatrimonialForm, JRSFacilitiesForm
 
 logger = logging.getLogger(__name__)
@@ -771,7 +771,6 @@ def cliente_force_delete(request, pk):
 
 # ── COLETES ───────────────────────────────────────────────────────────────────
 
-from .forms import ColeteForm
 
 @login_required
 def colete_list(request):
@@ -4139,6 +4138,13 @@ def patrimonial_dashboard(request):
     jrs_afastados = jrs_qs.filter(status='afastado').count()
     jrs_inativos  = jrs_qs.filter(status='inativo').count()
 
+    # Freelance
+    fl_qs = FuncionarioPatrimonial.objects.filter(empresa='freelance')
+    fl_total     = fl_qs.count()
+    fl_ativos    = fl_qs.filter(status='ativo').count()
+    fl_afastados = fl_qs.filter(status='afastado').count()
+    fl_inativos  = fl_qs.filter(status='inativo').count()
+
     return render(request, 'cadastros/patrimonial_dashboard.html', {
         'hoje':             hoje,
         'alertas_cnh':      alertas_cnh,
@@ -4152,6 +4158,10 @@ def patrimonial_dashboard(request):
         'jrs_ativos':       jrs_ativos,
         'jrs_afastados':    jrs_afastados,
         'jrs_inativos':     jrs_inativos,
+        'fl_total':         fl_total,
+        'fl_ativos':        fl_ativos,
+        'fl_afastados':     fl_afastados,
+        'fl_inativos':      fl_inativos,
     })
 
 
@@ -4310,6 +4320,85 @@ def jrsfacilities_delete(request, pk):
     return render(request, 'cadastros/confirm_delete.html', {
         'obj': func,
         'cancel_url': 'jrsfacilities_list',
+    })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# FREELANCE — Cadastro de freelancers patrimoniais
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def freelance_list(request):
+    q = request.GET.get('q', '').strip()
+    status_filtro = request.GET.get('status', '').strip()
+
+    qs = FuncionarioPatrimonial.objects.filter(empresa='freelance')
+
+    if q:
+        qs = qs.filter(
+            Q(nome__icontains=q)
+            | Q(cpf__icontains=q)
+            | Q(rg__icontains=q)
+            | Q(cargo__icontains=q)
+            | Q(posto_trabalho__icontains=q)
+        )
+    if status_filtro in ('ativo', 'afastado', 'inativo'):
+        qs = qs.filter(status=status_filtro)
+
+    total = qs.count()
+    return render(request, 'cadastros/freelance_list.html', {
+        'funcionarios': qs.prefetch_related('consultas_processo').order_by('nome'),
+        'q': q,
+        'status_filtro': status_filtro,
+        'total': total,
+    })
+
+
+@login_required
+def freelance_create(request):
+    form = FreelanceForm(request.POST or None, request.FILES or None)
+    if form.is_valid():
+        obj = form.save(commit=False)
+        obj.empresa = 'freelance'
+        obj.save()
+        messages.success(request, 'Freelance cadastrado com sucesso!')
+        return redirect('freelance_list')
+    return render(request, 'cadastros/freelance_form.html', {
+        'form': form,
+        'titulo': 'Novo Freelance',
+    })
+
+
+@login_required
+def freelance_edit(request, pk):
+    func = get_object_or_404(FuncionarioPatrimonial, pk=pk, empresa='freelance')
+    form = FreelanceForm(request.POST or None, request.FILES or None, instance=func)
+    if form.is_valid():
+        form.save()
+        messages.success(request, 'Freelance atualizado!')
+        return redirect('freelance_list')
+    return render(request, 'cadastros/freelance_form.html', {
+        'form': form,
+        'titulo': 'Editar Freelance',
+    })
+
+
+@login_required
+def freelance_detail(request, pk):
+    func = get_object_or_404(FuncionarioPatrimonial, pk=pk, empresa='freelance')
+    return render(request, 'cadastros/freelance_detail.html', {'obj': func})
+
+
+@login_required
+def freelance_delete(request, pk):
+    func = get_object_or_404(FuncionarioPatrimonial, pk=pk, empresa='freelance')
+    if request.method == 'POST':
+        func.delete()
+        messages.success(request, 'Freelance removido.')
+        return redirect('freelance_list')
+    return render(request, 'cadastros/confirm_delete.html', {
+        'obj': func,
+        'cancel_url': 'freelance_list',
     })
 
 

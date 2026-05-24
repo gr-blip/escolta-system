@@ -933,6 +933,7 @@ class FuncionarioPatrimonial(models.Model):
     EMPRESA_CHOICES = [
         ('jr_seguranca', 'JR Segurança'),
         ('jrs_facilities', 'JRS Facilities'),
+        ('freelance', 'Freelance'),
     ]
     TIPO_CHOICES = [
         ('vigilante', 'Vigilante Patrimonial'),
