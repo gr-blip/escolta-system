@@ -301,6 +301,7 @@ body{
             <div class="field"><label>Val. CNV</label><div class="val">{{ os.equipe.agente1.cnv_validade|date:"d/m/Y"|default:"—" }}</div></div>
             <div class="field"><label>Função</label><div class="val">{{ os.equipe.agente1.get_funcao_display }}</div></div>
             <div class="field"><label>Status</label><div class="val">{{ os.equipe.agente1.get_status_display }}</div></div>
+            <div class="field"><label>Endereço</label><div class="val">{{ os.equipe.agente1.endereco|default:"—" }}</div></div>
           </div>
         </div>
       </div>
@@ -337,6 +338,7 @@ body{
             <div class="field"><label>Val. CNV</label><div class="val">{{ os.equipe.agente2.cnv_validade|date:"d/m/Y"|default:"—" }}</div></div>
             <div class="field"><label>Função</label><div class="val">{{ os.equipe.agente2.get_funcao_display }}</div></div>
             <div class="field"><label>Status</label><div class="val">{{ os.equipe.agente2.get_status_display }}</div></div>
+            <div class="field"><label>Endereço</label><div class="val">{{ os.equipe.agente2.endereco|default:"—" }}</div></div>
           </div>
         </div>
       </div>
@@ -357,6 +359,7 @@ body{
         <div class="field"><label>Cor</label><div class="val">{{ os.equipe.viatura.cor }}</div></div>
         <div class="field"><label>Frota</label><div class="val">{{ os.equipe.viatura.frota|default:"—" }}</div></div>
         <div class="field"><label>Placa</label><div class="val bold">{{ os.equipe.viatura.placa }}</div></div>
+        <div class="field"><label>RENAVAN</label><div class="val">{{ os.equipe.viatura.renavam|default:"—" }}</div></div>
         <div class="field"><label>MCT / ID</label><div class="val">{{ os.equipe.viatura.mct_id|default:"—" }}</div></div>
       </div>
       {% with rastreador=os.equipe.viatura.rastreadores.first %}
