@@ -4450,4 +4450,11 @@ def consulta_processo_reconsultar(request, pk):
         logger.error(f'Erro inesperado na consulta DriverID do funcionário {pk}: {e}', exc_info=True)
         messages.error(request, f'Erro inesperado: {e}')
 
-    return redirect('funcionario_patrimonial_detail', pk=pk)
+    # Redirecionar para o detail correto baseado na empresa do funcionário
+    redirect_map = {
+        'jr_seguranca': 'funcionario_patrimonial_detail',
+        'jrs_facilities': 'jrsfacilities_detail',
+        'freelance': 'freelance_detail',
+    }
+    url_name = redirect_map.get(func.empresa, 'funcionario_patrimonial_detail')
+    return redirect(url_name, pk=pk)
