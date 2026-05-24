@@ -4408,24 +4408,26 @@ def freelance_delete(request, pk):
 
 @csrf_exempt
 def auto_consultar_processos(request, token):
-    """Endpoint protegido para consulta agendada via cron externo (cron-job.org)."""
+    """Endpoint protegido para consulta agendada via cron externo (cron-job.org).
+    Roda em background thread para não estourar timeout do gunicorn."""
     from django.conf import settings as conf
+    import threading
 
     if token != conf.AUTO_CONSULTA_TOKEN:
         return JsonResponse({'erro': 'token invalido'}, status=403)
 
-    from .management.commands.consultar_processos import Command
-    from io import StringIO
+    def _run():
+        from .management.commands.consultar_processos import Command
+        from io import StringIO
+        out = StringIO()
+        err = StringIO()
+        cmd = Command(stdout=out, stderr=err)
+        cmd.handle(force=True, cpf=None)
+        logger.info(f'Auto-consulta concluida: {out.getvalue()}')
 
-    out = StringIO()
-    err = StringIO()
-    cmd = Command(stdout=out, stderr=err)
-    cmd.handle(force=True, cpf=None)
+    threading.Thread(target=_run, daemon=True).start()
 
-    return JsonResponse({
-        'ok': True,
-        'log': out.getvalue(),
-    })
+    return JsonResponse({'ok': True, 'mensagem': 'Consulta iniciada em background'})
 
 
 # ══════════════════════════════════════════════════════════════════════════════
