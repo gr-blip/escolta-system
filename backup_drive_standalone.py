@@ -22,13 +22,13 @@ def main():
 
     if not all([db_url, google_json, folder_id, railway_token, app_url, project_id]):
         print("Erro: variáveis de ambiente incompletas.")
-        print(f"  DATABASE_URL: {'OK' if db_url else 'FALTANDO'}")
-        print(f"  GCP_SA_KEY_JSON: {'OK' if google_json else 'FALTANDO'}")
-        print(f"  GDRIVE_FOLDER_ID: {'OK' if folder_id else 'FALTANDO'}")
-        print(f"  RAILWAY_TOKEN: {'OK' if railway_token else 'FALTANDO'}")
-        print(f"  RAILWAY_APP_URL: {'OK' if app_url else 'FALTANDO'}")
-        print(f"  RAILWAY_PROJECT_ID: {'OK' if project_id else 'FALTANDO'}")
         exit(1)
+
+    # Diagnóstico do Token (Sem expor o valor completo)
+    if railway_token:
+        print(f"Diagnóstico: Token carregado. Tamanho: {len(railway_token)} caracteres. Início: {railway_token[:4]}... Fim: ...{railway_token[-4:]}")
+    else:
+        print("Diagnóstico: Token NÃO carregado.")
 
     timestamp         = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     db_backup_file    = f'db_backup_{timestamp}.sql.gz'
@@ -46,13 +46,11 @@ def main():
         # ── 2. Backup da mídia via Railway CLI ──────────────────────────
         print(f"Iniciando backup de mídia → {media_backup_file}")
         
-        # Injeção nativa de contexto para o Railway CLI
         env_railway = os.environ.copy()
         env_railway['RAILWAY_TOKEN'] = railway_token
         env_railway['RAILWAY_PROJECT_ID'] = project_id
         env_railway['RAILWAY_ENVIRONMENT'] = 'production'
         
-        # Simplificamos o comando: railway run agora usa as envs acima automaticamente
         cmd_media = [
             'railway', 'run',
             '--', 'tar', 'czf', '-', '/app/media'
@@ -63,7 +61,9 @@ def main():
             result = subprocess.run(cmd_media, stdout=f_out, stderr=subprocess.PIPE, env=env_railway)
         
         if result.returncode != 0:
-            raise Exception(f"railway run falhou:\n{result.stderr.decode()}")
+            # Imprime o erro do Railway detalhadamente
+            stderr_output = result.stderr.decode()
+            raise Exception(f"railway run falhou:\n{stderr_output}")
 
         size_media = os.path.getsize(media_backup_file)
         if size_media < 100:

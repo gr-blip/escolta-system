@@ -107,7 +107,7 @@ class ColeteForm(forms.ModelForm):
 class FuncionarioPatrimonialForm(forms.ModelForm):
     class Meta:
         model = FuncionarioPatrimonial
-        exclude = ['criado_em', 'atualizado_em']
+        exclude = ['criado_em', 'atualizado_em', 'empresa', 'cargo']
         widgets = {
             'nome':            forms.TextInput(attrs={'placeholder': 'Ex: Jose Silva Santos'}),
             'cpf':             forms.TextInput(attrs={'placeholder': '000.000.000-00'}),
@@ -115,6 +115,32 @@ class FuncionarioPatrimonialForm(forms.ModelForm):
             'telefone':        forms.TextInput(attrs={'placeholder': '(62) 99999-0000'}),
             'nome_mae':        forms.TextInput(attrs={'placeholder': 'Nome completo da mãe'}),
             'data_nascimento': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'cnh':             forms.TextInput(attrs={'placeholder': '00000000000'}),
+            'cnh_validade':    forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'cnv':             forms.TextInput(attrs={'placeholder': '00000/0000'}),
+            'cnv_validade':    forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'posto_trabalho':  forms.TextInput(attrs={'placeholder': 'Ex: Portaria Condominio Alpha'}),
+            'data_admissao':   forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'registro_drt':    forms.TextInput(attrs={'placeholder': 'Nr DRT/MTE'}),
+            'curso':           forms.TextInput(attrs={'placeholder': 'Ex: Curso de Formacao de Vigilante'}),
+            'curso_validade':  forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'observacoes':     forms.Textarea(attrs={'rows': 3, 'placeholder': 'Observacoes sobre o funcionario...'}),
+        }
+
+
+class JRSFacilitiesForm(forms.ModelForm):
+    """Form para JRS Facilities — usa cargo livre em vez de tipo."""
+    class Meta:
+        model = FuncionarioPatrimonial
+        exclude = ['criado_em', 'atualizado_em', 'tipo', 'empresa']
+        widgets = {
+            'nome':            forms.TextInput(attrs={'placeholder': 'Ex: Jose Silva Santos'}),
+            'cpf':             forms.TextInput(attrs={'placeholder': '000.000.000-00'}),
+            'rg':              forms.TextInput(attrs={'placeholder': '0000000'}),
+            'telefone':        forms.TextInput(attrs={'placeholder': '(62) 99999-0000'}),
+            'nome_mae':        forms.TextInput(attrs={'placeholder': 'Nome completo da mãe'}),
+            'data_nascimento': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'cargo':           forms.TextInput(attrs={'placeholder': 'Ex: Agente Patrimonial'}),
             'cnh':             forms.TextInput(attrs={'placeholder': '00000000000'}),
             'cnh_validade':    forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'cnv':             forms.TextInput(attrs={'placeholder': '00000/0000'}),

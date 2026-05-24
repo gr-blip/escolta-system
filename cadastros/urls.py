@@ -143,4 +143,11 @@ urlpatterns += [
 
     # Reconsultar processos judiciais (DriverID) — inline no detail
     path('patrimonial/jr-seguranca/<int:pk>/reconsultar/', views.consulta_processo_reconsultar, name='consulta_processo_reconsultar'),
+
+    # JRS Facilities
+    path('patrimonial/jrs-facilities/',                  views.jrsfacilities_list,   name='jrsfacilities_list'),
+    path('patrimonial/jrs-facilities/novo/',             views.jrsfacilities_create, name='jrsfacilities_create'),
+    path('patrimonial/jrs-facilities/<int:pk>/',         views.jrsfacilities_detail, name='jrsfacilities_detail'),
+    path('patrimonial/jrs-facilities/<int:pk>/editar/',  views.jrsfacilities_edit,   name='jrsfacilities_edit'),
+    path('patrimonial/jrs-facilities/<int:pk>/excluir/', views.jrsfacilities_delete, name='jrsfacilities_delete'),
 ]

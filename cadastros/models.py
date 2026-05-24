@@ -930,6 +930,10 @@ class EspelhamentoEnviado(models.Model):
 # controle cadastral e de documentos (CNV, CNH, etc.).
 # =====================================================================
 class FuncionarioPatrimonial(models.Model):
+    EMPRESA_CHOICES = [
+        ('jr_seguranca', 'JR Segurança'),
+        ('jrs_facilities', 'JRS Facilities'),
+    ]
     TIPO_CHOICES = [
         ('vigilante', 'Vigilante Patrimonial'),
         ('porteiro', 'Porteiro'),
@@ -961,8 +965,12 @@ class FuncionarioPatrimonial(models.Model):
         ('outro', 'Outro (descrever em observacoes)'),
     ]
 
+    # Empresa
+    empresa = models.CharField(max_length=20, choices=EMPRESA_CHOICES, default='jr_seguranca', verbose_name='Empresa')
+
     # Classificacao patrimonial
-    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, verbose_name='Tipo')
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, blank=True, verbose_name='Tipo')
+    cargo = models.CharField(max_length=200, blank=True, verbose_name='Cargo')
 
     # Identificacao (espelho do Agente)
     foto = models.ImageField(upload_to='funcionarios_patrimonial/', blank=True, null=True)
@@ -1003,7 +1011,8 @@ class FuncionarioPatrimonial(models.Model):
         ordering = ['nome']
 
     def __str__(self):
-        return f'{self.nome} ({self.get_tipo_display()})'
+        label = self.cargo or (self.get_tipo_display() if self.tipo else '')
+        return f'{self.nome} ({label})' if label else self.nome
 
     @staticmethod
     def _status_validade(data_validade, dias_alerta=30):

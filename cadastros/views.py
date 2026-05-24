@@ -12,7 +12,7 @@ from .models import Agente, Viatura, Rastreador, Armamento, Cliente, Colete, Equ
     TrocaMotorista, FotoTrocaMotorista, AssinaturaOS, DespesaOS, FuncionarioPatrimonial, \
     ConsultaProcesso
 from .forms import AgenteForm, ViaturaForm, RastreadorForm, ArmamentoForm, ClienteForm, \
-    FuncionarioPatrimonialForm
+    FuncionarioPatrimonialForm, JRSFacilitiesForm
 
 logger = logging.getLogger(__name__)
 
@@ -4090,7 +4090,8 @@ def patrimonial_dashboard(request):
     limite_padrao    = hoje + timedelta(days=60)   # CNH, CNV e curso não-brigadista
     limite_brigadista = hoje + timedelta(days=120)  # curso brigadista: 4 meses
 
-    ativos = FuncionarioPatrimonial.objects.filter(status='ativo')
+    # JR Segurança
+    ativos = FuncionarioPatrimonial.objects.filter(status='ativo', empresa='jr_seguranca')
 
     alertas_cnh = (
         ativos
@@ -4118,9 +4119,10 @@ def patrimonial_dashboard(request):
         .only('id', 'nome', 'tipo', 'curso', 'curso_validade', 'posto_trabalho')
     )
 
-    total        = FuncionarioPatrimonial.objects.count()
+    jr_qs = FuncionarioPatrimonial.objects.filter(empresa='jr_seguranca')
+    total        = jr_qs.count()
     total_ativos = ativos.count()
-    total_afastados = FuncionarioPatrimonial.objects.filter(status='afastado').count()
+    total_afastados = jr_qs.filter(status='afastado').count()
     total_alertas = (
         ativos.filter(
             Q(cnh_validade__lte=limite_padrao,    cnh_validade__isnull=False)
@@ -4129,6 +4131,13 @@ def patrimonial_dashboard(request):
             | Q(curso_validade__lte=limite_padrao, curso_validade__isnull=False)
         ).distinct().count()
     )
+
+    # JRS Facilities
+    jrs_qs = FuncionarioPatrimonial.objects.filter(empresa='jrs_facilities')
+    jrs_total     = jrs_qs.count()
+    jrs_ativos    = jrs_qs.filter(status='ativo').count()
+    jrs_afastados = jrs_qs.filter(status='afastado').count()
+    jrs_inativos  = jrs_qs.filter(status='inativo').count()
 
     return render(request, 'cadastros/patrimonial_dashboard.html', {
         'hoje':             hoje,
@@ -4139,6 +4148,10 @@ def patrimonial_dashboard(request):
         'total_ativos':     total_ativos,
         'total_afastados':  total_afastados,
         'total_alertas':    total_alertas,
+        'jrs_total':        jrs_total,
+        'jrs_ativos':       jrs_ativos,
+        'jrs_afastados':    jrs_afastados,
+        'jrs_inativos':     jrs_inativos,
     })
 
 
@@ -4148,7 +4161,7 @@ def funcionario_patrimonial_list(request):
     tipo = request.GET.get('tipo', '').strip()
     status_filtro = request.GET.get('status', '').strip()
 
-    qs = FuncionarioPatrimonial.objects.all()
+    qs = FuncionarioPatrimonial.objects.filter(empresa='jr_seguranca')
 
     if q:
         qs = qs.filter(
@@ -4176,12 +4189,14 @@ def funcionario_patrimonial_list(request):
 def funcionario_patrimonial_create(request):
     form = FuncionarioPatrimonialForm(request.POST or None, request.FILES or None)
     if form.is_valid():
-        form.save()
+        obj = form.save(commit=False)
+        obj.empresa = 'jr_seguranca'
+        obj.save()
         messages.success(request, 'Funcionário cadastrado com sucesso!')
         return redirect('funcionario_patrimonial_list')
     return render(request, 'cadastros/funcionario_patrimonial_form.html', {
         'form': form,
-        'titulo': 'Novo Funcionário Patrimonial',
+        'titulo': 'Novo Agente',
     })
 
 
@@ -4216,6 +4231,85 @@ def funcionario_patrimonial_delete(request, pk):
     return render(request, 'cadastros/confirm_delete.html', {
         'obj': func,
         'cancel_url': 'funcionario_patrimonial_list',
+    })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# JRS FACILITIES — Cadastro de funcionários JRS Facilities Ltda
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def jrsfacilities_list(request):
+    q = request.GET.get('q', '').strip()
+    status_filtro = request.GET.get('status', '').strip()
+
+    qs = FuncionarioPatrimonial.objects.filter(empresa='jrs_facilities')
+
+    if q:
+        qs = qs.filter(
+            Q(nome__icontains=q)
+            | Q(cpf__icontains=q)
+            | Q(rg__icontains=q)
+            | Q(cargo__icontains=q)
+            | Q(posto_trabalho__icontains=q)
+        )
+    if status_filtro in ('ativo', 'afastado', 'inativo'):
+        qs = qs.filter(status=status_filtro)
+
+    total = qs.count()
+    return render(request, 'cadastros/jrsfacilities_list.html', {
+        'funcionarios': qs.prefetch_related('consultas_processo').order_by('nome'),
+        'q': q,
+        'status_filtro': status_filtro,
+        'total': total,
+    })
+
+
+@login_required
+def jrsfacilities_create(request):
+    form = JRSFacilitiesForm(request.POST or None, request.FILES or None)
+    if form.is_valid():
+        obj = form.save(commit=False)
+        obj.empresa = 'jrs_facilities'
+        obj.save()
+        messages.success(request, 'Funcionário JRS Facilities cadastrado com sucesso!')
+        return redirect('jrsfacilities_list')
+    return render(request, 'cadastros/jrsfacilities_form.html', {
+        'form': form,
+        'titulo': 'Novo Funcionário JRS Facilities',
+    })
+
+
+@login_required
+def jrsfacilities_edit(request, pk):
+    func = get_object_or_404(FuncionarioPatrimonial, pk=pk, empresa='jrs_facilities')
+    form = JRSFacilitiesForm(request.POST or None, request.FILES or None, instance=func)
+    if form.is_valid():
+        form.save()
+        messages.success(request, 'Funcionário JRS Facilities atualizado!')
+        return redirect('jrsfacilities_list')
+    return render(request, 'cadastros/jrsfacilities_form.html', {
+        'form': form,
+        'titulo': 'Editar Funcionário JRS Facilities',
+    })
+
+
+@login_required
+def jrsfacilities_detail(request, pk):
+    func = get_object_or_404(FuncionarioPatrimonial, pk=pk, empresa='jrs_facilities')
+    return render(request, 'cadastros/jrsfacilities_detail.html', {'obj': func})
+
+
+@login_required
+def jrsfacilities_delete(request, pk):
+    func = get_object_or_404(FuncionarioPatrimonial, pk=pk, empresa='jrs_facilities')
+    if request.method == 'POST':
+        func.delete()
+        messages.success(request, 'Funcionário JRS Facilities removido.')
+        return redirect('jrsfacilities_list')
+    return render(request, 'cadastros/confirm_delete.html', {
+        'obj': func,
+        'cancel_url': 'jrsfacilities_list',
     })
 
 
