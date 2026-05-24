@@ -4420,7 +4420,7 @@ def auto_consultar_processos(request, token):
     out = StringIO()
     err = StringIO()
     cmd = Command(stdout=out, stderr=err)
-    cmd.handle(force=True)
+    cmd.handle(force=True, cpf=None)
 
     return JsonResponse({
         'ok': True,
