@@ -29,48 +29,48 @@ body{
 .topbar{
   background:#0d1428;
   border-bottom:1px solid rgba(180,200,240,0.15);
-  padding:14px 24px;
+  padding:10px 16px;
   display:flex;
   align-items:center;
   justify-content:space-between;
   position:sticky;top:0;z-index:50;
 }
-.topbar-brand{font-size:14px;font-weight:800;letter-spacing:.8px;color:#ffffff;text-transform:uppercase}
+.topbar-brand{font-size:12px;font-weight:800;letter-spacing:.8px;color:#ffffff;text-transform:uppercase}
 .topbar-brand span{color:#4d8df0}
 .topbar-sub{font-size:9.5px;color:#8090b0;margin-top:2px;letter-spacing:1.2px;text-transform:uppercase;opacity:.9}
 .topbar-actions{display:flex;gap:8px;align-items:center}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;border:none;text-decoration:none;font-family:inherit}
 .btn-primary{background:var(--blue);color:#fff}
 .btn-secondary{background:#1e2a40;color:#9aa0b8;border:1px solid #2e3450}
-.os-num{font-size:13px;font-weight:700;color:#4d8df0;background:var(--blue-bg);border:1px solid var(--blue-border);padding:4px 12px;border-radius:var(--radius)}
+.os-num{font-size:11px;font-weight:700;color:#4d8df0;background:var(--blue-bg);border:1px solid var(--blue-border);padding:3px 10px;border-radius:var(--radius)}
 
 /* ── LAYOUT ── */
-.content{padding:24px;max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.content{padding:12px 16px;max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
 
 /* ── CARDS ── */
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
 .card-header{
-  padding:10px 16px;
+  padding:6px 12px;
   background:var(--bg3);
   border-bottom:1px solid var(--border);
-  font-size:10px;font-weight:700;
+  font-size:9px;font-weight:700;
   color:var(--text3);
   text-transform:uppercase;letter-spacing:.08em;
   display:flex;align-items:center;gap:8px;
 }
 .card-header .hl{color:var(--blue-light);font-size:13px;font-weight:700;text-transform:none;letter-spacing:0;margin-left:auto}
-.card-body{padding:14px 16px}
+.card-body{padding:8px 12px}
 
 /* ── GRID ── */
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
-.g5{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
+.g5{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:6px}
 
 /* ── FIELDS ── */
-.field{display:flex;flex-direction:column;gap:3px}
+.field{display:flex;flex-direction:column;gap:2px}
 .field label{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
-.field .val{font-size:12px;color:var(--text);background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 9px;min-height:30px}
+.field .val{font-size:11px;color:var(--text);background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:4px 8px;min-height:auto}
 .field .val.bold{font-weight:700;color:var(--blue-light)}
 
 /* ── AGENTE CARD ── */
@@ -89,43 +89,43 @@ body{
 /* ── TABELA OPERAÇÃO ── */
 .op-table{width:100%;border-collapse:collapse}
 .op-table th{
-  text-align:left;padding:7px 10px;
+  text-align:left;padding:5px 8px;
   font-size:10px;font-weight:600;color:var(--text3);
   text-transform:uppercase;letter-spacing:.06em;
   border-bottom:1px solid var(--border);
 }
-.op-table td{padding:8px 10px;font-size:12px;border-bottom:1px solid var(--border);color:var(--text2)}
+.op-table td{padding:5px 8px;font-size:11px;border-bottom:1px solid var(--border);color:var(--text2)}
 .op-table tr:last-child td{border-bottom:none}
 .op-table tr:hover td{background:var(--bg3)}
 .op-table .sit{color:var(--text);font-weight:500}
 .op-table .num{color:var(--blue-light);font-weight:600;font-family:monospace;font-size:13px}
 
 /* ── BADGE ── */
-.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:600}
 .badge-blue{background:var(--blue-bg);color:var(--blue-light);border:1px solid var(--blue-border)}
 .badge-green{background:var(--green-bg);color:var(--green);border:1px solid #1a4d2a}
 .badge-amber{background:#2a1f0a;color:#f59e0b;border:1px solid #3a2a10}
 .badge-red{background:#2a0f0f;color:#ef4444;border:1px solid #3a1515}
 
 /* ── RODAPÉ ── */
-.rodape{text-align:center;font-size:10px;color:var(--text3);padding:14px 0 4px;border-top:1px solid var(--border);letter-spacing:.5px;margin-top:4px}
+.rodape{text-align:center;font-size:10px;color:var(--text3);padding:8px 0 2px;border-top:1px solid var(--border);letter-spacing:.5px;margin-top:2px}
 
 
 /* ── AGENTE COMPACTO ── */
-.agente-compact{display:grid;grid-template-columns:110px 1fr;gap:16px}
-.agente-photo{width:110px;height:140px;border-radius:var(--radius);background:#eef2f7;border:1px solid var(--blue-border);display:flex;align-items:center;justify-content:center;color:var(--blue-light);overflow:hidden}
+.agente-compact{display:grid;grid-template-columns:90px 1fr;gap:10px}
+.agente-photo{width:90px;height:110px;border-radius:var(--radius);background:#eef2f7;border:1px solid var(--blue-border);display:flex;align-items:center;justify-content:center;color:var(--blue-light);overflow:hidden}
 .agente-photo img{width:100%;height:100%;object-fit:contain}
 .agente-photo .ph-icon{font-size:28px}
 .agente-photo .ph-label{font-size:9px}
 .agente-badge{margin-top:6px;font-size:10px;padding:2px 8px;border-radius:99px;background:var(--green-bg);color:var(--green);border:1px solid #1a4d2a;display:inline-block}
 .agente-badge.inativo{background:var(--red-bg);color:var(--red);border-color:#3a1515}
 .agente-badge.afastado{background:var(--amber-bg);color:var(--amber);border-color:#3a2a10}
-.agente-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.agente-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .agente-fields .f2{grid-column:span 2}
 .agente-fields .f3{grid-column:span 3}
 
 /* ── VIATURA COMPACTO ── */
-.viatura-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.viatura-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .viatura-fields .val.plate{font-family:monospace;font-size:14px;font-weight:700;background:#1a1d2e;color:#f8f9fc;letter-spacing:.06em}
 .cor-dot{display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid var(--border2);margin-right:6px;vertical-align:-1px}
 
@@ -153,14 +153,14 @@ body{
   .val{color:#1a1d2e!important}
   .val.bold{color:#1a1d2e!important}
   .foto-agente{background:#e8eaf2!important}
-  .agente-compact{display:grid!important;grid-template-columns:110px 1fr!important;gap:16px!important}
-  .agente-photo{width:110px!important;height:140px!important;background:#eef2f7!important;border-color:#b8d0f8!important}
+  .agente-compact{display:grid!important;grid-template-columns:90px 1fr!important;gap:10px!important}
+  .agente-photo{width:90px!important;height:110px!important;background:#eef2f7!important;border-color:#b8d0f8!important}
   .agente-photo img{width:100%!important;height:100%!important;object-fit:contain!important}
   .agente-badge{background:#dcfce7!important;color:#16a34a!important;border-color:#1a4d2a!important}
   .agente-badge.inativo{background:#fef2f2!important;color:#dc2626!important;border-color:#3a1515!important}
   .agente-badge.afastado{background:#fffbeb!important;color:#d97706!important;border-color:#3a2a10!important}
-  .agente-fields{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:8px!important}
-  .viatura-fields{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:8px!important}
+  .agente-fields{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:6px!important}
+  .viatura-fields{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:6px!important}
   .viatura-fields .val.plate{background:#1a1d2e!important;color:#f8f9fc!important}
   .cor-dot{border-color:#c0c8e0!important}
   @page{margin:10mm}
