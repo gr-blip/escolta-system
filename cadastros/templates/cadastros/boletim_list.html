@@ -208,7 +208,7 @@
 </div>
 
 <script>
-(function () {
+document.addEventListener('DOMContentLoaded', function () {
   var modal     = document.getElementById('modal-filtro-bol');
   var btnAbrir  = document.getElementById('btn-abrir-filtro-bol');
   var btnFechar  = document.getElementById('btn-fechar-bol');
@@ -218,6 +218,8 @@
   var btnTodos  = document.getElementById('bol-marcar-todos');
   var btnLimpar = document.getElementById('bol-limpar-cli');
   var resumoEl  = document.getElementById('bol-resumo');
+
+  if (!modal || !btnAbrir) return;
 
   function abrirModal() {
     modal.style.display = 'flex';
@@ -231,11 +233,12 @@
   function fecharModal() { modal.style.display = 'none'; }
 
   function atualizarResumo() {
+    if (!listaCli || !resumoEl) return;
     var n = listaCli.querySelectorAll('input[type=checkbox]:checked').length;
     resumoEl.textContent = n > 0 ? n + ' cliente(s) selecionado(s)' : '';
   }
 
-  if (btnAbrir)  btnAbrir.addEventListener('click', abrirModal);
+  btnAbrir.addEventListener('click', abrirModal);
   if (btnFechar)  btnFechar.addEventListener('click', fecharModal);
   if (btnFechar2) btnFechar2.addEventListener('click', fecharModal);
 
@@ -276,7 +279,7 @@
       if (e.target.type === 'checkbox') atualizarResumo();
     });
   }
-})();
+});
 </script>
 {% endblock %}
 

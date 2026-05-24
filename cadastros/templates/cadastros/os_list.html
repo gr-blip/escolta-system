@@ -299,7 +299,7 @@
 
 <script>
 // ─── Modal de Filtro ─────────────────────────────────────────────────────────
-(function () {
+document.addEventListener('DOMContentLoaded', function () {
   var modal    = document.getElementById('modal-filtro');
   var btnAbrir = document.getElementById('btn-abrir-filtro');
   var btnFechar  = document.getElementById('btn-fechar-filtro');
@@ -309,6 +309,8 @@
   var btnTodos  = document.getElementById('btn-marcar-todos');
   var btnLimpar = document.getElementById('btn-limpar-clientes');
   var resumoEl  = document.getElementById('filtro-resumo');
+
+  if (!modal || !btnAbrir) return;
 
   function abrirModal() {
     modal.style.display = 'flex';
@@ -324,11 +326,12 @@
   }
 
   function atualizarResumo() {
+    if (!listaCli || !resumoEl) return;
     var checked = listaCli.querySelectorAll('input[type=checkbox]:checked').length;
     resumoEl.textContent = checked > 0 ? checked + ' cliente(s) selecionado(s)' : '';
   }
 
-  if (btnAbrir)  btnAbrir.addEventListener('click', abrirModal);
+  btnAbrir.addEventListener('click', abrirModal);
   if (btnFechar) btnFechar.addEventListener('click', fecharModal);
   if (btnFechar2) btnFechar2.addEventListener('click', fecharModal);
 
@@ -381,7 +384,7 @@
       if (e.target.type === 'checkbox') atualizarResumo();
     });
   }
-})();</script>
+});</script>
 
 {% if not tem_filtro %}
 <div style="background:var(--blue-bg, #0f1830);border:1px solid #1a3a8f;border-left:3px solid var(--blue-light, #4d8df0);color:var(--text2);border-radius:6px;padding:10px 14px;margin:10px 0;font-size:12px;display:flex;align-items:center;gap:10px">
