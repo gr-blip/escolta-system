@@ -4403,6 +4403,32 @@ def freelance_delete(request, pk):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# AUTO-CONSULTA AGENDADA — Endpoint para cron externo
+# ══════════════════════════════════════════════════════════════════════════════
+
+@csrf_exempt
+def auto_consultar_processos(request, token):
+    """Endpoint protegido para consulta agendada via cron externo (cron-job.org)."""
+    from django.conf import settings as conf
+
+    if token != conf.AUTO_CONSULTA_TOKEN:
+        return JsonResponse({'erro': 'token invalido'}, status=403)
+
+    from .management.commands.consultar_processos import Command
+    from io import StringIO
+
+    out = StringIO()
+    err = StringIO()
+    cmd = Command(stdout=out, stderr=err)
+    cmd.handle(force=True)
+
+    return JsonResponse({
+        'ok': True,
+        'log': out.getvalue(),
+    })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # CONSULTA PROCESSO — Integração DriverID (inline no detail do funcionário)
 # ══════════════════════════════════════════════════════════════════════════════
 

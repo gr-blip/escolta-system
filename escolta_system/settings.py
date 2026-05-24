@@ -105,6 +105,7 @@ CACHES = {
 DRIVERID_API_URL    = config('URL_API_DO_DRIVERID',  default='https://api.driverid.dev/v1')
 DRIVERID_EMAIL      = config('DRIVERID_EMAIL',       default='')
 DRIVERID_PASSWORD   = os.environ.get('DRIVERID_SENHA', config('DRIVERID_SENHA', default=''))
+AUTO_CONSULTA_TOKEN = config('AUTO_CONSULTA_TOKEN', default='consultar-processos-2026')
 
 # ══════════════════════════════ AUTH ══════════════════════════════
 AUTH_PASSWORD_VALIDATORS = [

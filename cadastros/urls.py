@@ -159,4 +159,7 @@ urlpatterns += [
     path('patrimonial/freelance/<int:pk>/editar/',  views.freelance_edit,   name='freelance_edit'),
     path('patrimonial/freelance/<int:pk>/excluir/', views.freelance_delete, name='freelance_delete'),
     path('patrimonial/freelance/<int:pk>/reconsultar/', views.consulta_processo_reconsultar, name='freelance_reconsultar'),
+
+    # Auto-consulta agendada (cron externo chama esta URL)
+    path('patrimonial/auto-consultar/<str:token>/', views.auto_consultar_processos, name='auto_consultar_processos'),
 ]
