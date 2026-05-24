@@ -110,6 +110,25 @@ body{
 /* ── RODAPÉ ── */
 .rodape{text-align:center;font-size:10px;color:var(--text3);padding:14px 0 4px;border-top:1px solid var(--border);letter-spacing:.5px;margin-top:4px}
 
+
+/* ── AGENTE COMPACTO ── */
+.agente-compact{display:grid;grid-template-columns:88px 1fr;gap:16px}
+.agente-photo{width:88px;height:100px;border-radius:var(--radius);background:var(--blue-bg);border:1px solid var(--blue-border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--blue-light);overflow:hidden}
+.agente-photo img{width:100%;height:100%;object-fit:cover;object-position:top center}
+.agente-photo .ph-icon{font-size:28px}
+.agente-photo .ph-label{font-size:9px}
+.agente-badge{margin-top:6px;font-size:10px;padding:2px 8px;border-radius:99px;background:var(--green-bg);color:var(--green);border:1px solid #1a4d2a;display:inline-block}
+.agente-badge.inativo{background:var(--red-bg);color:var(--red);border-color:#3a1515}
+.agente-badge.afastado{background:var(--amber-bg);color:var(--amber);border-color:#3a2a10}
+.agente-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.agente-fields .f2{grid-column:span 2}
+.agente-fields .f3{grid-column:span 3}
+
+/* ── VIATURA COMPACTO ── */
+.viatura-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.viatura-fields .val.plate{font-family:monospace;font-size:14px;font-weight:700;background:#1a1d2e;color:#f8f9fc;letter-spacing:.06em}
+.cor-dot{display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid var(--border2);margin-right:6px;vertical-align:-1px}
+
 /* ── PRINT ── */
 @media print {
   :root{
@@ -134,6 +153,16 @@ body{
   .val{color:#1a1d2e!important}
   .val.bold{color:#1a1d2e!important}
   .foto-agente{background:#e8eaf2!important}
+  .agente-compact{display:grid!important;grid-template-columns:88px 1fr!important;gap:16px!important}
+  .agente-photo{width:88px!important;height:100px!important;background:#e8f0fd!important;border-color:#b8d0f8!important}
+  .agente-photo img{width:100%!important;height:100%!important;object-fit:cover!important}
+  .agente-badge{background:#dcfce7!important;color:#16a34a!important;border-color:#1a4d2a!important}
+  .agente-badge.inativo{background:#fef2f2!important;color:#dc2626!important;border-color:#3a1515!important}
+  .agente-badge.afastado{background:#fffbeb!important;color:#d97706!important;border-color:#3a2a10!important}
+  .agente-fields{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:8px!important}
+  .viatura-fields{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:8px!important}
+  .viatura-fields .val.plate{background:#1a1d2e!important;color:#f8f9fc!important}
+  .cor-dot{border-color:#c0c8e0!important}
   @page{margin:10mm}
 }
 .print-header{display:none;align-items:center;justify-content:space-between;background:#0d1428;padding:14px 20px;border-radius:8px 8px 0 0;margin-bottom:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -279,30 +308,35 @@ body{
       <span class="hl">{{ os.equipe.agente1.nome }}</span>
     </div>
     <div class="card-body">
-      <div class="agente-wrap">
-        <div class="agente-foto">
-          {% if os.equipe.agente1.foto %}
-            <img src="{{ request.scheme }}://{{ request.get_host }}{{ os.equipe.agente1.foto.url }}" alt="foto">
-          {% else %}&#128100;{% endif %}
+      <div class="agente-compact">
+        <div>
+          <div class="agente-photo">
+            {% if os.equipe.agente1.foto %}
+              <img src="{{ request.scheme }}://{{ request.get_host }}{{ os.equipe.agente1.foto.url }}" alt="foto">
+            {% else %}
+              <span class="ph-icon">&#128100;</span>
+              <span class="ph-label">Foto</span>
+            {% endif %}
+          </div>
+          {% if os.equipe.agente1.status == 'ativo' %}
+            <span class="agente-badge"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.3"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg> {{ os.equipe.agente1.get_status_display }}</span>
+          {% elif os.equipe.agente1.status == 'afastado' %}
+            <span class="agente-badge afastado">{{ os.equipe.agente1.get_status_display }}</span>
+          {% else %}
+            <span class="agente-badge inativo">{{ os.equipe.agente1.get_status_display }}</span>
+          {% endif %}
         </div>
-        <div class="agente-info">
-          <div class="g2">
-            <div class="field"><label>Nome Completo</label><div class="val bold">{{ os.equipe.agente1.nome }}</div></div>
-            <div class="field"><label>CPF</label><div class="val">{{ os.equipe.agente1.cpf }}</div></div>
-          </div>
-          <div class="g4">
-            <div class="field"><label>RG</label><div class="val">{{ os.equipe.agente1.rg }}</div></div>
-            <div class="field"><label>Contato</label><div class="val">{{ os.equipe.agente1.telefone|default:"—" }}</div></div>
-            <div class="field"><label>CNH</label><div class="val">{{ os.equipe.agente1.cnh|default:"—" }}</div></div>
-            <div class="field"><label>Val. CNH</label><div class="val">{{ os.equipe.agente1.cnh_validade|date:"d/m/Y"|default:"—" }}</div></div>
-          </div>
-          <div class="g4">
-            <div class="field"><label>CNV</label><div class="val">{{ os.equipe.agente1.cnv|default:"—" }}</div></div>
-            <div class="field"><label>Val. CNV</label><div class="val">{{ os.equipe.agente1.cnv_validade|date:"d/m/Y"|default:"—" }}</div></div>
-            <div class="field"><label>Função</label><div class="val">{{ os.equipe.agente1.get_funcao_display }}</div></div>
-            <div class="field"><label>Status</label><div class="val">{{ os.equipe.agente1.get_status_display }}</div></div>
-            <div class="field"><label>Endereço</label><div class="val">{{ os.equipe.agente1.endereco|default:"—" }}</div></div>
-          </div>
+        <div class="agente-fields">
+          <div class="f2"><div class="field"><label>Nome Completo</label><div class="val bold">{{ os.equipe.agente1.nome }}</div></div></div>
+          <div><div class="field"><label>CPF</label><div class="val">{{ os.equipe.agente1.cpf }}</div></div></div>
+          <div><div class="field"><label>RG</label><div class="val">{{ os.equipe.agente1.rg }}</div></div></div>
+          <div><div class="field"><label>Contato</label><div class="val">{{ os.equipe.agente1.telefone|default:"—" }}</div></div></div>
+          <div><div class="field"><label>CNH</label><div class="val">{{ os.equipe.agente1.cnh|default:"—" }}</div></div></div>
+          <div><div class="field"><label>Val. CNH</label><div class="val">{{ os.equipe.agente1.cnh_validade|date:"d/m/Y"|default:"—" }}</div></div></div>
+          <div><div class="field"><label>CNV</label><div class="val">{{ os.equipe.agente1.cnv|default:"—" }}</div></div></div>
+          <div><div class="field"><label>Val. CNV</label><div class="val">{{ os.equipe.agente1.cnv_validade|date:"d/m/Y"|default:"—" }}</div></div></div>
+          <div><div class="field"><label>Função</label><div class="val">{{ os.equipe.agente1.get_funcao_display }}</div></div></div>
+          <div class="f3"><div class="field"><label>Endereço</label><div class="val">{{ os.equipe.agente1.endereco|default:"—" }}</div></div></div>
         </div>
       </div>
     </div>
@@ -316,30 +350,35 @@ body{
       <span class="hl">{{ os.equipe.agente2.nome }}</span>
     </div>
     <div class="card-body">
-      <div class="agente-wrap">
-        <div class="agente-foto">
-          {% if os.equipe.agente2.foto %}
-            <img src="{{ request.scheme }}://{{ request.get_host }}{{ os.equipe.agente2.foto.url }}" alt="foto">
-          {% else %}&#128100;{% endif %}
+      <div class="agente-compact">
+        <div>
+          <div class="agente-photo">
+            {% if os.equipe.agente2.foto %}
+              <img src="{{ request.scheme }}://{{ request.get_host }}{{ os.equipe.agente2.foto.url }}" alt="foto">
+            {% else %}
+              <span class="ph-icon">&#128100;</span>
+              <span class="ph-label">Foto</span>
+            {% endif %}
+          </div>
+          {% if os.equipe.agente2.status == 'ativo' %}
+            <span class="agente-badge"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.3"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg> {{ os.equipe.agente2.get_status_display }}</span>
+          {% elif os.equipe.agente2.status == 'afastado' %}
+            <span class="agente-badge afastado">{{ os.equipe.agente2.get_status_display }}</span>
+          {% else %}
+            <span class="agente-badge inativo">{{ os.equipe.agente2.get_status_display }}</span>
+          {% endif %}
         </div>
-        <div class="agente-info">
-          <div class="g2">
-            <div class="field"><label>Nome Completo</label><div class="val bold">{{ os.equipe.agente2.nome }}</div></div>
-            <div class="field"><label>CPF</label><div class="val">{{ os.equipe.agente2.cpf }}</div></div>
-          </div>
-          <div class="g4">
-            <div class="field"><label>RG</label><div class="val">{{ os.equipe.agente2.rg }}</div></div>
-            <div class="field"><label>Contato</label><div class="val">{{ os.equipe.agente2.telefone|default:"—" }}</div></div>
-            <div class="field"><label>CNH</label><div class="val">{{ os.equipe.agente2.cnh|default:"—" }}</div></div>
-            <div class="field"><label>Val. CNH</label><div class="val">{{ os.equipe.agente2.cnh_validade|date:"d/m/Y"|default:"—" }}</div></div>
-          </div>
-          <div class="g4">
-            <div class="field"><label>CNV</label><div class="val">{{ os.equipe.agente2.cnv|default:"—" }}</div></div>
-            <div class="field"><label>Val. CNV</label><div class="val">{{ os.equipe.agente2.cnv_validade|date:"d/m/Y"|default:"—" }}</div></div>
-            <div class="field"><label>Função</label><div class="val">{{ os.equipe.agente2.get_funcao_display }}</div></div>
-            <div class="field"><label>Status</label><div class="val">{{ os.equipe.agente2.get_status_display }}</div></div>
-            <div class="field"><label>Endereço</label><div class="val">{{ os.equipe.agente2.endereco|default:"—" }}</div></div>
-          </div>
+        <div class="agente-fields">
+          <div class="f2"><div class="field"><label>Nome Completo</label><div class="val bold">{{ os.equipe.agente2.nome }}</div></div></div>
+          <div><div class="field"><label>CPF</label><div class="val">{{ os.equipe.agente2.cpf }}</div></div></div>
+          <div><div class="field"><label>RG</label><div class="val">{{ os.equipe.agente2.rg }}</div></div></div>
+          <div><div class="field"><label>Contato</label><div class="val">{{ os.equipe.agente2.telefone|default:"—" }}</div></div></div>
+          <div><div class="field"><label>CNH</label><div class="val">{{ os.equipe.agente2.cnh|default:"—" }}</div></div></div>
+          <div><div class="field"><label>Val. CNH</label><div class="val">{{ os.equipe.agente2.cnh_validade|date:"d/m/Y"|default:"—" }}</div></div></div>
+          <div><div class="field"><label>CNV</label><div class="val">{{ os.equipe.agente2.cnv|default:"—" }}</div></div></div>
+          <div><div class="field"><label>Val. CNV</label><div class="val">{{ os.equipe.agente2.cnv_validade|date:"d/m/Y"|default:"—" }}</div></div></div>
+          <div><div class="field"><label>Função</label><div class="val">{{ os.equipe.agente2.get_funcao_display }}</div></div></div>
+          <div class="f3"><div class="field"><label>Endereço</label><div class="val">{{ os.equipe.agente2.endereco|default:"—" }}</div></div></div>
         </div>
       </div>
     </div>
@@ -354,12 +393,12 @@ body{
       <span class="hl">{{ os.equipe.viatura.placa }}</span>
     </div>
     <div class="card-body">
-      <div class="g5">
+      <div class="viatura-fields">
         <div class="field"><label>Modelo</label><div class="val">{{ os.equipe.viatura.marca_modelo }}</div></div>
         <div class="field"><label>Cor</label><div class="val">{{ os.equipe.viatura.cor }}</div></div>
         <div class="field"><label>Frota</label><div class="val">{{ os.equipe.viatura.frota|default:"—" }}</div></div>
-        <div class="field"><label>Placa</label><div class="val bold">{{ os.equipe.viatura.placa }}</div></div>
-        <div class="field"><label>RENAVAN</label><div class="val">{{ os.equipe.viatura.renavam|default:"—" }}</div></div>
+        <div class="field"><label>Placa</label><div class="val plate">{{ os.equipe.viatura.placa }}</div></div>
+        <div class="field"><label>RENAVAN</label><div class="val" style="font-family:monospace;font-size:11px">{{ os.equipe.viatura.renavam|default:"—" }}</div></div>
         <div class="field"><label>MCT / ID</label><div class="val">{{ os.equipe.viatura.mct_id|default:"—" }}</div></div>
       </div>
       {% with rastreador=os.equipe.viatura.rastreadores.first %}
