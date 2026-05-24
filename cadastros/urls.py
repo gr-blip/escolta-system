@@ -1,6 +1,5 @@
 from django.urls import path
 from . import views
-from . import views_import_temp
 
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
@@ -151,7 +150,4 @@ urlpatterns += [
     path('patrimonial/jrs-facilities/<int:pk>/',         views.jrsfacilities_detail, name='jrsfacilities_detail'),
     path('patrimonial/jrs-facilities/<int:pk>/editar/',  views.jrsfacilities_edit,   name='jrsfacilities_edit'),
     path('patrimonial/jrs-facilities/<int:pk>/excluir/', views.jrsfacilities_delete, name='jrsfacilities_delete'),
-
-    # TEMP: importação JRS — remover após uso
-    path('api/import-jrs-temp/', views_import_temp.importar_jrs_temp, name='importar_jrs_temp'),
 ]
