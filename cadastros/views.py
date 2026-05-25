@@ -2607,6 +2607,8 @@ def boletim_detalhe(request, pk):
         tabela_id = request.POST.get('tabela_preco')
         if tabela_id:
             boletim.tabela_preco_id = tabela_id
+        else:
+            boletim.tabela_preco_id = None
         def to_float(val):
             try:
                 return float(str(val or '0').replace(',', '.'))
@@ -2618,7 +2620,10 @@ def boletim_detalhe(request, pk):
         boletim.numero_nota  = request.POST.get('numero_nota', '')
         boletim.observacoes  = request.POST.get('observacoes', '')
         action = request.POST.get('action', 'salvar')
-        if action == 'calcular' and boletim.tabela_preco_id:
+        if action == 'calcular':
+            if not boletim.tabela_preco_id:
+                messages.error(request, 'Selecione uma tabela de preco antes de calcular.')
+                return redirect('boletim_detalhe', pk=pk)
             # Salva o pedágio manual antes de calcular para não ser sobrescrito
             boletim.save()
             boletim.calcular()
@@ -2765,6 +2770,8 @@ def boletim_detalhe(request, pk):
         tabela_id = request.POST.get('tabela_preco')
         if tabela_id:
             boletim.tabela_preco_id = tabela_id
+        else:
+            boletim.tabela_preco_id = None
         def to_float(val):
             try:
                 return float(str(val or '0').replace(',', '.'))
@@ -2776,7 +2783,10 @@ def boletim_detalhe(request, pk):
         boletim.numero_nota  = request.POST.get('numero_nota', '')
         boletim.observacoes  = request.POST.get('observacoes', '')
         action = request.POST.get('action', 'salvar')
-        if action == 'calcular' and boletim.tabela_preco_id:
+        if action == 'calcular':
+            if not boletim.tabela_preco_id:
+                messages.error(request, 'Selecione uma tabela de preco antes de calcular.')
+                return redirect('boletim_detalhe', pk=pk)
             # Salva o pedágio manual antes de calcular para não ser sobrescrito
             boletim.save()
             boletim.calcular()
