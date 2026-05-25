@@ -2609,6 +2609,18 @@ def boletim_detalhe(request, pk):
             boletim.tabela_preco_id = tabela_id
         else:
             boletim.tabela_preco_id = None
+            # Zerar todos os valores quando tabela e removida
+            boletim.horas_realizadas = '00:00'
+            boletim.km_realizado = 0
+            boletim.horas_excedentes = '00:00'
+            boletim.km_excedente = 0
+            boletim.valor_escolta = 0
+            boletim.valor_excedente_km = 0
+            boletim.valor_excedente_hora = 0
+            boletim.valor_pedagio = 0
+            boletim.acrescimo = 0
+            boletim.desconto = 0
+            boletim.valor_total = 0
         def to_float(val):
             try:
                 return float(str(val or '0').replace(',', '.'))
@@ -2772,6 +2784,18 @@ def boletim_detalhe(request, pk):
             boletim.tabela_preco_id = tabela_id
         else:
             boletim.tabela_preco_id = None
+            # Zerar todos os valores quando tabela e removida
+            boletim.horas_realizadas = '00:00'
+            boletim.km_realizado = 0
+            boletim.horas_excedentes = '00:00'
+            boletim.km_excedente = 0
+            boletim.valor_escolta = 0
+            boletim.valor_excedente_km = 0
+            boletim.valor_excedente_hora = 0
+            boletim.valor_pedagio = 0
+            boletim.acrescimo = 0
+            boletim.desconto = 0
+            boletim.valor_total = 0
         def to_float(val):
             try:
                 return float(str(val or '0').replace(',', '.'))
