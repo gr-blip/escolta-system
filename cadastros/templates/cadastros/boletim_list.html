@@ -55,12 +55,28 @@
           </div>
           <div>
             <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);display:block;margin-bottom:6px;">Status</label>
-            <select name="status" style="height:38px;padding:0 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none;min-width:150px;">
-              <option value="">Todos os status</option>
-              <option value="aberto"    {% if status_filtro == 'aberto' %}selected{% endif %}>Em Aberto</option>
-              <option value="faturado"  {% if status_filtro == 'faturado' %}selected{% endif %}>Faturado</option>
-              <option value="cancelado" {% if status_filtro == 'cancelado' %}selected{% endif %}>Cancelado</option>
-            </select>
+            <div style="display:flex;flex-direction:column;gap:6px;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;min-width:180px;">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text);">
+                <input type="checkbox" name="status" value="aberto" style="width:14px;height:14px;accent-color:var(--blue-light,#4d8df0);cursor:pointer;"
+                  {% if 'aberto' in status_filtro %}checked{% endif %}>
+                <span>Em Aberto</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text);">
+                <input type="checkbox" name="status" value="faturado" style="width:14px;height:14px;accent-color:var(--blue-light,#4d8df0);cursor:pointer;"
+                  {% if 'faturado' in status_filtro %}checked{% endif %}>
+                <span>Faturado</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text);">
+                <input type="checkbox" name="status" value="cancelado_com" style="width:14px;height:14px;accent-color:var(--blue-light,#4d8df0);cursor:pointer;"
+                  {% if 'cancelado_com' in status_filtro %}checked{% endif %}>
+                <span>Cancelado c/ Desloc.</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text);">
+                <input type="checkbox" name="status" value="cancelado_sem" style="width:14px;height:14px;accent-color:var(--blue-light,#4d8df0);cursor:pointer;"
+                  {% if 'cancelado_sem' in status_filtro %}checked{% endif %}>
+                <span>Cancelado s/ Desloc.</span>
+              </label>
+            </div>
           </div>
         </div>
 
@@ -139,7 +155,11 @@
   <span style="color:var(--text2);">Filtro ativo:
     {% if q %}<strong style="color:var(--text);">"{{ q }}"</strong>{% endif %}
     {% if clientes_filtro %}<strong style="color:var(--text);">{{ clientes_filtro|length }} cliente(s)</strong>{% endif %}
-    {% if status_filtro %}<strong style="color:var(--text);">{{ status_filtro }}</strong>{% endif %}
+    {% if status_filtro %}<strong style="color:var(--text);">
+      {% for s in status_filtro %}
+        {% if s == 'aberto' %}Em Aberto{% elif s == 'faturado' %}Faturado{% elif s == 'cancelado_com' %}Cancelado c/ Desloc.{% elif s == 'cancelado_sem' %}Cancelado s/ Desloc.{% elif s == 'cancelado' %}Cancelado{% endif %}{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </strong>{% endif %}
     {% if data_ini or data_fim %}<strong style="color:var(--text);">{{ data_ini|default:"..." }} ate {{ data_fim|default:"..." }}</strong>{% endif %}
     - <em>{{ boletins|length }} resultado(s)</em>
   </span>

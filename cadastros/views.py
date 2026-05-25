@@ -2535,7 +2535,7 @@ def boletim_list(request):
         return redirect('dashboard')
     from datetime import datetime
     q = request.GET.get('q', '')
-    status_filtro = request.GET.get('status', '')
+    status_filtro = request.GET.getlist('status')
     clientes_filtro = request.GET.getlist('clientes')
     data_ini = request.GET.get('data_ini', '')
     data_fim = request.GET.get('data_fim', '')
@@ -2553,7 +2553,20 @@ def boletim_list(request):
             Q(os__solicitante__icontains=q)
         )
     if status_filtro:
-        boletins = boletins.filter(status=status_filtro)
+        from django.db.models import Q as _Q
+        status_q = _Q()
+        if 'aberto' in status_filtro:
+            status_q |= _Q(status='aberto')
+        if 'faturado' in status_filtro:
+            status_q |= _Q(status='faturado')
+        if 'cancelado_com' in status_filtro:
+            status_q |= _Q(status='cancelado', os__tipo_cancelamento='com_deslocamento')
+        if 'cancelado_sem' in status_filtro:
+            status_q |= _Q(status='cancelado', os__tipo_cancelamento='sem_deslocamento')
+        if 'cancelado' in status_filtro:
+            status_q |= _Q(status='cancelado')
+        if status_q:
+            boletins = boletins.filter(status_q)
     if clientes_filtro:
         boletins = boletins.filter(os__cliente__id__in=clientes_filtro)
     if data_ini:
@@ -2797,7 +2810,7 @@ def _boletim_queryset(request):
     """Aplica os mesmos filtros da boletim_list e retorna (qs, cliente_label, periodo_label)."""
     from datetime import datetime as dt
     q             = request.GET.get('q', '')
-    status_filtro = request.GET.get('status', '')
+    status_filtro = request.GET.getlist('status')
     clientes_filtro = request.GET.getlist('clientes')
     data_ini      = request.GET.get('data_ini', '')
     data_fim      = request.GET.get('data_fim', '')
@@ -2813,7 +2826,20 @@ def _boletim_queryset(request):
             Q(os__solicitante__icontains=q)
         )
     if status_filtro:
-        boletins = boletins.filter(status=status_filtro)
+        from django.db.models import Q as _Q
+        status_q = _Q()
+        if 'aberto' in status_filtro:
+            status_q |= _Q(status='aberto')
+        if 'faturado' in status_filtro:
+            status_q |= _Q(status='faturado')
+        if 'cancelado_com' in status_filtro:
+            status_q |= _Q(status='cancelado', os__tipo_cancelamento='com_deslocamento')
+        if 'cancelado_sem' in status_filtro:
+            status_q |= _Q(status='cancelado', os__tipo_cancelamento='sem_deslocamento')
+        if 'cancelado' in status_filtro:
+            status_q |= _Q(status='cancelado')
+        if status_q:
+            boletins = boletins.filter(status_q)
     if clientes_filtro:
         boletins = boletins.filter(os__cliente__id__in=clientes_filtro)
     if data_ini:
