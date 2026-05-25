@@ -843,8 +843,8 @@ def dashboard_operacional(request):
         ano  = hoje.year  - ((hoje.month - 1 - i) < 0 and 1 or 0)
         mes  = ((hoje.month - 1 - i) % 12) + 1
         total = OrdemServico.objects.filter(
-            criado_em__year=ano,
-            criado_em__month=mes,
+            previsao_inicio__year=ano,
+            previsao_inicio__month=mes,
         ).exclude(status='cancelada').exclude(cliente__razao_social__icontains='JRS FACILITIES').exclude(cliente__razao_social__icontains='JR SEGURANÇA').count()
         meses_labels.append(f'{MESES_PT[mes-1].upper()} DE {ano}')
         meses_totais.append(total)
@@ -859,7 +859,7 @@ def dashboard_operacional(request):
 
     qs_pizza = (
         OrdemServico.objects
-        .filter(criado_em__year=ano_sel, criado_em__month=mes_sel)
+        .filter(previsao_inicio__year=ano_sel, previsao_inicio__month=mes_sel)
         .exclude(status='cancelada')
         .exclude(cliente__razao_social__icontains='JRS FACILITIES')
         .exclude(cliente__razao_social__icontains='JR SEGURANÇA')
