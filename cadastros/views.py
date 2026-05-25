@@ -1405,7 +1405,10 @@ def os_cancelar(request, pk):
         # Garante que a OS apareça no Boletim de Medição para o financeiro
         from .models import BoletimMedicao
         if not hasattr(os_obj, 'boletim'):
-            BoletimMedicao.objects.create(os=os_obj)
+            BoletimMedicao.objects.create(os=os_obj, status='cancelado')
+        else:
+            os_obj.boletim.status = 'cancelado'
+            os_obj.boletim.save()
 
         tipo_label = 'com deslocamento' if tipo == 'com_deslocamento' else 'sem deslocamento'
         messages.success(request, f'OS {os_obj.numero} cancelada ({tipo_label}).')
