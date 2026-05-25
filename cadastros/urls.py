@@ -119,6 +119,7 @@ urlpatterns += [
     path('faturamento/tabelas/<int:pk>/excluir/',  views.tabela_preco_delete, name='tabela_preco_delete'),
     path('boletim/',             views.boletim_list,        name='boletim_list'),
     path('boletim/<int:pk>/',    views.boletim_detalhe,     name='boletim_detalhe'),
+    path('boletim/<int:pk>/finalizar/', views.boletim_finalizar, name='boletim_finalizar'),
     path('boletim/export/pdf/',  views.boletim_export_pdf,  name='boletim_export_pdf'),
     path('boletim/export/xlsx/', views.boletim_export_xlsx, name='boletim_export_xlsx'),
 ]

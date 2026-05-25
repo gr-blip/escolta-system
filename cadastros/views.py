@@ -2423,6 +2423,30 @@ def espelhamento_cancelar_ajax(request):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# FATURAMENTO — Finalizar Boletim
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def boletim_finalizar(request, pk):
+    if not _pode_faturamento(request.user):
+        messages.error(request, 'Sem permissão para acessar Faturamento.')
+        return redirect('dashboard')
+    boletim = get_object_or_404(BoletimMedicao, pk=pk)
+    if request.method != 'POST':
+        return redirect('boletim_list')
+    if boletim.status == 'faturado':
+        messages.warning(request, f'Boletim OS-{boletim.os.numero} ja esta faturado.')
+        return redirect('boletim_list')
+    if boletim.status == 'cancelado':
+        messages.error(request, f'Boletim OS-{boletim.os.numero} esta cancelado.')
+        return redirect('boletim_list')
+    boletim.status = 'faturado'
+    boletim.save()
+    messages.success(request, f'Boletim OS-{boletim.os.numero} finalizado com sucesso!')
+    return redirect('boletim_list')
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # FATURAMENTO — Tabela de Precos
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -2549,6 +2573,9 @@ def boletim_list(request):
     for os_obj in os_sem_boletim:
         BoletimMedicao.objects.get_or_create(os=os_obj)
     boletins = BoletimMedicao.objects.select_related('os', 'os__cliente', 'os__equipe', 'tabela_preco').all()
+    # Por padrao, esconder boletins faturados (so aparecem quando filtrar)
+    if not status_filtro:
+        boletins = boletins.exclude(status='faturado')
     if q:
         boletins = boletins.filter(
             Q(os__numero__icontains=q) |
@@ -2662,6 +2689,30 @@ def boletim_detalhe(request, pk):
         'boletim': boletim, 'os': os_obj, 'op': op, 'tabelas': tabelas,
         'pedagio_sugerido': pedagio_sugerido,
     })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# FATURAMENTO — Finalizar Boletim
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def boletim_finalizar(request, pk):
+    if not _pode_faturamento(request.user):
+        messages.error(request, 'Sem permissão para acessar Faturamento.')
+        return redirect('dashboard')
+    boletim = get_object_or_404(BoletimMedicao, pk=pk)
+    if request.method != 'POST':
+        return redirect('boletim_list')
+    if boletim.status == 'faturado':
+        messages.warning(request, f'Boletim OS-{boletim.os.numero} ja esta faturado.')
+        return redirect('boletim_list')
+    if boletim.status == 'cancelado':
+        messages.error(request, f'Boletim OS-{boletim.os.numero} esta cancelado.')
+        return redirect('boletim_list')
+    boletim.status = 'faturado'
+    boletim.save()
+    messages.success(request, f'Boletim OS-{boletim.os.numero} finalizado com sucesso!')
+    return redirect('boletim_list')
 
 
 # ══════════════════════════════════════════════════════════════════════════════
