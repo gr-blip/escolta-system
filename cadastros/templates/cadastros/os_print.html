@@ -45,12 +45,12 @@ body{
 .os-num{font-size:11px;font-weight:700;color:#4d8df0;background:var(--blue-bg);border:1px solid var(--blue-border);padding:3px 10px;border-radius:var(--radius)}
 
 /* ── LAYOUT ── */
-.content{padding:10px 14px;max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:6px}
+.content{padding:8px 12px;max-width:800px;margin:0 auto;display:flex;flex-direction:column;gap:5px}
 
 /* ── CARDS ── */
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
 .card-header{
-  padding:5px 10px;
+  padding:4px 8px;
   background:var(--bg3);
   border-bottom:1px solid var(--border);
   font-size:9px;font-weight:700;
@@ -59,18 +59,18 @@ body{
   display:flex;align-items:center;gap:8px;
 }
 .card-header .hl{color:var(--blue-light);font-size:13px;font-weight:700;text-transform:none;letter-spacing:0;margin-left:auto}
-.card-body{padding:6px 10px}
+.card-body{padding:5px 8px}
 
 /* ── GRID ── */
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
-.g5{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:6px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px}
+.g5{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:4px}
 
 /* ── FIELDS ── */
 .field{display:flex;flex-direction:column;gap:2px}
 .field label{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
-.field .val{font-size:11px;color:var(--text);background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:4px 8px;min-height:auto}
+.field .val{font-size:10px;color:var(--text);background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:3px 6px;min-height:auto}
 .field .val.bold{font-weight:700;color:var(--blue-light)}
 
 /* ── AGENTE CARD ── */
@@ -89,12 +89,12 @@ body{
 /* ── TABELA OPERAÇÃO ── */
 .op-table{width:100%;border-collapse:collapse}
 .op-table th{
-  text-align:left;padding:5px 8px;
+  text-align:left;padding:4px 6px;
   font-size:10px;font-weight:600;color:var(--text3);
   text-transform:uppercase;letter-spacing:.06em;
   border-bottom:1px solid var(--border);
 }
-.op-table td{padding:5px 8px;font-size:11px;border-bottom:1px solid var(--border);color:var(--text2)}
+.op-table td{padding:4px 6px;font-size:10px;border-bottom:1px solid var(--border);color:var(--text2)}
 .op-table tr:last-child td{border-bottom:none}
 .op-table tr:hover td{background:var(--bg3)}
 .op-table .sit{color:var(--text);font-weight:500}
@@ -112,20 +112,20 @@ body{
 
 
 /* ── AGENTE COMPACTO ── */
-.agente-compact{display:grid;grid-template-columns:90px 1fr;gap:10px}
-.agente-photo{width:90px;height:110px;border-radius:var(--radius);background:#eef2f7;border:1px solid var(--blue-border);display:flex;align-items:center;justify-content:center;color:var(--blue-light);overflow:hidden}
+.agente-compact{display:grid;grid-template-columns:80px 1fr;gap:8px}
+.agente-photo{width:80px;height:95px;border-radius:var(--radius);background:#eef2f7;border:1px solid var(--blue-border);display:flex;align-items:center;justify-content:center;color:var(--blue-light);overflow:hidden}
 .agente-photo img{width:100%;height:100%;object-fit:contain}
 .agente-photo .ph-icon{font-size:28px}
 .agente-photo .ph-label{font-size:9px}
 .agente-badge{margin-top:6px;font-size:10px;padding:2px 8px;border-radius:99px;background:var(--green-bg);color:var(--green);border:1px solid #1a4d2a;display:inline-block}
 .agente-badge.inativo{background:var(--red-bg);color:var(--red);border-color:#3a1515}
 .agente-badge.afastado{background:var(--amber-bg);color:var(--amber);border-color:#3a2a10}
-.agente-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.agente-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
 .agente-fields .f2{grid-column:span 2}
 .agente-fields .f3{grid-column:span 3}
 
 /* ── VIATURA COMPACTO ── */
-.viatura-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.viatura-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
 .viatura-fields .val.plate{font-family:monospace;font-size:14px;font-weight:700;background:#1a1d2e;color:#f8f9fc;letter-spacing:.06em}
 .cor-dot{display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid var(--border2);margin-right:6px;vertical-align:-1px}
 
@@ -141,49 +141,46 @@ body{
     --amber:#d97706;--amber-bg:#fffbeb;
   }
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  html,body{background:#ffffff!important;color:#1a1d2e!important}
+  html,body{background:#ffffff!important;color:#1a1d2e!important;margin:0!important;padding:0!important}
   .topbar{display:none!important}
   .no-print{display:none!important}
-  .print-header{display:flex!important}
-  .content{padding:4px 6px;max-width:100%;background:#ffffff!important;gap:4px!important}
-  .card{break-inside:avoid;background:#ffffff!important;border-color:#d0d4e8!important}
-  .card-header{background:#f8f9fc!important;color:#1a1d2e!important}
-  .field{background:#f0f2f8!important;border-color:#d0d4e8!important}
-  .field label{color:#7a80a0!important}
-  .val{color:#1a1d2e!important}
+  .print-header{display:flex!important;padding:8px 12px!important;margin-bottom:0!important;border-radius:4px 4px 0 0!important}
+  .print-header .brand{font-size:12px!important}
+  .print-header .os-pill{padding:3px 8px!important;font-size:10px!important}
+  .content{padding:4px 6px!important;max-width:210mm!important;width:100%!important;margin:0 auto!important;background:#ffffff!important;gap:4px!important;font-size:11px!important}
+  .card{break-inside:avoid;background:#ffffff!important;border-color:#d0d4e8!important;margin-bottom:4px!important;border-radius:4px!important}
+  .card-header{background:#f8f9fc!important;color:#1a1d2e!important;padding:3px 6px!important;font-size:8px!important;border-radius:4px 4px 0 0!important}
+  .card-body{padding:3px 6px!important}
+  .field{background:#f0f2f8!important;border-color:#d0d4e8!important;gap:1px!important}
+  .field label{color:#7a80a0!important;font-size:8px!important}
+  .field .val{color:#1a1d2e!important;padding:2px 4px!important;font-size:10px!important;min-height:auto!important;border-radius:2px!important}
   .val.bold{color:#1a1d2e!important}
   .foto-agente{background:#e8eaf2!important}
-  .agente-compact{display:grid!important;grid-template-columns:80px 1fr!important;gap:8px!important}
-  .agente-photo{width:80px!important;height:95px!important;background:#eef2f7!important;border-color:#b8d0f8!important}
+  .g2{gap:3px!important}
+  .g3{gap:3px!important}
+  .g4{gap:2px!important}
+  .g5{gap:2px!important}
+  .agente-compact{display:grid!important;grid-template-columns:70px 1fr!important;gap:6px!important}
+  .agente-photo{width:70px!important;height:85px!important;background:#eef2f7!important;border-color:#b8d0f8!important}
   .agente-photo img{width:100%!important;height:100%!important;object-fit:contain!important}
-  .agente-badge{background:#dcfce7!important;color:#16a34a!important;border-color:#1a4d2a!important}
+  .agente-badge{background:#dcfce7!important;color:#16a34a!important;border-color:#1a4d2a!important;padding:1px 5px!important;font-size:7px!important}
   .agente-badge.inativo{background:#fef2f2!important;color:#dc2626!important;border-color:#3a1515!important}
   .agente-badge.afastado{background:#fffbeb!important;color:#d97706!important;border-color:#3a2a10!important}
-  .agente-fields{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:4px!important}
-  .viatura-fields{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:4px!important}
-  .viatura-fields .val.plate{background:#1a1d2e!important;color:#f8f9fc!important}
-  .card{margin-bottom:4px!important;border-radius:6px!important}
-  .card-header{padding:4px 8px!important;font-size:8px!important}
-  .card-body{padding:4px 8px!important}
-  .g2{gap:6px!important}
-  .g3{gap:6px!important}
-  .g4{gap:4px!important}
-  .g5{gap:4px!important}
-  .field{gap:1px!important}
-  .field label{font-size:9px!important}
-  .field .val{padding:2px 5px!important;font-size:10px!important;min-height:auto!important;border-radius:3px!important}
-  .op-table th{padding:3px 5px!important;font-size:8px!important}
-  .op-table td{padding:3px 5px!important;font-size:9px!important}
-  .rodape{padding:4px 0 0!important;margin-top:1px!important;font-size:9px!important}
-  .print-header{padding:8px 12px!important;margin-bottom:0!important;border-radius:4px 4px 0 0!important}
-  .print-header .brand{font-size:13px!important}
-  .print-header .os-pill{padding:4px 10px!important;font-size:11px!important}
-  .topbar-brand{font-size:10px!important}
-  .os-num{padding:2px 8px!important;font-size:10px!important}
-  .badge{padding:1px 6px!important;font-size:9px!important}
-
+  .agente-fields{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:3px!important}
+  .viatura-fields{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:3px!important}
+  .viatura-fields .val.plate{background:#1a1d2e!important;color:#f8f9fc!important;font-size:11px!important}
   .cor-dot{border-color:#c0c8e0!important}
-  @page{margin:3mm}
+  .op-table th{padding:2px 4px!important;font-size:8px!important}
+  .op-table td{padding:2px 4px!important;font-size:9px!important}
+  .rodape{padding:3px 0 0!important;margin-top:1px!important;font-size:8px!important}
+  .topbar-brand{font-size:9px!important}
+  .os-num{padding:2px 6px!important;font-size:9px!important}
+  .badge{padding:1px 4px!important;font-size:7px!important}
+  .agente-photo .ph-icon{font-size:18px!important}
+  .agente-photo .ph-label{font-size:6px!important}
+  .badge-green{padding:1px 4px!important;font-size:7px!important}
+  @page{size:A4;margin:4mm}
+}
 }
 .print-header{display:none;align-items:center;justify-content:space-between;background:#0d1428;padding:14px 20px;border-radius:8px 8px 0 0;margin-bottom:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .print-header-left{display:flex;align-items:center;gap:12px}
