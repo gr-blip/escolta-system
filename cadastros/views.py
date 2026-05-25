@@ -91,7 +91,14 @@ def _os_por_dia(n_dias=14):
     buckets = {(inicio + timedelta(days=i)): 0 for i in range(n_dias)}
 
     # Usar previsao_inicio (início previsto) em vez de criado_em (data de criação)
-    qs = OrdemServico.objects.filter(previsao_inicio__date__gte=inicio).values_list('previsao_inicio', flat=True)
+    # Excluir clientes de teste (JRS Facilities e JR Segurança)
+    qs = (
+        OrdemServico.objects
+        .filter(previsao_inicio__date__gte=inicio)
+        .exclude(cliente__razao_social__icontains='JRS FACILITIES')
+        .exclude(cliente__razao_social__icontains='JR SEGURANÇA')
+        .values_list('previsao_inicio', flat=True)
+    )
     for dt in qs:
         d = timezone.localtime(dt).date() if timezone.is_aware(dt) else dt.date()
         if d in buckets:
@@ -130,6 +137,8 @@ def dashboard_os_por_cliente(request):
     qs = (
         OrdemServico.objects
         .filter(previsao_inicio__date__gte=dt_ini, previsao_inicio__date__lte=dt_fim)
+        .exclude(cliente__razao_social__icontains='JRS FACILITIES')
+        .exclude(cliente__razao_social__icontains='JR SEGURANÇA')
         .values('cliente__razao_social')
         .annotate(total=_Count('id'))
         .order_by('-total')[:20]
@@ -836,7 +845,7 @@ def dashboard_operacional(request):
         total = OrdemServico.objects.filter(
             criado_em__year=ano,
             criado_em__month=mes,
-        ).exclude(status='cancelada').count()
+        ).exclude(status='cancelada').exclude(cliente__razao_social__icontains='JRS FACILITIES').exclude(cliente__razao_social__icontains='JR SEGURANÇA').count()
         meses_labels.append(f'{MESES_PT[mes-1].upper()} DE {ano}')
         meses_totais.append(total)
 
@@ -852,6 +861,8 @@ def dashboard_operacional(request):
         OrdemServico.objects
         .filter(criado_em__year=ano_sel, criado_em__month=mes_sel)
         .exclude(status='cancelada')
+        .exclude(cliente__razao_social__icontains='JRS FACILITIES')
+        .exclude(cliente__razao_social__icontains='JR SEGURANÇA')
         .values('cliente__razao_social')
         .annotate(total=_Count('id'))
         .order_by('-total')
