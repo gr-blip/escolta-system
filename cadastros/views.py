@@ -2437,9 +2437,6 @@ def boletim_finalizar(request, pk):
     if boletim.status == 'faturado':
         messages.warning(request, f'Boletim OS-{boletim.os.numero} ja esta faturado.')
         return redirect('boletim_list')
-    if boletim.status == 'cancelado':
-        messages.error(request, f'Boletim OS-{boletim.os.numero} esta cancelado.')
-        return redirect('boletim_list')
     boletim.status = 'faturado'
     boletim.save()
     messages.success(request, f'Boletim OS-{boletim.os.numero} finalizado com sucesso!')
@@ -2591,10 +2588,13 @@ def boletim_list(request):
             status_q |= _Q(status='faturado')
         if 'cancelado_com' in status_filtro:
             status_q |= _Q(status='cancelado', os__tipo_cancelamento='com_deslocamento')
+            status_q |= _Q(status='faturado', os__tipo_cancelamento='com_deslocamento')
         if 'cancelado_sem' in status_filtro:
             status_q |= _Q(status='cancelado', os__tipo_cancelamento='sem_deslocamento')
+            status_q |= _Q(status='faturado', os__tipo_cancelamento='sem_deslocamento')
         if 'cancelado' in status_filtro:
             status_q |= _Q(status='cancelado')
+            status_q |= _Q(status='faturado', os__tipo_cancelamento__isnull=False)
         if status_q:
             boletins = boletins.filter(status_q)
     if clientes_filtro:
@@ -2705,9 +2705,6 @@ def boletim_finalizar(request, pk):
         return redirect('boletim_list')
     if boletim.status == 'faturado':
         messages.warning(request, f'Boletim OS-{boletim.os.numero} ja esta faturado.')
-        return redirect('boletim_list')
-    if boletim.status == 'cancelado':
-        messages.error(request, f'Boletim OS-{boletim.os.numero} esta cancelado.')
         return redirect('boletim_list')
     boletim.status = 'faturado'
     boletim.save()
@@ -2922,10 +2919,13 @@ def _boletim_queryset(request):
             status_q |= _Q(status='faturado')
         if 'cancelado_com' in status_filtro:
             status_q |= _Q(status='cancelado', os__tipo_cancelamento='com_deslocamento')
+            status_q |= _Q(status='faturado', os__tipo_cancelamento='com_deslocamento')
         if 'cancelado_sem' in status_filtro:
             status_q |= _Q(status='cancelado', os__tipo_cancelamento='sem_deslocamento')
+            status_q |= _Q(status='faturado', os__tipo_cancelamento='sem_deslocamento')
         if 'cancelado' in status_filtro:
             status_q |= _Q(status='cancelado')
+            status_q |= _Q(status='faturado', os__tipo_cancelamento__isnull=False)
         if status_q:
             boletins = boletins.filter(status_q)
     if clientes_filtro:

@@ -214,7 +214,7 @@
           </td>
           <td style="display:flex;gap:6px;align-items:center;">
             <a href="{% url 'boletim_detalhe' b.pk %}" class="btn btn-sm btn-secondary">Abrir</a>
-            {% if b.status == 'aberto' and b.os.status != 'cancelada' %}
+            {% if b.status == 'aberto' or b.status == 'cancelado' %}
             <form method="post" action="{% url 'boletim_finalizar' b.pk %}" style="display:inline;" onsubmit="return confirm('Finalizar boletim OS-{{ b.os.numero }}?');">
               {% csrf_token %}
               <button type="submit" class="btn btn-sm" style="background:var(--green,#22c55e);color:#fff;border-color:var(--green,#22c55e);">Finalizar</button>
