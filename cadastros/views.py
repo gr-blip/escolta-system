@@ -95,8 +95,8 @@ def _os_por_dia(n_dias=14):
     qs = (
         OrdemServico.objects
         .filter(previsao_inicio__date__gte=inicio)
-        .exclude(cliente__razao_social__icontains='JRS FACILITIES')
-        .exclude(cliente__razao_social__icontains='JR SEGURANÇA')
+        .exclude(cliente__razao_social__icontains='JRS FACILIT')
+        .exclude(cliente__razao_social__icontains='JR SEGURANC')
         .values_list('previsao_inicio', flat=True)
     )
     for dt in qs:
@@ -137,8 +137,8 @@ def dashboard_os_por_cliente(request):
     qs = (
         OrdemServico.objects
         .filter(previsao_inicio__date__gte=dt_ini, previsao_inicio__date__lte=dt_fim)
-        .exclude(cliente__razao_social__icontains='JRS FACILITIES')
-        .exclude(cliente__razao_social__icontains='JR SEGURANÇA')
+        .exclude(cliente__razao_social__icontains='JRS FACILIT')
+        .exclude(cliente__razao_social__icontains='JR SEGURANC')
         .values('cliente__razao_social')
         .annotate(total=_Count('id'))
         .order_by('-total')[:20]
@@ -845,7 +845,7 @@ def dashboard_operacional(request):
         total = OrdemServico.objects.filter(
             previsao_inicio__year=ano,
             previsao_inicio__month=mes,
-        ).exclude(status='cancelada').exclude(cliente__razao_social__icontains='JRS FACILITIES').exclude(cliente__razao_social__icontains='JR SEGURANÇA').count()
+        ).exclude(status='cancelada').exclude(cliente__razao_social__icontains='JRS FACILIT').exclude(cliente__razao_social__icontains='JR SEGURANC').count()
         meses_labels.append(f'{MESES_PT[mes-1].upper()} DE {ano}')
         meses_totais.append(total)
 
@@ -861,8 +861,8 @@ def dashboard_operacional(request):
         OrdemServico.objects
         .filter(previsao_inicio__year=ano_sel, previsao_inicio__month=mes_sel)
         .exclude(status='cancelada')
-        .exclude(cliente__razao_social__icontains='JRS FACILITIES')
-        .exclude(cliente__razao_social__icontains='JR SEGURANÇA')
+        .exclude(cliente__razao_social__icontains='JRS FACILIT')
+        .exclude(cliente__razao_social__icontains='JR SEGURANC')
         .values('cliente__razao_social')
         .annotate(total=_Count('id'))
         .order_by('-total')
