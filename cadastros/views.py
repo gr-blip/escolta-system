@@ -90,7 +90,8 @@ def _os_por_dia(n_dias=14):
 
     buckets = {(inicio + timedelta(days=i)): 0 for i in range(n_dias)}
 
-    qs = OrdemServico.objects.filter(criado_em__date__gte=inicio).values_list('criado_em', flat=True)
+    # Usar previsao_inicio (início previsto) em vez de criado_em (data de criação)
+    qs = OrdemServico.objects.filter(previsao_inicio__date__gte=inicio).values_list('previsao_inicio', flat=True)
     for dt in qs:
         d = timezone.localtime(dt).date() if timezone.is_aware(dt) else dt.date()
         if d in buckets:
@@ -128,7 +129,7 @@ def dashboard_os_por_cliente(request):
 
     qs = (
         OrdemServico.objects
-        .filter(criado_em__date__gte=dt_ini, criado_em__date__lte=dt_fim)
+        .filter(previsao_inicio__date__gte=dt_ini, previsao_inicio__date__lte=dt_fim)
         .values('cliente__razao_social')
         .annotate(total=_Count('id'))
         .order_by('-total')[:20]
