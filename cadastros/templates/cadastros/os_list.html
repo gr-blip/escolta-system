@@ -433,7 +433,7 @@ document.addEventListener('DOMContentLoaded', function () {
             {% elif o.status == 'encerrando' %}<span class="badge badge-purple">Encerrando</span>
             {% elif o.status == 'concluida' %}<span class="badge badge-green">Concluida</span>
             {% elif o.status == 'finalizada' %}<span class="badge badge-finalizada">Finalizada</span>
-            {% elif o.status == 'cancelada' %}<span class="badge badge-red">Cancelada</span>
+            {% elif o.status == 'cancelada' %}<span class="badge badge-red">{% if o.tipo_cancelamento == 'com_deslocamento' %}Cancelada c/ Desloc.{% elif o.tipo_cancelamento == 'sem_deslocamento' %}Cancelada s/ Desloc.{% else %}Cancelada{% endif %}</span>
             {% else %}<span class="badge badge-gray">{{ o.get_status_display }}</span>{% endif %}
           </td>
           <td>
