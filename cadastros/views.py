@@ -1763,7 +1763,7 @@ def omnilink_frota_posicoes(request):
         )
     ).exclude(
         status__in=['concluida', 'finalizada', 'cancelada']
-    ).select_related('equipe__viatura', 'cliente').prefetch_related('operacional').distinct()
+    ).select_related('equipe__viatura', 'equipe__agente1', 'equipe__agente2', 'cliente').prefetch_related('operacional').distinct()
     for os_obj in _qs:
         placa = (os_obj.snap_viatura_placa or '').strip().upper()
         if not placa:
@@ -1785,14 +1785,14 @@ def omnilink_frota_posicoes(request):
                 try:
                     a1 = os_obj.equipe.agente1
                     if a1:
-                        agente1 = a1.nome_completo or ''
+                        agente1 = a1.nome or ''
                 except Exception:
                     pass
             if not agente2 and os_obj.equipe:
                 try:
                     a2 = os_obj.equipe.agente2
                     if a2:
-                        agente2 = a2.nome_completo or ''
+                        agente2 = a2.nome or ''
                 except Exception:
                     pass
             agentes = ' / '.join(filter(None, [agente1, agente2]))
