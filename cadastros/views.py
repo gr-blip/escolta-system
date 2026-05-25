@@ -1778,9 +1778,24 @@ def omnilink_frota_posicoes(request):
             cliente_nome = ''
             if os_obj.cliente:
                 cliente_nome = os_obj.cliente.nome_fantasia or os_obj.cliente.razao_social or ''
-            agentes = ' / '.join(filter(None, [
-                os_obj.snap_agente1_nome, os_obj.snap_agente2_nome
-            ]))
+            # Buscar agentes: snapshot primeiro, fallback pela equipe
+            agente1 = os_obj.snap_agente1_nome or ''
+            agente2 = os_obj.snap_agente2_nome or ''
+            if not agente1 and os_obj.equipe:
+                try:
+                    a1 = os_obj.equipe.agente1
+                    if a1:
+                        agente1 = a1.nome_completo or ''
+                except Exception:
+                    pass
+            if not agente2 and os_obj.equipe:
+                try:
+                    a2 = os_obj.equipe.agente2
+                    if a2:
+                        agente2 = a2.nome_completo or ''
+                except Exception:
+                    pass
+            agentes = ' / '.join(filter(None, [agente1, agente2]))
             try:
                 op = os_obj.operacional
                 inicio_dt = op.inicio_viagem or os_obj.previsao_inicio
