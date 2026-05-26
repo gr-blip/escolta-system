@@ -65,7 +65,7 @@ _COLUNAS = [
     ("$ POR\nHoras Excedente",           6,  13, 'R'),   # 25  Z
     ("TOTAL",                            6,  13, 'R'),   # 26  AA → LARANJA
     # Bloco 8 — Encerramento
-    ("Despesas\nExtra Franquia",         7,  11, 'R'),   # 27  AB
+    ("Pedágio\n(R$)",                     7,  11, 'R'),   # 27  AB
     ("TOTAL",                            8,  13, 'R'),   # 28  AC → TOTAL GERAL (verde)
     # Extra
     ("Observações",                     12,  37, 'L'),   # 29  AD

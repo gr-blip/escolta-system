@@ -3045,7 +3045,7 @@ def _boletim_to_missao(idx, b):
         'taxa_hora':    float(tab.excedente_hora) if tab else 0.0,
         'subtotal_h':   float(b.valor_excedente_hora),   # TOTAL horas (laranja)
         # ── Encerramento ───────────────────────────────────────────
-        'despesas':     float(b.acrescimo) + float(b.valor_pedagio),
+        'despesas':     float(b.valor_pedagio),
         'total':        float(b.valor_total),
         'obs':          b.observacoes or '',
     }
@@ -3088,7 +3088,7 @@ def _calcular_totais(boletins_list):
         km_exc       += b.valor_excedente_km
         escolta      += b.valor_escolta
         pedagio      += b.valor_pedagio
-        despesas     += b.acrescimo + b.valor_pedagio
+        despesas     += b.valor_pedagio
         total        += b.valor_total
 
     return {
