@@ -522,15 +522,13 @@ def gerar_os_pdf(request, pk):
 
     os_obj = OrdemServico.objects.select_related(
         'cliente', 'equipe', 'equipe__viatura'
-    ).prefetch_related(
-        'veiculos', 'paradas', 'incidentes', 'despesas', 'assinaturas',
     ).get(pk=pk)
 
     op = getattr(os_obj, 'operacional', None)
     veiculos = list(os_obj.veiculos.order_by('ordem'))
     paradas = list(os_obj.paradas.all())
     incidentes = list(os_obj.incidentes.all())
-    despesas = list(os_obj.despesas.all())
+    despesas = list(DespesaOS.objects.filter(os=os_obj))
     assinaturas = list(os_obj.assinaturas.all())
 
     # Fotos dos marcos
