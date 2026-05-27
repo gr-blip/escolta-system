@@ -230,7 +230,7 @@ def _identificacao_os_block(os_obj):
         ['Nº OS / FOLHA', f'{os_obj.numero} / {folha}' if folha else os_obj.numero,
          'TIPO DE OPERAÇÃO', os_obj.get_tipo_viagem_display(),
          'STATUS', os_obj.get_status_display()],
-        ['EMPRESA CONTRATANTE', os_obj.cliente.nome if os_obj.cliente else '—',
+        ['EMPRESA CONTRATANTE', os_obj.cliente.razao_social if os_obj.cliente else '—',
          'SOLICITANTE', os_obj.solicitante or '—', '', ''],
         ['DATA INÍCIO', os_obj.previsao_inicio.strftime('%d/%m/%Y') if os_obj.previsao_inicio else '—',
          'HORA INÍCIO', os_obj.previsao_inicio.strftime('%H:%M') if os_obj.previsao_inicio else '—',
