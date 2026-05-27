@@ -1562,6 +1562,13 @@ def os_print(request, pk):
 
 
 @login_required
+def os_pdf_download(request, pk):
+    """Gera PDF profissional da OS com ReportLab (A4 landscape)."""
+    from .os_pdf import gerar_os_pdf
+    return gerar_os_pdf(request, pk)
+
+
+@login_required
 def os_email_html(request, pk):
     """Retorna HTML da OS formatado para copiar e colar em e-mail."""
     os_obj = get_object_or_404(OrdemServico, pk=pk)

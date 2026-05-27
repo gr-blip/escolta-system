@@ -213,7 +213,7 @@ body{
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
       Baixar PNG
     </button>
-    <button onclick="baixarPDF()" class="btn btn-primary" style="background:#b45309" id="btnPdf">
+    <button onclick="window.location.href=window.location.pathname.replace(/\/print\/$/, '/pdf/')"  class="btn btn-primary" style="background:#b45309">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M10 13h4"/><path d="M10 17h4"/></svg>
       Baixar PDF
     </button>
@@ -732,7 +732,6 @@ body{
   <div class="rodape">ATENCIOSAMENTE — DEPARTAMENTO DE ESCOLTA ARMADA — JR SEGURANÇA</div>
 
 </div><!-- /content -->
-<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
@@ -776,40 +775,6 @@ async function baixarPNG() {
 }
 </script>
 
-<script>
-async function baixarPDF() {
-  const btn = document.getElementById('btnPdf');
-  const origHTML = btn.innerHTML;
-  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Gerando PDF...';
-  btn.disabled = true;
-  try {
-    document.querySelectorAll('.no-print').forEach(el => el.style.display = 'none');
-    const ph = document.querySelector('.print-header');
-    if (ph) ph.style.display = 'flex';
-
-    const element = document.body;
-    const opt = {
-      margin:       [0, 0, 0, 0],
-      filename:     'OS-{{ os.numero }}.pdf',
-      image:        { type: 'jpeg', quality: 0.95 },
-      html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#0a0f1a', width: 1200, logging: false },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
-      pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-    };
-
-    await html2pdf().set(opt).from(element).save();
-
-    document.querySelectorAll('.no-print').forEach(el => el.style.display = '');
-    if (ph) ph.style.display = 'none';
-  } catch (e) {
-    alert('Erro ao gerar PDF: ' + e.message);
-    console.error(e);
-  } finally {
-    btn.innerHTML = origHTML;
-    btn.disabled = false;
-  }
-}
-</script>
 </body>
 </html>
 

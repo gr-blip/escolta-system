@@ -69,6 +69,7 @@ urlpatterns += [
     path('operacional/os/<int:pk>/cancelar/',             views.os_cancelar,          name='os_cancelar'),
     path('operacional/os/<int:pk>/operacional/',          views.os_operacional_save,  name='os_operacional_save'),
     path('operacional/os/<int:pk>/print/',                views.os_print,             name='os_print'),
+    path('operacional/os/<int:pk>/pdf/',                  views.os_pdf_download,      name='os_pdf_download'),
     path('operacional/os/<int:pk>/email/',                views.os_email_html,        name='os_email_html'),
     path('operacional/os/<int:pk>/finalizar/',            views.os_finalizar,         name='os_finalizar'),
     path('operacional/os/<int:pk>/observacoes/',          views.os_observacoes_save,  name='os_observacoes_save'),
