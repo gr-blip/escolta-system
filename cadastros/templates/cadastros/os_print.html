@@ -209,6 +209,10 @@ body{
       <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="3" y="1" width="8" height="5" rx="1" stroke="#fff" stroke-width="1.3"/><rect x="2" y="5" width="10" height="6" rx="1" stroke="#fff" stroke-width="1.3"/><rect x="4" y="8" width="6" height="3" rx=".5" stroke="#fff" stroke-width="1.1"/></svg>
       Imprimir / Salvar PDF
     </button>
+    <button onclick="baixarPNG()" class="btn btn-primary" style="background:#2d7a4f" id="btnPng">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      Baixar PNG
+    </button>
     <button onclick="window.close()" class="btn btn-secondary">✕ Fechar</button>
   </div>
 </div>
@@ -724,6 +728,48 @@ body{
   <div class="rodape">ATENCIOSAMENTE — DEPARTAMENTO DE ESCOLTA ARMADA — JR SEGURANÇA</div>
 
 </div><!-- /content -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script>
+async function baixarPNG() {
+  const btn = document.getElementById('btnPng');
+  const origText = btn.innerHTML;
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Gerando...';
+  btn.disabled = true;
+  try {
+    // Hide no-print elements
+    document.querySelectorAll('.no-print').forEach(el => el.style.display = 'none');
+    // Show print header
+    const ph = document.querySelector('.print-header');
+    if (ph) ph.style.display = 'flex';
+    
+    const canvas = await html2canvas(document.body, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#0a0f1a',
+      width: document.body.scrollWidth,
+      height: document.body.scrollHeight,
+      windowWidth: 1200,
+      logging: false
+    });
+    
+    const link = document.createElement('a');
+    link.download = 'OS-{{ os.numero }}.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    
+    // Restore no-print elements
+    document.querySelectorAll('.no-print').forEach(el => el.style.display = '');
+    if (ph) ph.style.display = 'none';
+  } catch (e) {
+    alert('Erro ao gerar PNG: ' + e.message);
+    console.error(e);
+  } finally {
+    btn.innerHTML = origText;
+    btn.disabled = false;
+  }
+}
+</script>
 </body>
 </html>
 
