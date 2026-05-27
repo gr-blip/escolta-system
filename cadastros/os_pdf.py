@@ -22,17 +22,17 @@ from reportlab.platypus import (
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 
 # ─── Cores ───────────────────────────────────────────────────────────────────
-_AZUL_ESCURO = "0D1B2A"
-_AZUL_MEDIO  = "1B3A5C"
-_AZUL_HEADER = "1F4E79"
-_AZUL_DEST   = "4D8DF0"
-_BRANCO      = "FFFFFF"
-_CINZA_BG    = "F2F5F9"
-_CINZA_TXT   = "555555"
-_CINZA_LIGHT = "E8ECF0"
-_VERDE       = "2D7A4F"
-_VERMELHO    = "C0392B"
-_LARANJA     = "E67E22"
+_AZUL_ESCURO = "#0D1B2A"
+_AZUL_MEDIO  = "#1B3A5C"
+_AZUL_HEADER = "#1F4E79"
+_AZUL_DEST   = "#4D8DF0"
+_BRANCO      = "#FFFFFF"
+_CINZA_BG    = "#F2F5F9"
+_CINZA_TXT   = "#555555"
+_CINZA_LIGHT = "#E8ECF0"
+_VERDE       = "#2D7A4F"
+_VERMELHO    = "#C0392B"
+_LARANJA     = "#E67E22"
 
 
 def _s(txt, size=8, bold=False, color=_CINZA_TXT, align=TA_LEFT):
@@ -85,9 +85,9 @@ def _header_block(os_obj):
 
     # Tabela de cabeçalho
     title_style = _s(14, bold=True, color=_BRANCO, align=TA_LEFT)
-    sub_style = _s(9, color='A0B4CC', align=TA_LEFT)
+    sub_style = _s(9, color='#A0B4CC', align=TA_LEFT)
     os_style = _s(22, bold=True, color=_AZUL_DEST, align=TA_RIGHT)
-    status_style = _s(9, color='A0B4CC', align=TA_RIGHT)
+    status_style = _s(9, color='#A0B4CC', align=TA_RIGHT)
 
     status_map = dict(os_obj.STATUS_CHOICES)
     status_txt = status_map.get(os_obj.status, os_obj.status)
@@ -137,9 +137,9 @@ def _section_header(title):
 def _info_row(label, value, label2=None, value2=None):
     """Linha com 2 campos lado a lado."""
     ls = _s(7, bold=True, color=_CINZA_TXT)
-    vs = _s(9, color='1A1A1A')
+    vs = _s(9, color='#1A1A1A')
     lls = _s(7, bold=True, color=_CINZA_TXT)
-    vvs = _s(9, color='1A1A1A')
+    vvs = _s(9, color='#1A1A1A')
 
     row = [
         [Paragraph(label, ls), Paragraph(str(value or '—'), vs)],
@@ -157,7 +157,7 @@ def _info_row(label, value, label2=None, value2=None):
         ('LEFTPADDING', (0, 0), (-1, -1), 6),
         ('TOPPADDING', (0, 0), (-1, -1), 3),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
-        ('GRID', (0, 0), (-1, -1), 0.3, HexColor('CCCCCC')),
+        ('GRID', (0, 0), (-1, -1), 0.3, HexColor('#CCCCCC')),
     ]))
     if label2 is not None:
         t.setStyle(TableStyle([
@@ -196,7 +196,7 @@ def _marco_table(op):
     ]
 
     hdr = _s(7, bold=True, color=_BRANCO)
-    cel = _s(8, color='1A1A1A')
+    cel = _s(8, color='#1A1A1A')
 
     header = ['Marco', 'Data/Hora', 'KM', 'Duração', 'Latitude', 'Longitude']
     data = [[Paragraph(h, hdr) for h in header]]
@@ -221,7 +221,7 @@ def _marco_table(op):
         ('BACKGROUND', (0, 0), (-1, 0), HexColor(_AZUL_HEADER)),
         ('TEXTCOLOR', (0, 0), (-1, 0), HexColor(_BRANCO)),
         ('FONTSIZE', (0, 0), (-1, -1), 7),
-        ('GRID', (0, 0), (-1, -1), 0.4, HexColor('CCCCCC')),
+        ('GRID', (0, 0), (-1, -1), 0.4, HexColor('#CCCCCC')),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [HexColor(_BRANCO), HexColor(_CINZA_BG)]),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('LEFTPADDING', (0, 0), (-1, -1), 4),
@@ -237,7 +237,7 @@ def _veiculos_table(veiculos):
         return []
 
     hdr = _s(7, bold=True, color=_BRANCO)
-    cel = _s(8, color='1A1A1A')
+    cel = _s(8, color='#1A1A1A')
 
     header = ['Nº', 'Veículo', 'Placa Cavalo', 'Placa Carreta', 'Placa Carreta 2', 'Motorista']
     data = [[Paragraph(h, hdr) for h in header]]
@@ -256,7 +256,7 @@ def _veiculos_table(veiculos):
     t.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), HexColor(_AZUL_HEADER)),
         ('TEXTCOLOR', (0, 0), (-1, 0), HexColor(_BRANCO)),
-        ('GRID', (0, 0), (-1, -1), 0.4, HexColor('CCCCCC')),
+        ('GRID', (0, 0), (-1, -1), 0.4, HexColor('#CCCCCC')),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [HexColor(_BRANCO), HexColor(_CINZA_BG)]),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('LEFTPADDING', (0, 0), (-1, -1), 4),
@@ -272,7 +272,7 @@ def _paradas_table(paradas):
         return []
 
     hdr = _s(7, bold=True, color=_BRANCO)
-    cel = _s(8, color='1A1A1A')
+    cel = _s(8, color='#1A1A1A')
 
     header = ['Motivo', 'Descrição', 'Início', 'Fim', 'Duração']
     data = [[Paragraph(h, hdr) for h in header]]
@@ -293,7 +293,7 @@ def _paradas_table(paradas):
     t.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), HexColor(_AZUL_HEADER)),
         ('TEXTCOLOR', (0, 0), (-1, 0), HexColor(_BRANCO)),
-        ('GRID', (0, 0), (-1, -1), 0.4, HexColor('CCCCCC')),
+        ('GRID', (0, 0), (-1, -1), 0.4, HexColor('#CCCCCC')),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [HexColor(_BRANCO), HexColor(_CINZA_BG)]),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('LEFTPADDING', (0, 0), (-1, -1), 4),
@@ -309,7 +309,7 @@ def _incidentes_table(incidentes):
         return []
 
     hdr = _s(7, bold=True, color=_BRANCO)
-    cel = _s(8, color='1A1A1A')
+    cel = _s(8, color='#1A1A1A')
 
     header = ['Tipo', 'Gravidade', 'Descrição', 'Data/Hora', 'Nº BO']
     data = [[Paragraph(h, hdr) for h in header]]
@@ -329,7 +329,7 @@ def _incidentes_table(incidentes):
     t.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), HexColor(_AZUL_HEADER)),
         ('TEXTCOLOR', (0, 0), (-1, 0), HexColor(_BRANCO)),
-        ('GRID', (0, 0), (-1, -1), 0.4, HexColor('CCCCCC')),
+        ('GRID', (0, 0), (-1, -1), 0.4, HexColor('#CCCCCC')),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [HexColor(_BRANCO), HexColor(_CINZA_BG)]),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('LEFTPADDING', (0, 0), (-1, -1), 4),
@@ -345,7 +345,7 @@ def _despesas_table(despesas):
         return []
 
     hdr = _s(7, bold=True, color=_BRANCO)
-    cel = _s(8, color='1A1A1A')
+    cel = _s(8, color='#1A1A1A')
 
     header = ['Tipo', 'Natureza', 'Descrição', 'Valor (R$)', 'Data/Hora']
     data = [[Paragraph(h, hdr) for h in header]]
@@ -379,7 +379,7 @@ def _despesas_table(despesas):
     t.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), HexColor(_AZUL_HEADER)),
         ('TEXTCOLOR', (0, 0), (-1, 0), HexColor(_BRANCO)),
-        ('GRID', (0, 0), (-1, -1), 0.4, HexColor('CCCCCC')),
+        ('GRID', (0, 0), (-1, -1), 0.4, HexColor('#CCCCCC')),
         ('ROWBACKGROUNDS', (0, 1), (-1, -2), [HexColor(_BRANCO), HexColor(_CINZA_BG)]),
         ('BACKGROUND', (0, -1), (-1, -1), HexColor(_CINZA_LIGHT)),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
@@ -448,8 +448,8 @@ def _fotos_grid(fotos_dict, marcos_lista, titulo='Fotos dos Marcos'):
         t.setStyle(TableStyle([
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('BOX', (0, 0), (-1, -1), 0.5, HexColor('CCCCCC')),
-            ('INNERGRID', (0, 0), (-1, -1), 0.3, HexColor('DDDDDD')),
+            ('BOX', (0, 0), (-1, -1), 0.5, HexColor('#CCCCCC')),
+            ('INNERGRID', (0, 0), (-1, -1), 0.3, HexColor('#DDDDDD')),
             ('TOPPADDING', (0, 0), (-1, -1), 4),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
         ]))
@@ -502,8 +502,8 @@ def _assinaturas_block(assinaturas):
         t.setStyle(TableStyle([
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('BOX', (0, 0), (-1, -1), 0.5, HexColor('CCCCCC')),
-            ('INNERGRID', (0, 0), (-1, -1), 0.3, HexColor('DDDDDD')),
+            ('BOX', (0, 0), (-1, -1), 0.5, HexColor('#CCCCCC')),
+            ('INNERGRID', (0, 0), (-1, -1), 0.3, HexColor('#DDDDDD')),
             ('TOPPADDING', (0, 0), (-1, -1), 6),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
         ]))
@@ -663,14 +663,14 @@ def gerar_os_pdf(request, pk):
         elements.append(Spacer(1, 4*mm))
         elements.append(_section_header('Observações'))
         elements.append(Spacer(1, 2*mm))
-        obs_style = _s(9, color='1A1A1A')
+        obs_style = _s(9, color='#1A1A1A')
         elements.append(Paragraph(os_obj.observacoes.replace('\n', '<br/>'), obs_style))
 
     # ── Rodapé ──
     elements.append(Spacer(1, 6*mm))
     now_str = datetime.now().strftime('%d/%m/%Y %H:%M')
     footer_style = _s(7, color=_CINZA_TXT, align=TA_CENTER)
-    elements.append(HRFlowable(width='100%', thickness=0.5, color=HexColor('CCCCCC')))
+    elements.append(HRFlowable(width='100%', thickness=0.5, color=HexColor('#CCCCCC')))
     elements.append(Spacer(1, 2*mm))
     elements.append(Paragraph(
         f'JR Segurança e Vigilância Patrimonial Ltda — Depto. de Escolta Armada | '
