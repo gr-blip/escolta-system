@@ -528,7 +528,7 @@ def gerar_os_pdf(request, pk):
     veiculos = list(os_obj.veiculos.order_by('ordem'))
     paradas = list(os_obj.paradas.all())
     incidentes = list(os_obj.incidentes.all())
-    despesas = list(DespesaOS.objects.filter(os=os_obj))
+    despesas = []  # DespesaOS sem FK para OS no banco
     assinaturas = list(os_obj.assinaturas.all())
 
     # Fotos dos marcos
