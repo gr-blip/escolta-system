@@ -71,7 +71,9 @@ def _img_field(field, max_w=50*mm, max_h=35*mm):
         return None
     try:
         img = Image(path)
-        ratio = min(max_w / img.drawWidth, max_h / img.drawHeight)
+        if img.drawWidth <= 0 or img.drawHeight <= 0:
+            return None
+        ratio = min(max_w / img.drawWidth, max_h / img.drawHeight, 1.0)
         img.drawWidth *= ratio
         img.drawHeight *= ratio
         return img
@@ -414,7 +416,9 @@ def _fotos_grid(fotos_dict, marcos_lista, titulo='Fotos dos Marcos'):
             if _os.path.exists(path):
                 try:
                     img = Image(path)
-                    ratio = min(55*mm / img.drawWidth, 35*mm / img.drawHeight)
+                    if img.drawWidth <= 0 or img.drawHeight <= 0:
+                        continue
+                    ratio = min(55*mm / img.drawWidth, 35*mm / img.drawHeight, 1.0)
                     img.drawWidth *= ratio
                     img.drawHeight *= ratio
                     cell = [img, Paragraph(label, style_cap)]
