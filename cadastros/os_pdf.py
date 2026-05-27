@@ -234,7 +234,7 @@ def _identificacao_os_block(os_obj):
          'SOLICITANTE', os_obj.solicitante or '—', '', ''],
         ['DATA INÍCIO', os_obj.previsao_inicio.strftime('%d/%m/%Y') if os_obj.previsao_inicio else '—',
          'HORA INÍCIO', os_obj.previsao_inicio.strftime('%H:%M') if os_obj.previsao_inicio else '—',
-         'TEL / CONTATO', os_obj.telefone_contato or '—'],
+         'TEL / CONTATO', getattr(os_obj, 'telefone_contato', '') or '—'],
         ['FORMA SOLICITAÇÃO', os_obj.get_forma_solicitacao_display(), '', '', '', ''],
     ]
     elements.extend(_info_table(rows))
