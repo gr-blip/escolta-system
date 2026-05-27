@@ -61,6 +61,16 @@ def _p(txt, style=None):
     return Paragraph(str(txt).replace('\n', '<br/>'), style)
 
 
+def _fmt_dt(dt, fmt='%d/%m/%Y %H:%M'):
+    """Formata datetime convertendo UTC→local (America/Sao_Paulo)."""
+    if not dt:
+        return '—'
+    from django.utils import timezone
+    if dt.tzinfo:
+        dt = timezone.localtime(dt)
+    return dt.strftime(fmt)
+
+
 def _safe_file_path(field):
     """Retorna o path absoluto de um ImageField, ou None."""
     try:
@@ -232,8 +242,8 @@ def _identificacao_os_block(os_obj):
          'STATUS', os_obj.get_status_display()],
         ['EMPRESA CONTRATANTE', os_obj.cliente.razao_social if os_obj.cliente else '—',
          'SOLICITANTE', os_obj.solicitante or '—', '', ''],
-        ['DATA INÍCIO', os_obj.previsao_inicio.strftime('%d/%m/%Y') if os_obj.previsao_inicio else '—',
-         'HORA INÍCIO', os_obj.previsao_inicio.strftime('%H:%M') if os_obj.previsao_inicio else '—',
+        ['DATA INÍCIO', _fmt_dt(os_obj.previsao_inicio, '%d/%m/%Y'),
+         'HORA INÍCIO', _fmt_dt(os_obj.previsao_inicio, '%H:%M'),
          'TEL / CONTATO', getattr(os_obj, 'telefone_contato', '') or '—'],
         ['FORMA SOLICITAÇÃO', os_obj.get_forma_solicitacao_display(), '', '', '', ''],
     ]
@@ -338,7 +348,7 @@ def _dados_operacao_block(os_obj):
     ]
 
     for nome_marco, dt, km in marcos:
-        dt_str = dt.strftime('%d/%m/%Y %H:%M') if dt else '—'
+        dt_str = _fmt_dt(dt)
         km_str = str(km) if km else '—'
         data.append([
             Paragraph(nome_marco, cel_bold),
@@ -404,7 +414,7 @@ def _fotos_marcos_block(os_obj):
     row_cells = []
     for key, label, dt, km in marcos_info:
         foto = fotos_dict.get(key)
-        dt_str = dt.strftime('%d/%m/%Y %H:%M') if dt else '—'
+        dt_str = _fmt_dt(dt)
         km_str = f'KM: {km}' if km else ''
 
         if foto and foto.foto:
