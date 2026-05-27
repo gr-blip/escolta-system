@@ -6,10 +6,13 @@ Ordem de Serviço — PDF profissional (A4 landscape)
 """
 
 import io
+import logging
 import os as _os
 from datetime import datetime
 
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 from reportlab.lib import colors
 from reportlab.lib.colors import HexColor
 from reportlab.lib.pagesizes import A4, landscape
@@ -72,12 +75,18 @@ def _img_field(field, max_w=50*mm, max_h=35*mm):
     try:
         img = Image(path)
         if img.drawWidth <= 0 or img.drawHeight <= 0:
+            logger.warning("Image %s: dimensões inválidas %sx%s", path, img.drawWidth, img.drawHeight)
             return None
         ratio = min(max_w / img.drawWidth, max_h / img.drawHeight, 1.0)
         img.drawWidth *= ratio
         img.drawHeight *= ratio
+        # Segurança: se após escala ainda for maior que 300mm, descarta
+        if img.drawWidth > 300*mm or img.drawHeight > 300*mm:
+            logger.warning("Image %s: dimensões pós-escala inválidas %sx%s pts", path, img.drawWidth, img.drawHeight)
+            return None
         return img
     except Exception:
+        logger.exception("Erro ao carregar imagem %s", path)
         return None
 
 
@@ -417,10 +426,14 @@ def _fotos_grid(fotos_dict, marcos_lista, titulo='Fotos dos Marcos'):
                 try:
                     img = Image(path)
                     if img.drawWidth <= 0 or img.drawHeight <= 0:
+                        logger.warning("Foto marco %s: dimensões inválidas %sx%s", path, img.drawWidth, img.drawHeight)
                         continue
                     ratio = min(55*mm / img.drawWidth, 35*mm / img.drawHeight, 1.0)
                     img.drawWidth *= ratio
                     img.drawHeight *= ratio
+                    if img.drawWidth > 300*mm or img.drawHeight > 300*mm:
+                        logger.warning("Foto marco %s: dimensões pós-escala %sx%s pts", path, img.drawWidth, img.drawHeight)
+                        continue
                     cell = [img, Paragraph(label, style_cap)]
                     row.append(cell)
                     count += 1
@@ -428,6 +441,7 @@ def _fotos_grid(fotos_dict, marcos_lista, titulo='Fotos dos Marcos'):
                         rows.append(row)
                         row = []
                 except Exception:
+                    logger.exception("Erro ao carregar foto marco %s", path)
                     pass
 
     if row:
@@ -683,7 +697,34 @@ def gerar_os_pdf(request, pk):
     ))
 
     # ── Build ──
-    doc.build(elements)
+    try:
+        doc.build(elements)
+    except Exception as e:
+        logger.error("Erro ao gerar PDF da OS %s: %s", pk, e)
+        # Retry sem imagens
+        from reportlab.platypus import KeepTogether
+        safe_elements = []
+        for el in elements:
+            if isinstance(el, Image):
+                continue
+            if isinstance(el, KeepTogether):
+                safe_el = [x for x in el._content if not isinstance(x, Image)]
+                if safe_el:
+                    safe_elements.append(KeepTogether(safe_el))
+            elif isinstance(el, Table):
+                safe_elements.append(el)
+            else:
+                safe_elements.append(el)
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=landscape(A4),
+            leftMargin=10*mm, rightMargin=10*mm,
+            topMargin=10*mm, bottomMargin=10*mm,
+            title=f'OS-{os_obj.numero}',
+            author='JR Segurança',
+        )
+        doc.build(safe_elements)
     buffer.seek(0)
 
     from django.http import FileResponse
