@@ -1220,9 +1220,13 @@ def os_detalhe_novo(request):
         def parse_dt(val):
             if not val:
                 return None
+            import pytz
+            from django.conf import settings as _settings
             for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
                 try:
-                    return datetime.strptime(val, fmt)
+                    dt_naive = datetime.strptime(val, fmt)
+                    tz = pytz.timezone(_settings.TIME_ZONE)
+                    return tz.localize(dt_naive)
                 except ValueError:
                     continue
             return None
@@ -1278,9 +1282,13 @@ def os_detalhe(request, pk):
         def parse_dt(val):
             if not val:
                 return None
+            import pytz
+            from django.conf import settings as _settings
             for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
                 try:
-                    return datetime.strptime(val, fmt)
+                    dt_naive = datetime.strptime(val, fmt)
+                    tz = pytz.timezone(_settings.TIME_ZONE)
+                    return tz.localize(dt_naive)
                 except ValueError:
                     continue
             return None
@@ -1442,9 +1450,13 @@ def os_operacional_save(request, pk):
     def parse_dt(val):
         if not val:
             return None
+        import pytz
+        from django.conf import settings as _settings
         for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
             try:
-                return datetime.strptime(val, fmt)
+                dt_naive = datetime.strptime(val, fmt)
+                tz = pytz.timezone(_settings.TIME_ZONE)
+                return tz.localize(dt_naive)
             except ValueError:
                 continue
         return None
@@ -3496,8 +3508,13 @@ def os_field_marco_salvar(request, token):
 
     def parse_dt(val):
         if not val: return None
+        import pytz
+        from django.conf import settings
         for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
-            try: return datetime.strptime(val, fmt)
+            try:
+                dt = datetime.strptime(val, fmt)
+                tz = pytz.timezone(settings.TIME_ZONE)
+                return tz.localize(dt)
             except ValueError: continue
         return None
 
@@ -3546,9 +3563,13 @@ def os_field_link(request, token):
         def parse_dt(val):
             if not val:
                 return None
+            import pytz
+            from django.conf import settings as _settings
             for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
                 try:
-                    return datetime.strptime(val, fmt)
+                    dt_naive = datetime.strptime(val, fmt)
+                    tz = pytz.timezone(_settings.TIME_ZONE)
+                    return tz.localize(dt_naive)
                 except ValueError:
                     continue
             return None
@@ -3785,9 +3806,13 @@ def os_field_parada_salvar(request, token):
     def parse_dt(val):
         if not val:
             return None
+        import pytz
+        from django.conf import settings as _settings
         for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
             try:
-                return datetime.strptime(val, fmt)
+                dt_naive = datetime.strptime(val, fmt)
+                tz = pytz.timezone(_settings.TIME_ZONE)
+                return tz.localize(dt_naive)
             except ValueError:
                 continue
         return None
@@ -3861,9 +3886,13 @@ def os_field_incidente_salvar(request, token):
     def parse_dt(val):
         if not val:
             return None
+        import pytz
+        from django.conf import settings as _settings
         for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
             try:
-                return datetime.strptime(val, fmt)
+                dt_naive = datetime.strptime(val, fmt)
+                tz = pytz.timezone(_settings.TIME_ZONE)
+                return tz.localize(dt_naive)
             except ValueError:
                 continue
         return None
@@ -3971,9 +4000,13 @@ def os_field_troca_motorista(request, token):
     def parse_dt(val):
         if not val:
             return None
+        import pytz
+        from django.conf import settings as _settings
         for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
             try:
-                return datetime.strptime(val, fmt)
+                dt_naive = datetime.strptime(val, fmt)
+                tz = pytz.timezone(_settings.TIME_ZONE)
+                return tz.localize(dt_naive)
             except ValueError:
                 continue
         return None
@@ -4098,9 +4131,13 @@ def os_field_despesa_salvar(request, token):
     def parse_dt(val):
         if not val:
             return None
+        import pytz
+        from django.conf import settings as _settings
         for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
             try:
-                return datetime.strptime(val, fmt)
+                dt_naive = datetime.strptime(val, fmt)
+                tz = pytz.timezone(_settings.TIME_ZONE)
+                return tz.localize(dt_naive)
             except ValueError:
                 continue
         return None
