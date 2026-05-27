@@ -1119,6 +1119,9 @@ def os_finalizar(request, pk):
                 os_obj.snap_agente1_telefone = a1.telefone or ''
                 os_obj.snap_agente1_cnh      = a1.cnh or ''
                 os_obj.snap_agente1_cnv      = a1.cnv or ''
+                os_obj.snap_agente1_val_cnh  = a1.cnh_validade
+                os_obj.snap_agente1_val_cnv  = a1.cnv_validade
+                os_obj.snap_agente1_endereco = a1.endereco or ''
                 os_obj.snap_agente1_foto     = a1.foto.name if a1.foto else ''
             a2 = eq.agente2
             if a2:
@@ -1128,14 +1131,18 @@ def os_finalizar(request, pk):
                 os_obj.snap_agente2_telefone = a2.telefone or ''
                 os_obj.snap_agente2_cnh      = a2.cnh or ''
                 os_obj.snap_agente2_cnv      = a2.cnv or ''
+                os_obj.snap_agente2_val_cnh  = a2.cnh_validade
+                os_obj.snap_agente2_val_cnv  = a2.cnv_validade
+                os_obj.snap_agente2_endereco = a2.endereco or ''
                 os_obj.snap_agente2_foto     = a2.foto.name if a2.foto else ''
             v = eq.viatura
             if v:
-                os_obj.snap_viatura_modelo = v.marca_modelo or ''
-                os_obj.snap_viatura_placa  = v.placa or ''
-                os_obj.snap_viatura_cor    = v.cor or ''
-                os_obj.snap_viatura_frota  = v.frota or ''
-                os_obj.snap_viatura_mct    = v.mct_id or ''
+                os_obj.snap_viatura_modelo  = v.marca_modelo or ''
+                os_obj.snap_viatura_placa   = v.placa or ''
+                os_obj.snap_viatura_cor     = v.cor or ''
+                os_obj.snap_viatura_frota   = v.frota or ''
+                os_obj.snap_viatura_mct     = v.mct_id or ''
+                os_obj.snap_viatura_renavan = v.renavam or ''
         os_obj.save()
         messages.success(request, f'OS-{os_obj.numero} finalizada com sucesso. Dados bloqueados para edição.')
         return redirect('os_list')
