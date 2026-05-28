@@ -213,7 +213,7 @@
             {% else %}<span class="badge badge-red">Cancelado</span>{% endif %}
           </td>
           <td style="display:flex;gap:6px;align-items:center;">
-            <a href="{% url 'os_detalhe' b.os.pk %}" class="btn btn-sm btn-secondary" title="Abrir Ordem de Serviço OS-{{ b.os.numero }}" style="color:var(--blue-light,#4d8df0);border-color:var(--blue-light,#4d8df0);">OS</a>
+            <a href="{% url 'os_print' b.os.pk %}" class="btn btn-sm btn-secondary" title="Ver OS-{{ b.os.numero }} para impressão" target="_blank" style="color:var(--blue-light,#4d8df0);border-color:var(--blue-light,#4d8df0);">OS</a>
             <a href="{% url 'boletim_detalhe' b.pk %}" class="btn btn-sm btn-secondary">Abrir</a>
             {% if b.status == 'aberto' or b.status == 'cancelado' %}
             <form method="post" action="{% url 'boletim_finalizar' b.pk %}" style="display:inline;" onsubmit="return confirm('Finalizar boletim OS-{{ b.os.numero }}?');">
