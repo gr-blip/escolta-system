@@ -42,22 +42,19 @@ class Command(BaseCommand):
         parser.add_argument('--manter',       type=int, default=7)
 
     def handle(self, *args, **options):
-        folder   = config('GOOGLE_DRIVE_FOLDER_ID', default='')
-        sa_json  = config('GOOGLE_SERVICE_ACCOUNT_JSON', default='')
+        folder        = config('GOOGLE_DRIVE_FOLDER_ID', default='')
+        client_id     = config('GOOGLE_CLIENT_ID', default='')
+        client_secret = config('GOOGLE_CLIENT_SECRET', default='')
+        refresh_token = config('GOOGLE_REFRESH_TOKEN', default='')
 
-        if not folder or not sa_json:
+        if not all([folder, client_id, client_secret, refresh_token]):
             self.stderr.write(self.style.ERROR(
-                'Faltam variáveis: GOOGLE_DRIVE_FOLDER_ID, GOOGLE_SERVICE_ACCOUNT_JSON'
+                'Faltam variáveis: GOOGLE_DRIVE_FOLDER_ID, GOOGLE_CLIENT_ID, '
+                'GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN'
             ))
             return
 
-        try:
-            sa_info = json.loads(sa_json)
-        except json.JSONDecodeError:
-            self.stderr.write(self.style.ERROR('GOOGLE_SERVICE_ACCOUNT_JSON não é JSON válido.'))
-            return
-
-        service = self._drive_service(sa_info)
+        service = self._drive_service(client_id, client_secret, refresh_token)
 
         from datetime import datetime, timezone
         ts     = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')
@@ -103,12 +100,15 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS('Backup concluído com sucesso!'))
 
     # ──────────────────────────────────────────────
-    def _drive_service(self, sa_info):
-        from google.oauth2 import service_account
+    def _drive_service(self, client_id, client_secret, refresh_token):
+        from google.oauth2.credentials import Credentials
         from googleapiclient.discovery import build
-        creds = service_account.Credentials.from_service_account_info(
-            sa_info,
-            scopes=['https://www.googleapis.com/auth/drive'],
+        creds = Credentials(
+            token=None,
+            refresh_token=refresh_token,
+            client_id=client_id,
+            client_secret=client_secret,
+            token_uri='https://oauth2.googleapis.com/token',
         )
         return build('drive', 'v3', credentials=creds)
 
