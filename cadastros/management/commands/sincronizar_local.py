@@ -37,7 +37,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # ── Verificação de segurança ───────────────────────────
         db = connection.settings_dict
-        if 'postgresql' in db.get('ENGINE', '') or 'postgres' in db.get('NAME', ''):
+        if 'postgresql' in db.get('ENGINE', '') or 'postgres' in str(db.get('NAME', '')):
             self.stderr.write(self.style.ERROR(
                 '❌ Este comando só pode rodar no banco LOCAL (SQLite). '
                 'Não execute em produção!'
@@ -115,22 +115,60 @@ class Command(BaseCommand):
             tmp_path = tmp.name
 
         try:
-            # ── Limpa banco local ──────────────────────────────
-            self.stdout.write('🗑️  Limpando banco local …')
-            call_command('flush', '--no-input', verbosity=0)
+            import subprocess
+            import sys
 
-            # ── Carrega dados ──────────────────────────────────
+            # ── Apaga banco SQLite ─────────────────────────────
+            self.stdout.write('🗑️  Apagando banco local …')
+            db_path = str(connection.settings_dict.get('NAME', ''))
+            connection.close()
+            if db_path and os.path.exists(db_path):
+                os.remove(db_path)
+                self.stdout.write(f'    Removido: {db_path}')
+
+            # ── Recria via subprocess (nova conexão limpa) ─────
+            self.stdout.write('🔧 Aplicando migrações …')
+            ret = subprocess.run(
+                [sys.executable, 'manage.py', 'migrate', '--verbosity=0'],
+                capture_output=True, text=True
+            )
+            if ret.returncode != 0:
+                raise Exception(ret.stderr)
+
+            # ── Limpa dados criados pelas migrações ───────────
+            self.stdout.write('🧹 Limpando dados de migração …')
+            ret = subprocess.run(
+                [sys.executable, '-c',
+                 'import django, os; os.environ.setdefault("DJANGO_SETTINGS_MODULE","escolta_system.settings"); django.setup();'
+                 'from django.contrib.auth.models import User;'
+                 'from cadastros.models_perfil import PerfilUsuario;'
+                 'PerfilUsuario.objects.all().delete();'
+                 'User.objects.all().delete();'
+                 'print("Limpeza OK")'],
+                capture_output=True, text=True
+            )
+            if ret.stdout:
+                self.stdout.write(f'    {ret.stdout.strip()}')
+
+            # ── Carrega dados via subprocess ───────────────────
             self.stdout.write('📂 Carregando dados …')
-            call_command('loaddata', tmp_path, verbosity=1)
+            ret = subprocess.run(
+                [sys.executable, 'manage.py', 'loaddata', tmp_path],
+                capture_output=True, text=True
+            )
+            if ret.returncode != 0:
+                raise Exception(ret.stderr or ret.stdout)
+            self.stdout.write(ret.stdout.strip())
 
             self.stdout.write(self.style.SUCCESS(
                 f'\n✅ Sincronização concluída! Backup: {arq["name"]}'
             ))
 
         except Exception as e:
-            self.stderr.write(self.style.ERROR(f'Erro ao carregar dados: {e}'))
+            self.stderr.write(self.style.ERROR(f'Erro: {e}'))
         finally:
-            os.remove(tmp_path)
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
 
     def _drive_service(self, client_id, client_secret, refresh_token):
         from google.oauth2.credentials import Credentials

@@ -56,8 +56,8 @@ class PerfilUsuario(models.Model):
 # ao rodar migrate num banco fresco e o createsuperuser dispara o signal
 # antes da migration 0016_perfilusuario rodar).
 @receiver(post_save, sender=User)
-def criar_perfil_automatico(sender, instance, created, **kwargs):
-    if created:
+def criar_perfil_automatico(sender, instance, created, raw=False, **kwargs):
+    if created and not raw:   # raw=True durante loaddata — não criar perfil duplicado
         try:
             PerfilUsuario.objects.get_or_create(user=instance)
         except (OperationalError, ProgrammingError):
@@ -66,9 +66,12 @@ def criar_perfil_automatico(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=User)
-def salvar_perfil_automatico(sender, instance, **kwargs):
-    if hasattr(instance, 'perfil'):
-        try:
+def salvar_perfil_automatico(sender, instance, raw=False, **kwargs):
+    if raw:
+        return   # loaddata já salva o perfil diretamente — não interferir
+    try:
+        if hasattr(instance, 'perfil'):
             instance.perfil.save()
-        except (OperationalError, ProgrammingError):
-            pass
+    except (OperationalError, ProgrammingError):
+        # Tabela ainda não existe (migração em curso) — ignora
+        pass
