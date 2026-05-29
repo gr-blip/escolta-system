@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 PREFIXO_DB    = 'jr_db_'
 PREFIXO_MEDIA = 'jr_media_'
+PREFIXO_EXCEL = 'jr_dados_'
 
 
 class Command(BaseCommand):
@@ -39,6 +40,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--apenas-db',    action='store_true')
         parser.add_argument('--apenas-midia', action='store_true')
+        parser.add_argument('--apenas-excel', action='store_true')
         parser.add_argument('--manter',       type=int, default=7)
 
     def handle(self, *args, **options):
@@ -62,6 +64,7 @@ class Command(BaseCommand):
 
         apenas_db    = options['apenas_db']
         apenas_midia = options['apenas_midia']
+        apenas_excel = options['apenas_excel']
         manter       = options['manter']
 
         # ── 1. Banco de dados (Django dumpdata → JSON comprimido) ──
@@ -90,6 +93,22 @@ class Command(BaseCommand):
                 self._purgar_antigos(service, folder, PREFIXO_MEDIA, manter)
             except Exception as e:
                 msg = f'Falha no backup da mídia: {e}'
+                self.stderr.write(self.style.ERROR(f'    ✗ {msg}'))
+                logger.error(msg)
+                erros.append(msg)
+
+        # ── 3. Excel com todos os dados ──
+        if not apenas_db and not apenas_midia:
+            nome_excel = f'{PREFIXO_EXCEL}{ts}.xlsx'
+            self.stdout.write(f'[3/3] Gerando Excel → {nome_excel} …')
+            try:
+                buf = self._gerar_excel()
+                self._upload(service, folder, nome_excel,
+                             buf, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                self.stdout.write(self.style.SUCCESS(f'    ✓ Excel enviado: {nome_excel}'))
+                self._purgar_antigos(service, folder, PREFIXO_EXCEL, manter)
+            except Exception as e:
+                msg = f'Falha no Excel: {e}'
                 self.stderr.write(self.style.ERROR(f'    ✗ {msg}'))
                 logger.error(msg)
                 erros.append(msg)
@@ -148,6 +167,163 @@ class Command(BaseCommand):
             body=meta, media_body=media, fields='id',
             supportsAllDrives=True,
         ).execute()
+
+    def _gerar_excel(self):
+        """Gera Excel com 4 abas: OS, Boletins, Cadastros, Patrimonial."""
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill, Alignment
+        from cadastros.models import (
+            OrdemServico, BoletimMedicao, Agente, Viatura, Cliente,
+            FuncionarioPatrimonial,
+        )
+
+        wb = openpyxl.Workbook()
+        azul  = PatternFill('solid', fgColor='1F4E79')
+        fonte = Font(bold=True, color='FFFFFF', size=10)
+        al    = Alignment(horizontal='center', vertical='center')
+
+        def cabecalho(ws, cols):
+            ws.append(cols)
+            for cell in ws[1]:
+                cell.fill = azul
+                cell.font = fonte
+                cell.alignment = al
+            ws.row_dimensions[1].height = 20
+
+        def fmt(v):
+            if v is None:
+                return ''
+            if hasattr(v, 'strftime'):
+                return v.strftime('%d/%m/%Y %H:%M') if hasattr(v, 'hour') else v.strftime('%d/%m/%Y')
+            return str(v)
+
+        # ── Aba 1: Ordens de Serviço ──────────────────────────
+        ws1 = wb.active
+        ws1.title = 'Ordens de Serviço'
+        cabecalho(ws1, [
+            'Nº OS', 'Cliente', 'Solicitante', 'Tipo', 'Status',
+            'Previsão Início', 'Origem', 'Destino',
+            'Agente 1', 'Agente 2', 'Viatura', 'Placa',
+            'Início Viagem', 'Chegada Op.', 'Início Op.', 'Término Op.', 'Término Viagem',
+            'KM Início', 'KM Término Op.', 'KM Rodado',
+        ])
+        for os in OrdemServico.objects.select_related('cliente').prefetch_related('operacional').order_by('-numero'):
+            op = None
+            try:
+                op = os.operacional
+            except Exception:
+                pass
+            ws1.append([
+                os.numero,
+                os.cliente.razao_social if os.cliente else '',
+                os.solicitante,
+                os.get_tipo_viagem_display(),
+                os.get_status_display(),
+                fmt(os.previsao_inicio),
+                f'{os.cidade_origem}/{os.uf_origem}' if os.cidade_origem else '',
+                f'{os.cidade_destino}/{os.uf_destino}' if os.cidade_destino else '',
+                os.snap_agente1_nome,
+                os.snap_agente2_nome,
+                os.snap_viatura_modelo,
+                os.snap_viatura_placa,
+                fmt(op.inicio_viagem) if op else '',
+                fmt(op.chegada_operacao) if op else '',
+                fmt(op.inicio_operacao) if op else '',
+                fmt(op.termino_operacao) if op else '',
+                fmt(op.termino_viagem) if op else '',
+                op.km_inicio_viagem if op else '',
+                op.km_termino_operacao if op else '',
+                op.km_total if op else '',
+            ])
+
+        # ── Aba 2: Boletins de Medição ────────────────────────
+        ws2 = wb.create_sheet('Boletins')
+        cabecalho(ws2, [
+            'Nº OS', 'Cliente', 'Data OS', 'Tabela de Preço', 'Status',
+            'Horas Realizadas', 'KM Realizado', 'Horas Excedentes', 'KM Excedente',
+            'Valor Escolta', 'Excedente KM', 'Excedente Hora',
+            'Pedágio', 'Acréscimo', 'Desconto', 'Valor Total', 'Nº Nota',
+        ])
+        for b in BoletimMedicao.objects.select_related('os__cliente', 'tabela_preco').order_by('-os__numero'):
+            ws2.append([
+                b.os.numero,
+                b.os.cliente.razao_social if b.os.cliente else '',
+                fmt(b.os.previsao_inicio),
+                b.tabela_preco.nome if b.tabela_preco else '',
+                b.get_status_display() if hasattr(b, 'get_status_display') else b.status,
+                str(b.horas_realizadas),
+                b.km_realizado,
+                str(b.horas_excedentes),
+                b.km_excedente,
+                float(b.valor_escolta),
+                float(b.valor_excedente_km),
+                float(b.valor_excedente_hora),
+                float(b.valor_pedagio),
+                float(b.acrescimo),
+                float(b.desconto),
+                float(b.valor_total),
+                b.numero_nota or '',
+            ])
+
+        # ── Aba 3: Cadastros ──────────────────────────────────
+        ws3 = wb.create_sheet('Agentes')
+        cabecalho(ws3, [
+            'Nome', 'CPF', 'RG', 'Telefone', 'Função', 'Status',
+            'CNH', 'Val. CNH', 'CNV', 'Val. CNV', 'Endereço',
+        ])
+        for a in Agente.objects.order_by('nome'):
+            ws3.append([
+                a.nome, a.cpf, a.rg, a.telefone,
+                a.get_funcao_display() if hasattr(a, 'get_funcao_display') else a.funcao,
+                a.get_status_display() if hasattr(a, 'get_status_display') else a.status,
+                a.cnh, fmt(a.val_cnh) if hasattr(a, 'val_cnh') else '',
+                a.cnv, fmt(a.val_cnv) if hasattr(a, 'val_cnv') else '',
+                a.endereco or '',
+            ])
+
+        ws3b = wb.create_sheet('Viaturas')
+        cabecalho(ws3b, ['Placa', 'Modelo', 'Cor', 'Frota', 'MCT ID', 'Status', 'Renavam', 'Chassi'])
+        for v in Viatura.objects.order_by('placa'):
+            ws3b.append([
+                v.placa, v.marca_modelo, v.cor, v.frota, v.mct_id or '',
+                v.get_status_display() if hasattr(v, 'get_status_display') else v.status,
+                v.renavam or '', v.chassi or '',
+            ])
+
+        ws3c = wb.create_sheet('Clientes')
+        cabecalho(ws3c, ['Razão Social', 'Nome Fantasia', 'CNPJ', 'Ativo'])
+        for c in Cliente.objects.order_by('razao_social'):
+            ws3c.append([
+                c.razao_social, c.nome_fantasia or '', c.cnpj,
+                'Sim' if c.ativo else 'Não',
+            ])
+
+        # ── Aba 4: Patrimonial ────────────────────────────────
+        ws4 = wb.create_sheet('Patrimonial')
+        cabecalho(ws4, [
+            'Empresa', 'Nome', 'CPF', 'RG', 'Cargo', 'Status',
+            'CNH', 'Val. CNH', 'CNV', 'Val. CNV',
+        ])
+        for f in FuncionarioPatrimonial.objects.order_by('empresa', 'nome'):
+            ws4.append([
+                f.get_empresa_display() if hasattr(f, 'get_empresa_display') else f.empresa,
+                f.nome, f.cpf, f.rg or '',
+                f.cargo or '',
+                f.get_status_display() if hasattr(f, 'get_status_display') else getattr(f, 'status', ''),
+                f.cnh or '', fmt(f.val_cnh) if getattr(f, 'val_cnh', None) else '',
+                f.cnv or '', fmt(f.val_cnv) if getattr(f, 'val_cnv', None) else '',
+            ])
+
+        # Ajusta largura das colunas em todas as abas
+        for ws in wb.worksheets:
+            for col in ws.columns:
+                max_len = max((len(str(c.value or '')) for c in col), default=10)
+                ws.column_dimensions[col[0].column_letter].width = min(max_len + 4, 50)
+
+        buf = io.BytesIO()
+        wb.save(buf)
+        buf.seek(0)
+        return buf
 
     def _purgar_antigos(self, service, folder_id, prefixo, manter):
         query = (
