@@ -1,30 +1,30 @@
 """
 cadastros/management/commands/backup_to_google.py
 ──────────────────────────────────────────────────
-Backup diário do banco PostgreSQL + pasta de mídia para o Google Drive.
+Backup diário do banco (Django dumpdata JSON) + pasta de mídia para o Google Drive.
+
+Variáveis de ambiente obrigatórias (Railway):
+    GOOGLE_DRIVE_FOLDER_ID       — ID da pasta de destino no Drive
+    GOOGLE_CLIENT_ID             — Client ID OAuth2
+    GOOGLE_CLIENT_SECRET         — Client Secret OAuth2
+    GOOGLE_REFRESH_TOKEN         — Refresh Token OAuth2 do usuário real
 
 Uso:
     python manage.py backup_to_google
     python manage.py backup_to_google --apenas-db
     python manage.py backup_to_google --apenas-midia
     python manage.py backup_to_google --manter 14    (padrão: 7 dias)
-
-Variáveis de ambiente obrigatórias (Railway):
-    DATABASE_URL               — string de conexão PostgreSQL
-    GOOGLE_SERVICE_ACCOUNT_JSON — conteúdo JSON da conta de serviço
-    GOOGLE_DRIVE_FOLDER_ID      — ID da pasta de destino no Drive
 """
+import gzip
 import io
 import json
 import logging
 import os
-import subprocess
 import tarfile
-import tempfile
-from datetime import datetime, timezone
 
 from decouple import config
 from django.conf import settings
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
 logger = logging.getLogger(__name__)
@@ -34,47 +34,45 @@ PREFIXO_MEDIA = 'jr_media_'
 
 
 class Command(BaseCommand):
-    help = 'Backup diário (PostgreSQL + mídia) para o Google Drive'
+    help = 'Backup diário (banco JSON + mídia) para o Google Drive'
 
     def add_arguments(self, parser):
-        parser.add_argument('--apenas-db',    action='store_true', help='Faz só o backup do banco')
-        parser.add_argument('--apenas-midia', action='store_true', help='Faz só o backup da mídia')
-        parser.add_argument('--manter',       type=int, default=7,
-                            help='Quantos backups manter por tipo (padrão: 7)')
+        parser.add_argument('--apenas-db',    action='store_true')
+        parser.add_argument('--apenas-midia', action='store_true')
+        parser.add_argument('--manter',       type=int, default=7)
 
-    # ──────────────────────────────────────────────
     def handle(self, *args, **options):
-        db_url  = config('DATABASE_URL', default='')
-        sa_json = config('GOOGLE_SERVICE_ACCOUNT_JSON', default='')
-        folder  = config('GOOGLE_DRIVE_FOLDER_ID', default='')
+        folder   = config('GOOGLE_DRIVE_FOLDER_ID', default='')
+        sa_json  = config('GOOGLE_SERVICE_ACCOUNT_JSON', default='')
 
-        if not db_url or not sa_json or not folder:
+        if not folder or not sa_json:
             self.stderr.write(self.style.ERROR(
-                'Faltam variáveis de ambiente: DATABASE_URL, '
-                'GOOGLE_SERVICE_ACCOUNT_JSON, GOOGLE_DRIVE_FOLDER_ID'
+                'Faltam variáveis: GOOGLE_DRIVE_FOLDER_ID, GOOGLE_SERVICE_ACCOUNT_JSON'
             ))
             return
 
         try:
             sa_info = json.loads(sa_json)
         except json.JSONDecodeError:
-            self.stderr.write(self.style.ERROR('GOOGLE_SERVICE_ACCOUNT_JSON não é um JSON válido.'))
+            self.stderr.write(self.style.ERROR('GOOGLE_SERVICE_ACCOUNT_JSON não é JSON válido.'))
             return
 
         service = self._drive_service(sa_info)
-        ts      = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')
-        erros   = []
+
+        from datetime import datetime, timezone
+        ts     = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')
+        erros  = []
 
         apenas_db    = options['apenas_db']
         apenas_midia = options['apenas_midia']
         manter       = options['manter']
 
-        # ── 1. Banco de dados ─────────────────────
+        # ── 1. Banco de dados (Django dumpdata → JSON comprimido) ──
         if not apenas_midia:
-            nome_db = f'{PREFIXO_DB}{ts}.sql.gz'
-            self.stdout.write(f'[1/2] Gerando dump do banco → {nome_db} …')
+            nome_db = f'{PREFIXO_DB}{ts}.json.gz'
+            self.stdout.write(f'[1/2] Exportando banco → {nome_db} …')
             try:
-                buf = self._dump_db(db_url)
+                buf = self._dump_db()
                 self._upload(service, folder, nome_db, buf, 'application/gzip')
                 self.stdout.write(self.style.SUCCESS(f'    ✓ Banco enviado: {nome_db}'))
                 self._purgar_antigos(service, folder, PREFIXO_DB, manter)
@@ -84,7 +82,7 @@ class Command(BaseCommand):
                 logger.error(msg)
                 erros.append(msg)
 
-        # ── 2. Mídia ──────────────────────────────
+        # ── 2. Mídia ──
         if not apenas_db:
             nome_media = f'{PREFIXO_MEDIA}{ts}.tar.gz'
             self.stdout.write(f'[2/2] Compactando mídia → {nome_media} …')
@@ -99,54 +97,38 @@ class Command(BaseCommand):
                 logger.error(msg)
                 erros.append(msg)
 
-        # ── Resultado final ───────────────────────
         if erros:
             self.stderr.write(self.style.ERROR(f'Backup concluído COM ERROS: {len(erros)} falha(s).'))
         else:
             self.stdout.write(self.style.SUCCESS('Backup concluído com sucesso!'))
 
     # ──────────────────────────────────────────────
-    # Helpers
-    # ──────────────────────────────────────────────
-
     def _drive_service(self, sa_info):
         from google.oauth2 import service_account
         from googleapiclient.discovery import build
         creds = service_account.Credentials.from_service_account_info(
-            sa_info, scopes=['https://www.googleapis.com/auth/drive.file']
+            sa_info,
+            scopes=['https://www.googleapis.com/auth/drive'],
         )
         return build('drive', 'v3', credentials=creds)
 
-    def _dump_db(self, db_url):
-        """Executa pg_dump e retorna buffer gzip em memória."""
-        with tempfile.NamedTemporaryFile(suffix='.sql', delete=False) as tmp:
-            tmp_path = tmp.name
-
-        try:
-            env = os.environ.copy()
-            env['PGPASSWORD'] = self._pg_password(db_url)
-            subprocess.run(
-                ['pg_dump', '--no-password', db_url, '-f', tmp_path],
-                check=True, env=env,
-                capture_output=True
-            )
-            buf = io.BytesIO()
-            import gzip
-            with open(tmp_path, 'rb') as f_in, gzip.GzipFile(fileobj=buf, mode='wb') as f_gz:
-                f_gz.write(f_in.read())
-            buf.seek(0)
-            return buf
-        finally:
-            if os.path.exists(tmp_path):
-                os.remove(tmp_path)
-
-    def _pg_password(self, db_url):
-        """Extrai senha do DATABASE_URL (postgresql://user:senha@host/db)."""
-        try:
-            from urllib.parse import urlparse
-            return urlparse(db_url).password or ''
-        except Exception:
-            return ''
+    def _dump_db(self):
+        """Django dumpdata → JSON comprimido em memória."""
+        buf_str = io.StringIO()
+        call_command(
+            'dumpdata',
+            '--natural-foreign',
+            '--natural-primary',
+            '--exclude=contenttypes',
+            '--exclude=auth.permission',
+            stdout=buf_str,
+            verbosity=0,
+        )
+        buf_gz = io.BytesIO()
+        with gzip.GzipFile(fileobj=buf_gz, mode='wb') as gz:
+            gz.write(buf_str.getvalue().encode('utf-8'))
+        buf_gz.seek(0)
+        return buf_gz
 
     def _dump_media(self):
         """Compacta /app/media em tarball gzip em memória."""
@@ -162,10 +144,12 @@ class Command(BaseCommand):
         from googleapiclient.http import MediaIoBaseUpload
         meta  = {'name': nome, 'parents': [folder_id]}
         media = MediaIoBaseUpload(buf, mimetype=mime, resumable=True)
-        service.files().create(body=meta, media_body=media, fields='id').execute()
+        service.files().create(
+            body=meta, media_body=media, fields='id',
+            supportsAllDrives=True,
+        ).execute()
 
     def _purgar_antigos(self, service, folder_id, prefixo, manter):
-        """Remove backups mais antigos que `manter` dias, mantendo ao menos `manter` arquivos."""
         query = (
             f"'{folder_id}' in parents "
             f"and name contains '{prefixo}' "
@@ -173,10 +157,12 @@ class Command(BaseCommand):
         )
         resp = service.files().list(
             q=query, fields='files(id,name,createdTime)',
-            orderBy='createdTime desc'
+            orderBy='createdTime desc',
+            supportsAllDrives=True,
+            includeItemsFromAllDrives=True,
         ).execute()
-        arquivos = resp.get('files', [])
-        excluir  = arquivos[manter:]          # mantém os N mais recentes
-        for arq in excluir:
-            service.files().delete(fileId=arq['id']).execute()
-            self.stdout.write(f'    🗑  Removido backup antigo: {arq["name"]}')
+        for arq in resp.get('files', [])[manter:]:
+            service.files().delete(
+                fileId=arq['id'], supportsAllDrives=True
+            ).execute()
+            self.stdout.write(f'    🗑  Removido: {arq["name"]}')
