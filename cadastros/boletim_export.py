@@ -176,7 +176,8 @@ def gerar_pdf_bytes(cliente: str, periodo: str, missoes: list, totais: dict) -> 
     st_rod    = _st('rd',  6, False, TA_CENTER, colors.HexColor(f"#{_CINZA_ROD}"))
 
     story = []
-    data_ger = datetime.now().strftime("%d/%m/%Y %H:%M")
+    from django.utils import timezone as _tz
+    data_ger = _tz.localtime(_tz.now()).strftime("%d/%m/%Y %H:%M")
     n_regs   = totais.get('missoes', len(missoes))
 
     # Cabeçalho
@@ -331,7 +332,8 @@ def gerar_xlsx_bytes(cliente: str, periodo: str, missoes: list, totais: dict) ->
     def _align(h='left', wrap=False):
         return Alignment(horizontal=h, vertical='center', wrap_text=wrap)
 
-    data_ger = datetime.now().strftime("%d/%m/%Y %H:%M")
+    from django.utils import timezone as _tz
+    data_ger = _tz.localtime(_tz.now()).strftime("%d/%m/%Y %H:%M")
     n_regs   = totais.get('missoes', len(missoes))
 
     # ── Linha 1: Título ────────────────────────────────────────────────────

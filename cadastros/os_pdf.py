@@ -634,7 +634,8 @@ def gerar_os_pdf(request, pk):
     elements.append(Spacer(1, 6 * mm))
     elements.append(HRFlowable(width='100%', thickness=0.5, color=HexColor('#CCCCCC')))
     elements.append(Spacer(1, 2 * mm))
-    now_str = datetime.now().strftime('%d/%m/%Y %H:%M')
+    from django.utils import timezone as _tz
+    now_str = _tz.localtime(_tz.now()).strftime('%d/%m/%Y %H:%M')
     footer_style = _s(7, color=_CINZA_TXT, align=TA_CENTER)
     elements.append(Paragraph(
         f'ATENCIOSAMENTE — DEPARTAMENTO DE ESCOLTA ARMADA — JR SEGURANÇA | '

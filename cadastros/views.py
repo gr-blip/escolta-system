@@ -3641,6 +3641,9 @@ def os_field_link(request, token):
 
     def fmt_dt(dt):
         if dt:
+            from django.utils.timezone import localtime, is_aware
+            if is_aware(dt):
+                dt = localtime(dt)
             return dt.strftime('%Y-%m-%dT%H:%M')
         return ''
 
