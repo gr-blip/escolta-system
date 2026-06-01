@@ -2691,7 +2691,8 @@ def boletim_detalhe(request, pk):
         # ── Correções dos marcos operacionais pelo financeiro ──
         if op:
             import pytz as _pytz
-            _tz_bsb = _pytz.timezone(settings.TIME_ZONE)
+            from django.conf import settings as _settings
+            _tz_bsb = _pytz.timezone(_settings.TIME_ZONE)
 
             def _parse_marco(val):
                 if not val:
@@ -2927,7 +2928,8 @@ def boletim_detalhe(request, pk):
         # ── Correções dos marcos operacionais pelo financeiro ──
         if op:
             import pytz as _pytz
-            _tz_bsb = _pytz.timezone(settings.TIME_ZONE)
+            from django.conf import settings as _settings
+            _tz_bsb = _pytz.timezone(_settings.TIME_ZONE)
 
             def _parse_marco(val):
                 if not val:
