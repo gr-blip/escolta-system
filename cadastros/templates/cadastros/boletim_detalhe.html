@@ -83,60 +83,43 @@
       </div>
 
       {% if op %}
-      <!-- Tabela de marcos (igual à impressão da OS) -->
+      <!-- Tabela de marcos editável -->
       <div style="margin-top:16px">
-        <div style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">Dados da Operação</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.5px;text-transform:uppercase">Dados da Operação</div>
+          {% if boletim.status != 'faturado' %}
+          <button type="button" id="btn-editar-marcos"
+            style="font-size:11px;padding:3px 10px;border-radius:5px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:5px">
+            <svg width="11" height="11" fill="none" viewBox="0 0 16 16"><path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+            Corrigir marcos
+          </button>
+          {% endif %}
+        </div>
+
         <table style="width:100%;border-collapse:collapse;font-size:12px">
           <thead>
             <tr style="background:var(--bg2,#f5f5f3)">
-              <th style="text-align:left;padding:7px 10px;font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;border-bottom:2px solid var(--border)">Marco</th>
+              <th style="text-align:left;padding:7px 10px;font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;border-bottom:2px solid var(--border);width:30%">Marco</th>
               <th style="text-align:left;padding:7px 10px;font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;border-bottom:2px solid var(--border)">Data / Hora</th>
-              <th style="text-align:right;padding:7px 10px;font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;border-bottom:2px solid var(--border)">KM</th>
+              <th style="text-align:right;padding:7px 10px;font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;border-bottom:2px solid var(--border);width:120px">KM</th>
             </tr>
           </thead>
           <tbody>
+            <!-- Previsão — só leitura -->
             <tr style="border-bottom:1px solid var(--border)">
               <td style="padding:7px 10px;color:var(--text2)">Previsão de Início</td>
               <td style="padding:7px 10px">{{ os.previsao_inicio|date:"d/m/Y H:i"|default:"—" }}</td>
               <td style="padding:7px 10px;text-align:right;color:var(--text3)">—</td>
             </tr>
-            <tr style="border-bottom:1px solid var(--border)">
-              <td style="padding:7px 10px;color:var(--text2)">Início de Viagem</td>
-              <td style="padding:7px 10px">{{ op.inicio_viagem|date:"d/m/Y H:i"|default:"—" }}</td>
-              <td style="padding:7px 10px;text-align:right;font-weight:{% if op.km_inicio_viagem %}600{% else %}400{% endif %};color:{% if op.km_inicio_viagem %}var(--blue-light,#2563eb){% else %}var(--text3){% endif %}">
-                {% if op.km_inicio_viagem %}{{ op.km_inicio_viagem }}{% else %}—{% endif %}
-              </td>
-            </tr>
-            <tr style="border-bottom:1px solid var(--border)">
-              <td style="padding:7px 10px;color:var(--text2)">Chegada Operação</td>
-              <td style="padding:7px 10px">{{ op.chegada_operacao|date:"d/m/Y H:i"|default:"—" }}</td>
-              <td style="padding:7px 10px;text-align:right;font-weight:{% if op.km_chegada_operacao %}600{% else %}400{% endif %};color:{% if op.km_chegada_operacao %}var(--blue-light,#2563eb){% else %}var(--text3){% endif %}">
-                {% if op.km_chegada_operacao %}{{ op.km_chegada_operacao }}{% else %}—{% endif %}
-              </td>
-            </tr>
-            <tr style="border-bottom:1px solid var(--border)">
-              <td style="padding:7px 10px;color:var(--text2)">Início Operação</td>
-              <td style="padding:7px 10px">{{ op.inicio_operacao|date:"d/m/Y H:i"|default:"—" }}</td>
-              <td style="padding:7px 10px;text-align:right;font-weight:{% if op.km_inicio_operacao %}600{% else %}400{% endif %};color:{% if op.km_inicio_operacao %}var(--blue-light,#2563eb){% else %}var(--text3){% endif %}">
-                {% if op.km_inicio_operacao %}{{ op.km_inicio_operacao }}{% else %}—{% endif %}
-              </td>
-            </tr>
-            <tr style="border-bottom:1px solid var(--border)">
-              <td style="padding:7px 10px;color:var(--text2)">Término Operação</td>
-              <td style="padding:7px 10px">{{ op.termino_operacao|date:"d/m/Y H:i"|default:"—" }}</td>
-              <td style="padding:7px 10px;text-align:right;font-weight:{% if op.km_termino_operacao %}600{% else %}400{% endif %};color:{% if op.km_termino_operacao %}var(--blue-light,#2563eb){% else %}var(--text3){% endif %}">
-                {% if op.km_termino_operacao %}{{ op.km_termino_operacao }}{% else %}—{% endif %}
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:7px 10px;color:var(--text2)">Término de Viagem</td>
-              <td style="padding:7px 10px">{{ op.termino_viagem|date:"d/m/Y H:i"|default:"—" }}</td>
-              <td style="padding:7px 10px;text-align:right;font-weight:{% if op.km_termino_viagem %}600{% else %}400{% endif %};color:{% if op.km_termino_viagem %}var(--blue-light,#2563eb){% else %}var(--text3){% endif %}">
-                {% if op.km_termino_viagem %}{{ op.km_termino_viagem }}{% else %}—{% endif %}
-              </td>
-            </tr>
+
+            {% include "cadastros/boletim_marco_row.html" with label="Início de Viagem"   campo="inicio_viagem"    campo_km="km_inicio_viagem"    val_dt=op.inicio_viagem    val_km=op.km_inicio_viagem    last=False %}
+            {% include "cadastros/boletim_marco_row.html" with label="Chegada Operação"  campo="chegada_operacao" campo_km="km_chegada_operacao" val_dt=op.chegada_operacao val_km=op.km_chegada_operacao last=False %}
+            {% include "cadastros/boletim_marco_row.html" with label="Início Operação"   campo="inicio_operacao"  campo_km="km_inicio_operacao"  val_dt=op.inicio_operacao  val_km=op.km_inicio_operacao  last=False %}
+            {% include "cadastros/boletim_marco_row.html" with label="Término Operação"  campo="termino_operacao" campo_km="km_termino_operacao" val_dt=op.termino_operacao val_km=op.km_termino_operacao last=False %}
+            {% include "cadastros/boletim_marco_row.html" with label="Término de Viagem" campo="termino_viagem"   campo_km="km_termino_viagem"   val_dt=op.termino_viagem   val_km=op.km_termino_viagem   last=True %}
           </tbody>
         </table>
+
         {% if op.pedagio %}
         <div style="margin-top:8px;font-size:12px;color:var(--text2)">
           Pedágio registrado na OS: <strong>R$ {{ op.pedagio|floatformat:2 }}</strong>
@@ -285,3 +268,27 @@
 </div>
 {% endblock %}
 
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var btn = document.getElementById('btn-editar-marcos');
+  if (!btn) return;
+  var editando = false;
+  btn.addEventListener('click', function() {
+    editando = !editando;
+    document.querySelectorAll('.marco-view').forEach(function(el) {
+      el.style.display = editando ? 'none' : 'inline';
+    });
+    document.querySelectorAll('.marco-input').forEach(function(el) {
+      el.style.display = editando ? 'inline-block' : 'none';
+    });
+    btn.innerHTML = editando
+      ? '<svg width="11" height="11" fill="none" viewBox="0 0 16 16"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Confirmar edição'
+      : '<svg width="11" height="11" fill="none" viewBox="0 0 16 16"><path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg> Corrigir marcos';
+    btn.style.background  = editando ? 'var(--blue-bg,#eff6ff)' : 'var(--bg2)';
+    btn.style.color       = editando ? 'var(--blue-light,#2563eb)' : 'var(--text2)';
+    btn.style.borderColor = editando ? 'var(--blue-light,#2563eb)' : 'var(--border)';
+  });
+});
+</script>
+{% endblock %}

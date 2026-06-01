@@ -1,0 +1,17 @@
+<tr style="{% if not last %}border-bottom:1px solid var(--border){% endif %}">
+  <td style="padding:7px 10px;color:var(--text2)">{{ label }}</td>
+  <td style="padding:5px 10px">
+    <span class="marco-view" style="display:inline">{{ val_dt|date:"d/m/Y H:i"|default:"—" }}</span>
+    <input type="datetime-local" name="op_{{ campo }}"
+      class="marco-input" style="display:none;padding:3px 6px;border:1px solid var(--border);border-radius:5px;background:var(--bg);color:var(--text);font-size:12px"
+      value="{% if val_dt %}{{ val_dt|date:'Y-m-d' }}T{{ val_dt|date:'H:i' }}{% endif %}">
+  </td>
+  <td style="padding:5px 10px;text-align:right">
+    <span class="marco-view" style="font-weight:{% if val_km %}600{% else %}400{% endif %};color:{% if val_km %}var(--blue-light,#2563eb){% else %}var(--text3){% endif %}">
+      {% if val_km %}{{ val_km }}{% else %}—{% endif %}
+    </span>
+    <input type="number" name="op_{{ campo_km }}"
+      class="marco-input" style="display:none;width:80px;padding:3px 6px;border:1px solid var(--border);border-radius:5px;background:var(--bg);color:var(--text);font-size:12px;text-align:right"
+      value="{{ val_km|default:'' }}" min="0">
+  </td>
+</tr>

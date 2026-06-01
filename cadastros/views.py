@@ -2687,12 +2687,52 @@ def boletim_detalhe(request, pk):
         boletim.valor_pedagio = to_float(request.POST.get('valor_pedagio', '0'))
         boletim.numero_nota  = request.POST.get('numero_nota', '')
         boletim.observacoes  = request.POST.get('observacoes', '')
+
+        # ── Correções dos marcos operacionais pelo financeiro ──
+        if op:
+            import pytz as _pytz
+            _tz_bsb = _pytz.timezone(settings.TIME_ZONE)
+
+            def _parse_marco(val):
+                if not val:
+                    return None
+                for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
+                    try:
+                        return _tz_bsb.localize(datetime.strptime(val, fmt))
+                    except ValueError:
+                        continue
+                return None
+
+            campos_marcos = [
+                ('inicio_viagem',    'km_inicio_viagem'),
+                ('chegada_operacao', 'km_chegada_operacao'),
+                ('inicio_operacao',  'km_inicio_operacao'),
+                ('termino_operacao', 'km_termino_operacao'),
+                ('termino_viagem',   'km_termino_viagem'),
+            ]
+            op_alterado = False
+            for campo_dt, campo_km in campos_marcos:
+                val_dt = request.POST.get(f'op_{campo_dt}', '').strip()
+                val_km = request.POST.get(f'op_{campo_km}', '').strip()
+                if val_dt:
+                    novo_dt = _parse_marco(val_dt)
+                    if novo_dt:
+                        setattr(op, campo_dt, novo_dt)
+                        op_alterado = True
+                if val_km != '':
+                    try:
+                        setattr(op, campo_km, int(val_km) if val_km else None)
+                        op_alterado = True
+                    except (ValueError, TypeError):
+                        pass
+            if op_alterado:
+                op.save()
+
         action = request.POST.get('action', 'salvar')
         if action == 'calcular':
             if not boletim.tabela_preco_id:
                 messages.error(request, 'Selecione uma tabela de preco antes de calcular.')
                 return redirect('boletim_detalhe', pk=pk)
-            # Salva o pedágio manual antes de calcular para não ser sobrescrito
             boletim.save()
             boletim.calcular()
             messages.success(request, 'Valores calculados com sucesso!')
@@ -2883,12 +2923,52 @@ def boletim_detalhe(request, pk):
         boletim.valor_pedagio = to_float(request.POST.get('valor_pedagio', '0'))
         boletim.numero_nota  = request.POST.get('numero_nota', '')
         boletim.observacoes  = request.POST.get('observacoes', '')
+
+        # ── Correções dos marcos operacionais pelo financeiro ──
+        if op:
+            import pytz as _pytz
+            _tz_bsb = _pytz.timezone(settings.TIME_ZONE)
+
+            def _parse_marco(val):
+                if not val:
+                    return None
+                for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
+                    try:
+                        return _tz_bsb.localize(datetime.strptime(val, fmt))
+                    except ValueError:
+                        continue
+                return None
+
+            campos_marcos = [
+                ('inicio_viagem',    'km_inicio_viagem'),
+                ('chegada_operacao', 'km_chegada_operacao'),
+                ('inicio_operacao',  'km_inicio_operacao'),
+                ('termino_operacao', 'km_termino_operacao'),
+                ('termino_viagem',   'km_termino_viagem'),
+            ]
+            op_alterado = False
+            for campo_dt, campo_km in campos_marcos:
+                val_dt = request.POST.get(f'op_{campo_dt}', '').strip()
+                val_km = request.POST.get(f'op_{campo_km}', '').strip()
+                if val_dt:
+                    novo_dt = _parse_marco(val_dt)
+                    if novo_dt:
+                        setattr(op, campo_dt, novo_dt)
+                        op_alterado = True
+                if val_km != '':
+                    try:
+                        setattr(op, campo_km, int(val_km) if val_km else None)
+                        op_alterado = True
+                    except (ValueError, TypeError):
+                        pass
+            if op_alterado:
+                op.save()
+
         action = request.POST.get('action', 'salvar')
         if action == 'calcular':
             if not boletim.tabela_preco_id:
                 messages.error(request, 'Selecione uma tabela de preco antes de calcular.')
                 return redirect('boletim_detalhe', pk=pk)
-            # Salva o pedágio manual antes de calcular para não ser sobrescrito
             boletim.save()
             boletim.calcular()
             messages.success(request, 'Valores calculados com sucesso!')
