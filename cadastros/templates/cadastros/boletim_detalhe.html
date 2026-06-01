@@ -28,6 +28,10 @@
 {% endblock %}
 
 {% block content %}
+{% if boletim.status != 'faturado' %}
+<form method="post">
+{% csrf_token %}
+{% endif %}
 <div style="display:grid;grid-template-columns:1fr 360px;gap:16px;align-items:start">
 
   <!-- Coluna principal -->
@@ -202,8 +206,6 @@
       {% endif %}
     </div>
     {% else %}
-    <form method="post">
-      {% csrf_token %}
       <div class="form-grid" style="gap:12px">
 
         <div class="field">
@@ -261,11 +263,13 @@
           Marcar como Faturado
         </button>
       </div>
-    </form>
     {% endif %}
   </div>
 
 </div>
+{% if boletim.status != 'faturado' %}
+</form>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}
@@ -274,20 +278,31 @@ document.addEventListener('DOMContentLoaded', function() {
   var btn = document.getElementById('btn-editar-marcos');
   if (!btn) return;
   var editando = false;
+
   btn.addEventListener('click', function() {
-    editando = !editando;
+    if (editando) {
+      // Confirmar — submete o form com action=salvar
+      var form = document.querySelector('form[method="post"]');
+      if (form) {
+        var inp = document.createElement('input');
+        inp.type = 'hidden'; inp.name = 'action'; inp.value = 'salvar';
+        form.appendChild(inp);
+        form.submit();
+      }
+      return;
+    }
+    // Entrar em modo edição
+    editando = true;
     document.querySelectorAll('.marco-view').forEach(function(el) {
-      el.style.display = editando ? 'none' : 'inline';
+      el.style.display = 'none';
     });
     document.querySelectorAll('.marco-input').forEach(function(el) {
-      el.style.display = editando ? 'inline-block' : 'none';
+      el.style.display = 'inline-block';
     });
-    btn.innerHTML = editando
-      ? '<svg width="11" height="11" fill="none" viewBox="0 0 16 16"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Confirmar edição'
-      : '<svg width="11" height="11" fill="none" viewBox="0 0 16 16"><path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg> Corrigir marcos';
-    btn.style.background  = editando ? 'var(--blue-bg,#eff6ff)' : 'var(--bg2)';
-    btn.style.color       = editando ? 'var(--blue-light,#2563eb)' : 'var(--text2)';
-    btn.style.borderColor = editando ? 'var(--blue-light,#2563eb)' : 'var(--border)';
+    btn.innerHTML = '<svg width="11" height="11" fill="none" viewBox="0 0 16 16"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Confirmar edição';
+    btn.style.background  = 'var(--blue-bg,#eff6ff)';
+    btn.style.color       = 'var(--blue-light,#2563eb)';
+    btn.style.borderColor = 'var(--blue-light,#2563eb)';
   });
 });
 </script>
