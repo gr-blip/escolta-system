@@ -2692,6 +2692,7 @@ def boletim_detalhe(request, pk):
         if op:
             import pytz as _pytz
             from django.conf import settings as _settings
+            from datetime import datetime as _datetime
             _tz_bsb = _pytz.timezone(_settings.TIME_ZONE)
 
             def _parse_marco(val):
@@ -2699,7 +2700,7 @@ def boletim_detalhe(request, pk):
                     return None
                 for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
                     try:
-                        return _tz_bsb.localize(datetime.strptime(val, fmt))
+                        return _tz_bsb.localize(_datetime.strptime(val, fmt))
                     except ValueError:
                         continue
                 return None
@@ -2929,6 +2930,7 @@ def boletim_detalhe(request, pk):
         if op:
             import pytz as _pytz
             from django.conf import settings as _settings
+            from datetime import datetime as _datetime
             _tz_bsb = _pytz.timezone(_settings.TIME_ZONE)
 
             def _parse_marco(val):
@@ -2936,7 +2938,7 @@ def boletim_detalhe(request, pk):
                     return None
                 for fmt in ('%Y-%m-%dT%H:%M', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M'):
                     try:
-                        return _tz_bsb.localize(datetime.strptime(val, fmt))
+                        return _tz_bsb.localize(_datetime.strptime(val, fmt))
                     except ValueError:
                         continue
                 return None
