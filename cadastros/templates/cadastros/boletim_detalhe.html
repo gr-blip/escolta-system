@@ -97,6 +97,10 @@
             <svg width="11" height="11" fill="none" viewBox="0 0 16 16"><path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
             Corrigir marcos
           </button>
+          <button type="submit" name="action" value="salvar" id="btn-confirmar-marcos"
+            style="display:none;font-size:11px;padding:3px 12px;border-radius:5px;border:1px solid var(--blue-light,#2563eb);background:var(--blue-bg,#eff6ff);color:var(--blue-light,#2563eb);cursor:pointer;font-weight:600">
+            ✓ Salvar marcos
+          </button>
           {% endif %}
         </div>
 
@@ -275,34 +279,16 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  var btn = document.getElementById('btn-editar-marcos');
-  if (!btn) return;
-  var editando = false;
+  var btnEditar    = document.getElementById('btn-editar-marcos');
+  var btnConfirmar = document.getElementById('btn-confirmar-marcos');
+  if (!btnEditar) return;
 
-  btn.addEventListener('click', function() {
-    if (editando) {
-      // Confirmar — submete o form com action=salvar
-      var form = document.querySelector('form[method="post"]');
-      if (form) {
-        var inp = document.createElement('input');
-        inp.type = 'hidden'; inp.name = 'action'; inp.value = 'salvar';
-        form.appendChild(inp);
-        form.submit();
-      }
-      return;
-    }
-    // Entrar em modo edição
-    editando = true;
-    document.querySelectorAll('.marco-view').forEach(function(el) {
-      el.style.display = 'none';
-    });
-    document.querySelectorAll('.marco-input').forEach(function(el) {
-      el.style.display = 'inline-block';
-    });
-    btn.innerHTML = '<svg width="11" height="11" fill="none" viewBox="0 0 16 16"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Confirmar edição';
-    btn.style.background  = 'var(--blue-bg,#eff6ff)';
-    btn.style.color       = 'var(--blue-light,#2563eb)';
-    btn.style.borderColor = 'var(--blue-light,#2563eb)';
+  btnEditar.addEventListener('click', function() {
+    // Entra em modo edição
+    document.querySelectorAll('.marco-view').forEach(function(el) { el.style.display = 'none'; });
+    document.querySelectorAll('.marco-input').forEach(function(el) { el.style.display = 'inline-block'; });
+    btnEditar.style.display    = 'none';
+    if (btnConfirmar) btnConfirmar.style.display = 'inline-flex';
   });
 });
 </script>
