@@ -168,37 +168,43 @@ document.querySelector('select[name="mes"]').addEventListener('change', function
   // então deixa o input oculto com o ano_sel atual (o form trata corretamente)
 });
 
-// ── Impressão PDF ───────────────────────────────────────────────────────────
-function imprimirDashboard() {
-  window.print();
-}
-
-// ── Adaptar gráficos para impressão (fundo branco) ──────────────────────────
-window.addEventListener('beforeprint', function () {
-  // Barras
-  chartBarObj.options.scales.x.ticks.color = '#333';
-  chartBarObj.options.scales.y.ticks.color = '#333';
-  chartBarObj.options.scales.x.grid.color = 'rgba(0,0,0,0.1)';
-  chartBarObj.options.scales.y.grid.color = 'rgba(0,0,0,0.1)';
+// ── Cores dos gráficos ──────────────────────────────────────────────────────
+function setChartColorsPrint() {
+  chartBarObj.options.scales.x.ticks.color = '#111';
+  chartBarObj.options.scales.y.ticks.color = '#111';
+  chartBarObj.options.scales.x.grid.color = 'rgba(0,0,0,0.12)';
+  chartBarObj.options.scales.y.grid.color = 'rgba(0,0,0,0.12)';
   chartBarObj.update('none');
-  // Pizza
   chartPizzaObj.options.plugins.legend.labels.color = '#111';
   chartPizzaObj.data.datasets[0].borderColor = '#fff';
   chartPizzaObj.update('none');
-});
+}
 
-window.addEventListener('afterprint', function () {
-  // Restaurar barras
+function setChartColorsScreen() {
   chartBarObj.options.scales.x.ticks.color = '#9ca3af';
   chartBarObj.options.scales.y.ticks.color = '#9ca3af';
   chartBarObj.options.scales.x.grid.color = 'rgba(255,255,255,0.05)';
   chartBarObj.options.scales.y.grid.color = 'rgba(255,255,255,0.07)';
   chartBarObj.update('none');
-  // Restaurar pizza
   chartPizzaObj.options.plugins.legend.labels.color = '#d1d5db';
   chartPizzaObj.data.datasets[0].borderColor = '#1a1a2e';
   chartPizzaObj.update('none');
-});
+}
+
+// ── Impressão PDF ───────────────────────────────────────────────────────────
+function imprimirDashboard() {
+  setChartColorsPrint();
+  // Aguarda o canvas re-renderizar antes de abrir o diálogo de impressão
+  setTimeout(function () {
+    window.print();
+    // Restaura cores da tela após fechar o diálogo
+    setTimeout(setChartColorsScreen, 1500);
+  }, 300);
+}
+
+// Fallback para Ctrl+P direto
+window.addEventListener('beforeprint', setChartColorsPrint);
+window.addEventListener('afterprint', setChartColorsScreen);
 </script>
 
 <style>
