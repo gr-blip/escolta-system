@@ -1,0 +1,144 @@
+[
+  {
+    "step": 1,
+    "title": "Visão Geral do Projeto",
+    "description": "O Sistema Escolta é uma plataforma de gestão operacional para empresa de escolta armada. Desenvolvido em Django + SQLite, gerencia agentes, viaturas, armamento, clientes, ordens de serviço e faturamento.",
+    "nodeIds": [
+      "document:README.md",
+      "document:CONTEXTO_CLAUDE_GrupoJR.md",
+      "config:requirements.txt"
+    ],
+    "languageLesson": "Django é o framework web Python usado. SQLite é o banco de dados leve para desenvolvimento. Railway é a plataforma de deploy."
+  },
+  {
+    "step": 2,
+    "title": "Configuração e Entry Point",
+    "description": "O projeto segue a estrutura padrão Django: manage.py como entry point, settings.py com configurações, urls.py como roteador central.",
+    "nodeIds": [
+      "file:manage.py",
+      "file:escolta_system/settings.py",
+      "file:escolta_system/urls.py",
+      "file:escolta_system/wsgi.py",
+      "file:cadastros/apps.py"
+    ],
+    "languageLesson": "manage.py é o CLI do Django. settings.py contém configurações de banco, apps instalados, middlewares. urls.py mapeia URLs para views."
+  },
+  {
+    "step": 3,
+    "title": "Modelos de Dados",
+    "description": "O coração do sistema: 21 modelos Django que representam agentes, viaturas, armamento, clientes, ordens de serviço, boletins de medição e o módulo patrimonial (JR Segurança, JRS Facilities, Freelance).",
+    "nodeIds": [
+      "file:cadastros/models.py",
+      "file:cadastros/models_perfil.py"
+    ],
+    "languageLesson": "Cada classe herda de django.db.models.Model. Os campos definem colunas no banco. related_name cria acessores reversos entre modelos."
+  },
+  {
+    "step": 4,
+    "title": "URLs e Roteamento",
+    "description": "O sistema tem dezenas de URLs para CRUDs, dashboards, APIs e endpoints de integração. urls.py centraliza o roteamento de toda a aplicação.",
+    "nodeIds": [
+      "file:cadastros/urls.py",
+      "file:urls.py"
+    ]
+  },
+  {
+    "step": 5,
+    "title": "Views e Lógica de Negócio",
+    "description": "O maior arquivo do sistema: views.py com funções para CRUD de todos os modelos, dashboards, geração de OS, boletins, integração com GPS (Omnilink), espelhamento e gestão de usuários.",
+    "nodeIds": [
+      "file:cadastros/views.py",
+      "file:cadastros/permissoes.py",
+      "file:cadastros/signals.py"
+    ],
+    "languageLesson": "Views são funções que recebem HttpRequest e retornam HttpResponse. O decorator @login_required protege endpoints. Signals executam lógica em eventos do ORM."
+  },
+  {
+    "step": 6,
+    "title": "Formulários",
+    "description": "Forms Django para validação e renderização de dados em templates. Cada modelo principal tem seu formulário correspondente.",
+    "nodeIds": [
+      "file:cadastros/forms.py"
+    ]
+  },
+  {
+    "step": 7,
+    "title": "Django Admin",
+    "description": "Personalização do Django Admin para gerenciamento avançado: listagens com filtros, busca e ações em lote para agentes, viaturas, armamento, clientes e consultas de processos.",
+    "nodeIds": [
+      "file:cadastros/admin.py",
+      "file:cadastros/admin_perfil.py"
+    ]
+  },
+  {
+    "step": 8,
+    "title": "Interface: Template Base e Dashboard",
+    "description": "O template base.html define o layout (sidebar, topbar, tema). O dashboard principal exibe métricas com Chart.js e alertas de vencimento de documentos.",
+    "nodeIds": [
+      "file:cadastros/templates/cadastros/base.html",
+      "file:cadastros/templates/cadastros/dashboard.html",
+      "file:cadastros/templates/cadastros/dashboard_operacional.html"
+    ]
+  },
+  {
+    "step": 9,
+    "title": "Templates CRUD",
+    "description": "Templates para formulários e listagens de cada módulo: agentes, viaturas, clientes, armamento, coletes, equipes, OS e módulo patrimonial.",
+    "nodeIds": [
+      "file:cadastros/templates/cadastros/agente_form.html",
+      "file:cadastros/templates/cadastros/agente_list.html",
+      "file:cadastros/templates/cadastros/os_list.html",
+      "file:cadastros/templates/cadastros/boletim_list.html",
+      "file:cadastros/templates/cadastros/funcionario_patrimonial_list.html"
+    ]
+  },
+  {
+    "step": 10,
+    "title": "Integrações Externas",
+    "description": "O sistema integra com serviços externos: Omnilink/SASCAR para rastreamento GPS de viaturas e DriverID para consulta de processos judiciais de funcionários.",
+    "nodeIds": [
+      "file:cadastros/services/driverid_service.py",
+      "file:cadastros/omnilink.py",
+      "file:cadastros/INTEGRACAO.py"
+    ],
+    "languageLesson": "DriverID usa JWT para autenticação. Omnilink/SASCAR é o rastreador de veículos. As integrações usam requests para APIs REST."
+  },
+  {
+    "step": 11,
+    "title": "Exportação e Relatórios",
+    "description": "Geração de PDFs (ReportLab) e planilhas Excel (openpyxl) para boletins de medição e consultas de processos judiciais.",
+    "nodeIds": [
+      "file:cadastros/boletim_export.py",
+      "file:cadastros/pdf_processo.py"
+    ]
+  },
+  {
+    "step": 12,
+    "title": "Migrações do Banco",
+    "description": "Evolução do schema do banco de dados ao longo do tempo. As migrações rastreiam mudanças nos modelos e aplicam transformações no SQLite/PostgreSQL.",
+    "nodeIds": [
+      "file:cadastros/migrations/0022_despesaos_trocamotorista_parada_incidente_and_more.py",
+      "file:cadastros/migrations/0045_funcionariopatrimonial_empresa_freelance.py"
+    ]
+  },
+  {
+    "step": 13,
+    "title": "Comandos e Scripts",
+    "description": "Management commands Django para tarefas administrativas: importação de dados, backup para Google Drive, correções de dados e criação de usuários.",
+    "nodeIds": [
+      "file:cadastros/management/commands/backup_to_google.py",
+      "file:cadastros/management/commands/importar_freelance.py",
+      "file:cadastros/management/commands/corrigir_boletins_cancelados.py",
+      "file:backup_drive_standalone.py"
+    ]
+  },
+  {
+    "step": 14,
+    "title": "Infraestrutura e Deploy",
+    "description": "Deploy via Railway (Procfile + gunicorn), backup automatizado via GitHub Actions e dependências gerenciadas via requirements.txt.",
+    "nodeIds": [
+      "service:Procfile",
+      "pipeline:.github/workflows/backup.yml"
+    ]
+  }
+]

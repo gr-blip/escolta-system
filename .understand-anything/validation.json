@@ -1,0 +1,44 @@
+{
+  "valid": true,
+  "errors": 0,
+  "warnings": 0,
+  "totalNodes": 359,
+  "totalEdges": 605,
+  "nodeTypes": {
+    "file": 145,
+    "class": 63,
+    "function": 137,
+    "pipeline": 1,
+    "document": 2,
+    "service": 1,
+    "config": 1,
+    "layer": 8,
+    "tour": 1
+  },
+  "edgeTypes": {
+    "contains": 350,
+    "imports": 21,
+    "configures": 17,
+    "calls": 30,
+    "exports": 9,
+    "depends_on": 49,
+    "documents": 9,
+    "related": 46,
+    "renders_with": 11,
+    "extends": 11,
+    "migrates": 25,
+    "starts_with": 14,
+    "next_step": 13
+  },
+  "layerCount": 8,
+  "fileNodesInLayers": 150,
+  "totalFileNodes": 150,
+  "tourSteps": 14,
+  "issues": [
+    "All nodes have required fields",
+    "All complexity values valid",
+    "All edge types valid",
+    "All file nodes covered by layers",
+    "Tour exists with 14 steps"
+  ]
+}

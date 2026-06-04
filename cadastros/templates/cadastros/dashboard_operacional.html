@@ -96,7 +96,7 @@ const CORES = [
 
 // ── Gráfico de barras ───────────────────────────────────────────────────────
 const ctxBar = document.getElementById('chartBarras').getContext('2d');
-new Chart(ctxBar, {
+const chartBarObj = new Chart(ctxBar, {
   type: 'bar',
   data: {
     labels: MESES_LABELS,
@@ -134,7 +134,7 @@ new Chart(ctxBar, {
 
 // ── Gráfico de pizza ────────────────────────────────────────────────────────
 const ctxPizza = document.getElementById('chartPizza').getContext('2d');
-new Chart(ctxPizza, {
+const chartPizzaObj = new Chart(ctxPizza, {
   type: 'pie',
   data: {
     labels: PIZZA_LABELS,
@@ -172,14 +172,52 @@ document.querySelector('select[name="mes"]').addEventListener('change', function
 function imprimirDashboard() {
   window.print();
 }
+
+// ── Adaptar gráficos para impressão (fundo branco) ──────────────────────────
+window.addEventListener('beforeprint', function () {
+  // Barras
+  chartBarObj.options.scales.x.ticks.color = '#333';
+  chartBarObj.options.scales.y.ticks.color = '#333';
+  chartBarObj.options.scales.x.grid.color = 'rgba(0,0,0,0.1)';
+  chartBarObj.options.scales.y.grid.color = 'rgba(0,0,0,0.1)';
+  chartBarObj.update('none');
+  // Pizza
+  chartPizzaObj.options.plugins.legend.labels.color = '#111';
+  chartPizzaObj.data.datasets[0].borderColor = '#fff';
+  chartPizzaObj.update('none');
+});
+
+window.addEventListener('afterprint', function () {
+  // Restaurar barras
+  chartBarObj.options.scales.x.ticks.color = '#9ca3af';
+  chartBarObj.options.scales.y.ticks.color = '#9ca3af';
+  chartBarObj.options.scales.x.grid.color = 'rgba(255,255,255,0.05)';
+  chartBarObj.options.scales.y.grid.color = 'rgba(255,255,255,0.07)';
+  chartBarObj.update('none');
+  // Restaurar pizza
+  chartPizzaObj.options.plugins.legend.labels.color = '#d1d5db';
+  chartPizzaObj.data.datasets[0].borderColor = '#1a1a2e';
+  chartPizzaObj.update('none');
+});
 </script>
 
 <style>
 @media print {
+  /* Forçar variáveis CSS para tema claro */
+  :root {
+    --text1: #111 !important;
+    --text2: #333 !important;
+    --text3: #555 !important;
+    --border: #ccc !important;
+    --bg1: #fff !important;
+    --bg2: #f5f5f5 !important;
+    --accent: #c05a00 !important;
+  }
+
   /* Ocultar sidebar, topbar, botões */
   .sidebar, .topbar, .topbar-actions, .btn, select, form, button { display: none !important; }
   .main-content { margin: 0 !important; padding: 0 !important; }
-  body { background: white !important; color: black !important; }
+  body { background: white !important; color: #111 !important; }
   .card { background: white !important; border: 1px solid #ddd !important; break-inside: avoid; }
   .card-title { color: #111 !important; }
   td, th { color: #111 !important; border-color: #ccc !important; }
