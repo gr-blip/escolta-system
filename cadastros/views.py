@@ -4787,12 +4787,27 @@ def diarias_agentes(request):
         mes, ano = hoje.month, hoje.year
 
     # OS do período: concluídas/finalizadas (R$100) ou canceladas c/ deslocamento (R$60)
+    import datetime as _dt
+    import calendar as _cal
+
+    month_start = _dt.date(ano, mes, 1)
+    month_end   = _dt.date(ano, mes, _cal.monthrange(ano, mes)[1])
+
+    # OS que iniciaram neste mês OU que terminaram neste mês (operações multi-dia)
     os_periodo = OrdemServico.objects.filter(
-        previsao_inicio__year=ano,
-        previsao_inicio__month=mes,
-    ).filter(
         status__in=['concluida', 'finalizada', 'cancelada']
-    ).select_related('cliente', 'equipe', 'equipe__agente1', 'equipe__agente2').order_by('previsao_inicio')
+    ).filter(
+        Q(previsao_inicio__year=ano, previsao_inicio__month=mes) |
+        Q(operacional__termino_viagem__year=ano, operacional__termino_viagem__month=mes)
+    ).select_related(
+        'cliente', 'equipe', 'equipe__agente1', 'equipe__agente2', 'operacional'
+    ).distinct().order_by('previsao_inicio')
+
+    def _nome_ag(snap, agente_obj):
+        n = (snap or '').strip()
+        if not n and agente_obj:
+            n = (getattr(agente_obj, 'nome', '') or '').strip()
+        return n
 
     linhas = []
     for os in os_periodo:
@@ -4813,42 +4828,49 @@ def diarias_agentes(request):
             rota += f' → {os.cidade_destino}/{os.uf_destino}'
         cliente_nome = os.cliente.razao_social if os.cliente else '—'
 
-        def _nome_agente(snap, agente_obj):
-            """Snap preferido; fallback para o FK direto."""
-            n = (snap or '').strip()
-            if not n and agente_obj:
-                n = (getattr(agente_obj, 'nome', '') or '').strip()
-            return n
-
         eq = os.equipe
+        nome1 = _nome_ag(os.snap_agente1_nome, eq.agente1 if eq else None)
+        nome2 = _nome_ag(os.snap_agente2_nome, eq.agente2 if eq else None)
+        nomes = [n for n in [nome1, nome2] if n]
+        if not nomes:
+            continue
 
-        # Agente 1
-        nome1 = _nome_agente(os.snap_agente1_nome, eq.agente1 if eq else None)
-        if nome1:
-            linhas.append({
-                'agente': nome1,
-                'data': os.previsao_inicio.date(),
-                'os_pk': os.pk,
-                'os_numero': os.numero,
-                'cliente': cliente_nome,
-                'rota': rota,
-                'missao': missao,
-                'valor': valor,
-            })
+        # Calcula dias de operação (multi-dia para escolta interestadual)
+        if valor == 100.00:  # escolta — pode ser multi-dia
+            op = getattr(os, 'operacional', None)
+            if op and op.inicio_viagem and op.termino_viagem:
+                d_ini = op.inicio_viagem.date()
+                d_fim = op.termino_viagem.date()
+            else:
+                d_ini = d_fim = os.previsao_inicio.date()
+            # Gera 1 linha por dia que cai dentro do mês selecionado
+            dias = []
+            delta = (d_fim - d_ini).days + 1
+            for i in range(delta):
+                d = d_ini + _dt.timedelta(days=i)
+                if month_start <= d <= month_end:
+                    dias.append(d)
+            if not dias:
+                continue
+        else:
+            # Cancelada c/ deslocamento = 1 diária no dia do início previsto
+            d_ini = os.previsao_inicio.date()
+            if not (month_start <= d_ini <= month_end):
+                continue
+            dias = [d_ini]
 
-        # Agente 2
-        nome2 = _nome_agente(os.snap_agente2_nome, eq.agente2 if eq else None)
-        if nome2:
-            linhas.append({
-                'agente': nome2,
-                'data': os.previsao_inicio.date(),
-                'os_pk': os.pk,
-                'os_numero': os.numero,
-                'cliente': cliente_nome,
-                'rota': rota,
-                'missao': missao,
-                'valor': valor,
-            })
+        for data in dias:
+            for nome in nomes:
+                linhas.append({
+                    'agente': nome,
+                    'data': data,
+                    'os_pk': os.pk,
+                    'os_numero': os.numero,
+                    'cliente': cliente_nome,
+                    'rota': rota,
+                    'missao': missao,
+                    'valor': valor,
+                })
 
     # Agrupa por agente com subtotais
     from collections import defaultdict, OrderedDict
@@ -4903,14 +4925,27 @@ def diarias_export_xlsx(request):
                    'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
     mes_nome = meses_nomes[mes - 1]
 
+    import datetime as _dt2
+    import calendar as _cal2
+    month_start2 = _dt2.date(ano, mes, 1)
+    month_end2   = _dt2.date(ano, mes, _cal2.monthrange(ano, mes)[1])
+
     os_periodo = OrdemServico.objects.filter(
-        previsao_inicio__year=ano,
-        previsao_inicio__month=mes,
         status__in=['concluida', 'finalizada', 'cancelada'],
-    ).select_related('cliente', 'equipe', 'equipe__agente1', 'equipe__agente2').order_by('previsao_inicio')
+    ).filter(
+        Q(previsao_inicio__year=ano, previsao_inicio__month=mes) |
+        Q(operacional__termino_viagem__year=ano, operacional__termino_viagem__month=mes)
+    ).select_related('cliente', 'equipe', 'equipe__agente1', 'equipe__agente2', 'operacional').distinct().order_by('previsao_inicio')
 
     from collections import defaultdict
     agrupado = defaultdict(list)
+
+    def _n2(snap, obj):
+        n = (snap or '').strip()
+        if not n and obj:
+            n = (getattr(obj, 'nome', '') or '').strip()
+        return n
+
     for os in os_periodo:
         if os.status in ('concluida', 'finalizada'):
             valor, missao = 100.00, 'ESCOLTA'
@@ -4927,22 +4962,38 @@ def diarias_export_xlsx(request):
         cliente_nome = os.cliente.razao_social if os.cliente else '—'
 
         eq = os.equipe
-        def _n(snap, obj):
-            n = (snap or '').strip()
-            if not n and obj:
-                n = (getattr(obj, 'nome', '') or '').strip()
-            return n
-        for nome in filter(None, [
-            _n(os.snap_agente1_nome, eq.agente1 if eq else None),
-            _n(os.snap_agente2_nome, eq.agente2 if eq else None),
-        ]):
-            agrupado[nome].append({
-                'data': os.previsao_inicio.strftime('%d/%m/%Y'),
-                'cliente': cliente_nome,
-                'rota': rota,
-                'missao': missao,
-                'valor': valor,
-            })
+        nomes = [n for n in [
+            _n2(os.snap_agente1_nome, eq.agente1 if eq else None),
+            _n2(os.snap_agente2_nome, eq.agente2 if eq else None),
+        ] if n]
+        if not nomes:
+            continue
+
+        if valor == 100.00:
+            op = getattr(os, 'operacional', None)
+            if op and op.inicio_viagem and op.termino_viagem:
+                d_ini = op.inicio_viagem.date()
+                d_fim = op.termino_viagem.date()
+            else:
+                d_ini = d_fim = os.previsao_inicio.date()
+            dias = []
+            for i in range((d_fim - d_ini).days + 1):
+                d = d_ini + _dt2.timedelta(days=i)
+                if month_start2 <= d <= month_end2:
+                    dias.append(d)
+        else:
+            d_ini = os.previsao_inicio.date()
+            dias = [d_ini] if month_start2 <= d_ini <= month_end2 else []
+
+        for data in dias:
+            for nome in nomes:
+                agrupado[nome].append({
+                    'data': data.strftime('%d/%m/%Y'),
+                    'cliente': cliente_nome,
+                    'rota': rota,
+                    'missao': missao,
+                    'valor': valor,
+                })
 
     wb = openpyxl.Workbook()
     ws = wb.active
