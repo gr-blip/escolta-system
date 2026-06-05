@@ -1473,6 +1473,64 @@ async function salvarPedagio(token) {
   } catch(e) { alert('Erro de conexão.'); }
 }
 </script>
+
+<!-- ── Modal: escolher câmera ou galeria ── -->
+<div id="modal-foto-escolha" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);align-items:flex-end;justify-content:center" onclick="fecharSeletorFoto()">
+  <div style="background:#fff;border-radius:18px 18px 0 0;padding:22px 20px 32px;width:100%;max-width:500px;box-shadow:0 -4px 24px rgba(0,0,0,.15)" onclick="event.stopPropagation()">
+    <div style="text-align:center;font-weight:700;font-size:16px;margin-bottom:18px;color:#222">Adicionar foto</div>
+    <button onclick="escolherCamera()" style="display:flex;align-items:center;gap:14px;width:100%;padding:15px 16px;border:none;background:#f2f2f2;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:10px;cursor:pointer;color:#111">
+      <span style="font-size:24px">📷</span> Tirar foto com a câmera
+    </button>
+    <button onclick="escolherGaleria()" style="display:flex;align-items:center;gap:14px;width:100%;padding:15px 16px;border:none;background:#f2f2f2;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:10px;cursor:pointer;color:#111">
+      <span style="font-size:24px">🖼️</span> Escolher da galeria
+    </button>
+    <button onclick="fecharSeletorFoto()" style="display:flex;align-items:center;justify-content:center;width:100%;padding:12px;border:none;background:none;font-size:14px;color:#888;cursor:pointer;margin-top:4px">
+      Cancelar
+    </button>
+  </div>
+</div>
+
+<script>
+/* ── Seletor câmera/galeria ── */
+var _fotoInputId = null;
+
+// Intercepta todos os botões de foto e mostra o modal de escolha
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.foto-upload-btn').forEach(function (label) {
+    var inputId = label.getAttribute('for');
+    if (!inputId) return;
+    label.removeAttribute('for'); // desvincula o clique automático
+    label.addEventListener('click', function (e) {
+      e.preventDefault();
+      _fotoInputId = inputId;
+      document.getElementById('modal-foto-escolha').style.display = 'flex';
+    });
+  });
+});
+
+function fecharSeletorFoto() {
+  document.getElementById('modal-foto-escolha').style.display = 'none';
+  _fotoInputId = null;
+}
+
+function escolherCamera() {
+  var id = _fotoInputId;
+  fecharSeletorFoto();
+  if (!id) return;
+  var input = document.getElementById(id);
+  input.setAttribute('capture', 'environment');
+  input.click();
+  setTimeout(function () { input.removeAttribute('capture'); }, 2000);
+}
+
+function escolherGaleria() {
+  var id = _fotoInputId;
+  fecharSeletorFoto();
+  if (!id) return;
+  document.getElementById(id).click();
+}
+</script>
+
 </body>
 </html>
 
