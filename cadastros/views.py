@@ -4792,7 +4792,7 @@ def diarias_agentes(request):
         previsao_inicio__month=mes,
     ).filter(
         status__in=['concluida', 'finalizada', 'cancelada']
-    ).select_related('cliente', 'equipe').order_by('previsao_inicio')
+    ).select_related('cliente', 'equipe', 'equipe__agente1', 'equipe__agente2').order_by('previsao_inicio')
 
     linhas = []
     for os in os_periodo:
@@ -4813,8 +4813,17 @@ def diarias_agentes(request):
             rota += f' → {os.cidade_destino}/{os.uf_destino}'
         cliente_nome = os.cliente.razao_social if os.cliente else '—'
 
+        def _nome_agente(snap, agente_obj):
+            """Snap preferido; fallback para o FK direto."""
+            n = (snap or '').strip()
+            if not n and agente_obj:
+                n = (getattr(agente_obj, 'nome', '') or '').strip()
+            return n
+
+        eq = os.equipe
+
         # Agente 1
-        nome1 = (os.snap_agente1_nome or '').strip()
+        nome1 = _nome_agente(os.snap_agente1_nome, eq.agente1 if eq else None)
         if nome1:
             linhas.append({
                 'agente': nome1,
@@ -4828,7 +4837,7 @@ def diarias_agentes(request):
             })
 
         # Agente 2
-        nome2 = (os.snap_agente2_nome or '').strip()
+        nome2 = _nome_agente(os.snap_agente2_nome, eq.agente2 if eq else None)
         if nome2:
             linhas.append({
                 'agente': nome2,
@@ -4898,7 +4907,7 @@ def diarias_export_xlsx(request):
         previsao_inicio__year=ano,
         previsao_inicio__month=mes,
         status__in=['concluida', 'finalizada', 'cancelada'],
-    ).select_related('cliente').order_by('previsao_inicio')
+    ).select_related('cliente', 'equipe', 'equipe__agente1', 'equipe__agente2').order_by('previsao_inicio')
 
     from collections import defaultdict
     agrupado = defaultdict(list)
@@ -4917,9 +4926,15 @@ def diarias_export_xlsx(request):
             rota += f' X {os.cidade_destino}/{os.uf_destino}'
         cliente_nome = os.cliente.razao_social if os.cliente else '—'
 
+        eq = os.equipe
+        def _n(snap, obj):
+            n = (snap or '').strip()
+            if not n and obj:
+                n = (getattr(obj, 'nome', '') or '').strip()
+            return n
         for nome in filter(None, [
-            (os.snap_agente1_nome or '').strip(),
-            (os.snap_agente2_nome or '').strip(),
+            _n(os.snap_agente1_nome, eq.agente1 if eq else None),
+            _n(os.snap_agente2_nome, eq.agente2 if eq else None),
         ]):
             agrupado[nome].append({
                 'data': os.previsao_inicio.strftime('%d/%m/%Y'),
