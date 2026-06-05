@@ -257,8 +257,6 @@ body {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 28px;
 }
-/* Compensa a altura do topbar fixo */
-.content { padding-top: calc(var(--topbar-h) + 20px); }
 .topbar-left { display: flex; flex-direction: column; gap: 1px; }
 .page-title { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; }
 .breadcrumb { font-size: 12px; color: var(--text3); display: flex; gap: 6px; }
@@ -266,7 +264,8 @@ body {
 .breadcrumb a:hover { color: var(--text2); }
 .topbar-actions { display: flex; align-items: center; gap: 10px; }
 
-.content { padding: 24px 28px 48px; width: 100%; margin: 0; max-width: none; }
+/* padding-top compensa o topbar fixo (60px) + folga de 24px */
+.content { padding: calc(var(--topbar-h) + 24px) 28px 48px; width: 100%; margin: 0; max-width: none; }
 
 /* ============================================================
    COMPONENTES
