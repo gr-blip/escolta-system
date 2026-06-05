@@ -225,7 +225,7 @@
                 </div>
                 {% endif %}{% endfor %}
                 <label class="foto-upload-btn" for="file_inicio_viagem" id="label_file_inicio_viagem"><span>📷</span>Foto</label>
-                <input type="file" id="file_inicio_viagem" accept="image/*" capture="environment" onchange="selecionarFotoMarco(this,'inicio_viagem')">
+                <input type="file" id="file_inicio_viagem" accept="image/*" onchange="selecionarFotoMarco(this,'inicio_viagem')">
               </div>
             </div>
             <button type="button" class="btn btn-primary btn-submit-full" style="margin-top:10px" id="btn_salvar_inicio_viagem" onclick="salvarMarco('inicio_viagem','{{ op.token }}')">
@@ -259,7 +259,7 @@
                 </div>
                 {% endif %}{% endfor %}
                 <label class="foto-upload-btn" for="file_chegada_operacao" id="label_file_chegada_operacao"><span>📷</span>Foto</label>
-                <input type="file" id="file_chegada_operacao" accept="image/*" capture="environment" onchange="selecionarFotoMarco(this,'chegada_operacao')">
+                <input type="file" id="file_chegada_operacao" accept="image/*" onchange="selecionarFotoMarco(this,'chegada_operacao')">
               </div>
             </div>
             <button type="button" class="btn btn-primary btn-submit-full" style="margin-top:10px" id="btn_salvar_chegada_operacao" onclick="salvarMarco('chegada_operacao','{{ op.token }}')">
@@ -293,7 +293,7 @@
                 </div>
                 {% endif %}{% endfor %}
                 <label class="foto-upload-btn" for="file_inicio_operacao" id="label_file_inicio_operacao"><span>📷</span>Foto</label>
-                <input type="file" id="file_inicio_operacao" accept="image/*" capture="environment" onchange="selecionarFotoMarco(this,'inicio_operacao')">
+                <input type="file" id="file_inicio_operacao" accept="image/*" onchange="selecionarFotoMarco(this,'inicio_operacao')">
               </div>
             </div>
             <button type="button" class="btn btn-primary btn-submit-full" style="margin-top:10px" id="btn_salvar_inicio_operacao" onclick="salvarMarco('inicio_operacao','{{ op.token }}')">
@@ -327,7 +327,7 @@
                 </div>
                 {% endif %}{% endfor %}
                 <label class="foto-upload-btn" for="file_termino_operacao" id="label_file_termino_operacao"><span>📷</span>Foto</label>
-                <input type="file" id="file_termino_operacao" accept="image/*" capture="environment" onchange="selecionarFotoMarco(this,'termino_operacao')">
+                <input type="file" id="file_termino_operacao" accept="image/*" onchange="selecionarFotoMarco(this,'termino_operacao')">
               </div>
             </div>
             <button type="button" class="btn btn-primary btn-submit-full" style="margin-top:10px" id="btn_salvar_termino_operacao" onclick="salvarMarco('termino_operacao','{{ op.token }}')">
@@ -361,7 +361,7 @@
                 </div>
                 {% endif %}{% endfor %}
                 <label class="foto-upload-btn" for="file_termino_viagem" id="label_file_termino_viagem"><span>📷</span>Foto</label>
-                <input type="file" id="file_termino_viagem" accept="image/*" capture="environment" onchange="selecionarFotoMarco(this,'termino_viagem')">
+                <input type="file" id="file_termino_viagem" accept="image/*" onchange="selecionarFotoMarco(this,'termino_viagem')">
               </div>
             </div>
             <button type="button" class="btn btn-primary btn-submit-full" style="margin-top:10px" id="btn_salvar_termino_viagem" onclick="salvarMarco('termino_viagem','{{ op.token }}')">
@@ -488,7 +488,7 @@
           </div>
           {% endif %}{% endfor %}
           <label class="foto-upload-btn" for="fvfoto_{{ v.pk }}"><span>📷</span>Foto</label>
-          <input type="file" id="fvfoto_{{ v.pk }}" accept="image/*" capture="environment"
+          <input type="file" id="fvfoto_{{ v.pk }}" accept="image/*"
             onchange="uploadFotoVeiculo(this,{{ v.pk }},'antes','fotos_veiculo_{{ v.pk }}','{{ op.token }}')">
         </div>
       </div>
@@ -661,7 +661,7 @@ function salvarVeiculo(token) {
             ${data.placa_carreta ? `<p style="font-size:12px;color:var(--muted);margin-bottom:4px">Carreta: ${escHtml(data.placa_carreta)}${data.placa_carreta2 ? ' / ' + escHtml(data.placa_carreta2) : ''}</p>` : ''}
             <div class="foto-grid" id="fotos_veiculo_${data.pk}">
               <label class="foto-upload-btn" for="fvfoto_${data.pk}"><span>📷</span>Foto</label>
-              <input type="file" id="fvfoto_${data.pk}" accept="image/*" capture="environment"
+              <input type="file" id="fvfoto_${data.pk}" accept="image/*"
                 onchange="uploadFotoVeiculo(this,${data.pk},'antes','fotos_veiculo_${data.pk}','${token}')">
             </div>
           </div>
@@ -887,7 +887,7 @@ function escJs(s) {
         <label style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Fotos (opcional)</label>
         <div class="foto-grid" id="p_fotos_preview" style="margin-top:8px"></div>
         <label class="foto-upload-btn" for="p_fotos_input" style="max-width:80px;margin-top:4px;aspect-ratio:1"><span>📷</span>Foto</label>
-        <input type="file" id="p_fotos_input" accept="image/*" capture="environment" multiple onchange="previewFotos(this,'p_fotos_preview')">
+        <input type="file" id="p_fotos_input" accept="image/*" multiple onchange="previewFotos(this,'p_fotos_preview')">
       </div>
       <div class="field">
         <label>GPS (opcional)</label>
@@ -935,7 +935,7 @@ function escJs(s) {
         <label style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Fotos (opcional)</label>
         <div class="foto-grid" id="i_fotos_preview" style="margin-top:8px"></div>
         <label class="foto-upload-btn" for="i_fotos_input" style="max-width:80px;margin-top:4px;aspect-ratio:1"><span>📷</span>Foto</label>
-        <input type="file" id="i_fotos_input" accept="image/*" capture="environment" multiple onchange="previewFotos(this,'i_fotos_preview')">
+        <input type="file" id="i_fotos_input" accept="image/*" multiple onchange="previewFotos(this,'i_fotos_preview')">
       </div>
       <div class="field">
         <button type="button" class="btn btn-success" onclick="captureGPSModal('i_lat','i_lng','i_gps_status')">📍 GPS do Local</button>
@@ -971,7 +971,7 @@ function escJs(s) {
         <label style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Fotos (CNH, rosto — opcional)</label>
         <div class="foto-grid" id="t_fotos_preview" style="margin-top:8px"></div>
         <label class="foto-upload-btn" for="t_fotos_input" style="max-width:80px;margin-top:4px;aspect-ratio:1"><span>📷</span>Foto</label>
-        <input type="file" id="t_fotos_input" accept="image/*" capture="environment" multiple onchange="previewFotos(this,'t_fotos_preview')">
+        <input type="file" id="t_fotos_input" accept="image/*" multiple onchange="previewFotos(this,'t_fotos_preview')">
       </div>
       <div class="field">
         <button type="button" class="btn btn-success" onclick="captureGPSModal('t_lat','t_lng','t_gps_status')">📍 GPS Local</button>
@@ -1018,7 +1018,7 @@ function escJs(s) {
         <label style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Comprovante (foto)</label>
         <div class="foto-grid" id="d_foto_preview" style="margin-top:8px"></div>
         <label class="foto-upload-btn" for="d_foto_input" style="max-width:80px;margin-top:4px;aspect-ratio:1"><span>📷</span>Foto</label>
-        <input type="file" id="d_foto_input" accept="image/*" capture="environment" onchange="previewFotos(this,'d_foto_preview')">
+        <input type="file" id="d_foto_input" accept="image/*" onchange="previewFotos(this,'d_foto_preview')">
       </div>
     </div>
     <div class="modal-footer">
