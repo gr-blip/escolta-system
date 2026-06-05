@@ -4765,3 +4765,269 @@ def consulta_processo_reconsultar(request, pk):
     }
     url_name = redirect_map.get(func.empresa, 'funcionario_patrimonial_detail')
     return redirect(url_name, pk=pk)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DIÁRIAS DOS AGENTES
+# ─────────────────────────────────────────────────────────────────────────────
+
+@login_required
+def diarias_agentes(request):
+    """Relatório mensal de diárias por agente."""
+    from datetime import date
+    import calendar
+
+    hoje = date.today()
+    try:
+        mes = int(request.GET.get('mes', hoje.month))
+        ano = int(request.GET.get('ano', hoje.year))
+        if not (1 <= mes <= 12) or not (2020 <= ano <= 2099):
+            raise ValueError
+    except (ValueError, TypeError):
+        mes, ano = hoje.month, hoje.year
+
+    # OS do período: concluídas/finalizadas (R$100) ou canceladas c/ deslocamento (R$60)
+    os_periodo = OrdemServico.objects.filter(
+        previsao_inicio__year=ano,
+        previsao_inicio__month=mes,
+    ).filter(
+        status__in=['concluida', 'finalizada', 'cancelada']
+    ).select_related('cliente', 'equipe').order_by('previsao_inicio')
+
+    linhas = []
+    for os in os_periodo:
+        # Determina valor e missão
+        if os.status in ('concluida', 'finalizada'):
+            valor = 100.00
+            missao = 'ESCOLTA'
+        elif os.status == 'cancelada' and os.tipo_cancelamento == 'com_deslocamento':
+            valor = 60.00
+            missao = 'OPERAÇÃO CANCELADA'
+        else:
+            continue  # cancelada sem deslocamento → sem diária
+
+        rota = ''
+        if os.cidade_origem:
+            rota = f'{os.cidade_origem}/{os.uf_origem}'
+        if os.cidade_destino:
+            rota += f' → {os.cidade_destino}/{os.uf_destino}'
+        cliente_nome = os.cliente.razao_social if os.cliente else '—'
+
+        # Agente 1
+        nome1 = (os.snap_agente1_nome or '').strip()
+        if nome1:
+            linhas.append({
+                'agente': nome1,
+                'data': os.previsao_inicio.date(),
+                'os_pk': os.pk,
+                'os_numero': os.numero,
+                'cliente': cliente_nome,
+                'rota': rota,
+                'missao': missao,
+                'valor': valor,
+            })
+
+        # Agente 2
+        nome2 = (os.snap_agente2_nome or '').strip()
+        if nome2:
+            linhas.append({
+                'agente': nome2,
+                'data': os.previsao_inicio.date(),
+                'os_pk': os.pk,
+                'os_numero': os.numero,
+                'cliente': cliente_nome,
+                'rota': rota,
+                'missao': missao,
+                'valor': valor,
+            })
+
+    # Agrupa por agente com subtotais
+    from collections import defaultdict, OrderedDict
+    agrupado = defaultdict(list)
+    for l in linhas:
+        agrupado[l['agente']].append(l)
+
+    agentes_data = []
+    total_geral = 0.0
+    for nome in sorted(agrupado.keys()):
+        rows = sorted(agrupado[nome], key=lambda x: x['data'])
+        subtotal = sum(r['valor'] for r in rows)
+        total_geral += subtotal
+        agentes_data.append({'nome': nome, 'linhas': rows, 'subtotal': subtotal})
+
+    # Opções de mês/ano para o seletor
+    meses_nomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                   'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+    anos = list(range(2024, hoje.year + 2))
+
+    return render(request, 'cadastros/diarias_agentes.html', {
+        'agentes_data': agentes_data,
+        'total_geral': total_geral,
+        'mes': mes,
+        'ano': ano,
+        'mes_nome': meses_nomes[mes - 1],
+        'meses_opcoes': list(enumerate(meses_nomes, 1)),
+        'anos': anos,
+        'total_linhas': len(linhas),
+    })
+
+
+@login_required
+def diarias_export_xlsx(request):
+    """Exporta as diárias do mês em Excel."""
+    from datetime import date
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+    from django.http import HttpResponse
+
+    hoje = date.today()
+    try:
+        mes = int(request.GET.get('mes', hoje.month))
+        ano = int(request.GET.get('ano', hoje.year))
+        if not (1 <= mes <= 12):
+            raise ValueError
+    except (ValueError, TypeError):
+        mes, ano = hoje.month, hoje.year
+
+    meses_nomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                   'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+    mes_nome = meses_nomes[mes - 1]
+
+    os_periodo = OrdemServico.objects.filter(
+        previsao_inicio__year=ano,
+        previsao_inicio__month=mes,
+        status__in=['concluida', 'finalizada', 'cancelada'],
+    ).select_related('cliente').order_by('previsao_inicio')
+
+    from collections import defaultdict
+    agrupado = defaultdict(list)
+    for os in os_periodo:
+        if os.status in ('concluida', 'finalizada'):
+            valor, missao = 100.00, 'ESCOLTA'
+        elif os.status == 'cancelada' and os.tipo_cancelamento == 'com_deslocamento':
+            valor, missao = 60.00, 'OPERAÇÃO CANCELADA'
+        else:
+            continue
+
+        rota = ''
+        if os.cidade_origem:
+            rota = f'{os.cidade_origem}/{os.uf_origem}'
+        if os.cidade_destino:
+            rota += f' X {os.cidade_destino}/{os.uf_destino}'
+        cliente_nome = os.cliente.razao_social if os.cliente else '—'
+
+        for nome in filter(None, [
+            (os.snap_agente1_nome or '').strip(),
+            (os.snap_agente2_nome or '').strip(),
+        ]):
+            agrupado[nome].append({
+                'data': os.previsao_inicio.strftime('%d/%m/%Y'),
+                'cliente': cliente_nome,
+                'rota': rota,
+                'missao': missao,
+                'valor': valor,
+            })
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = mes_nome[:31]
+
+    # Estilos
+    laranja = 'FFE07000'
+    cinza_claro = 'FFF2F2F2'
+    branco = 'FFFFFFFF'
+    thin = Side(style='thin', color='FFD0D0D0')
+    borda = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+    # Título
+    ws.merge_cells('A1:G1')
+    c = ws['A1']
+    c.value = f'ESCOLTA ARMADA — DIÁRIAS {mes_nome.upper()} DE {ano}'
+    c.font = Font(name='Calibri', bold=True, size=13, color='FFFFFFFF')
+    c.fill = PatternFill('solid', fgColor=laranja)
+    c.alignment = Alignment(horizontal='center', vertical='center')
+    ws.row_dimensions[1].height = 28
+
+    total_geral = 0.0
+    row = 2
+
+    for nome in sorted(agrupado.keys()):
+        linhas = sorted(agrupado[nome], key=lambda x: x['data'])
+
+        # Cabeçalho do agente
+        ws.merge_cells(f'A{row}:G{row}')
+        c = ws.cell(row=row, column=1, value=nome.upper())
+        c.font = Font(name='Calibri', bold=True, size=11, color='FF1A1A1A')
+        c.fill = PatternFill('solid', fgColor='FFE8E8E8')
+        c.alignment = Alignment(horizontal='left', vertical='center', indent=1)
+        ws.row_dimensions[row].height = 20
+        row += 1
+
+        # Cabeçalho das colunas
+        headers = ['DATA', 'CLIENTE', 'ORIGEM X DESTINO', 'MISSÃO', 'VALOR DIÁRIA']
+        for col, h in enumerate(headers, 1):
+            c = ws.cell(row=row, column=col, value=h)
+            c.font = Font(name='Calibri', bold=True, size=9, color='FF555555')
+            c.fill = PatternFill('solid', fgColor=cinza_claro)
+            c.alignment = Alignment(horizontal='center', vertical='center')
+            c.border = borda
+        ws.row_dimensions[row].height = 16
+        row += 1
+
+        subtotal = 0.0
+        for i, l in enumerate(linhas):
+            fill_color = branco if i % 2 == 0 else 'FFFAFAFA'
+            for col, val in enumerate([l['data'], l['cliente'], l['rota'], l['missao'], l['valor']], 1):
+                c = ws.cell(row=row, column=col, value=val)
+                c.font = Font(name='Calibri', size=10)
+                c.fill = PatternFill('solid', fgColor=fill_color)
+                c.border = borda
+                c.alignment = Alignment(vertical='center')
+                if col == 5:
+                    c.number_format = 'R$ #,##0.00'
+                    c.alignment = Alignment(horizontal='right', vertical='center')
+            subtotal += l['valor']
+            row += 1
+
+        # Subtotal do agente
+        c = ws.cell(row=row, column=4, value='SUBTOTAL')
+        c.font = Font(name='Calibri', bold=True, size=10)
+        c.fill = PatternFill('solid', fgColor='FFE8E8E8')
+        c.alignment = Alignment(horizontal='right', vertical='center')
+        c.border = borda
+        c = ws.cell(row=row, column=5, value=subtotal)
+        c.font = Font(name='Calibri', bold=True, size=10, color='FFB85000')
+        c.fill = PatternFill('solid', fgColor='FFE8E8E8')
+        c.number_format = 'R$ #,##0.00'
+        c.alignment = Alignment(horizontal='right', vertical='center')
+        c.border = borda
+        total_geral += subtotal
+        row += 2  # linha em branco entre agentes
+
+    # Total geral
+    ws.merge_cells(f'A{row}:D{row}')
+    c = ws.cell(row=row, column=1, value='TOTAL GERAL')
+    c.font = Font(name='Calibri', bold=True, size=12, color='FFFFFFFF')
+    c.fill = PatternFill('solid', fgColor=laranja)
+    c.alignment = Alignment(horizontal='right', vertical='center')
+    c = ws.cell(row=row, column=5, value=total_geral)
+    c.font = Font(name='Calibri', bold=True, size=12, color='FFFFFFFF')
+    c.fill = PatternFill('solid', fgColor=laranja)
+    c.number_format = 'R$ #,##0.00'
+    c.alignment = Alignment(horizontal='right', vertical='center')
+    ws.row_dimensions[row].height = 24
+
+    # Larguras das colunas
+    ws.column_dimensions['A'].width = 13
+    ws.column_dimensions['B'].width = 28
+    ws.column_dimensions['C'].width = 42
+    ws.column_dimensions['D'].width = 22
+    ws.column_dimensions['E'].width = 15
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="diarias_{mes_nome}_{ano}.xlsx"'
+    wb.save(response)
+    return response
