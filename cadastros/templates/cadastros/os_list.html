@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function () {
       <tbody>
         {% for o in ordens %}
         <tr>
-          <td style="white-space:nowrap"><strong style="color:var(--blue-light)">OS-{{ o.numero }}</strong></td>
+          <td style="white-space:nowrap"><strong style="color:var(--blue-light)">OS-{{ o.numero|slice:"4:" }}</strong></td>
           <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)" title="{{ o.cliente.razao_social }}">{{ o.cliente.razao_social }}</td>
           <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2)" title="{{ o.solicitante }}">{{ o.solicitante|default:"---" }}</td>
           <td style="font-size:12px;word-break:break-word;white-space:normal">
