@@ -4843,6 +4843,9 @@ def diarias_agentes(request):
                 d_fim = op.termino_viagem.date()
             else:
                 d_ini = d_fim = os.previsao_inicio.date()
+            # Multi-dia = INTERESTADUAL
+            if d_fim > d_ini:
+                missao = 'INTERESTADUAL'
             # Gera 1 linha por dia que cai dentro do mês selecionado
             dias = []
             delta = (d_fim - d_ini).days + 1
@@ -4976,6 +4979,8 @@ def diarias_export_xlsx(request):
                 d_fim = op.termino_viagem.date()
             else:
                 d_ini = d_fim = os.previsao_inicio.date()
+            if d_fim > d_ini:
+                missao = 'INTERESTADUAL'
             dias = []
             for i in range((d_fim - d_ini).days + 1):
                 d = d_ini + _dt2.timedelta(days=i)
@@ -5046,13 +5051,23 @@ def diarias_export_xlsx(request):
             fill_color = branco if i % 2 == 0 else 'FFFAFAFA'
             for col, val in enumerate([l['data'], l['cliente'], l['rota'], l['missao'], l['valor']], 1):
                 c = ws.cell(row=row, column=col, value=val)
-                c.font = Font(name='Calibri', size=10)
                 c.fill = PatternFill('solid', fgColor=fill_color)
                 c.border = borda
                 c.alignment = Alignment(vertical='center')
-                if col == 5:
+                # Missão com cor especial
+                if col == 4:
+                    if val == 'INTERESTADUAL':
+                        c.font = Font(name='Calibri', size=10, bold=True, color='FFC0392B')
+                    elif val == 'OPERAÇÃO CANCELADA':
+                        c.font = Font(name='Calibri', size=10, color='FFB8860B')
+                    else:
+                        c.font = Font(name='Calibri', size=10, color='FF276B47')
+                elif col == 5:
+                    c.font = Font(name='Calibri', size=10)
                     c.number_format = 'R$ #,##0.00'
                     c.alignment = Alignment(horizontal='right', vertical='center')
+                else:
+                    c.font = Font(name='Calibri', size=10)
             subtotal += l['valor']
             row += 1
 

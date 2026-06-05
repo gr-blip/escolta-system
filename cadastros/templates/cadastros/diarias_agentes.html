@@ -79,6 +79,8 @@
           <td>
             {% if l.missao == 'ESCOLTA' %}
               <span class="badge badge-green">Escolta</span>
+            {% elif l.missao == 'INTERESTADUAL' %}
+              <span class="badge badge-red">Interestadual</span>
             {% else %}
               <span class="badge badge-amber">Op. Cancelada</span>
             {% endif %}
