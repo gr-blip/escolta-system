@@ -1,78 +1,73 @@
 {% extends 'cadastros/base.html' %}
+{% load static %}
 {% block title %}Dashboard Operacional{% endblock %}
 {% block page_title %}Dashboard Operacional{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / Dashboard Operacional{% endblock %}
 
 {% block topbar_actions %}
 <button onclick="imprimirDashboard()" class="btn btn-secondary">
-  <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><rect x="3" y="1" width="10" height="4" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="1" y="5" width="14" height="8" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="4" y="10" width="8" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+  <svg viewBox="0 0 24 24" fill="none"><rect x="6" y="3" width="12" height="5" rx="1" stroke="currentColor" stroke-width="1.7"/><path d="M6 17H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" stroke="currentColor" stroke-width="1.7"/><rect x="6" y="14" width="12" height="7" rx="1" stroke="currentColor" stroke-width="1.7"/></svg>
   Imprimir PDF
 </button>
 {% endblock %}
 
 {% block content %}
 
-<!-- Seletor de mês para gráfico de pizza -->
-<div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-  <span style="font-size:12px;color:var(--text3);font-weight:600">Mês de referência (Gerenciadoras):</span>
+<!-- Seletor de mês -->
+<div class="toolbar mb-20">
+  <span class="tb-label">Mês de referência (Gerenciadoras)</span>
   <form method="get" style="display:flex;gap:8px;align-items:center">
-    <select name="periodo" id="periodo_sel" onchange="this.form.submit()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text1);border-radius:6px;padding:5px 10px;font-size:12px">
+    <select name="periodo" id="periodo_sel" onchange="this.form.submit()">
       {% for op in meses_opcoes %}
         <option value="{{ op.val }}" {% if op.sel %}selected{% endif %}>{{ op.label }}</option>
       {% endfor %}
     </select>
   </form>
-  <span style="font-size:11px;color:var(--text3)">Total no período: <strong style="color:var(--text1)">{{ pizza_total }}</strong> OS</span>
+  <span class="tb-total">Total no período <span class="num">{{ pizza_total }}</span> OS</span>
 </div>
 
 <!-- Gráfico de barras: OS por mês -->
-<div class="card" id="card-barras">
+<div class="card mb-20" id="card-barras">
   <div class="card-title">
-    <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><rect x="1" y="8" width="4" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="6" y="4" width="4" height="11" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="11" y="1" width="4" height="14" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+    <svg viewBox="0 0 24 24" fill="none"><path d="M4 20V11M10 20V4M16 20v-6M22 20H2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
     OS Emitidas — Últimos 8 Meses
   </div>
-  <div style="position:relative;height:260px">
+  <div style="position:relative;height:280px">
     <canvas id="chartBarras"></canvas>
   </div>
 </div>
 
 <!-- Gráfico de pizza + tabela -->
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" id="grid-pizza">
+<div class="grid-2" id="grid-pizza">
 
   <div class="card">
     <div class="card-title">
-      <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 8L8 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M8 8L13.5 11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v9l8 .5A9 9 0 1 0 12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
       Gerenciadoras de Risco — {{ mes_sel_label }}
     </div>
-    <div style="position:relative;height:280px;display:flex;align-items:center;justify-content:center">
+    <div style="position:relative;height:300px;display:flex;align-items:center;justify-content:center">
       <canvas id="chartPizza"></canvas>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">Totais por Gerenciadora</div>
-    <table style="width:100%;border-collapse:collapse;font-size:13px">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="1.5" stroke="currentColor" stroke-width="1.7"/><path d="M9 8h2M13 8h2M9 12h2M13 12h2M9 16h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+      Totais por Gerenciadora
+    </div>
+    <table class="totals-table">
       <thead>
-        <tr style="border-bottom:1px solid var(--border)">
-          <th style="text-align:left;padding:6px 8px;color:var(--text3);font-weight:600;font-size:11px;text-transform:uppercase">Gerenciadora</th>
-          <th style="text-align:center;padding:6px 8px;color:var(--text3);font-weight:600;font-size:11px;text-transform:uppercase">Total</th>
-        </tr>
+        <tr><th>Gerenciadora</th><th>Total</th></tr>
       </thead>
       <tbody>
         {% for nome, total in pizza_rows %}
-        <tr style="border-bottom:1px solid var(--border)">
-          <td style="padding:7px 8px;color:var(--text1)">{{ nome }}</td>
-          <td style="padding:7px 8px;text-align:center;font-weight:700;color:var(--text1)">{{ total }}</td>
-        </tr>
+        <tr><td>{{ nome }}</td><td class="num">{{ total }}</td></tr>
         {% empty %}
-        <tr><td colspan="2" style="padding:16px 8px;text-align:center;color:var(--text3)">Nenhuma OS no período</td></tr>
+        <tr><td colspan="2" style="text-align:center;color:var(--text3);padding:18px">Nenhuma OS no período</td></tr>
         {% endfor %}
       </tbody>
       <tfoot>
-        <tr style="border-top:2px solid var(--border)">
-          <td style="padding:8px;font-weight:700;color:var(--text1)">TOTAL</td>
-          <td style="padding:8px;text-align:center;font-weight:700;color:var(--accent)">{{ pizza_total }}</td>
-        </tr>
+        <tr><td>TOTAL</td><td class="num">{{ pizza_total }}</td></tr>
       </tfoot>
     </table>
   </div>
@@ -87,104 +82,100 @@ const MESES_TOTAIS = {{ meses_totais|safe }};
 const PIZZA_LABELS = {{ pizza_labels|safe }};
 const PIZZA_VALUES = {{ pizza_values|safe }};
 
-// ── Paleta de cores para pizza ──────────────────────────────────────────────
-const CORES = [
-  '#3b82f6','#f97316','#eab308','#22c55e','#a855f7',
-  '#ec4899','#06b6d4','#84cc16','#f43f5e','#14b8a6',
-  '#8b5cf6','#fb923c',
-];
+// Paleta harmônica (mesma família de cor) — sem neon
+const CORES = ['#E0884A','#D9B14A','#8FB85E','#4FB6A6','#5B9BD8','#8E8BD6','#D178B0','#DD7B6E','#C9A06A','#6FB0C9','#A88FD0','#E09A6E'];
 
-// ── Gráfico de barras ───────────────────────────────────────────────────────
+function ler(v, f){ return (getComputedStyle(document.documentElement).getPropertyValue(v) || f).trim(); }
+const COR_TXT  = ler('--text2', '#9db0cd');
+const COR_GRID = 'rgba(120,140,170,0.12)';
+const COR_CARD = ler('--bg2', '#1c2230');
+
+Chart.defaults.font.family = "'IBM Plex Sans', system-ui, sans-serif";
+Chart.defaults.color = COR_TXT;
+
+// ── Barras ──
 const ctxBar = document.getElementById('chartBarras').getContext('2d');
 const chartBarObj = new Chart(ctxBar, {
   type: 'bar',
-  data: {
-    labels: MESES_LABELS,
-    datasets: [{
-      label: 'OS Emitidas',
-      data: MESES_TOTAIS,
-      backgroundColor: '#f97316',
-      borderRadius: 4,
-      borderSkipped: false,
-    }]
-  },
+  data: { labels: MESES_LABELS, datasets: [{ label: 'OS Emitidas', data: MESES_TOTAIS, backgroundColor: '#E0884A', borderRadius: 5, maxBarThickness: 34 }] },
   options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: { label: ctx => ` ${ctx.parsed.y} OS` }
-      },
-      datalabels: { display: false },
-    },
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.y + ' OS' } } },
     scales: {
-      x: {
-        ticks: { color: '#9ca3af', font: { size: 10 }, maxRotation: 30 },
-        grid: { color: 'rgba(255,255,255,0.05)' }
-      },
-      y: {
-        beginAtZero: true,
-        ticks: { color: '#9ca3af', stepSize: 1, precision: 0 },
-        grid: { color: 'rgba(255,255,255,0.07)' }
-      }
+      x: { ticks: { color: COR_TXT, font: { size: 11 }, maxRotation: 30 }, grid: { display: false } },
+      y: { beginAtZero: true, ticks: { color: COR_TXT, stepSize: 1, precision: 0 }, grid: { color: COR_GRID } }
     }
   }
 });
 
-// ── Gráfico de pizza ────────────────────────────────────────────────────────
+// ── Pizza (doughnut) ──
 const ctxPizza = document.getElementById('chartPizza').getContext('2d');
 const chartPizzaObj = new Chart(ctxPizza, {
-  type: 'pie',
-  data: {
-    labels: PIZZA_LABELS,
-    datasets: [{
-      data: PIZZA_VALUES,
-      backgroundColor: CORES.slice(0, PIZZA_LABELS.length),
-      borderColor: '#1a1a2e',
-      borderWidth: 2,
-    }]
-  },
+  type: 'doughnut',
+  data: { labels: PIZZA_LABELS, datasets: [{ data: PIZZA_VALUES, backgroundColor: CORES.slice(0, PIZZA_LABELS.length), borderColor: COR_CARD, borderWidth: 2, hoverOffset: 6 }] },
   options: {
-    responsive: true,
-    maintainAspectRatio: false,
+    responsive: true, maintainAspectRatio: false, cutout: '56%',
     plugins: {
-      legend: {
-        position: 'bottom',
-        labels: { color: '#d1d5db', font: { size: 11 }, padding: 12, boxWidth: 12 }
-      },
-      tooltip: {
-        callbacks: {
-          label: ctx => ` ${ctx.label}: ${ctx.parsed} OS`
-        }
-      }
+      legend: { position: 'bottom', labels: { color: COR_TXT, font: { size: 11 }, padding: 12, boxWidth: 9, usePointStyle: true, pointStyle: 'circle' } },
+      tooltip: { callbacks: { label: ctx => ' ' + ctx.label + ': ' + ctx.parsed + ' OS' } }
     }
   }
 });
 
-// ── Ajustar ano ao mudar mês ────────────────────────────────────────────────
-document.querySelector('select[name="mes"]').addEventListener('change', function() {
-  // Recupera ano do option selecionado via data attribute não existe,
-  // então deixa o input oculto com o ano_sel atual (o form trata corretamente)
-});
-
-// ── Cores dos gráficos ──────────────────────────────────────────────────────
+// ── Cores para impressão / tela ──
 function setChartColorsPrint() {
   chartBarObj.options.scales.x.ticks.color = '#111';
   chartBarObj.options.scales.y.ticks.color = '#111';
-  chartBarObj.options.scales.x.grid.color = 'rgba(0,0,0,0.12)';
+  chartBarObj.options.scales.x.grid.color = 'rgba(0,0,0,0.10)';
   chartBarObj.options.scales.y.grid.color = 'rgba(0,0,0,0.12)';
   chartBarObj.update('none');
   chartPizzaObj.options.plugins.legend.labels.color = '#111';
   chartPizzaObj.data.datasets[0].borderColor = '#fff';
   chartPizzaObj.update('none');
 }
-
 function setChartColorsScreen() {
-  chartBarObj.options.scales.x.ticks.color = '#9ca3af';
-  chartBarObj.options.scales.y.ticks.color = '#9ca3af';
-  chartBarObj.options.scales.x.grid.color = 'rgba(255,255,255,0.05)';
-  chartBarObj.options.scales.y.grid.color = 'rgba(255,255,255,0.07)';
+  chartBarObj.options.scales.x.ticks.color = COR_TXT;
+  chartBarObj.options.scales.y.ticks.color = COR_TXT;
+  chartBarObj.options.scales.x.grid.color = COR_GRID;
+  chartBarObj.options.scales.y.grid.color = COR_GRID;
   chartBarObj.update('none');
-  chartPizzaObj.options.plugins.legend.labels.color = '#d1d5db';
-  chartPizzaObj.data.datasets
+  chartPizzaObj.options.plugins.legend.labels.color = COR_TXT;
+  chartPizzaObj.data.datasets[0].borderColor = COR_CARD;
+  chartPizzaObj.update('none');
+}
+
+function imprimirDashboard() {
+  setChartColorsPrint();
+  setTimeout(function () {
+    window.print();
+    setTimeout(setChartColorsScreen, 1500);
+  }, 300);
+}
+window.addEventListener('beforeprint', setChartColorsPrint);
+window.addEventListener('afterprint', setChartColorsScreen);
+</script>
+
+<style>
+@media print {
+  :root {
+    --text1: #111 !important; --text2: #333 !important; --text3: #555 !important;
+    --border: #ccc !important; --bg0: #fff !important; --bg1: #fff !important;
+    --bg2: #fff !important; --bg3: #f5f5f5 !important; --accent: #c05a00 !important;
+  }
+  .sidebar, .topbar, .topbar-actions, .btn, select, form, button { display: none !important; }
+  .main, .main-content { margin: 0 !important; padding: 0 !important; }
+  body { background: #fff !important; color: #111 !important; background-image: none !important; }
+  .card { background: #fff !important; border: 1px solid #ddd !important; box-shadow: none !important; break-inside: avoid; }
+  .card-title { color: #111 !important; }
+  td, th { color: #111 !important; border-color: #ccc !important; }
+  #grid-pizza { grid-template-columns: 1fr 1fr !important; }
+
+  body::before {
+    content: 'JR SEGURANÇA E VIGILÂNCIA PATRIMONIAL — Relatório Operacional';
+    display: block; text-align: center; font-size: 15px; font-weight: 700;
+    margin-bottom: 10px; color: #111; letter-spacing: .02em;
+  }
+}
+</style>
+
+{% endblock %}

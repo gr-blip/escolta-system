@@ -1,18 +1,19 @@
-﻿{% extends 'cadastros/base.html' %}
+{% extends 'cadastros/base.html' %}
 {% block title %}Agentes{% endblock %}
 {% block page_title %}Agentes{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / Agentes{% endblock %}
-{% block topbar_actions %}<a href="{% url 'agente_create' %}" class="btn btn-primary"><svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Novo Agente</a>{% endblock %}
+{% block topbar_actions %}<a href="{% url 'agente_create' %}" class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Novo Agente</a>{% endblock %}
 
 {% block content %}
 <div class="search-bar">
-  <form method="get" style="display:flex;gap:10px;flex:1">
+  <form method="get">
     <input type="text" name="q" value="{{ q }}" placeholder="Buscar por nome, CPF ou RG...">
     <button type="submit" class="btn btn-secondary">Buscar</button>
     {% if q %}<a href="{% url 'agente_list' %}" class="btn btn-secondary">Limpar</a>{% endif %}
   </form>
 </div>
-<div class="card" style="padding:0">
+
+<div class="card" style="padding:0;overflow:hidden">
   <div class="table-wrap">
     <table>
       <thead>
@@ -24,35 +25,34 @@
       <tbody>
         {% for a in agentes %}
         <tr>
-          <td><strong style="color:var(--text)">{{ a.nome }}</strong></td>
-          <td style="color:var(--text2);font-family:monospace">{{ a.cpf }}</td>
-          <td style="color:var(--text2)">{{ a.telefone }}</td>
-          <td style="color:var(--text2)">{{ a.get_funcao_display }}</td>
-          <td style="color:var(--text2)">{{ a.cnh_validade|date:"d/m/Y"|default:"—" }}</td>
-          <td style="color:var(--text2)">{{ a.cnv_validade|date:"d/m/Y"|default:"—" }}</td>
-          <td style="color:var(--text2)">{{ a.curso_validade|date:"d/m/Y"|default:"—" }}</td>
+          <td><strong>{{ a.nome }}</strong></td>
+          <td class="mono">{{ a.cpf }}</td>
+          <td>{{ a.telefone }}</td>
+          <td>{{ a.get_funcao_display }}</td>
+          <td class="mono">{{ a.cnh_validade|date:"d/m/Y"|default:"—" }}</td>
+          <td class="mono">{{ a.cnv_validade|date:"d/m/Y"|default:"—" }}</td>
+          <td class="mono">{{ a.curso_validade|date:"d/m/Y"|default:"—" }}</td>
           <td>
             {% if a.status == 'ativo' %}<span class="badge badge-green">Ativo</span>
             {% elif a.status == 'afastado' %}<span class="badge badge-amber">Afastado</span>
             {% else %}<span class="badge badge-gray">Inativo</span>{% endif %}
           </td>
           <td>
-            <div style="display:flex;gap:4px">
+            <div class="actions-cell">
               <a href="{% url 'agente_edit' a.pk %}" class="btn-icon" title="Editar">
-                <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M11 2l3 3L5 14H2v-3L11 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+                <svg viewBox="0 0 24 24" fill="none"><path d="M4 20h4L19 9l-4-4L4 16v4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 6l4 4" stroke="currentColor" stroke-width="1.7"/></svg>
               </a>
-              <a href="{% url 'agente_delete' a.pk %}" class="btn-icon" title="Excluir" style="color:var(--red)">
-                <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M3 4h10M6 4V2h4v2M5 4l1 10h4l1-10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <a href="{% url 'agente_delete' a.pk %}" class="btn-icon danger" title="Excluir">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M9 6V4h6v2M6 6l1 14h10l1-14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </a>
             </div>
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="8" style="text-align:center;color:var(--text3);padding:32px">Nenhum agente encontrado.</td></tr>
+        <tr><td colspan="9" class="empty">Nenhum agente encontrado.</td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
 {% endblock %}
-

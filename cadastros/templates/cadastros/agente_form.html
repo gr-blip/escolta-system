@@ -1,16 +1,16 @@
-﻿{% extends 'cadastros/base.html' %}
+{% extends 'cadastros/base.html' %}
 {% block title %}{{ titulo }}{% endblock %}
 {% block page_title %}{{ titulo }}{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / <a href="{% url 'agente_list' %}">Agentes</a> / {{ titulo }}{% endblock %}
 {% block topbar_actions %}<a href="{% url 'agente_list' %}" class="btn btn-secondary">← Voltar</a>{% endblock %}
 
 {% block content %}
-<form method="post" enctype="multipart/form-data">
+<form method="post" enctype="multipart/form-data" style="max-width:920px">
   {% csrf_token %}
 
   <div class="card">
     <div class="card-title">
-      <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.7"/><path d="M5 20c0-3.6 3.1-5.5 7-5.5s7 1.9 7 5.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
       Identificação pessoal
     </div>
     <div class="form-grid form-grid-2">
@@ -28,7 +28,7 @@
 
   <div class="card">
     <div class="card-title">
-      <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/><line x1="5" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.2"/><line x1="5" y1="9" x2="9" y2="9" stroke="currentColor" stroke-width="1.2"/></svg>
+      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M7 9h6M7 13h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
       Habilitações
     </div>
     <div class="form-grid form-grid-3">
@@ -43,7 +43,10 @@
   </div>
 
   <div class="card">
-    <div class="card-title">Status e função</div>
+    <div class="card-title">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8 3v6c0 5-3.4 8.5-8 11-4.6-2.5-8-6-8-11V6l8-3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+      Status e função
+    </div>
     <div class="form-grid form-grid-2">
       <div class="field"><label>Função *</label>{{ form.funcao }}</div>
       <div class="field"><label>Status *</label>{{ form.status }}</div>
@@ -51,18 +54,16 @@
     </div>
   </div>
 
-
   {% if form.errors %}
-  <div style="background:var(--red-bg);border:1px solid #3a1515;color:var(--red);border-radius:8px;padding:12px;margin-top:16px;font-size:13px">
+  <div class="form-error">
     {% for field in form %}{% for error in field.errors %}<div>{{ field.label }}: {{ error }}</div>{% endfor %}{% endfor %}
     {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
   </div>
   {% endif %}
 
-  <div style="display:flex;gap:10px;margin-top:16px">
+  <div class="form-actions">
     <button type="submit" class="btn btn-primary">Salvar Agente</button>
     <a href="{% url 'agente_list' %}" class="btn btn-secondary">Cancelar</a>
   </div>
 </form>
 {% endblock %}
-

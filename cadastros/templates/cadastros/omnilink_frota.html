@@ -6,32 +6,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rastreamento — JR Segurança</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;background:#f7f7f5;color:#1a1a1a;font-size:13px;height:100vh;overflow:hidden}
+body{font-family:'IBM Plex Sans',system-ui,-apple-system,sans-serif;background:#eef1f6;color:#16203a;font-size:13px;height:100vh;overflow:hidden}
 
 /* ── Header ── */
-header{background:#fff;border-bottom:1px solid #e4e4de;padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between;z-index:1000;position:relative;gap:12px}
-.hd-left{display:flex;align-items:center;gap:12px;min-width:0}
-.hd-logo{font-size:13px;font-weight:700;color:#111;white-space:nowrap;letter-spacing:.3px}
-.hd-logo span{color:#2563eb}
-a.btn-voltar{padding:5px 12px;border:1px solid #ddd;border-radius:6px;background:#fff;font-size:12px;cursor:pointer;color:#555;font-weight:500;text-decoration:none;white-space:nowrap}
-a.btn-voltar:hover{background:#f0f0ec;color:#111}
+header{background:#13181f;border-bottom:1px solid #232b38;padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;z-index:1000;position:relative;gap:12px}
+.hd-left{display:flex;align-items:center;gap:14px;flex-shrink:0}
+.hd-logo{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;color:#fff;white-space:nowrap}
+.hd-logo img{height:30px;width:auto}
+.hd-logo .rt{color:#e0884a;font-weight:600;letter-spacing:.02em}
+a.btn-voltar{padding:6px 13px;border:1px solid #2c3545;border-radius:7px;background:#1c2330;font-size:12px;cursor:pointer;color:#aeb6c9;font-weight:600;text-decoration:none;white-space:nowrap}
+a.btn-voltar:hover{background:#252e3d;color:#fff}
 
 /* ── Summary dots ── */
-.summary{display:flex;gap:12px;font-size:12px;align-items:center;flex-shrink:0}
+.summary{display:flex;gap:14px;font-size:12px;align-items:center;flex-shrink:1;min-width:0;overflow:hidden;flex-wrap:wrap}
 .summary-item{display:flex;align-items:center;gap:5px;white-space:nowrap}
 .dot{width:10px;height:10px;border-radius:50%;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15);flex-shrink:0}
 .dot-red{background:#dc2626}.dot-yellow{background:#eab308}.dot-green{background:#16a34a}.dot-gray{background:#9ca3af}.dot-blue{background:#2563eb}
 
 /* ── Buttons ── */
-button.btn{padding:5px 12px;border:1px solid #ddd;border-radius:6px;background:#fff;font-size:12px;cursor:pointer;color:#333;font-weight:500;white-space:nowrap}
-button.btn:hover{background:#f0f0ec}
-button.btn.primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
-button.btn.primary:hover{background:#333}
+button.btn{padding:6px 13px;border:1px solid #2c3545;border-radius:7px;background:#1c2330;font-size:12px;cursor:pointer;color:#cfd5e2;font-weight:600;white-space:nowrap}
+button.btn:hover{background:#252e3d;color:#fff}
+button.btn.primary{background:#c2410c;color:#fff;border-color:transparent}
+button.btn.primary:hover{background:#a8380a}
 #countdown{font-size:11px;color:#16a34a;font-weight:500;min-width:40px;text-align:right}
-#last-update{font-size:11px;color:#aaa;white-space:nowrap}
+#last-update{font-size:11px;color:#7f8aa0;white-space:nowrap}
 
 /* ── Layout ── */
 .layout{display:flex;height:calc(100vh - 52px)}
@@ -47,7 +49,7 @@ button.btn.primary:hover{background:#333}
 .sb-item.verde{border-left-color:#16a34a}
 .sb-item.cinza{border-left-color:#9ca3af}
 .sb-item.azul{border-left-color:#2563eb}
-.sb-placa{font-weight:700;letter-spacing:.5px;font-size:14px}
+.sb-placa{font-family:'IBM Plex Mono',monospace;font-weight:600;letter-spacing:.04em;font-size:14px}
 .sb-status{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;letter-spacing:.4px;margin:2px 0}
 .sb-st-amarela{background:#fef3c7;color:#92400e}
 .sb-st-verde{background:#dcfce7;color:#15803d}
@@ -76,11 +78,11 @@ button.btn.primary:hover{background:#333}
 body.dark{background:#0f1419;color:#e6e6e6}
 body.dark header{background:#1a1f24;border-bottom-color:#2a3037}
 body.dark .hd-logo{color:#fff}
-body.dark a.btn-voltar{background:#1a1f24;color:#ccc;border-color:#2a3037}
+body.dark a.btn-voltar{background:#1c2330;color:#aeb6c9;border-color:#2c3545}
 body.dark a.btn-voltar:hover{background:#2a3037;color:#fff}
-body.dark button.btn{background:#1a1f24;color:#e6e6e6;border-color:#2a3037}
+body.dark button.btn{background:#1c2330;color:#cfd5e2;border-color:#2c3545}
 body.dark button.btn:hover{background:#2a3037}
-body.dark button.btn.primary{background:#fff;color:#0f1419;border-color:#fff}
+body.dark button.btn.primary{background:#c2410c;color:#fff;border-color:transparent}
 body.dark #sidebar{background:#1a1f24;border-left-color:#2a3037}
 body.dark .sb-header{background:#1a1f24;border-bottom-color:#2a3037}
 body.dark .sb-title{color:#666}
@@ -119,7 +121,7 @@ body.dark .sb-os-info .os-eq{color:#9ca3af}
 <header>
   <div class="hd-left">
     <a href="{% url 'dashboard' %}" class="btn-voltar">← Sistema</a>
-    <div class="hd-logo">JR <span>SEGURANÇA</span> · Rastreamento</div>
+    <div class="hd-logo">JR&nbsp;SEGURANÇA <span class="rt">· Rastreamento</span></div>
   </div>
 
   <div class="summary" id="summary">

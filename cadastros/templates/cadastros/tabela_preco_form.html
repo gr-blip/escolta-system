@@ -1,12 +1,13 @@
-﻿{% extends 'cadastros/base.html' %}
+{% extends 'cadastros/base.html' %}
 {% block title %}{{ titulo }}{% endblock %}
 {% block page_title %}{{ titulo }}{% endblock %}
-{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> › <a href="{% url 'tabela_preco_list' %}">Tabelas de Preço</a> › {{ titulo }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / <a href="{% url 'tabela_preco_list' %}">Tabelas de Preço</a> / {{ titulo }}{% endblock %}
+{% block topbar_actions %}<a href="{% url 'tabela_preco_list' %}" class="btn btn-secondary">← Voltar</a>{% endblock %}
 
 {% block content %}
-<div class="card" style="max-width:860px">
-  <form method="post">
-    {% csrf_token %}
+<form method="post" style="max-width:860px">
+  {% csrf_token %}
+  <div class="card">
     <div class="form-grid form-grid-2">
 
       <div class="form-section">Identificação</div>
@@ -46,47 +47,17 @@
 
       <div class="form-section">Vigência</div>
 
-      <div class="field">
-        <label>Início do Contrato</label>
-        <input type="date" name="inicio_contrato" value="{{ tabela.inicio_contrato|date:'Y-m-d'|default:'' }}">
-      </div>
-
-      <div class="field">
-        <label>Último Reajuste</label>
-        <input type="date" name="ultimo_reajuste" value="{{ tabela.ultimo_reajuste|date:'Y-m-d'|default:'' }}">
-      </div>
-
-      <div class="field">
-        <label>Próximo Reajuste</label>
-        <input type="date" name="proximo_reajuste" value="{{ tabela.proximo_reajuste|date:'Y-m-d'|default:'' }}">
-      </div>
+      <div class="field"><label>Início do Contrato</label><input type="date" name="inicio_contrato" value="{{ tabela.inicio_contrato|date:'Y-m-d'|default:'' }}"></div>
+      <div class="field"><label>Último Reajuste</label><input type="date" name="ultimo_reajuste" value="{{ tabela.ultimo_reajuste|date:'Y-m-d'|default:'' }}"></div>
+      <div class="field"><label>Próximo Reajuste</label><input type="date" name="proximo_reajuste" value="{{ tabela.proximo_reajuste|date:'Y-m-d'|default:'' }}"></div>
 
       <div class="form-section">Valores</div>
 
-      <div class="field">
-        <label>Valor da Escolta (R$) *</label>
-        <input type="text" name="valor_escolta" value="{{ tabela.valor_escolta|default:'0.00' }}" required placeholder="0,00">
-      </div>
-
-      <div class="field">
-        <label>Franquia KM</label>
-        <input type="number" name="franquia_km" value="{{ tabela.franquia_km|default:0 }}" min="0">
-      </div>
-
-      <div class="field">
-        <label>Franquia Horas (HHH:MM)</label>
-        <input type="text" name="franquia_horas" value="{{ tabela.franquia_horas|default:'000:00' }}" placeholder="000:00" maxlength="6">
-      </div>
-
-      <div class="field">
-        <label>Excedente por KM (R$)</label>
-        <input type="text" name="excedente_km" value="{{ tabela.excedente_km|default:'0.00' }}" placeholder="0,00">
-      </div>
-
-      <div class="field">
-        <label>Excedente por Hora (R$)</label>
-        <input type="text" name="excedente_hora" value="{{ tabela.excedente_hora|default:'0.00' }}" placeholder="0,00">
-      </div>
+      <div class="field"><label>Valor da Escolta (R$) *</label><input type="text" name="valor_escolta" value="{{ tabela.valor_escolta|default:'0.00' }}" required placeholder="0,00"></div>
+      <div class="field"><label>Franquia KM</label><input type="number" name="franquia_km" value="{{ tabela.franquia_km|default:0 }}" min="0"></div>
+      <div class="field"><label>Franquia Horas (HHH:MM)</label><input type="text" name="franquia_horas" value="{{ tabela.franquia_horas|default:'000:00' }}" placeholder="000:00" maxlength="6"></div>
+      <div class="field"><label>Excedente por KM (R$)</label><input type="text" name="excedente_km" value="{{ tabela.excedente_km|default:'0.00' }}" placeholder="0,00"></div>
+      <div class="field"><label>Excedente por Hora (R$)</label><input type="text" name="excedente_hora" value="{{ tabela.excedente_hora|default:'0.00' }}" placeholder="0,00"></div>
 
       <div class="form-section">Pedágio</div>
 
@@ -98,20 +69,14 @@
         </select>
       </div>
 
-      <div id="pedagio_fields" class="field-full" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div class="field">
-          <label>Pedágio Fixo (R$)</label>
-          <input type="text" name="pedagio_fixo" value="{{ tabela.pedagio_fixo|default:'0.00' }}" placeholder="0,00">
-        </div>
-        <div class="field">
-          <label>% sobre Escolta</label>
-          <input type="text" name="pedagio_percent" value="{{ tabela.pedagio_percent|default:'0.00' }}" placeholder="0,00">
-        </div>
+      <div id="pedagio_fields" class="field-full" style="display:grid;grid-template-columns:1fr 1fr;gap:15px 18px">
+        <div class="field"><label>Pedágio Fixo (R$)</label><input type="text" name="pedagio_fixo" value="{{ tabela.pedagio_fixo|default:'0.00' }}" placeholder="0,00"></div>
+        <div class="field"><label>% sobre Escolta</label><input type="text" name="pedagio_percent" value="{{ tabela.pedagio_percent|default:'0.00' }}" placeholder="0,00"></div>
       </div>
 
     </div>
 
-    <div style="margin-top:20px;display:flex;gap:10px">
+    <div class="form-actions">
       <button type="submit" class="btn btn-primary">Salvar Tabela</button>
       <a href="{% url 'tabela_preco_list' %}" class="btn btn-secondary">Cancelar</a>
     </div>
@@ -126,4 +91,3 @@ function togglePedagio() {
 togglePedagio();
 </script>
 {% endblock %}
-

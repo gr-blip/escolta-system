@@ -1,16 +1,14 @@
-﻿{% extends 'cadastros/base.html' %}
+{% extends 'cadastros/base.html' %}
 {% block title %}Clientes{% endblock %}
 {% block page_title %}Clientes{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / Clientes{% endblock %}
-{% block topbar_actions %}{% if is_admin %}<a href="{% url 'cliente_create' %}" class="btn btn-primary"><svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Novo Cliente</a>{% endif %}{% endblock %}
+{% block topbar_actions %}{% if is_admin %}<a href="{% url 'cliente_create' %}" class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Novo Cliente</a>{% endif %}{% endblock %}
 
 {% block content %}
-<div class="search-bar">
-  <form method="get" style="display:flex;gap:10px;flex:1;align-items:center">
+<div class="search-bar" style="justify-content:space-between">
+  <form method="get">
     <input type="text" name="q" value="{{ q }}" placeholder="Buscar por razão social ou CNPJ...">
-    {% if mostrar_inativos %}
-      <input type="hidden" name="inativos" value="1">
-    {% endif %}
+    {% if mostrar_inativos %}<input type="hidden" name="inativos" value="1">{% endif %}
     <button type="submit" class="btn btn-secondary">Buscar</button>
     {% if q %}<a href="{% url 'cliente_list' %}{% if mostrar_inativos %}?inativos=1{% endif %}" class="btn btn-secondary">Limpar</a>{% endif %}
   </form>
@@ -18,61 +16,59 @@
     {% if mostrar_inativos %}
       <a href="{% url 'cliente_list' %}{% if q %}?q={{ q }}{% endif %}" class="btn btn-secondary">Mostrar apenas ativos</a>
     {% else %}
-      <a href="?inativos=1{% if q %}&q={{ q }}{% endif %}" class="btn btn-secondary" style="opacity:.7">Mostrar inativos</a>
+      <a href="?inativos=1{% if q %}&q={{ q }}{% endif %}" class="btn btn-secondary">Mostrar inativos</a>
     {% endif %}
   </div>
 </div>
-<div class="card" style="padding:0">
+
+<div class="card" style="padding:0;overflow:hidden">
   <div class="table-wrap">
     <table>
       <thead>
-        <tr><th>Razão Social</th><th>Nome Fantasia</th><th>CNPJ</th><th>Cidade / UF</th><th>IE / IM</th><th>Status</th><th style="width:90px">Ações</th></tr>
+        <tr><th>Razão Social</th><th>Nome Fantasia</th><th>CNPJ</th><th>Cidade / UF</th><th>IE / IM</th><th>Status</th><th style="width:120px">Ações</th></tr>
       </thead>
       <tbody>
         {% for c in clientes %}
-        <tr style="{% if not c.ativo %}opacity:.5{% endif %}">
-          <td><strong style="color:var(--text)">{{ c.razao_social }}</strong></td>
-          <td style="color:var(--text2)">{{ c.nome_fantasia|default:"—" }}</td>
-          <td style="font-family:monospace;color:var(--text2)">{{ c.cnpj }}</td>
-          <td style="color:var(--text2)">{{ c.cidade_uf|default:"—" }}</td>
-          <td style="color:var(--text2)">{{ c.inscricao_estadual|default:"—" }}</td>
+        <tr style="{% if not c.ativo %}opacity:.55{% endif %}">
+          <td><strong>{{ c.razao_social }}</strong></td>
+          <td>{{ c.nome_fantasia|default:"—" }}</td>
+          <td class="mono">{{ c.cnpj }}</td>
+          <td>{{ c.cidade_uf|default:"—" }}</td>
+          <td>{{ c.inscricao_estadual|default:"—" }}</td>
           <td>
-            {% if c.ativo %}
-              <span style="color:var(--green,#22c55e);font-size:12px;font-weight:600">● Ativo</span>
-            {% else %}
-              <span style="color:var(--red);font-size:12px;font-weight:600">● Inativo</span>
-            {% endif %}
+            {% if c.ativo %}<span class="badge badge-green">Ativo</span>
+            {% else %}<span class="badge badge-gray">Inativo</span>{% endif %}
           </td>
           <td>
-            <div style="display:flex;gap:4px">
+            <div class="actions-cell">
               {% if is_admin %}
-              <a href="{% url 'cliente_edit' c.pk %}" class="btn-icon" title="Editar"><svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M11 2l3 3L5 14H2v-3L11 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></a>
+              <a href="{% url 'cliente_edit' c.pk %}" class="btn-icon" title="Editar">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M4 20h4L19 9l-4-4L4 16v4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 6l4 4" stroke="currentColor" stroke-width="1.7"/></svg>
+              </a>
               <form method="post" action="{% url 'cliente_delete' c.pk %}" style="display:inline" onsubmit="return confirm('{% if c.ativo %}Inativar{% else %}Reativar{% endif %} o cliente {{ c.razao_social }}?')">
                 {% csrf_token %}
-                <button type="submit" class="btn-icon" title="{% if c.ativo %}Inativar{% else %}Reativar{% endif %}" style="color:{% if c.ativo %}var(--red){% else %}var(--green,#22c55e){% endif %};background:none;border:none;cursor:pointer;padding:4px">
+                <button type="submit" class="btn-icon" title="{% if c.ativo %}Inativar{% else %}Reativar{% endif %}">
                   {% if c.ativo %}
-                    <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M5 8h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M8 12h8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
                   {% else %}
-                    <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M6 8l2 2 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M8 12l3 3 5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
                   {% endif %}
                 </button>
               </form>
-              <a href="{% url 'cliente_deletar_definitivo' c.pk %}" class="btn-icon" title="Excluir definitivamente"
-                 style="color:#dc2626;background:none;border:none;cursor:pointer;padding:4px;display:inline-flex;align-items:center">
-                <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><polyline points="3,5 13,5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M6 5V3h4v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M5 5l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <a href="{% url 'cliente_deletar_definitivo' c.pk %}" class="btn-icon danger" title="Excluir definitivamente">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M9 6V4h6v2M6 6l1 14h10l1-14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </a>
               {% else %}
-              <span style="color:var(--text3);font-size:11px;padding:4px">—</span>
+              <span style="color:var(--text3);font-size:11px">—</span>
               {% endif %}
             </div>
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px">Nenhum cliente encontrado.</td></tr>
+        <tr><td colspan="7" class="empty">Nenhum cliente encontrado.</td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
 {% endblock %}
-

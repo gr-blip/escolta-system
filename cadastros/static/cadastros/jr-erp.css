@@ -157,9 +157,18 @@ body {
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  position: sticky;
+  /* Fixa de verdade: imune a overflow-x:hidden de elementos-pai */
+  position: fixed;
   top: 0;
+  left: 0;
   height: 100vh;
+  z-index: 50;
+}
+
+/* Anula gradiente escuro hardcoded do style.css no logo da sidebar */
+.sidebar-logo {
+  background: var(--bg1) !important;
+  background-image: none !important;
 }
 
 .brand {
@@ -168,7 +177,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 14px 20px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: none;
 }
 .brand-logo {
   height: 62px;
@@ -177,26 +186,51 @@ body {
   filter: drop-shadow(0 2px 8px rgba(0,0,0,.4));
 }
 
-.nav { padding: 14px 12px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
-.nav-group-label {
-  font-size: 10px; letter-spacing: .09em; text-transform: uppercase;
-  color: var(--text3); font-weight: 600;
-  padding: 14px 12px 6px;
+.nav { padding: 10px 10px 16px; display: flex; flex-direction: column; gap: 1px; overflow-y: auto; }
+
+/* Grupo sanfona */
+.nav-group { display: flex; flex-direction: column; }
+.nav-group-toggle {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 10px 12px; margin-top: 4px;
+  background: none; border: none; cursor: pointer;
+  color: var(--text3); font-family: var(--font);
+  font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  border-radius: var(--radius-sm); transition: color .14s, background .14s;
 }
+.nav-group-toggle > svg.lead { width: 15px; height: 15px; opacity: .8; }
+.nav-group-toggle:hover { color: var(--text1); background: var(--bg2); }
+.nav-group-toggle .chev {
+  margin-left: auto; width: 14px; height: 14px; color: var(--text3);
+  transition: transform .22s ease;
+}
+.nav-group.open > .nav-group-toggle { color: var(--text1); }
+.nav-group.open > .nav-group-toggle .chev { transform: rotate(90deg); }
+
+.nav-sub {
+  overflow: hidden; max-height: 0;
+  transition: max-height .26s ease;
+}
+.nav-group.open > .nav-sub { max-height: 420px; }
+.nav-sub > div { display: flex; flex-direction: column; gap: 1px; padding: 1px 0 4px 6px; }
+
 .nav-item {
   display: flex; align-items: center; gap: 11px;
-  padding: 9px 12px; border-radius: var(--radius-sm);
+  padding: 8px 12px; border-radius: var(--radius-sm);
   color: var(--text2); text-decoration: none;
-  font-size: 13.5px; font-weight: 500;
-  cursor: pointer; border: 1px solid transparent;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; position: relative;
   transition: background .14s, color .14s;
 }
-.nav-item svg { width: 17px; height: 17px; opacity: .85; flex-shrink: 0; }
+.nav-item svg { width: 16px; height: 16px; opacity: .8; flex-shrink: 0; }
 .nav-item:hover { background: var(--bg2); color: var(--text1); }
 .nav-item.active {
   background: var(--accent-soft);
-  color: var(--text1);
-  border-color: var(--accent-line);
+  color: var(--text1); font-weight: 600;
+}
+.nav-item.active::before {
+  content: ""; position: absolute; left: 0; top: 7px; bottom: 7px;
+  width: 3px; border-radius: 0 3px 3px 0; background: var(--accent);
 }
 .nav-item.active svg { color: var(--accent); opacity: 1; }
 
@@ -212,17 +246,19 @@ body {
 }
 
 /* ── Main ── */
-.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; margin-left: var(--sidebar-w); }
 
 .topbar {
   height: var(--topbar-h);
   border-bottom: 1px solid var(--border);
-  background: color-mix(in oklch, var(--bg1) 86%, transparent);
+  background: color-mix(in oklch, var(--bg1) 92%, transparent);
   backdrop-filter: blur(8px);
-  position: sticky; top: 0; z-index: 20;
+  position: fixed; top: 0; left: var(--sidebar-w); right: 0; z-index: 30;
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 28px;
 }
+/* Compensa a altura do topbar fixo */
+.content { padding-top: calc(var(--topbar-h) + 20px); }
 .topbar-left { display: flex; flex-direction: column; gap: 1px; }
 .page-title { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; }
 .breadcrumb { font-size: 12px; color: var(--text3); display: flex; gap: 6px; }
@@ -230,7 +266,7 @@ body {
 .breadcrumb a:hover { color: var(--text2); }
 .topbar-actions { display: flex; align-items: center; gap: 10px; }
 
-.content { padding: 24px 28px 48px; max-width: 1320px; width: 100%; }
+.content { padding: 24px 28px 48px; width: 100%; margin: 0; max-width: none; }
 
 /* ============================================================
    COMPONENTES
@@ -241,14 +277,18 @@ body {
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 18px 20px;
+  padding: 16px 18px;
   box-shadow: var(--shadow);
 }
+/* Anula a regra do style.css que empurra o 2º card em grids */
+.card + .card { margin-top: 0; }
 .card-title {
   display: flex; align-items: center; gap: 9px;
   font-size: 13px; font-weight: 600; color: var(--text2);
   letter-spacing: .005em;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 .card-title svg { width: 15px; height: 15px; color: var(--text3); }
 
@@ -310,14 +350,14 @@ body {
 .badge-finalizada { color: var(--green);  background: var(--green-soft);  border-color: oklch(0.72 0.13 158 / 0.34); font-weight: 700; }
 
 /* Tables */
-.table-wrap { overflow-x: auto; margin: 0 -4px; }
+.table-wrap { overflow-x: hidden; margin: 0; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 thead th {
   text-align: left; padding: 8px 10px;
   font-size: 10.5px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase;
   color: var(--text3); border-bottom: 1px solid var(--border); white-space: nowrap;
 }
-tbody td { padding: 11px 10px; border-bottom: 1px solid var(--border); color: var(--text2); white-space: nowrap; }
+tbody td { padding: 9px 8px; border-bottom: 1px solid var(--border); color: var(--text2); }
 tbody tr:last-child td { border-bottom: none; }
 tbody tr { transition: background .12s; }
 tbody tr:hover { background: var(--bg-hover); }
@@ -343,6 +383,8 @@ td strong { color: var(--text1); font-weight: 600; }
   border-color: transparent;
 }
 .btn-primary:hover { background: oklch(0.76 0.165 52); }
+.btn-sm { padding: 5px 10px; font-size: 12px; gap: 5px; }
+.btn-sm svg { width: 13px; height: 13px; }
 
 /* Inputs (controles avulsos: toolbar, filtros) */
 input[type="date"], select, .input {
@@ -465,9 +507,9 @@ form > .card { margin-bottom: 16px; }
 .section-ico svg { width: 15px; height: 15px; }
 
 /* Grids */
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.grid-alerts { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
-.mb-20 { margin-bottom: 20px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+.grid-alerts { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; align-items: start; }
+.mb-20 { margin-bottom: 16px; }
 
 /* Alert card — sem borda colorida à esquerda; usa header com ícone */
 .alert-card .alert-head {

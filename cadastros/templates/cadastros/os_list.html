@@ -1,4 +1,4 @@
-﻿{% extends 'cadastros/base.html' %}
+{% extends 'cadastros/base.html' %}
 {% block title %}Ordens de Serviço{% endblock %}
 {% block page_title %}Ordens de Serviço{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / Operacional / Ordens de Serviço{% endblock %}
@@ -29,7 +29,7 @@
     <div id="print-area" style="background:#fff;border-radius:8px;overflow:hidden"></div>
   </div>
   <div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:12px;z-index:10000">
-    <button onclick="window.print()" style="background:#1a56db;color:#fff;border:none;padding:11px 32px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.4)">Imprimir / Salvar PDF</button>
+    <button onclick="window.print()" style="background:var(--accent);color:#1a1205;border:none;padding:11px 32px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.4)">Imprimir / Salvar PDF</button>
     <button onclick="document.getElementById('modal-print').style.display='none'" style="background:#374151;color:#fff;border:none;padding:11px 22px;border-radius:8px;font-size:14px;cursor:pointer">Fechar</button>
   </div>
 </div>
@@ -38,9 +38,9 @@
 <div id="toast-copy" style="display:none;position:fixed;bottom:28px;right:28px;background:#16a34a;color:#fff;padding:11px 22px;border-radius:8px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.3)">Copiado para a area de transferencia!</div>
 
 <style>
-.badge-orange    { background:#2a1200; color:#f97316; border:1px solid #4a2200; }
-.badge-purple    { background:#1e1030; color:#a855f7; border:1px solid #3a1a60; }
-.badge-finalizada{ background:#0f2a1a; color:#22c55e; border:1px solid #1a4d2a; font-weight:700; }
+.badge-orange    { background:var(--accent-soft); color:var(--accent); border:1px solid var(--accent-line); }
+.badge-purple    { background:var(--purple-soft); color:var(--purple); border:1px solid oklch(0.66 0.15 300 / .32); }
+.badge-finalizada{ background:var(--green-soft); color:var(--green); border:1px solid oklch(0.72 0.13 158 / .34); font-weight:700; }
 
 /* ============================================================
    Barra de filtros: altura padronizada (36px) pra todos os
@@ -396,27 +396,38 @@ document.addEventListener('DOMContentLoaded', function () {
 <div class="card" style="padding:0">
   {% if ordens %}
   <div class="table-wrap">
-    <table>
+    <table style="font-size:12px;table-layout:fixed;width:100%">
+      <colgroup>
+        <col style="width:108px">  <!-- Nº OS -->
+        <col style="width:13%">    <!-- Cliente -->
+        <col style="width:8%">     <!-- Solicitante -->
+        <col style="width:22%">    <!-- Origem → Destino -->
+        <col style="width:78px">   <!-- Tipo -->
+        <col style="width:114px">  <!-- Previsão Início -->
+        <col style="width:10%">    <!-- Equipe -->
+        <col style="width:130px">  <!-- Status -->
+        <col style="width:74px">   <!-- Ações -->
+      </colgroup>
       <thead>
         <tr>
-          <th>N OS</th>
+          <th>Nº OS</th>
           <th>Cliente</th>
           <th>Solicitante</th>
-          <th>Origem -> Destino</th>
+          <th>Origem → Destino</th>
           <th>Tipo</th>
-          <th>Previsao Inicio</th>
+          <th>Previsão Início</th>
           <th>Equipe</th>
           <th>Status</th>
-          <th>Acoes</th>
+          <th>Ações</th>
         </tr>
       </thead>
       <tbody>
         {% for o in ordens %}
         <tr>
-          <td><strong style="color:var(--blue-light)">OS-{{ o.numero }}</strong></td>
-          <td style="color:var(--text)">{{ o.cliente.razao_social }}</td>
-          <td style="color:var(--text2)">{{ o.solicitante|default:"---" }}</td>
-          <td style="font-size:12px">
+          <td style="white-space:nowrap"><strong style="color:var(--blue-light)">OS-{{ o.numero }}</strong></td>
+          <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)" title="{{ o.cliente.razao_social }}">{{ o.cliente.razao_social }}</td>
+          <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2)" title="{{ o.solicitante }}">{{ o.solicitante|default:"---" }}</td>
+          <td style="font-size:12px;word-break:break-word;white-space:normal">
             {% if o.cidade_origem %}
             <span style="color:var(--text)">{{ o.cidade_origem }}/{{ o.uf_origem }}</span>
             <span style="color:var(--text3)"> -> </span>
