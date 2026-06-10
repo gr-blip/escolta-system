@@ -193,7 +193,7 @@
             {% else %}—{% endif %}
           </td>
           <td style="font-size:12px;font-family:var(--mono);white-space:nowrap">
-            {{ b.os.snap_viatura_placa|default:b.os.equipe.viatura.placa|default:"—" }}
+            {% if b.os.snap_viatura_placa %}{{ b.os.snap_viatura_placa }}{% else %}—{% endif %}
           </td>
           <td style="color:var(--text2)">{{ b.os.previsao_inicio|date:"d/m/Y" }}</td>
           <td style="color:var(--text2)">{{ b.tabela_preco.nome|default:"—" }}</td>
