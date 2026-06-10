@@ -2595,7 +2595,7 @@ def boletim_list(request):
     ).exclude(boletim__isnull=False)
     for os_obj in os_sem_boletim:
         BoletimMedicao.objects.get_or_create(os=os_obj)
-    boletins = BoletimMedicao.objects.select_related('os', 'os__cliente', 'os__equipe', 'tabela_preco').all()
+    boletins = BoletimMedicao.objects.select_related('os', 'os__cliente', 'os__equipe', 'tabela_preco').prefetch_related('os__veiculos').all()
     # Por padrao, esconder boletins faturados (so aparecem quando filtrar)
     if not status_filtro:
         boletins = boletins.exclude(status='faturado')
