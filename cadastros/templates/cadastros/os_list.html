@@ -191,6 +191,120 @@
   #modal-print > div:last-child { display:none!important; }
   #print-area { border-radius:0!important; }
 }
+
+/* ═══════════════════════════════════════════════════
+   OS LIST — LAYOUT CARDS EM MOBILE (≤ 768px)
+   Transforma cada linha da tabela em um card
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* Remove padding zero do card pai em mobile */
+  .os-list-card { padding: 10px !important; }
+  .os-list-card .table-wrap { overflow: visible !important; }
+
+  /* Oculta a tabela, colgroup e thead */
+  .os-card-table colgroup { display: none; }
+  .os-card-table thead    { display: none; }
+
+  /* Tabela e tbody viram flex-column */
+  .os-card-table,
+  .os-card-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  /* Cada <tr> vira um card com grid areas */
+  .os-card-table tr {
+    display: grid;
+    grid-template-areas:
+      "num    status"
+      "cli    cli"
+      "rota   rota"
+      "tipo   data"
+      "acoes  acoes";
+    grid-template-columns: auto 1fr;
+    gap: 4px 10px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: background .12s;
+  }
+  .os-card-table tr:hover { background: var(--bg-hover); }
+
+  /* Reset de cada célula */
+  .os-card-table td {
+    display: block;
+    padding: 0;
+    border: none;
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+  }
+
+  /* Nº OS */
+  .os-card-table td:nth-child(1) { grid-area: num; align-self: center; }
+
+  /* Cliente */
+  .os-card-table td:nth-child(2) {
+    grid-area: cli;
+    font-size: 13px; font-weight: 600;
+    color: var(--text1) !important;
+    margin-top: 2px;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Solicitante — oculto */
+  .os-card-table td:nth-child(3) { display: none !important; }
+
+  /* Origem → Destino */
+  .os-card-table td:nth-child(4) {
+    grid-area: rota;
+    font-size: 12px; color: var(--text2);
+    line-height: 1.4;
+  }
+
+  /* Tipo */
+  .os-card-table td:nth-child(5) { grid-area: tipo; align-self: center; }
+
+  /* Data */
+  .os-card-table td:nth-child(6) {
+    grid-area: data;
+    font-size: 11px; color: var(--text3);
+    text-align: right; align-self: center;
+  }
+
+  /* Equipe — oculto */
+  .os-card-table td:nth-child(7) { display: none !important; }
+
+  /* Status */
+  .os-card-table td:nth-child(8) {
+    grid-area: status;
+    justify-self: end; align-self: center;
+  }
+
+  /* Ações */
+  .os-card-table td:nth-child(9) {
+    grid-area: acoes;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: 4px;
+  }
+  .os-card-table td:nth-child(9) > div {
+    flex-wrap: wrap;
+    gap: 8px !important;
+  }
+  /* Botões de ação maiores para toque */
+  .os-card-table td:nth-child(9) .btn-icon {
+    width: 40px; height: 40px;
+  }
+}
 </style>
 
 <!-- MODAL DE FILTRO -->
@@ -393,10 +507,10 @@ document.addEventListener('DOMContentLoaded', function () {
 </div>
 {% endif %}
 
-<div class="card" style="padding:0">
+<div class="card os-list-card" style="padding:0">
   {% if ordens %}
   <div class="table-wrap">
-    <table style="font-size:12px;table-layout:fixed;width:100%">
+    <table class="os-card-table" style="font-size:12px;table-layout:fixed;width:100%">
       <colgroup>
         <col style="width:76px">   <!-- Nº OS -->
         <col style="width:12%">   <!-- Cliente -->
