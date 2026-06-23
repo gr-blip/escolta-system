@@ -3610,22 +3610,41 @@ def os_field_marco_salvar(request, token):
         try: return int(val) if val else None
         except (ValueError, TypeError): return None
 
-    setattr(op, marco,           parse_dt(dt_val))
-    setattr(op, f'km_{marco}',   parse_int(km_val))
-    setattr(op, f'gps_{marco}_lat', parse_float(lat_val))
-    setattr(op, f'gps_{marco}_lng', parse_float(lng_val))
-    op.save()
+    try:
+        setattr(op, marco,              parse_dt(dt_val))
+        setattr(op, f'km_{marco}',      parse_int(km_val))
+        setattr(op, f'gps_{marco}_lat', parse_float(lat_val))
+        setattr(op, f'gps_{marco}_lng', parse_float(lng_val))
+        op.save()
 
-    foto_id = None
-    foto_url = None
-    foto = request.FILES.get('foto')
-    if foto:
-        FotoMarco.objects.filter(os=op.os, marco=marco).delete()
-        fm = FotoMarco.objects.create(os=op.os, marco=marco, foto=foto)
-        foto_id = fm.pk
-        foto_url = fm.foto.url
+        # Atualizar status da OS
+        os_obj = op.os
+        if os_obj.status not in ('cancelada', 'finalizada', 'faturada'):
+            if op.termino_viagem:
+                os_obj.status = 'concluida'
+            elif op.termino_operacao:
+                os_obj.status = 'encerrando'
+            elif op.chegada_operacao or op.inicio_operacao:
+                os_obj.status = 'em_operacao'
+            elif op.inicio_viagem:
+                os_obj.status = 'em_viagem'
+            os_obj.save(update_fields=['status'])
 
-    return JsonResponse({'ok': True, 'foto_id': foto_id, 'foto_url': foto_url})
+        foto_id = None
+        foto_url = None
+        foto = request.FILES.get('foto')
+        if foto:
+            FotoMarco.objects.filter(os=op.os, marco=marco).delete()
+            fm = FotoMarco.objects.create(os=op.os, marco=marco, foto=foto)
+            foto_id = fm.pk
+            foto_url = fm.foto.url
+
+        return JsonResponse({'ok': True, 'foto_id': foto_id, 'foto_url': foto_url})
+
+    except Exception as e:
+        import traceback
+        logger.error(f'os_field_marco_salvar error: {e}\n{traceback.format_exc()}')
+        return JsonResponse({'ok': False, 'erro': f'Erro interno: {str(e)}'})
 
 def os_field_link(request, token):
     """Página pública para agente externo preencher dados operacionais da OS."""

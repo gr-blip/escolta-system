@@ -1159,7 +1159,14 @@ async function salvarMarco(marco, token) {
       btn.textContent = '💾 Salvar'; btn.disabled = false;
     }
   } catch(e) {
-    alert('Erro de conexão.'); btn.textContent = '💾 Salvar'; btn.disabled = false;
+    // Tenta ler o corpo do erro para diagnóstico
+    try {
+      const txt = e && e.message ? e.message : String(e);
+      alert('Erro de conexão: ' + txt);
+    } catch(_) {
+      alert('Erro de conexão. Verifique o sinal e tente novamente.');
+    }
+    btn.textContent = '💾 Salvar'; btn.disabled = false;
   }
 }
 
