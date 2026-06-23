@@ -570,3 +570,50 @@ tbody tr:hover td:first-child{box-shadow:inset 3px 0 0 var(--blue)}
   .topbar-left .page-title{font-size:14px}
   .topbar-user{display:none}
 }
+
+/* ── Impressão / Salvar como PDF ───────────────────────────────────────── */
+@media print {
+  /* Forçar fundo branco e texto preto em todo o documento */
+  *,*::before,*::after {
+    background: #fff !important;
+    background-color: #fff !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Cabeçalho e barra lateral não aparecem na impressão */
+  .sidebar, .topbar { display: none !important; }
+
+  /* Conteúdo principal ocupa tudo */
+  .main-content { margin-left: 0 !important; padding: 0 !important; }
+  .content-area { padding: 0 !important; }
+
+  /* Cards com borda fina no papel */
+  .card {
+    border: 1px solid #ccc !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Gráficos: manter cores para PDF colorido mas com fundo branco */
+  canvas { background: #fff !important; }
+
+  /* Tabelas com bordas visíveis */
+  table, th, td {
+    border: 1px solid #aaa !important;
+    color: #000 !important;
+  }
+  th { background: #eee !important; }
+
+  /* Links sem sublinhado colorido */
+  a, a:visited { color: #000 !important; text-decoration: none !important; }
+
+  /* Botões não aparecem na impressão */
+  button, .btn, input[type="button"], input[type="submit"] { display: none !important; }
+
+  /* Valor total do boletim em destaque */
+  .valor-total, [style*="color:var(--green)"] { color: #000 !important; font-weight: 700 !important; }
+}
