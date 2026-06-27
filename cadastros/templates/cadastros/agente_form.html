@@ -67,3 +67,40 @@
   </div>
 </form>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+/* ── Máscara CPF e Telefone ── */
+function mascaraCPF(v) {
+  v = v.replace(/\D/g,'').slice(0,11);
+  if (v.length > 9) return v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/,'$1.$2.$3-$4');
+  if (v.length > 6) return v.replace(/(\d{3})(\d{3})(\d{0,3})/,'$1.$2.$3');
+  if (v.length > 3) return v.replace(/(\d{3})(\d{0,3})/,'$1.$2');
+  return v;
+}
+function mascaraTel(v) {
+  v = v.replace(/\D/g,'').slice(0,11);
+  if (v.length === 11) return v.replace(/(\d{2})(\d{1})(\d{4})(\d{4})/,'($1) $2 $3-$4');
+  if (v.length === 10) return v.replace(/(\d{2})(\d{4})(\d{4})/,'($1) $2-$3');
+  if (v.length > 6)   return v.replace(/(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3');
+  if (v.length > 2)   return v.replace(/(\d{2})(\d+)/,'($1) $2');
+  if (v.length > 0)   return '(' + v;
+  return v;
+}
+document.addEventListener('DOMContentLoaded', function(){
+  var cpfInput = document.querySelector('[name="cpf"]');
+  var telInput = document.querySelector('[name="telefone"]');
+  if (cpfInput) {
+    cpfInput.addEventListener('input', function(){
+      var pos = this.selectionStart;
+      this.value = mascaraCPF(this.value);
+    });
+  }
+  if (telInput) {
+    telInput.addEventListener('input', function(){
+      this.value = mascaraTel(this.value);
+    });
+  }
+});
+</script>
+{% endblock %}

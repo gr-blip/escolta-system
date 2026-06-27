@@ -1,4 +1,5 @@
 {% extends 'cadastros/base.html' %}
+{% load cadastros_extras %}
 {% block title %}Agentes{% endblock %}
 {% block page_title %}Agentes{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / Agentes{% endblock %}
@@ -26,8 +27,8 @@
         {% for a in agentes %}
         <tr>
           <td><strong>{{ a.nome }}</strong></td>
-          <td class="mono">{{ a.cpf }}</td>
-          <td>{{ a.telefone }}</td>
+          <td class="mono">{{ a.cpf|fmt_cpf }}</td>
+          <td class="mono">{{ a.telefone|fmt_tel }}</td>
           <td>{{ a.get_funcao_display }}</td>
           <td class="mono">{{ a.cnh_validade|date:"d/m/Y"|default:"—" }}</td>
           <td class="mono">{{ a.cnv_validade|date:"d/m/Y"|default:"—" }}</td>
