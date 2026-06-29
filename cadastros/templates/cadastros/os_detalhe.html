@@ -1,4 +1,5 @@
 ﻿{% extends 'cadastros/base.html' %}
+{% load l10n %}
 {% block title %}{% if novo %}Nova OS — Detalhes{% else %}OS-{{ os.numero }}{% endif %}{% endblock %}
 {% block page_title %}{% if novo %}Abrir Ordem de Serviço{% else %}OS-{{ os.numero }}{% endif %}{% endblock %}
 {% block breadcrumb %}
@@ -420,7 +421,7 @@
             <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--text3)" id="d-inicio">0</td>
             <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border)">
               {% if op and op.gps_inicio_viagem_lat %}
-              <a href="https://www.google.com/maps?q={{ op.gps_inicio_viagem_lat }},{{ op.gps_inicio_viagem_lng }}" target="_blank" title="Ver no Google Maps" style="color:#10b981;font-size:18px;text-decoration:none">📍</a>
+              <a href="https://www.google.com/maps?q={{ op.gps_inicio_viagem_lat|unlocalize }},{{ op.gps_inicio_viagem_lng|unlocalize }}" target="_blank" title="Ver no Google Maps" style="color:#10b981;font-size:18px;text-decoration:none">📍</a>
               {% else %}<span style="color:var(--text3)">—</span>{% endif %}
             </td>
           </tr>
@@ -440,7 +441,7 @@
             <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--text2);font-weight:600" id="d-chegada">{{ op.km_trecho_chegada|default:"0" }}</td>
             <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border)">
               {% if op and op.gps_chegada_operacao_lat %}
-              <a href="https://www.google.com/maps?q={{ op.gps_chegada_operacao_lat }},{{ op.gps_chegada_operacao_lng }}" target="_blank" title="Ver no Google Maps" style="color:#10b981;font-size:18px;text-decoration:none">📍</a>
+              <a href="https://www.google.com/maps?q={{ op.gps_chegada_operacao_lat|unlocalize }},{{ op.gps_chegada_operacao_lng|unlocalize }}" target="_blank" title="Ver no Google Maps" style="color:#10b981;font-size:18px;text-decoration:none">📍</a>
               {% else %}<span style="color:var(--text3)">—</span>{% endif %}
             </td>
           </tr>
@@ -460,7 +461,7 @@
             <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--text3)" id="d-inicio-op">0</td>
             <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border)">
               {% if op and op.gps_inicio_operacao_lat %}
-              <a href="https://www.google.com/maps?q={{ op.gps_inicio_operacao_lat }},{{ op.gps_inicio_operacao_lng }}" target="_blank" title="Ver no Google Maps" style="color:#10b981;font-size:18px;text-decoration:none">📍</a>
+              <a href="https://www.google.com/maps?q={{ op.gps_inicio_operacao_lat|unlocalize }},{{ op.gps_inicio_operacao_lng|unlocalize }}" target="_blank" title="Ver no Google Maps" style="color:#10b981;font-size:18px;text-decoration:none">📍</a>
               {% else %}<span style="color:var(--text3)">—</span>{% endif %}
             </td>
           </tr>
@@ -480,7 +481,7 @@
             <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);color:var(--text2);font-weight:600" id="d-termino-op">{{ op.km_trecho_termino_op|default:"0" }}</td>
             <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border)">
               {% if op and op.gps_termino_operacao_lat %}
-              <a href="https://www.google.com/maps?q={{ op.gps_termino_operacao_lat }},{{ op.gps_termino_operacao_lng }}" target="_blank" title="Ver no Google Maps" style="color:#10b981;font-size:18px;text-decoration:none">📍</a>
+              <a href="https://www.google.com/maps?q={{ op.gps_termino_operacao_lat|unlocalize }},{{ op.gps_termino_operacao_lng|unlocalize }}" target="_blank" title="Ver no Google Maps" style="color:#10b981;font-size:18px;text-decoration:none">📍</a>
               {% else %}<span style="color:var(--text3)">—</span>{% endif %}
             </td>
           </tr>
@@ -500,7 +501,7 @@
             <td style="padding:7px 10px;text-align:center;color:var(--blue-light);font-weight:700" id="d-total">{{ op.km_total|default:"0" }}</td>
             <td style="padding:7px 10px;text-align:center">
               {% if op and op.gps_termino_viagem_lat %}
-              <a href="https://www.google.com/maps?q={{ op.gps_termino_viagem_lat }},{{ op.gps_termino_viagem_lng }}" target="_blank" title="Ver no Google Maps" style="color:#10b981;font-size:18px;text-decoration:none">📍</a>
+              <a href="https://www.google.com/maps?q={{ op.gps_termino_viagem_lat|unlocalize }},{{ op.gps_termino_viagem_lng|unlocalize }}" target="_blank" title="Ver no Google Maps" style="color:#10b981;font-size:18px;text-decoration:none">📍</a>
               {% else %}<span style="color:var(--text3)">—</span>{% endif %}
             </td>
           </tr>

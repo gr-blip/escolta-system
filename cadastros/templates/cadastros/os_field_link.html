@@ -205,7 +205,6 @@
           <div id="marco_form_inicio_viagem">
             <div class="gps-row">
               <small style="color:var(--muted);font-size:11px">Data, hora e KM</small>
-              <button type="button" class="btn btn-success" onclick="captureGPS('inicio_viagem',this)">📍 Capturar GPS</button>
             </div>
             <div class="grid-2">
               <div class="field"><label>Data / Hora</label><input type="datetime-local" id="dt_inicio_viagem" value="{% firstof fmt.inicio_viagem '' %}"></div>
@@ -239,7 +238,6 @@
           <div id="marco_form_chegada_operacao">
             <div class="gps-row">
               <small style="color:var(--muted);font-size:11px">Data, hora e KM</small>
-              <button type="button" class="btn btn-success" onclick="captureGPS('chegada_operacao',this)">📍 Capturar GPS</button>
             </div>
             <div class="grid-2">
               <div class="field"><label>Data / Hora</label><input type="datetime-local" id="dt_chegada_operacao" value="{% firstof fmt.chegada_operacao '' %}"></div>
@@ -273,7 +271,6 @@
           <div id="marco_form_inicio_operacao">
             <div class="gps-row">
               <small style="color:var(--muted);font-size:11px">Data, hora e KM</small>
-              <button type="button" class="btn btn-success" onclick="captureGPS('inicio_operacao',this)">📍 Capturar GPS</button>
             </div>
             <div class="grid-2">
               <div class="field"><label>Data / Hora</label><input type="datetime-local" id="dt_inicio_operacao" value="{% firstof fmt.inicio_operacao '' %}"></div>
@@ -307,7 +304,6 @@
           <div id="marco_form_termino_operacao">
             <div class="gps-row">
               <small style="color:var(--muted);font-size:11px">Data, hora e KM</small>
-              <button type="button" class="btn btn-success" onclick="captureGPS('termino_operacao',this)">📍 Capturar GPS</button>
             </div>
             <div class="grid-2">
               <div class="field"><label>Data / Hora</label><input type="datetime-local" id="dt_termino_operacao" value="{% firstof fmt.termino_operacao '' %}"></div>
@@ -341,7 +337,6 @@
           <div id="marco_form_termino_viagem">
             <div class="gps-row">
               <small style="color:var(--muted);font-size:11px">Data, hora e KM</small>
-              <button type="button" class="btn btn-success" onclick="captureGPS('termino_viagem',this)">📍 Capturar GPS</button>
             </div>
             <div class="grid-2">
               <div class="field"><label>Data / Hora</label><input type="datetime-local" id="dt_termino_viagem" value="{% firstof fmt.termino_viagem '' %}"></div>
@@ -1052,7 +1047,7 @@ function captureGPS(marco, btn) {
   btn.classList.add('loading'); btn.textContent = '⏳ Obtendo…';
   navigator.geolocation.getCurrentPosition(
     pos => {
-      const lat = pos.coords.latitude.toFixed(7), lng = pos.coords.longitude.toFixed(7);
+      const lat = pos.coords.latitude.toFixed(7).replace(',','.'), lng = pos.coords.longitude.toFixed(7).replace(',','.');
       document.getElementById('gps_' + marco + '_lat').value = lat;
       document.getElementById('gps_' + marco + '_lng').value = lng;
       const url = `https://www.google.com/maps?q=${lat},${lng}`;
@@ -1075,7 +1070,7 @@ function captureGPSModal(latId, lngId, statusId) {
   if (!navigator.geolocation) { alert('GPS não disponível.'); return; }
   navigator.geolocation.getCurrentPosition(
     pos => {
-      const lat = pos.coords.latitude.toFixed(7), lng = pos.coords.longitude.toFixed(7);
+      const lat = pos.coords.latitude.toFixed(7).replace(',','.'), lng = pos.coords.longitude.toFixed(7).replace(',','.');
       document.getElementById(latId).value = lat;
       document.getElementById(lngId).value = lng;
       const url = `https://www.google.com/maps?q=${lat},${lng}`;
@@ -1114,14 +1109,47 @@ function selecionarFotoMarco(input, marco) {
 }
 
 /* ── SALVAR MARCO (data + km + gps + foto) ── */
+function _getGPSAuto(marco) {
+  /* Captura GPS silenciosamente. Resolve sempre (nunca rejeita). */
+  return new Promise(resolve => {
+    if (!navigator.geolocation) { resolve({ lat: '', lng: '' }); return; }
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({
+        lat: pos.coords.latitude.toFixed(7).replace(',','.'),
+        lng: pos.coords.longitude.toFixed(7).replace(',','.'),
+      }),
+      () => resolve({ lat: '', lng: '' }),
+      { timeout: 8000, maximumAge: 30000, enableHighAccuracy: true }
+    );
+  });
+}
+
 async function salvarMarco(marco, token) {
   const btn = document.getElementById('btn_salvar_' + marco);
   const dt  = document.getElementById('dt_' + marco)?.value || '';
   const km  = document.getElementById('km_' + marco)?.value || '';
-  const lat = document.getElementById('gps_' + marco + '_lat')?.value || '';
-  const lng = document.getElementById('gps_' + marco + '_lng')?.value || '';
 
   if (!dt) { alert('Preencha a data e hora antes de salvar.'); return; }
+
+  btn.disabled = true; btn.textContent = '📍 Capturando GPS...';
+
+  /* Captura GPS automática antes de enviar */
+  const gps = await _getGPSAuto(marco);
+  const latInput = document.getElementById('gps_' + marco + '_lat');
+  const lngInput = document.getElementById('gps_' + marco + '_lng');
+  if (gps.lat) {
+    latInput.value = gps.lat;
+    lngInput.value = gps.lng;
+    const url = `https://www.google.com/maps?q=${gps.lat},${gps.lng}`;
+    document.getElementById('gps_status_' + marco).innerHTML =
+      `<div class="gps-status ok">📍 ${gps.lat}, ${gps.lng} <a class="gps-link" href="${url}" target="_blank">🗺 Mapa</a></div>`;
+  } else {
+    document.getElementById('gps_status_' + marco).innerHTML =
+      `<div class="gps-status err">⚠️ GPS não disponível — salvo sem localização</div>`;
+  }
+
+  const lat = latInput?.value || '';
+  const lng = lngInput?.value || '';
 
   const fd = new FormData();
   fd.append('csrfmiddlewaretoken', CSRF);
@@ -1132,7 +1160,7 @@ async function salvarMarco(marco, token) {
   fd.append('lng', lng);
   if (_fotoMarcoSelecionada[marco]) fd.append('foto', _fotoMarcoSelecionada[marco]);
 
-  btn.disabled = true; btn.textContent = '⏳ Salvando...';
+  btn.textContent = '⏳ Salvando...';
   try {
     const r = await fetch(`/os/field/${token}/marco/salvar/`, { method: 'POST', body: fd });
     const d = await r.json();

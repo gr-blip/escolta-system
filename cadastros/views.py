@@ -3752,8 +3752,10 @@ def os_field_link(request, token):
 
     def fmt_gps(lat, lng):
         if lat and lng:
-            return {'lat': float(lat), 'lng': float(lng),
-                    'url': f'https://www.google.com/maps?q={lat},{lng}'}
+            # Forçar ponto decimal (não vírgula do locale pt-br) para URL funcionar
+            flat, flng = float(lat), float(lng)
+            url = f'https://www.google.com/maps?q={flat:.7f},{flng:.7f}'
+            return {'lat': flat, 'lng': flng, 'url': url}
         return None
 
     return render(request, 'cadastros/os_field_link.html', {
