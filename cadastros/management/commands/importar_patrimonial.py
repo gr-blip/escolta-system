@@ -13,6 +13,29 @@ class Command(BaseCommand):
         placeholders = ','.join(['%s'] * len(FIELDS))
         field_names = ','.join(FIELDS)
         with connection.cursor() as c:
+            # Garante que as colunas existem antes de inserir
+            c.execute("ALTER TABLE cadastros_funcionariopatrimonial ADD COLUMN IF NOT EXISTS curso VARCHAR(200) NOT NULL DEFAULT ''")
+            c.execute("ALTER TABLE cadastros_funcionariopatrimonial ADD COLUMN IF NOT EXISTS curso_validade DATE NULL")
+            c.execute("ALTER TABLE cadastros_funcionariopatrimonial ADD COLUMN IF NOT EXISTS nome_mae VARCHAR(200) NOT NULL DEFAULT ''")
+            c.execute("ALTER TABLE cadastros_funcionariopatrimonial ADD COLUMN IF NOT EXISTS empresa VARCHAR(20) NOT NULL DEFAULT 'jr_seguranca'")
+            c.execute("ALTER TABLE cadastros_funcionariopatrimonial ADD COLUMN IF NOT EXISTS cargo VARCHAR(200) NOT NULL DEFAULT ''")
+            # Cria tabela de consultas se nao existir
+            c.execute("""CREATE TABLE IF NOT EXISTS cadastros_consultaprocesso (
+                id BIGSERIAL PRIMARY KEY,
+                cpf VARCHAR(14) NOT NULL,
+                nome_retornado VARCHAR(200) NOT NULL DEFAULT '',
+                status_cpf VARCHAR(30) NOT NULL DEFAULT '',
+                total_processos INTEGER NOT NULL DEFAULT 0,
+                resultado_json JSONB NOT NULL DEFAULT '{}',
+                pdf_file VARCHAR(100),
+                transaction_id VARCHAR(50) NOT NULL DEFAULT '',
+                origem VARCHAR(20) NOT NULL DEFAULT 'manual',
+                criado_em TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                atualizado_em TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                funcionario_id BIGINT NOT NULL REFERENCES cadastros_funcionariopatrimonial(id) ON DELETE CASCADE,
+                solicitante_id INTEGER REFERENCES auth_user(id) ON DELETE SET NULL
+            )""")
+            # Importa os dados
             c.execute("DELETE FROM cadastros_funcionariopatrimonial")
             for row in DATA:
                 c.execute(
@@ -20,4 +43,4 @@ class Command(BaseCommand):
                     row
                 )
             c.execute("SELECT setval(\'cadastros_funcionariopatrimonial_id_seq\', (SELECT MAX(id) FROM cadastros_funcionariopatrimonial))")
-        self.stdout.write(self.style.SUCCESS(f'Importados: {len(DATA)} registros'))
+        self.stdout.write(self.style.SUCCESS(f'Importados: {len(DATA)} registros. Paginas patrimoniais prontas.'))
