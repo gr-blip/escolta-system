@@ -44,19 +44,26 @@ class Command(BaseCommand):
         parser.add_argument('--manter',       type=int, default=7)
 
     def handle(self, *args, **options):
-        folder        = config('GOOGLE_DRIVE_FOLDER_ID', default='')
-        client_id     = config('GOOGLE_CLIENT_ID', default='')
-        client_secret = config('GOOGLE_CLIENT_SECRET', default='')
-        refresh_token = config('GOOGLE_REFRESH_TOKEN', default='')
+        folder           = config('GOOGLE_DRIVE_FOLDER_ID', default='')
+        sa_json          = config('GOOGLE_SERVICE_ACCOUNT_JSON', default='')
+        client_id        = config('GOOGLE_CLIENT_ID', default='')
+        client_secret    = config('GOOGLE_CLIENT_SECRET', default='')
+        refresh_token    = config('GOOGLE_REFRESH_TOKEN', default='')
 
-        if not all([folder, client_id, client_secret, refresh_token]):
-            self.stderr.write(self.style.ERROR(
-                'Faltam variáveis: GOOGLE_DRIVE_FOLDER_ID, GOOGLE_CLIENT_ID, '
-                'GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN'
-            ))
+        if not folder:
+            self.stderr.write(self.style.ERROR('Falta variável: GOOGLE_DRIVE_FOLDER_ID'))
             return
 
-        service = self._drive_service(client_id, client_secret, refresh_token)
+        if sa_json:
+            service = self._drive_service_sa(sa_json)
+        elif all([client_id, client_secret, refresh_token]):
+            service = self._drive_service(client_id, client_secret, refresh_token)
+        else:
+            self.stderr.write(self.style.ERROR(
+                'Faltam credenciais Google. Configure GOOGLE_SERVICE_ACCOUNT_JSON '
+                'ou GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET + GOOGLE_REFRESH_TOKEN'
+            ))
+            return
 
         from datetime import datetime, timezone
         ts     = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')
@@ -119,7 +126,19 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS('Backup concluído com sucesso!'))
 
     # ──────────────────────────────────────────────
+    def _drive_service_sa(self, sa_json_str):
+        """Autenticação via Service Account JSON."""
+        from google.oauth2 import service_account
+        from googleapiclient.discovery import build
+        sa_info = json.loads(sa_json_str)
+        creds = service_account.Credentials.from_service_account_info(
+            sa_info,
+            scopes=['https://www.googleapis.com/auth/drive'],
+        )
+        return build('drive', 'v3', credentials=creds)
+
     def _drive_service(self, client_id, client_secret, refresh_token):
+        """Autenticação via OAuth2 (legado)."""
         from google.oauth2.credentials import Credentials
         from googleapiclient.discovery import build
         creds = Credentials(
