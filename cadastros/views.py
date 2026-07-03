@@ -2524,6 +2524,7 @@ def tabela_preco_create(request):
                 franquia_horas   = request.POST.get('franquia_horas', '000:00'),
                 excedente_km     = dec(request.POST.get('excedente_km')),
                 excedente_hora   = dec(request.POST.get('excedente_hora')),
+                velocidade_media = int(request.POST['velocidade_media']) if request.POST.get('velocidade_media') else None,
                 cobrar_pedagio   = request.POST.get('cobrar_pedagio', 'sim'),
                 pedagio_fixo     = dec(request.POST.get('pedagio_fixo')),
                 pedagio_percent  = dec(request.POST.get('pedagio_percent')),
@@ -2559,6 +2560,7 @@ def tabela_preco_edit(request, pk):
             tabela.franquia_horas   = request.POST.get('franquia_horas', '000:00')
             tabela.excedente_km     = dec(request.POST.get('excedente_km'))
             tabela.excedente_hora   = dec(request.POST.get('excedente_hora'))
+            tabela.velocidade_media = int(request.POST['velocidade_media']) if request.POST.get('velocidade_media') else None
             tabela.cobrar_pedagio   = request.POST.get('cobrar_pedagio', 'sim')
             tabela.pedagio_fixo     = dec(request.POST.get('pedagio_fixo'))
             tabela.pedagio_percent  = dec(request.POST.get('pedagio_percent'))
@@ -2829,6 +2831,7 @@ def tabela_preco_create(request):
                 franquia_horas   = request.POST.get('franquia_horas', '000:00'),
                 excedente_km     = dec(request.POST.get('excedente_km')),
                 excedente_hora   = dec(request.POST.get('excedente_hora')),
+                velocidade_media = int(request.POST['velocidade_media']) if request.POST.get('velocidade_media') else None,
                 cobrar_pedagio   = request.POST.get('cobrar_pedagio', 'sim'),
                 pedagio_fixo     = dec(request.POST.get('pedagio_fixo')),
                 pedagio_percent  = dec(request.POST.get('pedagio_percent')),
@@ -2861,6 +2864,7 @@ def tabela_preco_edit(request, pk):
             tabela.franquia_horas   = request.POST.get('franquia_horas', '000:00')
             tabela.excedente_km     = dec(request.POST.get('excedente_km'))
             tabela.excedente_hora   = dec(request.POST.get('excedente_hora'))
+            tabela.velocidade_media = int(request.POST['velocidade_media']) if request.POST.get('velocidade_media') else None
             tabela.cobrar_pedagio   = request.POST.get('cobrar_pedagio', 'sim')
             tabela.pedagio_fixo     = dec(request.POST.get('pedagio_fixo'))
             tabela.pedagio_percent  = dec(request.POST.get('pedagio_percent'))

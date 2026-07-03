@@ -486,6 +486,8 @@ class TabelaPreco(models.Model):
     franquia_horas   = models.CharField(max_length=6, default='000:00', verbose_name='Franquia Horas (HHH:MM)')
     excedente_km     = models.DecimalField(max_digits=8, decimal_places=2, default=0, verbose_name='Excedente por KM (R$)')
     excedente_hora   = models.DecimalField(max_digits=8, decimal_places=2, default=0, verbose_name='Excedente por Hora (R$)')
+    velocidade_media = models.PositiveIntegerField(null=True, blank=True, verbose_name='Velocidade Média (km/h)',
+                                                    help_text='Se preenchido, franquia de horas = KM ÷ velocidade e o excedente KM = KM total × taxa KM.')
     cobrar_pedagio   = models.CharField(max_length=3, choices=COBRAR_PEDAGIO_CHOICES, default='sim', verbose_name='Cobrar Pedágio')
     pedagio_fixo     = models.DecimalField(max_digits=8, decimal_places=2, default=0, verbose_name='Pedágio Fixo (R$)')
     pedagio_percent  = models.DecimalField(max_digits=5, decimal_places=2, default=0, verbose_name='% Pedágio')
@@ -565,15 +567,28 @@ class BoletimMedicao(models.Model):
         # KM deve ser calculado entre Início e Término da Operação
         km_real = op.km_trecho_termino_op or 0
         self.km_realizado = km_real
-        franquia_min = tabela.franquia_horas_minutos()
-        excedente_min = max(0, total_min - franquia_min)
-        self.horas_excedentes = f'{excedente_min // 60:02d}:{excedente_min % 60:02d}'
-        km_exc = max(0, km_real - tabela.franquia_km)
-        self.km_excedente = km_exc
         self.valor_escolta = tabela.valor_escolta
-        exc_horas_dec = Decimal(excedente_min) / Decimal(60)
-        self.valor_excedente_hora = (exc_horas_dec * tabela.excedente_hora).quantize(Decimal('0.01'))
-        self.valor_excedente_km = (Decimal(km_exc) * tabela.excedente_km).quantize(Decimal('0.01'))
+
+        if tabela.velocidade_media:
+            # Modo velocidade média: franquia horas = km_real / velocidade_media
+            # e o excedente KM = km_total × taxa_km (sem franquia de km)
+            franquia_min = int(round(km_real * 60 / tabela.velocidade_media)) if tabela.velocidade_media else 0
+            excedente_min = max(0, total_min - franquia_min)
+            self.horas_excedentes = f'{excedente_min // 60:02d}:{excedente_min % 60:02d}'
+            self.km_excedente = km_real  # todos os km são cobrados
+            exc_horas_dec = Decimal(excedente_min) / Decimal(60)
+            self.valor_excedente_hora = (exc_horas_dec * tabela.excedente_hora).quantize(Decimal('0.01'))
+            self.valor_excedente_km = (Decimal(km_real) * tabela.excedente_km).quantize(Decimal('0.01'))
+        else:
+            # Modo padrão: franquia fixa de horas e km
+            franquia_min = tabela.franquia_horas_minutos()
+            excedente_min = max(0, total_min - franquia_min)
+            self.horas_excedentes = f'{excedente_min // 60:02d}:{excedente_min % 60:02d}'
+            km_exc = max(0, km_real - tabela.franquia_km)
+            self.km_excedente = km_exc
+            exc_horas_dec = Decimal(excedente_min) / Decimal(60)
+            self.valor_excedente_hora = (exc_horas_dec * tabela.excedente_hora).quantize(Decimal('0.01'))
+            self.valor_excedente_km = (Decimal(km_exc) * tabela.excedente_km).quantize(Decimal('0.01'))
         # Só define pedágio automático se o campo estiver zerado (não foi digitado manualmente)
         if self.valor_pedagio == 0:
             if tabela.cobrar_pedagio == 'sim':
