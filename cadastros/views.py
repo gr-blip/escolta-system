@@ -137,6 +137,8 @@ def dashboard_os_por_cliente(request):
     qs = (
         OrdemServico.objects
         .filter(previsao_inicio__date__gte=dt_ini, previsao_inicio__date__lte=dt_fim)
+        .exclude(status='cancelada', tipo_cancelamento__in=['sem_deslocamento', ''])
+        .exclude(status='cancelada', tipo_cancelamento__isnull=True)
         .exclude(cliente__razao_social__icontains='JRS FACILIT')
         .exclude(cliente__razao_social__icontains='JR SEGURANC')
         .values('cliente__razao_social')
