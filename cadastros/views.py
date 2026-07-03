@@ -845,7 +845,15 @@ def dashboard_operacional(request):
         total = OrdemServico.objects.filter(
             previsao_inicio__year=ano,
             previsao_inicio__month=mes,
-        ).exclude(status='cancelada').exclude(cliente__razao_social__icontains='JRS FACILIT').exclude(cliente__razao_social__icontains='JR SEGURANC').count()
+        ).exclude(
+            status='cancelada', tipo_cancelamento__in=['sem_deslocamento', '']
+        ).exclude(
+            status='cancelada', tipo_cancelamento__isnull=True
+        ).exclude(
+            cliente__razao_social__icontains='JRS FACILIT'
+        ).exclude(
+            cliente__razao_social__icontains='JR SEGURANC'
+        ).count()
         meses_labels.append(f'{MESES_PT[mes-1].upper()} DE {ano}')
         meses_totais.append(total)
 
@@ -860,7 +868,8 @@ def dashboard_operacional(request):
     qs_pizza = (
         OrdemServico.objects
         .filter(previsao_inicio__year=ano_sel, previsao_inicio__month=mes_sel)
-        .exclude(status='cancelada')
+        .exclude(status='cancelada', tipo_cancelamento__in=['sem_deslocamento', ''])
+        .exclude(status='cancelada', tipo_cancelamento__isnull=True)
         .exclude(cliente__razao_social__icontains='JRS FACILIT')
         .exclude(cliente__razao_social__icontains='JR SEGURANC')
         .values('cliente__razao_social')
