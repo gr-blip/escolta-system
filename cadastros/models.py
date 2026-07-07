@@ -1114,3 +1114,51 @@ class ConsultaProcesso(models.Model):
 
     def __str__(self):
         return f'{self.cpf} — {self.status_cpf} ({self.total_processos} proc.)'
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DIÁRIAS — Ajustes e lançamentos manuais
+# ─────────────────────────────────────────────────────────────────────────────
+
+class DiariasLancamento(models.Model):
+    """Permite editar, excluir ou incluir linhas na planilha de diárias.
+
+    - excluido=True  + os_pk preenchido → remove a linha automática daquela OS/dia/agente
+    - excluido=False + os_pk preenchido → substitui o valor da linha automática
+    - excluido=False + os_pk=None       → lançamento manual (não vem de nenhuma OS)
+    """
+    MISSAO_CHOICES = [
+        ('ESCOLTA', 'Escolta'),
+        ('INTERESTADUAL', 'Interestadual'),
+        ('OPERAÇÃO CANCELADA', 'Op. Cancelada'),
+        ('OUTRO', 'Outro'),
+    ]
+
+    data        = models.DateField(verbose_name='Data')
+    agente_nome = models.CharField(max_length=200, verbose_name='Agente')
+
+    # Referência à OS automática (nulo = lançamento puramente manual)
+    os_pk     = models.IntegerField(null=True, blank=True, verbose_name='PK da OS')
+    os_numero = models.CharField(max_length=20, blank=True, verbose_name='Nº OS')
+
+    # Dados do lançamento (preenchidos para manuais; para overrides, usados na exibição)
+    cliente = models.CharField(max_length=200, blank=True, verbose_name='Cliente')
+    rota    = models.CharField(max_length=500, blank=True, verbose_name='Origem → Destino')
+    missao  = models.CharField(max_length=30, choices=MISSAO_CHOICES, default='ESCOLTA', verbose_name='Missão')
+    valor   = models.DecimalField(max_digits=8, decimal_places=2, default=100, verbose_name='Valor (R$)')
+    obs     = models.TextField(blank=True, verbose_name='Observação')
+
+    # Se True: esta entrada *exclui* a linha automática correspondente
+    excluido = models.BooleanField(default=False, verbose_name='Excluir linha auto')
+
+    criado_por = models.ForeignKey('auth.User', null=True, blank=True,
+                                   on_delete=models.SET_NULL, verbose_name='Criado por')
+    criado_em  = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name        = 'Diárias — Lançamento'
+        verbose_name_plural = 'Diárias — Lançamentos'
+        ordering = ['data', 'agente_nome']
+
+    def __str__(self):
+        return f'{self.agente_nome} · {self.data} · R${self.valor}'
