@@ -81,8 +81,11 @@ urlpatterns += [
     path('operacional/rastreamento/',          views.omnilink_frota,          name='omnilink_frota'),
     path('operacional/rastreamento/posicoes/', views.omnilink_frota_posicoes, name='omnilink_frota_posicoes'),
     # Espelhamentos
-    path('operacional/diarias/',                 views.diarias_agentes,             name='diarias_agentes'),
-    path('operacional/diarias/export/xlsx/',    views.diarias_export_xlsx,         name='diarias_export_xlsx'),
+    path('operacional/diarias/',                        views.diarias_agentes,                   name='diarias_agentes'),
+    path('operacional/diarias/export/xlsx/',           views.diarias_export_xlsx,               name='diarias_export_xlsx'),
+    path('operacional/diarias/lancamento/salvar/',     views.diarias_lancamento_salvar,          name='diarias_lancamento_salvar'),
+    path('operacional/diarias/lancamento/excluir/',    views.diarias_lancamento_excluir_auto,    name='diarias_lancamento_excluir_auto'),
+    path('operacional/diarias/lancamento/deletar/',    views.diarias_lancamento_deletar,         name='diarias_lancamento_deletar'),
     path('operacional/espelhamentos/',           views.espelhamento_list,           name='espelhamento_list'),
     path('operacional/espelhamentos/listar/',    views.espelhamento_listar_ajax,    name='espelhamento_listar_ajax'),
     path('operacional/espelhamentos/centrais/',  views.espelhamento_centrais_ajax,  name='espelhamento_centrais_ajax'),

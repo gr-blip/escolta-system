@@ -10,7 +10,7 @@ from datetime import date, timedelta
 from .models import Agente, Viatura, Rastreador, Armamento, Cliente, Colete, Equipe, \
     FotoMarco, Parada, FotoParada, Incidente, FotoIncidente, FotoVeiculoEscoltado, \
     TrocaMotorista, FotoTrocaMotorista, AssinaturaOS, DespesaOS, FuncionarioPatrimonial, \
-    ConsultaProcesso
+    ConsultaProcesso, DiariasLancamento
 from .forms import AgenteForm, ArmamentoForm, ClienteForm, ColeteForm, FreelanceForm, RastreadorForm, ViaturaForm, \
     FuncionarioPatrimonialForm, JRSFacilitiesForm
 
@@ -4911,10 +4911,58 @@ def diarias_agentes(request):
                     'valor': valor,
                 })
 
-    # Agrupa por agente com subtotais
-    from collections import defaultdict, OrderedDict
-    agrupado = defaultdict(list)
+    # ── Mescla lançamentos manuais / ajustes / exclusões ──────────────────────
+    lancamentos = DiariasLancamento.objects.filter(
+        data__gte=month_start, data__lte=month_end
+    )
+
+    # Chave única de cada linha auto: (agente_nome, os_pk, data)
+    # Converte linhas em dict para permitir override/exclusão
+    linhas_dict = {}
     for l in linhas:
+        key = (l['agente'], l['os_pk'], l['data'])
+        linhas_dict[key] = l
+
+    for lanc in lancamentos:
+        key = (lanc.agente_nome, lanc.os_pk, lanc.data)
+        if lanc.excluido:
+            # Exclui a linha automática correspondente
+            linhas_dict.pop(key, None)
+        elif lanc.os_pk is not None:
+            # Override de valor de linha automática existente
+            if key in linhas_dict:
+                linhas_dict[key]['valor'] = float(lanc.valor)
+                linhas_dict[key]['lancamento_id'] = lanc.pk
+        else:
+            # Lançamento manual puro — chave única por pk do lancamento
+            manual_key = ('__manual__', lanc.pk, lanc.data)
+            linhas_dict[manual_key] = {
+                'agente': lanc.agente_nome,
+                'data': lanc.data,
+                'os_pk': None,
+                'os_numero': lanc.os_numero or '—',
+                'cliente': lanc.cliente,
+                'rota': lanc.rota,
+                'missao': lanc.missao,
+                'valor': float(lanc.valor),
+                'lancamento_id': lanc.pk,
+                'is_manual': True,
+            }
+
+    # Adiciona lancamento_id para linhas auto que têm ajuste de exclusão disponível
+    # (para poder excluir via botão na tela — passa a key da linha)
+    for key, l in linhas_dict.items():
+        if 'lancamento_id' not in l:
+            l['lancamento_id'] = None
+        if 'is_manual' not in l:
+            l['is_manual'] = False
+
+    linhas_final = list(linhas_dict.values())
+
+    # Agrupa por agente com subtotais
+    from collections import defaultdict
+    agrupado = defaultdict(list)
+    for l in linhas_final:
         agrupado[l['agente']].append(l)
 
     agentes_data = []
@@ -4938,7 +4986,8 @@ def diarias_agentes(request):
         'mes_nome': meses_nomes[mes - 1],
         'meses_opcoes': list(enumerate(meses_nomes, 1)),
         'anos': anos,
-        'total_linhas': len(linhas),
+        'total_linhas': len(linhas_final),
+        'missoes_choices': DiariasLancamento.MISSAO_CHOICES,
     })
 
 
@@ -5148,3 +5197,123 @@ def diarias_export_xlsx(request):
     response['Content-Disposition'] = f'attachment; filename="diarias_{mes_nome}_{ano}.xlsx"'
     wb.save(response)
     return response
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CRUD de DiariasLancamento
+# ─────────────────────────────────────────────────────────────────────────────
+
+@login_required
+def diarias_lancamento_salvar(request):
+    """Cria ou edita um DiariasLancamento (salva valor override ou lançamento manual)."""
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido'}, status=405)
+
+    import datetime as _dt
+
+    pk = request.POST.get('pk') or None  # se pk → editar existente
+    agente_nome = request.POST.get('agente_nome', '').strip()
+    os_pk_raw   = request.POST.get('os_pk', '').strip()
+    os_numero   = request.POST.get('os_numero', '').strip()
+    cliente     = request.POST.get('cliente', '').strip()
+    rota        = request.POST.get('rota', '').strip()
+    missao      = request.POST.get('missao', 'ESCOLTA').strip()
+    obs         = request.POST.get('obs', '').strip()
+    valor_raw   = request.POST.get('valor', '').replace(',', '.').strip()
+    data_raw    = request.POST.get('data', '').strip()
+
+    if not agente_nome or not valor_raw or not data_raw:
+        return JsonResponse({'ok': False, 'erro': 'Campos obrigatórios faltando'}, status=400)
+
+    try:
+        valor = float(valor_raw)
+        data  = _dt.date.fromisoformat(data_raw)
+    except (ValueError, TypeError):
+        return JsonResponse({'ok': False, 'erro': 'Valor ou data inválidos'}, status=400)
+
+    try:
+        os_pk = int(os_pk_raw) if os_pk_raw else None
+    except (ValueError, TypeError):
+        os_pk = None
+
+    if pk:
+        try:
+            lanc = DiariasLancamento.objects.get(pk=pk)
+        except DiariasLancamento.DoesNotExist:
+            return JsonResponse({'ok': False, 'erro': 'Lançamento não encontrado'}, status=404)
+    else:
+        lanc = DiariasLancamento()
+        lanc.criado_por = request.user
+
+    lanc.agente_nome = agente_nome
+    lanc.os_pk       = os_pk
+    lanc.os_numero   = os_numero
+    lanc.cliente     = cliente
+    lanc.rota        = rota
+    lanc.missao      = missao
+    lanc.obs         = obs
+    lanc.valor       = valor
+    lanc.data        = data
+    lanc.excluido    = False
+    lanc.save()
+
+    return JsonResponse({'ok': True, 'pk': lanc.pk})
+
+
+@login_required
+def diarias_lancamento_excluir_auto(request):
+    """Marca uma linha automática como excluída (cria DiariasLancamento com excluido=True)."""
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido'}, status=405)
+
+    import datetime as _dt
+
+    agente_nome = request.POST.get('agente_nome', '').strip()
+    os_pk_raw   = request.POST.get('os_pk', '').strip()
+    os_numero   = request.POST.get('os_numero', '').strip()
+    data_raw    = request.POST.get('data', '').strip()
+
+    if not agente_nome or not os_pk_raw or not data_raw:
+        return JsonResponse({'ok': False, 'erro': 'Dados insuficientes'}, status=400)
+
+    try:
+        os_pk = int(os_pk_raw)
+        data  = _dt.date.fromisoformat(data_raw)
+    except (ValueError, TypeError):
+        return JsonResponse({'ok': False, 'erro': 'Parâmetros inválidos'}, status=400)
+
+    # Cria ou atualiza registro de exclusão
+    lanc, created = DiariasLancamento.objects.get_or_create(
+        agente_nome=agente_nome,
+        os_pk=os_pk,
+        data=data,
+        defaults={
+            'os_numero': os_numero,
+            'excluido': True,
+            'valor': 0,
+            'criado_por': request.user,
+        }
+    )
+    if not created:
+        lanc.excluido = True
+        lanc.save()
+
+    return JsonResponse({'ok': True})
+
+
+@login_required
+def diarias_lancamento_deletar(request):
+    """Deleta um DiariasLancamento (lançamento manual ou override)."""
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erro': 'Método inválido'}, status=405)
+
+    pk = request.POST.get('pk', '').strip()
+    if not pk:
+        return JsonResponse({'ok': False, 'erro': 'PK não informado'}, status=400)
+
+    try:
+        lanc = DiariasLancamento.objects.get(pk=pk)
+        lanc.delete()
+        return JsonResponse({'ok': True})
+    except DiariasLancamento.DoesNotExist:
+        return JsonResponse({'ok': False, 'erro': 'Lançamento não encontrado'}, status=404)
