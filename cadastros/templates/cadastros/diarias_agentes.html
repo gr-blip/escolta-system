@@ -171,7 +171,12 @@
     <h3 id="modal-titulo" style="margin:0 0 20px;font-size:16px;font-weight:700">Lançamento</h3>
     <div class="field mb-14">
       <label>Agente</label>
-      <input type="text" id="m-agente" placeholder="Nome do agente">
+      <input type="text" id="m-agente" list="lista-agentes" placeholder="Digite ou selecione o agente..." autocomplete="off">
+      <datalist id="lista-agentes">
+        {% for nome in agentes_lista %}
+          <option value="{{ nome }}">
+        {% endfor %}
+      </datalist>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" class="mb-14">
       <div class="field">

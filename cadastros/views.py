@@ -5214,6 +5214,11 @@ def diarias_agentes(request):
                    'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
     anos = list(range(2024, hoje.year + 2))
 
+    # Lista de agentes ativos para o select do modal
+    agentes_lista = list(
+        Agente.objects.filter(status='ativo').order_by('nome').values_list('nome', flat=True)
+    )
+
     return render(request, 'cadastros/diarias_agentes.html', {
         'agentes_data': agentes_data,
         'total_geral': total_geral,
@@ -5224,6 +5229,7 @@ def diarias_agentes(request):
         'anos': anos,
         'total_linhas': len(linhas_final),
         'missoes_choices': DiariasLancamento.MISSAO_CHOICES,
+        'agentes_lista': agentes_lista,
     })
 
 
