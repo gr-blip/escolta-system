@@ -254,11 +254,183 @@ def dashboard(request):
 
 @login_required
 def agente_list(request):
-    q = request.GET.get('q', '')
+    q            = request.GET.get('q', '').strip()
+    status_filtro = request.GET.get('status', '').strip()
+    letra        = request.GET.get('letra', '').strip().upper()
+
     agentes = Agente.objects.all()
     if q:
         agentes = agentes.filter(Q(nome__icontains=q) | Q(cpf__icontains=q) | Q(rg__icontains=q))
-    return render(request, 'cadastros/agente_list.html', {'agentes': agentes, 'q': q})
+    if status_filtro in ('ativo', 'afastado', 'inativo'):
+        agentes = agentes.filter(status=status_filtro)
+    if letra and len(letra) == 1 and letra.isalpha():
+        agentes = agentes.filter(nome__istartswith=letra)
+
+    agentes = agentes.order_by('nome')
+    total = agentes.count()
+    return render(request, 'cadastros/agente_list.html', {
+        'agentes': agentes,
+        'q': q,
+        'status_filtro': status_filtro,
+        'letra': letra,
+        'total': total,
+        'hoje': date.today(),
+    })
+
+
+@login_required
+def agente_export_pdf(request):
+    """Exporta fichas resumidas em PDF dos agentes selecionados."""
+    from django.http import HttpResponse
+    import io
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.lib.units import mm
+    from reportlab.platypus import (
+        SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer,
+        HRFlowable, PageBreak,
+    )
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.enums import TA_CENTER
+    from datetime import datetime, date
+
+    if request.method != 'POST':
+        return redirect('agente_list')
+
+    pks = request.POST.getlist('agentes')
+    if not pks:
+        messages.error(request, 'Selecione ao menos um agente para exportar.')
+        return redirect('agente_list')
+
+    agentes = Agente.objects.filter(pk__in=pks).order_by('nome')
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=A4,
+                            leftMargin=15*mm, rightMargin=15*mm,
+                            topMargin=15*mm, bottomMargin=15*mm)
+
+    AZUL     = colors.HexColor('#1A3A5C')
+    VERDE    = colors.HexColor('#16a34a')
+    VERMELHO = colors.HexColor('#dc2626')
+    AMBAR    = colors.HexColor('#d97706')
+    CINZA    = colors.HexColor('#6b7280')
+    CINZA_BG = colors.HexColor('#f3f4f6')
+
+    styles = getSampleStyleSheet()
+    s_titulo  = ParagraphStyle('tit', parent=styles['Normal'], fontSize=11, textColor=colors.white, leading=14)
+    s_label   = ParagraphStyle('lbl', parent=styles['Normal'], fontSize=7,  textColor=CINZA, spaceAfter=1)
+    s_valor   = ParagraphStyle('val', parent=styles['Normal'], fontSize=9,  textColor=colors.black)
+    s_bold    = ParagraphStyle('bld', parent=styles['Normal'], fontSize=9,  textColor=colors.black, fontName='Helvetica-Bold')
+    s_small   = ParagraphStyle('sml', parent=styles['Normal'], fontSize=7,  textColor=CINZA)
+    s_section = ParagraphStyle('sec', parent=styles['Normal'], fontSize=8,  textColor=AZUL, fontName='Helvetica-Bold', spaceAfter=3)
+
+    elements = []
+
+    # ── Capa ──────────────────────────────────────────────────────────────────
+    elements.append(Spacer(1, 10*mm))
+    capa = Table(
+        [[Paragraph("JR SEGURANÇA E VIGILÂNCIA PATRIMONIAL LTDA", s_titulo),
+          Paragraph(f"Fichas de Agentes — {datetime.now().strftime('%d/%m/%Y')}", s_small)]],
+        colWidths=[130*mm, 45*mm]
+    )
+    capa.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), AZUL),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (0, -1), 10),
+        ('RIGHTPADDING', (-1, 0), (-1, -1), 10),
+        ('TEXTCOLOR', (1, 0), (1, 0), colors.HexColor('#9ca3af')),
+    ]))
+    elements.append(capa)
+    elements.append(Spacer(1, 6*mm))
+
+    hoje = date.today()
+
+    for idx, ag in enumerate(agentes):
+        # ── Cabeçalho da ficha ─────────────────────────────────────────────
+        status_cor = VERDE if ag.status == 'ativo' else (AMBAR if ag.status == 'afastado' else CINZA)
+        header_data = [[
+            Paragraph(f"<b>{ag.nome}</b>",
+                      ParagraphStyle('nm', parent=styles['Normal'], fontSize=12, textColor=AZUL)),
+            Paragraph(ag.get_funcao_display(),
+                      ParagraphStyle('fn', parent=styles['Normal'], fontSize=9, textColor=CINZA)),
+            Paragraph(f'<font color="#{status_cor.hexval()[2:]}">{ag.get_status_display()}</font>',
+                      ParagraphStyle('st', parent=styles['Normal'], fontSize=9, fontName='Helvetica-Bold')),
+        ]]
+        header_tbl = Table(header_data, colWidths=[90*mm, 60*mm, 25*mm])
+        header_tbl.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), CINZA_BG),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('TOPPADDING', (0, 0), (-1, -1), 7),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 7),
+            ('LEFTPADDING', (0, 0), (0, -1), 8),
+        ]))
+        elements.append(header_tbl)
+        elements.append(Spacer(1, 3*mm))
+
+        # ── Dados pessoais ─────────────────────────────────────────────────
+        elements.append(Paragraph("DADOS PESSOAIS", s_section))
+        row1 = [
+            Paragraph("CPF",      s_label), Paragraph(ag.cpf or '—', s_valor),
+            Paragraph("RG",       s_label), Paragraph(ag.rg or '—',  s_valor),
+            Paragraph("Telefone", s_label), Paragraph(ag.telefone or '—', s_valor),
+        ]
+        row2 = [
+            Paragraph("Nome da mãe", s_label), Paragraph(ag.nome_mae or '—', s_valor),
+            Paragraph("Nome do pai", s_label), Paragraph(ag.nome_pai or '—', s_valor),
+            Paragraph("Endereço",    s_label), Paragraph(ag.endereco or '—', s_valor),
+        ]
+        dados_tbl = Table([row1, row2], colWidths=[20*mm, 50*mm, 10*mm, 40*mm, 20*mm, 35*mm])
+        dados_tbl.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('TOPPADDING', (0, 0), (-1, -1), 1),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ]))
+        elements.append(dados_tbl)
+        elements.append(Spacer(1, 3*mm))
+
+        # ── Habilitações ───────────────────────────────────────────────────
+        elements.append(Paragraph("HABILITAÇÕES E VALIDADES", s_section))
+
+        def _val_str(d):
+            if not d:
+                return '—'
+            s = d.strftime('%d/%m/%Y')
+            return f'{s} ⚠ VENCIDO' if d < hoje else s
+
+        hab_row = [
+            Paragraph("CNH",          s_label), Paragraph(ag.cnh or '—', s_valor),
+            Paragraph("Val. CNH",     s_label), Paragraph(_val_str(ag.cnh_validade), s_valor),
+            Paragraph("Val. CNV",     s_label), Paragraph(_val_str(ag.cnv_validade), s_valor),
+            Paragraph("Val. Curso",   s_label), Paragraph(_val_str(ag.curso_validade), s_valor),
+        ]
+        hab_tbl = Table([hab_row], colWidths=[15*mm, 30*mm, 18*mm, 30*mm, 18*mm, 30*mm, 18*mm, 16*mm])
+        hab_tbl.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('TOPPADDING', (0, 0), (-1, -1), 1),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ]))
+        elements.append(hab_tbl)
+
+        elements.append(Spacer(1, 2*mm))
+        elements.append(HRFlowable(width="100%", thickness=0.4, color=CINZA))
+
+        if idx < len(pks) - 1:
+            elements.append(PageBreak())
+        else:
+            elements.append(Spacer(1, 6*mm))
+
+    elements.append(Paragraph(
+        f"Gerado em {datetime.now().strftime('%d/%m/%Y às %H:%M')} — JR Segurança © {datetime.now().year}",
+        ParagraphStyle('rod', parent=styles['Normal'], fontSize=7, textColor=CINZA, alignment=TA_CENTER)
+    ))
+
+    doc.build(elements)
+    buf.seek(0)
+    response = HttpResponse(buf, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="fichas_agentes.pdf"'
+    return response
 
 
 @login_required

@@ -7,6 +7,7 @@ urlpatterns = [
 
     # Agentes
     path('agentes/', views.agente_list, name='agente_list'),
+    path('agentes/exportar-pdf/', views.agente_export_pdf, name='agente_export_pdf'),
     path('agentes/novo/', views.agente_create, name='agente_create'),
     path('agentes/<int:pk>/editar/', views.agente_edit, name='agente_edit'),
     path('agentes/<int:pk>/excluir/', views.agente_delete, name='agente_delete'),
