@@ -277,12 +277,12 @@ function abrirModalNovo() {
   document.getElementById('m-rota').value = '';
   document.getElementById('m-valor').value = '100.00';
   document.getElementById('m-obs').value = '';
-  document.getElementById('modal-diaria').classList.add('open');
+  document.getElementById('modal-diaria').style.display = 'flex';
 }
 
 // ── Abrir modal "Novo" já com agente definido ──────────────────────────────
 function abrirModalNovoParaAgente(nome) {
-  abrirModalNovo();
+  abrirModalNovo(); // já abre o modal
   document.getElementById('m-agente').value = nome;
   document.getElementById('modal-titulo').textContent = 'Novo Lançamento — ' + nome;
 }
@@ -314,11 +314,11 @@ function abrirModalEditar(tr) {
   document.getElementById('m-valor').value = parseFloat(d.valor).toFixed(2);
   document.getElementById('m-obs').value = d.obs || '';
 
-  document.getElementById('modal-diaria').classList.add('open');
+  document.getElementById('modal-diaria').style.display = 'flex';
 }
 
 function fecharModal() {
-  document.getElementById('modal-diaria').classList.remove('open');
+  document.getElementById('modal-diaria').style.display = 'none';
 }
 
 // ── Salvar lançamento (POST) ───────────────────────────────────────────────
@@ -372,11 +372,11 @@ function confirmarExcluir(tr) {
     msg = 'Ocultar esta linha automática? Ela deixará de aparecer no relatório.';
   }
   document.getElementById('msg-excluir').textContent = msg;
-  document.getElementById('modal-excluir').classList.add('open');
+  document.getElementById('modal-excluir').style.display = 'flex';
 }
 
 function fecharModalExcluir() {
-  document.getElementById('modal-excluir').classList.remove('open');
+  document.getElementById('modal-excluir').style.display = 'none';
   _excluirTr = null;
 }
 
