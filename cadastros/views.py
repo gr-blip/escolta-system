@@ -4883,9 +4883,10 @@ def freelance_list(request):
 
 @login_required
 def patrimonial_export_pdf(request):
-    """Exporta ficha resumida em PDF dos funcionários patrimoniais selecionados."""
+    """Exporta ficha patrimonial em PDF — design revisado com logo, foto e processos."""
     from django.http import HttpResponse
-    import io
+    from django.conf import settings
+    import io, os
     from reportlab.lib.pagesizes import A4
     from reportlab.lib import colors
     from reportlab.lib.units import mm
@@ -4894,9 +4895,8 @@ def patrimonial_export_pdf(request):
         HRFlowable, PageBreak, Image as RLImage,
     )
     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-    from reportlab.lib.enums import TA_CENTER, TA_LEFT
-    from datetime import datetime
-    import os
+    from reportlab.lib.enums import TA_CENTER, TA_RIGHT
+    from datetime import datetime, date, timedelta
 
     if request.method != 'POST':
         return redirect('funcionario_patrimonial_list')
@@ -4907,61 +4907,97 @@ def patrimonial_export_pdf(request):
         messages.error(request, 'Selecione ao menos um funcionário para exportar.')
         return redirect(origin)
 
-    funcionarios = (
+    funcionarios_list = list(
         FuncionarioPatrimonial.objects
         .filter(pk__in=pks)
         .prefetch_related('consultas_processo')
         .order_by('nome')
     )
 
-    buf = io.BytesIO()
-    doc = SimpleDocTemplate(buf, pagesize=A4,
-                            leftMargin=15*mm, rightMargin=15*mm,
-                            topMargin=15*mm, bottomMargin=15*mm)
+    # ── Paleta ───────────────────────────────────────────────────────────────
+    AZUL      = colors.HexColor('#1A3A5C')
+    AZUL_CLR  = colors.HexColor('#dbeafe')
+    VERDE     = colors.HexColor('#16a34a')
+    VERDE_BG  = colors.HexColor('#dcfce7')
+    VERMELHO  = colors.HexColor('#dc2626')
+    VERM_BG   = colors.HexColor('#fee2e2')
+    AMBAR     = colors.HexColor('#d97706')
+    AMBAR_BG  = colors.HexColor('#fef3c7')
+    CINZA     = colors.HexColor('#6b7280')
+    CINZA_CLR = colors.HexColor('#f3f4f6')
+    CINZA_BRD = colors.HexColor('#e5e7eb')
+    BRANCO    = colors.white
 
-    AZUL    = colors.HexColor('#1A3A5C')
-    VERDE   = colors.HexColor('#16a34a')
-    VERMELHO = colors.HexColor('#dc2626')
-    AMBAR   = colors.HexColor('#d97706')
-    CINZA   = colors.HexColor('#6b7280')
-    CINZA_BG = colors.HexColor('#f3f4f6')
+    def hx(c): return c.hexval()[2:]
 
-    styles = getSampleStyleSheet()
-    s_titulo   = ParagraphStyle('tit',  parent=styles['Normal'], fontSize=11, textColor=colors.white, leading=14)
-    s_label    = ParagraphStyle('lbl',  parent=styles['Normal'], fontSize=7,  textColor=CINZA, spaceAfter=1)
-    s_valor    = ParagraphStyle('val',  parent=styles['Normal'], fontSize=9,  textColor=colors.black)
-    s_bold     = ParagraphStyle('bld',  parent=styles['Normal'], fontSize=9,  textColor=colors.black, fontName='Helvetica-Bold')
-    s_small    = ParagraphStyle('sml',  parent=styles['Normal'], fontSize=7,  textColor=CINZA)
-    s_section  = ParagraphStyle('sec',  parent=styles['Normal'], fontSize=8,  textColor=AZUL, fontName='Helvetica-Bold', spaceAfter=3)
+    N = getSampleStyleSheet()['Normal']
+    IW = 180 * mm  # inner width (A4 - 30mm margins)
+
+    # ── Estilos fixos ────────────────────────────────────────────────────────
+    s_lbl    = ParagraphStyle('s_lbl',  parent=N, fontSize=6.5, textColor=CINZA, leading=9)
+    s_val    = ParagraphStyle('s_val',  parent=N, fontSize=8.5, textColor=colors.black, leading=11)
+    s_hdr    = ParagraphStyle('s_hdr',  parent=N, fontSize=9,   textColor=BRANCO, leading=12)
+    s_hdr_dt = ParagraphStyle('s_hdt',  parent=N, fontSize=8,   textColor=colors.HexColor('#9ca3af'), alignment=TA_RIGHT, leading=11)
+    s_sec    = ParagraphStyle('s_sec',  parent=N, fontSize=7,   textColor=AZUL, fontName='Helvetica-Bold', leading=9)
+    s_small  = ParagraphStyle('s_sml',  parent=N, fontSize=7.5, textColor=CINZA, leading=10)
+    s_rod    = ParagraphStyle('s_rod',  parent=N, fontSize=6.5, textColor=CINZA, alignment=TA_CENTER)
+    s_p_info = ParagraphStyle('s_pinf', parent=N, fontSize=7.5, textColor=colors.black, leading=10)
+    s_p_cinz = ParagraphStyle('s_pciz', parent=N, fontSize=7.5, textColor=CINZA, leading=10)
+    s_p_lbl  = ParagraphStyle('s_plbl', parent=N, fontSize=6,   textColor=CINZA, leading=8)
+    s_p_num  = ParagraphStyle('s_pnum', parent=N, fontSize=8,   textColor=AZUL, fontName='Helvetica-Bold', leading=11)
+    s_p_ramo = ParagraphStyle('s_prmo', parent=N, fontSize=7.5, fontName='Helvetica-Bold', leading=10)
+
+    L = lambda t: Paragraph(str(t) if t else '', s_lbl)
+    V = lambda t: Paragraph(str(t) if t else '—', s_val)
+
+    hoje = date.today()
+    now_str = datetime.now().strftime('%d/%m/%Y')
+
+    def val_cor(d):
+        if not d: return CINZA
+        if d < hoje: return VERMELHO
+        if d <= hoje + timedelta(days=60): return AMBAR
+        return VERDE
+
+    def vd(d, extra=''):
+        """Data colorida por proximidade de vencimento."""
+        if not d: return Paragraph('—', s_val)
+        c = val_cor(d)
+        txt = d.strftime('%d/%m/%Y') + (f' ({extra})' if extra else '')
+        return Paragraph(f'<b><font color="#{hx(c)}">{txt}</font></b>', s_val)
+
+    def sec(title):
+        """Cabeçalho de seção azul claro."""
+        t = Table([[Paragraph(f'<b>{title}</b>', s_sec)]], colWidths=[IW])
+        t.setStyle(TableStyle([
+            ('BACKGROUND',    (0, 0), (-1, -1), AZUL_CLR),
+            ('TOPPADDING',    (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ('LEFTPADDING',   (0, 0), (-1, -1), 8),
+        ]))
+        return t
+
+    def badge_tbl(txt, fg, bg, w):
+        """Mini-tabela colorida tipo badge."""
+        t = Table(
+            [[Paragraph(f'<b>{txt}</b>', ParagraphStyle('bdg', parent=N, fontSize=10, textColor=fg))]],
+            colWidths=[w]
+        )
+        t.setStyle(TableStyle([
+            ('BACKGROUND',    (0, 0), (-1, -1), bg),
+            ('TOPPADDING',    (0, 0), (-1, -1), 5),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+            ('LEFTPADDING',   (0, 0), (-1, -1), 8),
+        ]))
+        return t
+
+    # ── Logo ─────────────────────────────────────────────────────────────────
+    logo_path = os.path.join(settings.BASE_DIR, 'cadastros', 'static', 'cadastros', 'img', 'logo-branco.png')
 
     elements = []
 
-    # ── Capa ────────────────────────────────────────────────────────────────
-    elements.append(Spacer(1, 10*mm))
-    capa = Table(
-        [[Paragraph("JR SEGURANÇA E VIGILÂNCIA PATRIMONIAL LTDA", s_titulo),
-          Paragraph(f"Fichas Patrimoniais — {datetime.now().strftime('%d/%m/%Y')}", s_small)]],
-        colWidths=[130*mm, 45*mm]
-    )
-    capa.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), AZUL),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-        ('LEFTPADDING', (0, 0), (0, -1), 10),
-        ('RIGHTPADDING', (-1, 0), (-1, -1), 10),
-        ('TEXTCOLOR', (1, 0), (1, 0), colors.HexColor('#9ca3af')),
-    ]))
-    elements.append(capa)
-    elements.append(Spacer(1, 6*mm))
-
-    for idx, func in enumerate(funcionarios):
-        ultima_consulta = func.consultas_processo.order_by('-criado_em').first()
-
-        # ── Cabeçalho da ficha ───────────────────────────────────────────
-        nome_par = Paragraph(f"<b>{func.nome}</b>", ParagraphStyle(
-            'nm', parent=styles['Normal'], fontSize=12, textColor=AZUL
-        ))
+    for idx, func in enumerate(funcionarios_list):
+        ultima = func.consultas_processo.order_by('-criado_em').first()
 
         empresa_label = {
             'jr_seguranca': 'JR Segurança e Vigilância Patrimonial Ltda',
@@ -4969,106 +5005,261 @@ def patrimonial_export_pdf(request):
             'freelance': 'Freelance',
         }.get(func.empresa, func.empresa)
 
-        cargo_label = getattr(func, 'cargo', '') or func.get_tipo_display() if hasattr(func, 'get_tipo_display') else '—'
+        cargo_display  = func.cargo or (func.get_tipo_display() if func.tipo else '') or '—'
+        funcao_display = func.get_funcao_display() if func.funcao else '—'
+        escala_display = func.get_escala_display() if func.escala else '—'
 
-        status_cor = VERDE if func.status == 'ativo' else (AMBAR if func.status == 'afastado' else CINZA)
+        # ── CABEÇALHO (fundo azul + logo) ────────────────────────────────────
+        try:
+            logo_cell = RLImage(logo_path, width=30*mm, height=11*mm) if os.path.exists(logo_path) else \
+                        Paragraph('<b>JR</b>', ParagraphStyle('lgx', parent=N, fontSize=11, textColor=BRANCO, fontName='Helvetica-Bold'))
+        except Exception:
+            logo_cell = Paragraph('<b>JR</b>', ParagraphStyle('lgx', parent=N, fontSize=11, textColor=BRANCO, fontName='Helvetica-Bold'))
 
-        header_data = [[
-            nome_par,
-            Paragraph(empresa_label, s_small),
-            Paragraph(f'<font color="#{status_cor.hexval()[2:]}">{func.get_status_display()}</font>',
-                      ParagraphStyle('st', parent=styles['Normal'], fontSize=9, fontName='Helvetica-Bold')),
-        ]]
-        header_tbl = Table(header_data, colWidths=[80*mm, 70*mm, 25*mm])
-        header_tbl.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), CINZA_BG),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('TOPPADDING', (0, 0), (-1, -1), 6),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-            ('LEFTPADDING', (0, 0), (0, -1), 8),
+        hdr = Table([[
+            logo_cell,
+            Paragraph(
+                f'<b>JR SEGURANÇA E VIGILÂNCIA PATRIMONIAL LTDA</b>'
+                f'<br/><font size="7" color="#9ca3af">{empresa_label}</font>',
+                s_hdr
+            ),
+            Paragraph(
+                f'Ficha Patrimonial<br/><font size="7">{now_str}</font>',
+                s_hdr_dt
+            ),
+        ]], colWidths=[34*mm, 108*mm, 38*mm])
+        hdr.setStyle(TableStyle([
+            ('BACKGROUND',    (0, 0), (-1, -1), AZUL),
+            ('VALIGN',        (0, 0), (-1, -1), 'MIDDLE'),
+            ('TOPPADDING',    (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('LEFTPADDING',   (0, 0), (0,  0),  10),
+            ('LEFTPADDING',   (1, 0), (1,  0),  10),
+            ('RIGHTPADDING',  (2, 0), (2,  0),  10),
         ]))
-        elements.append(header_tbl)
-        elements.append(Spacer(1, 3*mm))
+        elements.append(hdr)
+        elements.append(Spacer(1, 4*mm))
 
-        # ── Dados pessoais ────────────────────────────────────────────────
-        elements.append(Paragraph("DADOS PESSOAIS", s_section))
+        # ── NOME + STATUS + FOTO ─────────────────────────────────────────────
+        st_cor = VERDE if func.status == 'ativo' else (AMBAR if func.status == 'afastado' else CINZA)
 
-        row1 = [
-            Paragraph("CPF",         s_label), Paragraph(func.cpf or '—', s_valor),
-            Paragraph("RG",          s_label), Paragraph(func.rg or '—',  s_valor),
-            Paragraph("Tipo / Cargo",s_label), Paragraph(cargo_label or '—', s_valor),
-        ]
-        row2 = [
-            Paragraph("Telefone",    s_label), Paragraph(func.telefone or '—', s_valor),
-            Paragraph("Posto",       s_label), Paragraph(func.posto_trabalho or '—', s_valor),
-            Paragraph("Admissão",    s_label), Paragraph(func.data_admissao.strftime('%d/%m/%Y') if func.data_admissao else '—', s_valor),
-        ]
-        dados_tbl = Table([row1, row2], colWidths=[20*mm, 48*mm, 15*mm, 43*mm, 22*mm, 27*mm])
-        dados_tbl.setStyle(TableStyle([
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('TOPPADDING', (0, 0), (-1, -1), 1),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        foto_cell = Spacer(20*mm, 1)
+        if func.foto:
+            try:
+                fp = func.foto.path
+                if os.path.exists(fp):
+                    foto_cell = RLImage(fp, width=20*mm, height=24*mm)
+            except Exception:
+                pass
+
+        nome_tbl = Table([[
+            Paragraph(
+                f'<b><font size="12" color="#{hx(AZUL)}">{func.nome}</font></b><br/>'
+                f'<font size="8" color="#6b7280">{empresa_label} · {cargo_display}</font>',
+                ParagraphStyle('nm', parent=N, leading=17)
+            ),
+            Paragraph(
+                f'<b><font color="#{hx(st_cor)}">{func.get_status_display()}</font></b>',
+                ParagraphStyle('stx', parent=N, fontSize=9, alignment=TA_RIGHT)
+            ),
+            foto_cell,
+        ]], colWidths=[120*mm, 34*mm, 26*mm])
+        nome_tbl.setStyle(TableStyle([
+            ('BACKGROUND',    (0, 0), (-1, -1), CINZA_CLR),
+            ('VALIGN',        (0, 0), (1,  -1), 'MIDDLE'),
+            ('VALIGN',        (2, 0), (2,  -1), 'TOP'),
+            ('TOPPADDING',    (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (1,  -1), 8),
+            ('TOPPADDING',    (2, 0), (2,  -1), 4),
+            ('BOTTOMPADDING', (2, 0), (2,  -1), 4),
+            ('LEFTPADDING',   (0, 0), (0,  -1), 10),
+            ('RIGHTPADDING',  (2, 0), (2,  -1), 5),
+            ('LINEBELOW',     (0, 0), (-1, -1), 2.5, AZUL),
         ]))
-        elements.append(dados_tbl)
-        elements.append(Spacer(1, 3*mm))
+        elements.append(nome_tbl)
+        elements.append(Spacer(1, 4*mm))
 
-        # ── Habilitações ───────────────────────────────────────────────────
-        elements.append(Paragraph("HABILITAÇÕES E VALIDADES", s_section))
-        habRow = [
-            Paragraph("CNH Validade",  s_label),
-            Paragraph(func.cnh_validade.strftime('%d/%m/%Y') if func.cnh_validade else '—', s_valor),
-            Paragraph("CNV Validade",  s_label),
-            Paragraph(func.cnv_validade.strftime('%d/%m/%Y') if func.cnv_validade else '—', s_valor),
-            Paragraph("Curso Validade", s_label),
-            Paragraph(func.curso_validade.strftime('%d/%m/%Y') if func.curso_validade else '—', s_valor),
-        ]
-        hab_tbl = Table([habRow], colWidths=[25*mm, 30*mm, 25*mm, 30*mm, 30*mm, 35*mm])
-        hab_tbl.setStyle(TableStyle([
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('TOPPADDING', (0, 0), (-1, -1), 1),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        # ── DADOS PESSOAIS ────────────────────────────────────────────────────
+        elements.append(sec("DADOS PESSOAIS"))
+        elements.append(Spacer(1, 1.5*mm))
+        t_pes = Table([
+            [L("CPF"), V(func.cpf), L("RG"), V(func.rg), L("Telefone"), V(func.telefone)],
+            [L("Nascimento"),
+             V(func.data_nascimento.strftime('%d/%m/%Y') if func.data_nascimento else None),
+             L("Nome da Mãe"),
+             Paragraph(func.nome_mae or '—', s_val),
+             '', ''],
+        ], colWidths=[20*mm, 40*mm, 14*mm, 56*mm, 18*mm, 32*mm])
+        t_pes.setStyle(TableStyle([
+            ('VALIGN',        (0, 0), (-1, -1), 'TOP'),
+            ('TOPPADDING',    (0, 0), (-1, -1), 1),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+            ('SPAN',          (3, 1), (5,  1)),
         ]))
-        elements.append(hab_tbl)
-        elements.append(Spacer(1, 3*mm))
+        elements.append(t_pes)
+        elements.append(Spacer(1, 1*mm))
 
-        # ── Processos judiciais ────────────────────────────────────────────
-        elements.append(Paragraph("CONSULTA DE PROCESSOS JUDICIAIS (DriverID)", s_section))
-        if ultima_consulta:
-            cor_cpf = VERDE if ultima_consulta.status_cpf and 'REGULAR' in ultima_consulta.status_cpf.upper() else VERMELHO
-            proc_row = [
-                Paragraph("Status CPF",       s_label),
-                Paragraph(f'<font color="#{cor_cpf.hexval()[2:]}">{ultima_consulta.status_cpf or "—"}</font>',
-                          ParagraphStyle('cpfst', parent=styles['Normal'], fontSize=9, fontName='Helvetica-Bold')),
-                Paragraph("Total processos",  s_label),
-                Paragraph(str(ultima_consulta.total_processos), s_bold),
-                Paragraph("Data consulta",    s_label),
-                Paragraph(ultima_consulta.criado_em.strftime('%d/%m/%Y'), s_valor),
-            ]
-            proc_tbl = Table([proc_row], colWidths=[25*mm, 30*mm, 28*mm, 22*mm, 25*mm, 45*mm])
-            proc_tbl.setStyle(TableStyle([
-                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                ('TOPPADDING', (0, 0), (-1, -1), 1),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-            ]))
-            elements.append(proc_tbl)
-        else:
-            elements.append(Paragraph("Nenhuma consulta registrada.", s_small))
+        # ── DADOS PROFISSIONAIS ───────────────────────────────────────────────
+        elements.append(sec("DADOS PROFISSIONAIS"))
+        elements.append(Spacer(1, 1.5*mm))
+        t_prof = Table([
+            [L("Tipo / Cargo"), V(cargo_display), L("Função"), V(funcao_display), L("Escala"), V(escala_display)],
+            [L("Posto de Trabalho"), V(func.posto_trabalho),
+             L("Admissão"), V(func.data_admissao.strftime('%d/%m/%Y') if func.data_admissao else None),
+             L("Reg. DRT"), V(func.registro_drt)],
+        ], colWidths=[24*mm, 46*mm, 18*mm, 36*mm, 18*mm, 38*mm])
+        t_prof.setStyle(TableStyle([
+            ('VALIGN',        (0, 0), (-1, -1), 'TOP'),
+            ('TOPPADDING',    (0, 0), (-1, -1), 1),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ]))
+        elements.append(t_prof)
+        elements.append(Spacer(1, 1*mm))
 
+        # ── HABILITAÇÕES ──────────────────────────────────────────────────────
+        elements.append(sec("HABILITAÇÕES E VALIDADES"))
+        elements.append(Spacer(1, 1.5*mm))
+        t_hab = Table([
+            [L("CNH"), V(func.cnh), L("Val. CNH"), vd(func.cnh_validade, func.cnh_categoria), L("Categoria"), V(func.cnh_categoria)],
+            [L("CNV"), V(func.cnv), L("Val. CNV"), vd(func.cnv_validade), L("Curso"),         V(func.curso)],
+            [L("Val. Curso"), vd(func.curso_validade), '', '', '', ''],
+        ], colWidths=[18*mm, 36*mm, 18*mm, 38*mm, 18*mm, 52*mm])
+        t_hab.setStyle(TableStyle([
+            ('VALIGN',        (0, 0), (-1, -1), 'TOP'),
+            ('TOPPADDING',    (0, 0), (-1, -1), 1),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+            ('SPAN',          (1, 2), (5,  2)),
+        ]))
+        elements.append(t_hab)
+        elements.append(Spacer(1, 1*mm))
+
+        # ── CONSULTA DE PROCESSOS JUDICIAIS ──────────────────────────────────
+        elements.append(sec("CONSULTA DE PROCESSOS JUDICIAIS (DriverID)"))
         elements.append(Spacer(1, 2*mm))
-        elements.append(HRFlowable(width="100%", thickness=0.4, color=CINZA))
 
-        # Quebra de página entre funcionários (exceto o último)
-        if idx < len(pks) - 1:
-            elements.append(PageBreak())
+        if ultima:
+            is_reg   = ultima.status_cpf and 'REGULAR' in ultima.status_cpf.upper()
+            cor_cpf  = VERDE if is_reg else VERMELHO
+            bg_cpf   = VERDE_BG if is_reg else VERM_BG
+            n_proc   = ultima.total_processos
+            cor_proc = VERMELHO if n_proc > 0 else CINZA
+            bg_proc  = VERM_BG  if n_proc > 0 else CINZA_CLR
+
+            sum_tbl = Table([[
+                badge_tbl(ultima.status_cpf or '—', cor_cpf, bg_cpf, 36*mm),
+                badge_tbl(f'{n_proc} processo{"s" if n_proc != 1 else ""}', cor_proc, bg_proc, 40*mm),
+                Paragraph(
+                    f'<b>Data da consulta:</b> {ultima.criado_em.strftime("%d/%m/%Y %H:%M")}<br/>'
+                    f'<font size="7">Origem: {ultima.get_origem_display()}</font>',
+                    ParagraphStyle('dcns', parent=N, fontSize=8, textColor=CINZA, leading=11)
+                ),
+            ]], colWidths=[40*mm, 44*mm, 96*mm])
+            sum_tbl.setStyle(TableStyle([
+                ('VALIGN',        (0, 0), (-1, -1), 'MIDDLE'),
+                ('TOPPADDING',    (0, 0), (-1, -1), 0),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+                ('LEFTPADDING',   (2, 0), (2,  0),  10),
+            ]))
+            elements.append(sum_tbl)
+
+            # ── Detalhes dos processos ────────────────────────────────────
+            processos = ultima.resultado_json.get('data', {}).get('data', [])
+            if not processos:
+                res = ultima.resultado_json.get('data', {}).get('result', {})
+                processos = res.get('processos', [])
+
+            if processos:
+                elements.append(Spacer(1, 3*mm))
+                elements.append(Paragraph(
+                    f'<b>Processos encontrados: {len(processos)}</b>',
+                    ParagraphStyle('pdhdr', parent=N, fontSize=8, textColor=AZUL)
+                ))
+                elements.append(Spacer(1, 2*mm))
+
+                for pi, proc in enumerate(processos, 1):
+                    num      = proc.get('process_number', proc.get('numero', f'#{pi}')) or f'#{pi}'
+                    tribunal = proc.get('court',          proc.get('tribunal', '—'))     or '—'
+                    uf       = proc.get('state',          proc.get('uf', ''))            or ''
+                    ramo     = proc.get('law_branch',     proc.get('area', '—'))         or '—'
+                    status_p = proc.get('process_status', proc.get('statusObservacao', '—')) or '—'
+                    classe   = proc.get('procedural_class', '—') or '—'
+                    data_aut = proc.get('filing_date', proc.get('dataAutuacao', '—'))    or '—'
+                    seg      = proc.get('segment', '—') or '—'
+                    if isinstance(data_aut, str) and 'T' in data_aut:
+                        try:
+                            data_aut = datetime.fromisoformat(data_aut.replace('Z', '+00:00')).strftime('%d/%m/%Y')
+                        except Exception:
+                            pass
+
+                    rl = ramo.lower()
+                    if 'penal' in rl or 'criminal' in rl:
+                        r_cor, r_bg = VERMELHO, VERM_BG
+                    elif 'civil' in rl or 'cível' in rl:
+                        r_cor, r_bg = colors.HexColor('#2563eb'), colors.HexColor('#dbeafe')
+                    elif 'trabalh' in rl:
+                        r_cor, r_bg = colors.HexColor('#7c3aed'), colors.HexColor('#ede9fe')
+                    else:
+                        r_cor, r_bg = CINZA, CINZA_CLR
+
+                    p_tbl = Table([
+                        [
+                            Paragraph(f'<b><font color="#{hx(r_cor)}">{ramo}</font></b>', s_p_ramo),
+                            Paragraph(f'<b>Nº {num}</b>', s_p_num),
+                            Paragraph(f'{tribunal} {uf}'.strip(), s_p_cinz),
+                        ],
+                        [
+                            Paragraph('Classe', s_p_lbl),
+                            Paragraph(str(classe), s_p_info),
+                            Paragraph(f'Status: {status_p}', s_p_cinz),
+                        ],
+                        [
+                            Paragraph('Autuação', s_p_lbl),
+                            Paragraph(str(data_aut), s_p_info),
+                            Paragraph(f'Segmento: {seg}', s_p_cinz),
+                        ],
+                    ], colWidths=[38*mm, 82*mm, 60*mm])
+                    p_tbl.setStyle(TableStyle([
+                        ('BACKGROUND',    (0, 0), (-1, 0),  r_bg),
+                        ('VALIGN',        (0, 0), (-1, -1), 'TOP'),
+                        ('TOPPADDING',    (0, 0), (-1, -1), 3),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+                        ('LEFTPADDING',   (0, 0), (-1, -1), 5),
+                        ('LINEBEFORE',    (0, 0), (0,  -1), 2.5, r_cor),
+                        ('LINEBELOW',     (0, -1), (-1, -1), 0.3, CINZA_BRD),
+                    ]))
+                    elements.append(p_tbl)
+            else:
+                elements.append(Spacer(1, 2*mm))
+                elements.append(Paragraph("Nenhum processo encontrado nesta consulta.", s_small))
         else:
-            elements.append(Spacer(1, 6*mm))
+            elements.append(Paragraph("Nenhuma consulta de processos registrada.", s_small))
 
-    # ── Rodapé geral ──────────────────────────────────────────────────────
-    elements.append(Paragraph(
-        f"Gerado em {datetime.now().strftime('%d/%m/%Y às %H:%M')} — JR Segurança © {datetime.now().year}",
-        ParagraphStyle('rod', parent=styles['Normal'], fontSize=7, textColor=CINZA, alignment=TA_CENTER)
-    ))
+        # ── OBSERVAÇÕES ───────────────────────────────────────────────────────
+        if func.observacoes and func.observacoes.strip():
+            elements.append(Spacer(1, 3*mm))
+            elements.append(sec("OBSERVAÇÕES"))
+            elements.append(Spacer(1, 1.5*mm))
+            elements.append(Paragraph(
+                func.observacoes,
+                ParagraphStyle('obs', parent=N, fontSize=8, textColor=colors.black, leading=11)
+            ))
 
+        # ── RODAPÉ DA FICHA ───────────────────────────────────────────────────
+        elements.append(Spacer(1, 4*mm))
+        elements.append(HRFlowable(width="100%", thickness=0.5, color=AZUL_CLR))
+        elements.append(Spacer(1, 2*mm))
+        elements.append(Paragraph(
+            f"Gerado em {datetime.now().strftime('%d/%m/%Y às %H:%M')} — JR Segurança © {datetime.now().year}",
+            s_rod
+        ))
+
+        if idx < len(funcionarios_list) - 1:
+            elements.append(PageBreak())
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=A4,
+                            leftMargin=15*mm, rightMargin=15*mm,
+                            topMargin=12*mm, bottomMargin=12*mm)
     doc.build(elements)
     buf.seek(0)
 
