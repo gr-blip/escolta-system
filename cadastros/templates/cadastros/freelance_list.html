@@ -2,36 +2,58 @@
 {% block title %}Freelance{% endblock %}
 {% block page_title %}Freelance{% endblock %}
 {% block breadcrumb %}<a href="{% url 'dashboard' %}">Início</a> / Patrimonial / Freelance{% endblock %}
-{% block topbar_actions %}<a href="{% url 'freelance_create' %}" class="btn btn-primary"><svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Novo Freelance</a>{% endblock %}
+{% block topbar_actions %}
+<a href="{% url 'freelance_create' %}" class="btn btn-primary">
+  <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  Novo Freelance
+</a>
+{% endblock %}
 
 {% block content %}
 <div class="search-bar">
   <form method="get" style="display:flex;gap:10px;flex-wrap:wrap;flex:1;align-items:center">
     <input type="text" name="q" value="{{ q }}" placeholder="Buscar por nome, CPF, RG ou cargo..." style="flex:1;min-width:220px">
-
     <select name="status" style="min-width:130px">
       <option value="">Todos os status</option>
-      <option value="ativo" {% if status_filtro == 'ativo' %}selected{% endif %}>Ativo</option>
+      <option value="ativo"    {% if status_filtro == 'ativo'    %}selected{% endif %}>Ativo</option>
       <option value="afastado" {% if status_filtro == 'afastado' %}selected{% endif %}>Afastado</option>
-      <option value="inativo" {% if status_filtro == 'inativo' %}selected{% endif %}>Inativo</option>
+      <option value="inativo"  {% if status_filtro == 'inativo'  %}selected{% endif %}>Inativo</option>
     </select>
-
     <button type="submit" class="btn btn-secondary">Filtrar</button>
-    {% if q or status_filtro %}
+    {% if q or status_filtro or letra %}
       <a href="{% url 'freelance_list' %}" class="btn btn-secondary">Limpar</a>
     {% endif %}
   </form>
 </div>
 
-<div style="color:var(--text3);font-size:12px;margin:8px 0 12px 4px">
-  {{ total }} freelance{{ total|pluralize:"s" }} encontrado{{ total|pluralize:"s" }}
+<!-- Barra de letras A–Z -->
+<div class="letra-bar">
+  <a href="{% url 'freelance_list' %}{% if q %}?q={{ q }}{% endif %}{% if status_filtro %}&status={{ status_filtro }}{% endif %}"
+     class="letra-btn {% if not letra %}ativo{% endif %}">Todos</a>
+  {% for l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+  <a href="?letra={{ l }}{% if q %}&q={{ q }}{% endif %}{% if status_filtro %}&status={{ status_filtro }}{% endif %}"
+     class="letra-btn {% if letra == l %}ativo{% endif %}">{{ l }}</a>
+  {% endfor %}
 </div>
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin:8px 0 12px 4px">
+  <span style="color:var(--text3);font-size:12px">{{ total }} freelance{{ total|pluralize:"s" }} encontrado{{ total|pluralize:"s" }}</span>
+  <button id="btn-exportar" class="btn btn-secondary btn-sm" onclick="exportarSelecionados()" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M12 3v13M7 11l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 19h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    Exportar selecionados (<span id="cnt-sel">0</span>)
+  </button>
+</div>
+
+<form id="form-export" method="post" action="{% url 'patrimonial_export_pdf' %}">
+  {% csrf_token %}
+  <input type="hidden" name="origin" value="freelance_list">
 
 <div class="card" style="padding:0">
   <div class="table-wrap">
     <table>
       <thead>
         <tr>
+          <th style="width:36px"><input type="checkbox" id="check-all" title="Selecionar todos" onchange="toggleAll(this)"></th>
           <th>Nome</th>
           <th>Cargo</th>
           <th>CPF</th>
@@ -47,6 +69,9 @@
       <tbody>
         {% for f in funcionarios %}
         <tr>
+          <td style="width:36px;text-align:center">
+            <input type="checkbox" name="funcionarios" value="{{ f.pk }}" class="cb-func" onchange="atualizarSel()">
+          </td>
           <td>
             <strong style="color:var(--text)">{{ f.nome }}</strong>
           </td>
@@ -109,10 +134,31 @@
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="10" style="text-align:center;color:var(--text3);padding:32px">Nenhum freelance encontrado.</td></tr>
+        <tr><td colspan="11" style="text-align:center;color:var(--text3);padding:32px">Nenhum freelance encontrado.</td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
+</form>
+
+<style>
+.letra-bar { display:flex;flex-wrap:wrap;gap:4px;margin:10px 0 12px; }
+.letra-btn { display:inline-block;min-width:30px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-weight:600;text-align:center;color:var(--text2);text-decoration:none;background:var(--bg2);transition:background .12s,color .12s; }
+.letra-btn:hover { background:var(--accent-soft);color:var(--accent); }
+.letra-btn.ativo  { background:var(--accent);color:#fff;border-color:var(--accent); }
+</style>
+<script>
+function atualizarSel() {
+  const n = document.querySelectorAll('.cb-func:checked').length;
+  const btn = document.getElementById('btn-exportar');
+  document.getElementById('cnt-sel').textContent = n;
+  btn.style.display = n > 0 ? '' : 'none';
+}
+function toggleAll(cb) {
+  document.querySelectorAll('.cb-func').forEach(c => c.checked = cb.checked);
+  atualizarSel();
+}
+function exportarSelecionados() { document.getElementById('form-export').submit(); }
+</script>
 {% endblock %}

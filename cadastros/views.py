@@ -201,6 +201,33 @@ def dashboard(request):
         .only('id', 'marca', 'numeracao', 'validade')
     )
 
+    # ── Alertas de aumento de processos judiciais ─────────────────────────────
+    # Compara as 2 consultas mais recentes de cada funcionário:
+    # se o total_processos aumentou → gera alerta para a Controladoria
+    _func_ids_multi = list(
+        ConsultaProcesso.objects
+        .values('funcionario')
+        .annotate(_n=Count('id'))
+        .filter(_n__gte=2)
+        .values_list('funcionario', flat=True)
+    )
+    alertas_processos = []
+    for _fp in FuncionarioPatrimonial.objects.filter(pk__in=_func_ids_multi):
+        _hist = list(
+            ConsultaProcesso.objects
+            .filter(funcionario=_fp)
+            .order_by('-criado_em')[:2]
+        )
+        if len(_hist) == 2 and _hist[0].total_processos > _hist[1].total_processos:
+            alertas_processos.append({
+                'func': _fp,
+                'antes': _hist[1].total_processos,
+                'agora': _hist[0].total_processos,
+                'diff': _hist[0].total_processos - _hist[1].total_processos,
+                'em': _hist[0].criado_em,
+                'consulta_pk': _hist[0].pk,
+            })
+
     context = {
         'total_agentes': Agente.objects.filter(status='ativo').count(),
         'total_viaturas': Viatura.objects.filter(status='ativa').count(),
@@ -214,6 +241,7 @@ def dashboard(request):
         'alertas_cnv': alertas_cnv,
         'alertas_curso': alertas_curso,
         'alertas_coletes': alertas_coletes,
+        'alertas_processos': alertas_processos,
         'hoje': hoje,
         # NOVO — dados para os gráficos Chart.js do dashboard.html
         'fleet_data': _fleet_data(),
@@ -4485,6 +4513,7 @@ def funcionario_patrimonial_list(request):
     q = request.GET.get('q', '').strip()
     tipo = request.GET.get('tipo', '').strip()
     status_filtro = request.GET.get('status', '').strip()
+    letra = request.GET.get('letra', '').strip().upper()
 
     qs = FuncionarioPatrimonial.objects.filter(empresa='jr_seguranca')
 
@@ -4499,6 +4528,8 @@ def funcionario_patrimonial_list(request):
         qs = qs.filter(tipo=tipo)
     if status_filtro in ('ativo', 'afastado', 'inativo'):
         qs = qs.filter(status=status_filtro)
+    if letra and len(letra) == 1 and letra.isalpha():
+        qs = qs.filter(nome__istartswith=letra)
 
     total = qs.count()
     return render(request, 'cadastros/funcionario_patrimonial_list.html', {
@@ -4506,6 +4537,7 @@ def funcionario_patrimonial_list(request):
         'q': q,
         'tipo': tipo,
         'status_filtro': status_filtro,
+        'letra': letra,
         'total': total,
     })
 
@@ -4567,6 +4599,7 @@ def funcionario_patrimonial_delete(request, pk):
 def jrsfacilities_list(request):
     q = request.GET.get('q', '').strip()
     status_filtro = request.GET.get('status', '').strip()
+    letra = request.GET.get('letra', '').strip().upper()
 
     qs = FuncionarioPatrimonial.objects.filter(empresa='jrs_facilities')
 
@@ -4580,12 +4613,15 @@ def jrsfacilities_list(request):
         )
     if status_filtro in ('ativo', 'afastado', 'inativo'):
         qs = qs.filter(status=status_filtro)
+    if letra and len(letra) == 1 and letra.isalpha():
+        qs = qs.filter(nome__istartswith=letra)
 
     total = qs.count()
     return render(request, 'cadastros/jrsfacilities_list.html', {
         'funcionarios': qs.prefetch_related('consultas_processo').order_by('nome'),
         'q': q,
         'status_filtro': status_filtro,
+        'letra': letra,
         'total': total,
     })
 
@@ -4646,6 +4682,7 @@ def jrsfacilities_delete(request, pk):
 def freelance_list(request):
     q = request.GET.get('q', '').strip()
     status_filtro = request.GET.get('status', '').strip()
+    letra = request.GET.get('letra', '').strip().upper()
 
     qs = FuncionarioPatrimonial.objects.filter(empresa='freelance')
 
@@ -4659,14 +4696,213 @@ def freelance_list(request):
         )
     if status_filtro in ('ativo', 'afastado', 'inativo'):
         qs = qs.filter(status=status_filtro)
+    if letra and len(letra) == 1 and letra.isalpha():
+        qs = qs.filter(nome__istartswith=letra)
 
     total = qs.count()
     return render(request, 'cadastros/freelance_list.html', {
         'funcionarios': qs.prefetch_related('consultas_processo').order_by('nome'),
         'q': q,
         'status_filtro': status_filtro,
+        'letra': letra,
         'total': total,
     })
+
+
+@login_required
+def patrimonial_export_pdf(request):
+    """Exporta ficha resumida em PDF dos funcionários patrimoniais selecionados."""
+    from django.http import HttpResponse
+    import io
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.lib.units import mm
+    from reportlab.platypus import (
+        SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer,
+        HRFlowable, PageBreak, Image as RLImage,
+    )
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.enums import TA_CENTER, TA_LEFT
+    from datetime import datetime
+    import os
+
+    if request.method != 'POST':
+        return redirect('funcionario_patrimonial_list')
+
+    pks = request.POST.getlist('funcionarios')
+    origin = request.POST.get('origin', 'funcionario_patrimonial_list')
+    if not pks:
+        messages.error(request, 'Selecione ao menos um funcionário para exportar.')
+        return redirect(origin)
+
+    funcionarios = (
+        FuncionarioPatrimonial.objects
+        .filter(pk__in=pks)
+        .prefetch_related('consultas_processo')
+        .order_by('nome')
+    )
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=A4,
+                            leftMargin=15*mm, rightMargin=15*mm,
+                            topMargin=15*mm, bottomMargin=15*mm)
+
+    AZUL    = colors.HexColor('#1A3A5C')
+    VERDE   = colors.HexColor('#16a34a')
+    VERMELHO = colors.HexColor('#dc2626')
+    AMBAR   = colors.HexColor('#d97706')
+    CINZA   = colors.HexColor('#6b7280')
+    CINZA_BG = colors.HexColor('#f3f4f6')
+
+    styles = getSampleStyleSheet()
+    s_titulo   = ParagraphStyle('tit',  parent=styles['Normal'], fontSize=11, textColor=colors.white, leading=14)
+    s_label    = ParagraphStyle('lbl',  parent=styles['Normal'], fontSize=7,  textColor=CINZA, spaceAfter=1)
+    s_valor    = ParagraphStyle('val',  parent=styles['Normal'], fontSize=9,  textColor=colors.black)
+    s_bold     = ParagraphStyle('bld',  parent=styles['Normal'], fontSize=9,  textColor=colors.black, fontName='Helvetica-Bold')
+    s_small    = ParagraphStyle('sml',  parent=styles['Normal'], fontSize=7,  textColor=CINZA)
+    s_section  = ParagraphStyle('sec',  parent=styles['Normal'], fontSize=8,  textColor=AZUL, fontName='Helvetica-Bold', spaceAfter=3)
+
+    elements = []
+
+    # ── Capa ────────────────────────────────────────────────────────────────
+    elements.append(Spacer(1, 10*mm))
+    capa = Table(
+        [[Paragraph("JR SEGURANÇA E VIGILÂNCIA PATRIMONIAL LTDA", s_titulo),
+          Paragraph(f"Fichas Patrimoniais — {datetime.now().strftime('%d/%m/%Y')}", s_small)]],
+        colWidths=[130*mm, 45*mm]
+    )
+    capa.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), AZUL),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (0, -1), 10),
+        ('RIGHTPADDING', (-1, 0), (-1, -1), 10),
+        ('TEXTCOLOR', (1, 0), (1, 0), colors.HexColor('#9ca3af')),
+    ]))
+    elements.append(capa)
+    elements.append(Spacer(1, 6*mm))
+
+    for idx, func in enumerate(funcionarios):
+        ultima_consulta = func.consultas_processo.order_by('-criado_em').first()
+
+        # ── Cabeçalho da ficha ───────────────────────────────────────────
+        nome_par = Paragraph(f"<b>{func.nome}</b>", ParagraphStyle(
+            'nm', parent=styles['Normal'], fontSize=12, textColor=AZUL
+        ))
+
+        empresa_label = {
+            'jr_seguranca': 'JR Segurança e Vigilância Patrimonial Ltda',
+            'jrs_facilities': 'JRS Facilities Ltda',
+            'freelance': 'Freelance',
+        }.get(func.empresa, func.empresa)
+
+        cargo_label = getattr(func, 'cargo', '') or func.get_tipo_display() if hasattr(func, 'get_tipo_display') else '—'
+
+        status_cor = VERDE if func.status == 'ativo' else (AMBAR if func.status == 'afastado' else CINZA)
+
+        header_data = [[
+            nome_par,
+            Paragraph(empresa_label, s_small),
+            Paragraph(f'<font color="#{status_cor.hexval()[2:]}">{func.get_status_display()}</font>',
+                      ParagraphStyle('st', parent=styles['Normal'], fontSize=9, fontName='Helvetica-Bold')),
+        ]]
+        header_tbl = Table(header_data, colWidths=[80*mm, 70*mm, 25*mm])
+        header_tbl.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), CINZA_BG),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ('LEFTPADDING', (0, 0), (0, -1), 8),
+        ]))
+        elements.append(header_tbl)
+        elements.append(Spacer(1, 3*mm))
+
+        # ── Dados pessoais ────────────────────────────────────────────────
+        elements.append(Paragraph("DADOS PESSOAIS", s_section))
+
+        row1 = [
+            Paragraph("CPF",         s_label), Paragraph(func.cpf or '—', s_valor),
+            Paragraph("RG",          s_label), Paragraph(func.rg or '—',  s_valor),
+            Paragraph("Tipo / Cargo",s_label), Paragraph(cargo_label or '—', s_valor),
+        ]
+        row2 = [
+            Paragraph("Telefone",    s_label), Paragraph(func.telefone or '—', s_valor),
+            Paragraph("Posto",       s_label), Paragraph(func.posto_trabalho or '—', s_valor),
+            Paragraph("Admissão",    s_label), Paragraph(func.data_admissao.strftime('%d/%m/%Y') if func.data_admissao else '—', s_valor),
+        ]
+        dados_tbl = Table([row1, row2], colWidths=[20*mm, 48*mm, 15*mm, 43*mm, 22*mm, 27*mm])
+        dados_tbl.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('TOPPADDING', (0, 0), (-1, -1), 1),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ]))
+        elements.append(dados_tbl)
+        elements.append(Spacer(1, 3*mm))
+
+        # ── Habilitações ───────────────────────────────────────────────────
+        elements.append(Paragraph("HABILITAÇÕES E VALIDADES", s_section))
+        habRow = [
+            Paragraph("CNH Validade",  s_label),
+            Paragraph(func.cnh_validade.strftime('%d/%m/%Y') if func.cnh_validade else '—', s_valor),
+            Paragraph("CNV Validade",  s_label),
+            Paragraph(func.cnv_validade.strftime('%d/%m/%Y') if func.cnv_validade else '—', s_valor),
+            Paragraph("Curso Validade", s_label),
+            Paragraph(func.curso_validade.strftime('%d/%m/%Y') if func.curso_validade else '—', s_valor),
+        ]
+        hab_tbl = Table([habRow], colWidths=[25*mm, 30*mm, 25*mm, 30*mm, 30*mm, 35*mm])
+        hab_tbl.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('TOPPADDING', (0, 0), (-1, -1), 1),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ]))
+        elements.append(hab_tbl)
+        elements.append(Spacer(1, 3*mm))
+
+        # ── Processos judiciais ────────────────────────────────────────────
+        elements.append(Paragraph("CONSULTA DE PROCESSOS JUDICIAIS (DriverID)", s_section))
+        if ultima_consulta:
+            cor_cpf = VERDE if ultima_consulta.status_cpf and 'REGULAR' in ultima_consulta.status_cpf.upper() else VERMELHO
+            proc_row = [
+                Paragraph("Status CPF",       s_label),
+                Paragraph(f'<font color="#{cor_cpf.hexval()[2:]}">{ultima_consulta.status_cpf or "—"}</font>',
+                          ParagraphStyle('cpfst', parent=styles['Normal'], fontSize=9, fontName='Helvetica-Bold')),
+                Paragraph("Total processos",  s_label),
+                Paragraph(str(ultima_consulta.total_processos), s_bold),
+                Paragraph("Data consulta",    s_label),
+                Paragraph(ultima_consulta.criado_em.strftime('%d/%m/%Y'), s_valor),
+            ]
+            proc_tbl = Table([proc_row], colWidths=[25*mm, 30*mm, 28*mm, 22*mm, 25*mm, 45*mm])
+            proc_tbl.setStyle(TableStyle([
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('TOPPADDING', (0, 0), (-1, -1), 1),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ]))
+            elements.append(proc_tbl)
+        else:
+            elements.append(Paragraph("Nenhuma consulta registrada.", s_small))
+
+        elements.append(Spacer(1, 2*mm))
+        elements.append(HRFlowable(width="100%", thickness=0.4, color=CINZA))
+
+        # Quebra de página entre funcionários (exceto o último)
+        if idx < len(pks) - 1:
+            elements.append(PageBreak())
+        else:
+            elements.append(Spacer(1, 6*mm))
+
+    # ── Rodapé geral ──────────────────────────────────────────────────────
+    elements.append(Paragraph(
+        f"Gerado em {datetime.now().strftime('%d/%m/%Y às %H:%M')} — JR Segurança © {datetime.now().year}",
+        ParagraphStyle('rod', parent=styles['Normal'], fontSize=7, textColor=CINZA, alignment=TA_CENTER)
+    ))
+
+    doc.build(elements)
+    buf.seek(0)
+
+    response = HttpResponse(buf, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="fichas_patrimoniais.pdf"'
+    return response
 
 
 @login_required

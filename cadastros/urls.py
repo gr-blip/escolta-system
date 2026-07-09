@@ -169,4 +169,5 @@ urlpatterns += [
 
     # Auto-consulta agendada (cron externo chama esta URL)
     path('patrimonial/auto-consultar/<str:token>/', views.auto_consultar_processos, name='auto_consultar_processos'),
+    path('patrimonial/exportar-pdf/', views.patrimonial_export_pdf, name='patrimonial_export_pdf'),
 ]

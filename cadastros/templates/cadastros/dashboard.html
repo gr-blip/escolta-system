@@ -252,6 +252,69 @@
 </div>
 {% endif %}
 
+<!-- ══════════ ALERTA — AUMENTO DE PROCESSOS JUDICIAIS ══════════ -->
+{% if alertas_processos %}
+<div class="mb-20">
+  <div class="section-head">
+    <div class="section-ico" style="color:var(--danger)">
+      <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M12 3l9 16H3l9-16Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 10v4M12 17h.01" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </div>
+    <h2 style="color:var(--danger)">Atenção — Novos processos detectados</h2>
+    <span class="hint">{{ alertas_processos|length }} colaborador{{ alertas_processos|length|pluralize }} com aumento na última consulta</span>
+  </div>
+
+  <div class="card" style="border-color:#fca5a5;background:#fff5f5;padding:0">
+    <table style="width:100%;font-size:13px;border-collapse:collapse">
+      <thead>
+        <tr style="background:#fee2e2">
+          <th style="padding:10px 14px;text-align:left;font-weight:600;color:#991b1b;font-size:11px;letter-spacing:.04em">COLABORADOR</th>
+          <th style="padding:10px 14px;text-align:center;font-size:11px;color:#991b1b;letter-spacing:.04em">ANTES</th>
+          <th style="padding:10px 14px;text-align:center;font-size:11px;color:#991b1b;letter-spacing:.04em">AGORA</th>
+          <th style="padding:10px 14px;text-align:center;font-size:11px;color:#991b1b;letter-spacing:.04em">AUMENTO</th>
+          <th style="padding:10px 14px;text-align:left;font-size:11px;color:#991b1b;letter-spacing:.04em">EMPRESA</th>
+          <th style="padding:10px 14px;text-align:left;font-size:11px;color:#991b1b;letter-spacing:.04em">DATA CONSULTA</th>
+          <th style="padding:10px 14px"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for alerta in alertas_processos %}
+        <tr style="border-top:1px solid #fecaca">
+          <td style="padding:10px 14px">
+            <strong style="color:var(--text1)">{{ alerta.func.nome }}</strong>
+            <div style="font-size:11px;color:var(--text3)">CPF: {{ alerta.func.cpf }}</div>
+          </td>
+          <td style="padding:10px 14px;text-align:center">
+            <span style="font-family:var(--mono);color:var(--text2)">{{ alerta.antes }}</span>
+          </td>
+          <td style="padding:10px 14px;text-align:center">
+            <span class="badge badge-red" style="font-family:var(--mono);font-size:13px">{{ alerta.agora }}</span>
+          </td>
+          <td style="padding:10px 14px;text-align:center">
+            <span style="color:#dc2626;font-weight:700;font-family:var(--mono)">+{{ alerta.diff }}</span>
+          </td>
+          <td style="padding:10px 14px;color:var(--text2);font-size:12px">
+            {% if alerta.func.empresa == 'jr_seguranca' %}JR Segurança
+            {% elif alerta.func.empresa == 'jrs_facilities' %}JRS Facilities
+            {% else %}Freelance{% endif %}
+          </td>
+          <td style="padding:10px 14px;color:var(--text3);font-size:12px">{{ alerta.em|date:"d/m/Y" }}</td>
+          <td style="padding:10px 14px">
+            {% if alerta.func.empresa == 'jr_seguranca' %}
+              <a href="{% url 'funcionario_patrimonial_detail' alerta.func.pk %}" class="btn btn-sm btn-secondary">Ver ficha</a>
+            {% elif alerta.func.empresa == 'jrs_facilities' %}
+              <a href="{% url 'jrsfacilities_detail' alerta.func.pk %}" class="btn btn-sm btn-secondary">Ver ficha</a>
+            {% else %}
+              <a href="{% url 'freelance_detail' alerta.func.pk %}" class="btn btn-sm btn-secondary">Ver ficha</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
 <!-- ══════════ AGENTES E VIATURAS RECENTES ══════════ -->
 <div class="grid-2">
 
