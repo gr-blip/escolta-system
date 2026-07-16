@@ -3183,6 +3183,14 @@ def boletim_detalhe(request, pk):
             if op_alterado:
                 op.save()
 
+            # ── Corrigir previsão de início da OS ──
+            val_prev_inicio = request.POST.get('op_previsao_inicio', '').strip()
+            if val_prev_inicio:
+                novo_prev = _parse_marco(val_prev_inicio)
+                if novo_prev:
+                    os_obj.previsao_inicio = novo_prev
+                    os_obj.save(update_fields=['previsao_inicio'])
+
         action = request.POST.get('action', 'salvar')
         if action == 'calcular':
             if not boletim.tabela_preco_id:
@@ -3206,9 +3214,56 @@ def boletim_detalhe(request, pk):
     if pedagio_sugerido == 0 and op and op.pedagio:
         pedagio_sugerido = op.pedagio
 
+    # ── Preview do cálculo (sem salvar) ──────────────────────────────────────
+    op_preview = None
+    if op:
+        _inicio_base = os_obj.previsao_inicio
+        if op.inicio_operacao and os_obj.previsao_inicio and op.inicio_operacao < os_obj.previsao_inicio:
+            _inicio_base = op.inicio_operacao
+        elif op.chegada_operacao and os_obj.previsao_inicio and op.chegada_operacao > os_obj.previsao_inicio:
+            _inicio_base = op.chegada_operacao
+        _fim_base = op.termino_operacao
+        _total_min = (
+            int((_fim_base - _inicio_base).total_seconds() // 60)
+            if (_inicio_base and _fim_base and _fim_base > _inicio_base) else 0
+        )
+        _km_real  = op.km_trecho_termino_op or 0
+        _km_ini_op = op.km_inicio_operacao or op.km_chegada_operacao or 0
+        _km_desl  = max(0, _km_ini_op - (op.km_inicio_viagem or 0))
+        op_preview = {
+            'horas_realizadas': f'{_total_min // 60:02d}:{_total_min % 60:02d}',
+            'km_operacao': _km_real,
+            'km_deslocamento': _km_desl,
+        }
+        if boletim.tabela_preco:
+            from decimal import Decimal as _D
+            _tab = boletim.tabela_preco
+            if _tab.velocidade_media:
+                _fran_min = int(round(_km_real * 60 / _tab.velocidade_media)) if _tab.velocidade_media else 0
+                _exc_min  = max(0, _total_min - _fran_min)
+                _km_exc   = _km_real
+                _v_exc_h  = (_D(_exc_min) / _D(60) * _tab.excedente_hora).quantize(_D('0.01'))
+                _v_exc_k  = (_D(_km_real) * _tab.excedente_km).quantize(_D('0.01'))
+            else:
+                _fran_min = _tab.franquia_horas_minutos()
+                _exc_min  = max(0, _total_min - _fran_min)
+                _km_exc   = max(0, _km_real - _tab.franquia_km)
+                _v_exc_h  = (_D(_exc_min) / _D(60) * _tab.excedente_hora).quantize(_D('0.01'))
+                _v_exc_k  = (_D(_km_exc) * _tab.excedente_km).quantize(_D('0.01'))
+            _ped = _D(str(pedagio_sugerido)) if pedagio_sugerido else _D('0')
+            op_preview.update({
+                'horas_excedentes': f'{_exc_min // 60:02d}:{_exc_min % 60:02d}',
+                'km_excedente': _km_exc,
+                'valor_escolta': _tab.valor_escolta,
+                'valor_excedente_hora': _v_exc_h,
+                'valor_excedente_km': _v_exc_k,
+                'valor_total_preview': (_tab.valor_escolta + _v_exc_k + _v_exc_h + _ped).quantize(_D('0.01')),
+            })
+
     return render(request, 'cadastros/boletim_detalhe.html', {
         'boletim': boletim, 'os': os_obj, 'op': op, 'tabelas': tabelas,
         'pedagio_sugerido': pedagio_sugerido,
+        'op_preview': op_preview,
     })
 
 
