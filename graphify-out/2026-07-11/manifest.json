@@ -1,0 +1,537 @@
+{
+  ".understand-anything/config.json": {
+    "mtime": 1782844264.0,
+    "ast_hash": "68c8e9aa03b50350e9a58e36b3dd2baa",
+    "semantic_hash": "68c8e9aa03b50350e9a58e36b3dd2baa"
+  },
+  ".understand-anything/knowledge-graph.json": {
+    "mtime": 1782844264.0,
+    "ast_hash": "47347f4b601e80582782b652d517ea4f",
+    "semantic_hash": "47347f4b601e80582782b652d517ea4f"
+  },
+  ".understand-anything/layers.json": {
+    "mtime": 1782844264.0,
+    "ast_hash": "d9dc761801d52ae299057ecff33aa222",
+    "semantic_hash": "d9dc761801d52ae299057ecff33aa222"
+  },
+  ".understand-anything/meta.json": {
+    "mtime": 1782844264.0,
+    "ast_hash": "114e8137f14006fee977af313d927da6",
+    "semantic_hash": "114e8137f14006fee977af313d927da6"
+  },
+  ".understand-anything/metadata.json": {
+    "mtime": 1782844264.0,
+    "ast_hash": "ca47fc9ae438d6fe6808a748e1b07afa",
+    "semantic_hash": "ca47fc9ae438d6fe6808a748e1b07afa"
+  },
+  ".understand-anything/tmp/add-project-meta.mjs": {
+    "mtime": 1782844264.0,
+    "ast_hash": "1d9b5b54e04c3b5592ac21c2c286afce",
+    "semantic_hash": "1d9b5b54e04c3b5592ac21c2c286afce"
+  },
+  ".understand-anything/tmp/finalize.mjs": {
+    "mtime": 1782844264.0,
+    "ast_hash": "a32189c6471c7a93b6fa75e0ca93d41c",
+    "semantic_hash": "a32189c6471c7a93b6fa75e0ca93d41c"
+  },
+  ".understand-anything/tmp/fix-tour-dangling.mjs": {
+    "mtime": 1782844264.0,
+    "ast_hash": "37980442fc302d6085b775b1fbea16fb",
+    "semantic_hash": "37980442fc302d6085b775b1fbea16fb"
+  },
+  ".understand-anything/tmp/rebuild-graph.mjs": {
+    "mtime": 1782844264.0,
+    "ast_hash": "2313ee30bff0bf43c0f94165f3f051e1",
+    "semantic_hash": "2313ee30bff0bf43c0f94165f3f051e1"
+  },
+  ".understand-anything/tour.json": {
+    "mtime": 1782844264.0,
+    "ast_hash": "9b89a9e04e930b73c28d1cc832ff5f43",
+    "semantic_hash": "9b89a9e04e930b73c28d1cc832ff5f43"
+  },
+  ".understand-anything/validation.json": {
+    "mtime": 1782844264.0,
+    "ast_hash": "0d852219e13355e6c9a64c4ebdb03eb6",
+    "semantic_hash": "0d852219e13355e6c9a64c4ebdb03eb6"
+  },
+  "backup_drive_standalone.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "342bab18dc87eb2a12587cd3bd3dd8a9",
+    "semantic_hash": "342bab18dc87eb2a12587cd3bd3dd8a9"
+  },
+  "cadastros/INTEGRACAO.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "824557c4cbed41c6c8680422646516db",
+    "semantic_hash": "824557c4cbed41c6c8680422646516db"
+  },
+  "cadastros/__init__.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "cadastros/admin.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "f31dd7e893d68162fe422375f79fe90b",
+    "semantic_hash": "f31dd7e893d68162fe422375f79fe90b"
+  },
+  "cadastros/admin_perfil.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "529cf31e9dbb2ea1d3ba7fee9602f7bf",
+    "semantic_hash": "529cf31e9dbb2ea1d3ba7fee9602f7bf"
+  },
+  "cadastros/apps.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "9558c041430a8e7a12eaaaf8cff6bf2b",
+    "semantic_hash": "9558c041430a8e7a12eaaaf8cff6bf2b"
+  },
+  "cadastros/boletim_export.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "0b6c017eace89736e7432958dfb7c5a7",
+    "semantic_hash": "0b6c017eace89736e7432958dfb7c5a7"
+  },
+  "cadastros/cadastros_extras.py": {
+    "mtime": 1782521694.0,
+    "ast_hash": "3cdb1d538f5483d7f32d61a87563cdbf",
+    "semantic_hash": "3cdb1d538f5483d7f32d61a87563cdbf"
+  },
+  "cadastros/criar_usuarios.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "ba100475f31ea80590f33f7c07b40dfd",
+    "semantic_hash": "ba100475f31ea80590f33f7c07b40dfd"
+  },
+  "cadastros/fixtures/centrais_omnilink.json": {
+    "mtime": 1782844264.0,
+    "ast_hash": "001d17397b63b6c68f91b6c88d52d75f",
+    "semantic_hash": "001d17397b63b6c68f91b6c88d52d75f"
+  },
+  "cadastros/forms.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "17bc9ba5203082954c586451e0039331",
+    "semantic_hash": "17bc9ba5203082954c586451e0039331"
+  },
+  "cadastros/management/__init__.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "cadastros/management/commands/__init__.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "cadastros/management/commands/backup_to_google.py": {
+    "mtime": 1782848378.0,
+    "ast_hash": "d7845568b53a92335a4e692c55c39088",
+    "semantic_hash": "d7845568b53a92335a4e692c55c39088"
+  },
+  "cadastros/management/commands/consultar_processos.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "540a399ef9b443033c66821150fe4b73",
+    "semantic_hash": "540a399ef9b443033c66821150fe4b73"
+  },
+  "cadastros/management/commands/corrigir_boletins_cancelados.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "a557dd88bd8a4ea849fb79ee0390d46c",
+    "semantic_hash": "a557dd88bd8a4ea849fb79ee0390d46c"
+  },
+  "cadastros/management/commands/criar_developer.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "5ea5c220e86c61f7fd1f2d9d2d7347b4",
+    "semantic_hash": "5ea5c220e86c61f7fd1f2d9d2d7347b4"
+  },
+  "cadastros/management/commands/fix_total_processos.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "77456dc39681314f5165ba23eff9b3c3",
+    "semantic_hash": "77456dc39681314f5165ba23eff9b3c3"
+  },
+  "cadastros/management/commands/importar_consultas.py": {
+    "mtime": 1782847466.0,
+    "ast_hash": "cbf320fa48f20f2cfd9e9f8889d4536e",
+    "semantic_hash": "cbf320fa48f20f2cfd9e9f8889d4536e"
+  },
+  "cadastros/management/commands/importar_freelance.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "511504e1eb003b9acd7ca02c350920ca",
+    "semantic_hash": "511504e1eb003b9acd7ca02c350920ca"
+  },
+  "cadastros/management/commands/importar_jrs_facilities.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "adeff59bcaeb50fc64d1aa441c0a6c82",
+    "semantic_hash": "adeff59bcaeb50fc64d1aa441c0a6c82"
+  },
+  "cadastros/management/commands/importar_patrimonial.py": {
+    "mtime": 1782846898.0,
+    "ast_hash": "0114577066755d3b150e7525b4fad2c3",
+    "semantic_hash": "0114577066755d3b150e7525b4fad2c3"
+  },
+  "cadastros/management/commands/recomprimir_fotos.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "0728d1ee5bc7b04ba0ecbd4a43e3c74d",
+    "semantic_hash": "0728d1ee5bc7b04ba0ecbd4a43e3c74d"
+  },
+  "cadastros/management/commands/remover_cliente_teste.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "aebd70f69cce945666081823411d8a95",
+    "semantic_hash": "aebd70f69cce945666081823411d8a95"
+  },
+  "cadastros/management/commands/sincronizar_local.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "1ca0eea2b505136696deb47929b8364c",
+    "semantic_hash": "1ca0eea2b505136696deb47929b8364c"
+  },
+  "cadastros/migrations/0001_initial.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "5cf1fe634444c57c91c6f3f84c39c59c",
+    "semantic_hash": "5cf1fe634444c57c91c6f3f84c39c59c"
+  },
+  "cadastros/migrations/0002_remove_fields.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "4d4fbb2c0a2194d312a619d8b6ef2702",
+    "semantic_hash": "4d4fbb2c0a2194d312a619d8b6ef2702"
+  },
+  "cadastros/migrations/0003_add_colete.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "ddce5eaf16d5dab865f393514eddf038",
+    "semantic_hash": "ddce5eaf16d5dab865f393514eddf038"
+  },
+  "cadastros/migrations/0004_add_equipe.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "89d3664fdd5d01cd784bf9cbc53d5f1e",
+    "semantic_hash": "89d3664fdd5d01cd784bf9cbc53d5f1e"
+  },
+  "cadastros/migrations/0005_equipe_viatura.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "9100a6649d2c1ffaa16072473b139750",
+    "semantic_hash": "9100a6649d2c1ffaa16072473b139750"
+  },
+  "cadastros/migrations/0006_ordemservico.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "77d3579c6b4b4ea0303cae122c2263e3",
+    "semantic_hash": "77d3579c6b4b4ea0303cae122c2263e3"
+  },
+  "cadastros/migrations/0007_os_operacional_veiculos.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "7ce2a897ce1f3552af89ee68d180313d",
+    "semantic_hash": "7ce2a897ce1f3552af89ee68d180313d"
+  },
+  "cadastros/migrations/0008_alter_agente_funcao_alter_agente_observacoes_and_more.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "3b68421dfb5710a537574813c786560d",
+    "semantic_hash": "3b68421dfb5710a537574813c786560d"
+  },
+  "cadastros/migrations/0009_status_novos.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "5da9869406ea5508f2cb28030b70bbc0",
+    "semantic_hash": "5da9869406ea5508f2cb28030b70bbc0"
+  },
+  "cadastros/migrations/0010_merge_20260319_0827.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "116f208461285794ae848b52fbb6c21d",
+    "semantic_hash": "116f208461285794ae848b52fbb6c21d"
+  },
+  "cadastros/migrations/0011_equipe_finalizada_os_finalizada.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "da91ff170f6971860be4bf3f709a3bed",
+    "semantic_hash": "da91ff170f6971860be4bf3f709a3bed"
+  },
+  "cadastros/migrations/0012_osoperacional_pedagio.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "e686bae2ee0e294c144422f0c0c1f223",
+    "semantic_hash": "e686bae2ee0e294c144422f0c0c1f223"
+  },
+  "cadastros/migrations/0013_tabela_preco_boletim.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "566230a2de8b2bc5023193ba41d3ecb2",
+    "semantic_hash": "566230a2de8b2bc5023193ba41d3ecb2"
+  },
+  "cadastros/migrations/0014_os_snapshot_equipe.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "f66032597521adfd1bb03cca99320bfc",
+    "semantic_hash": "f66032597521adfd1bb03cca99320bfc"
+  },
+  "cadastros/migrations/0015_setup_groups_and_users.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "ba0143f8247fdd8244a13aefa8b3bdd0",
+    "semantic_hash": "ba0143f8247fdd8244a13aefa8b3bdd0"
+  },
+  "cadastros/migrations/0016_perfilusuario.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "51fdf25353e3b29a0ffe400cd4c3d37a",
+    "semantic_hash": "51fdf25353e3b29a0ffe400cd4c3d37a"
+  },
+  "cadastros/migrations/0017_osoperacional_token.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "66cbb1091129164e05f8c28871b99dac",
+    "semantic_hash": "66cbb1091129164e05f8c28871b99dac"
+  },
+  "cadastros/migrations/0018_populate_perfis.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "81937be0a44c9170eaa4120942cbc044",
+    "semantic_hash": "81937be0a44c9170eaa4120942cbc044"
+  },
+  "cadastros/migrations/0019_osoperacional_gps.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "46b895d58438e96d5bc53117ec05b226",
+    "semantic_hash": "46b895d58438e96d5bc53117ec05b226"
+  },
+  "cadastros/migrations/0020_cliente_nome_fantasia.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "a4572d54f8c5b61a0cedcfce012be054",
+    "semantic_hash": "a4572d54f8c5b61a0cedcfce012be054"
+  },
+  "cadastros/migrations/0021_cliente_ativo.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "76e54b97cefed56151ba703d5a9e153e",
+    "semantic_hash": "76e54b97cefed56151ba703d5a9e153e"
+  },
+  "cadastros/migrations/0022_despesaos_trocamotorista_parada_incidente_and_more.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "2e892f522b6683a1cb47d590c4eba8d7",
+    "semantic_hash": "2e892f522b6683a1cb47d590c4eba8d7"
+  },
+  "cadastros/migrations/0023_despesaos_os_fk.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "e6d132e36b32d27370ec2865e09d578e",
+    "semantic_hash": "e6d132e36b32d27370ec2865e09d578e"
+  },
+  "cadastros/migrations/0024_merge_0013_tabela_preco_boletim_0023_despesaos_os_fk.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "9f1130d66ed8a1d4efaa5608949f5e3c",
+    "semantic_hash": "9f1130d66ed8a1d4efaa5608949f5e3c"
+  },
+  "cadastros/migrations/0025_remove_despesaos_os_alter_assinaturaos_imagem_and_more.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "a104d34fffa69159208bc3f41de4c310",
+    "semantic_hash": "a104d34fffa69159208bc3f41de4c310"
+  },
+  "cadastros/migrations/0026_espelhamentoenviado.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "e300556ce3a811f9e8ef6370089151be",
+    "semantic_hash": "e300556ce3a811f9e8ef6370089151be"
+  },
+  "cadastros/migrations/0027_seed_espelhamentos_historicos.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "323e1d75753947786b8b4b796f59df29",
+    "semantic_hash": "323e1d75753947786b8b4b796f59df29"
+  },
+  "cadastros/migrations/0028_alter_espelhamentoenviado_id.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "691d69cebc36eb57c6eca7772314584a",
+    "semantic_hash": "691d69cebc36eb57c6eca7772314584a"
+  },
+  "cadastros/migrations/0029_funcionariopatrimonial.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "202e30be91ac6a0351fdcab8073c0d24",
+    "semantic_hash": "202e30be91ac6a0351fdcab8073c0d24"
+  },
+  "cadastros/migrations/0030_cancelamento_tipo.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "87cade33132fe05d006073a79cdbdc88",
+    "semantic_hash": "87cade33132fe05d006073a79cdbdc88"
+  },
+  "cadastros/migrations/0031_funcionariopatrimonial_curso.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "f3a8d33e2679d68883f3786b1c9c5903",
+    "semantic_hash": "f3a8d33e2679d68883f3786b1c9c5903"
+  },
+  "cadastros/migrations/0032_agente_curso.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "b10d652e6d52249b996b8292091ae3b9",
+    "semantic_hash": "b10d652e6d52249b996b8292091ae3b9"
+  },
+  "cadastros/migrations/0033_funcionariopatrimonial_tipo_brigadista.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "74c85427d5d80e6c5b1762d949b86359",
+    "semantic_hash": "74c85427d5d80e6c5b1762d949b86359"
+  },
+  "cadastros/migrations/0034_funcionariopatrimonial_funcao_brigadista.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "0008ae1f0aaf73d05eca7368b3f59041",
+    "semantic_hash": "0008ae1f0aaf73d05eca7368b3f59041"
+  },
+  "cadastros/migrations/0035_agente_certidao_tjdf.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "6e495936a4ce11effd42da064ef58e6e",
+    "semantic_hash": "6e495936a4ce11effd42da064ef58e6e"
+  },
+  "cadastros/migrations/0036_agente_certidao_trf.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "ef8f8a3f73ccdb1b96d34adcfed55efa",
+    "semantic_hash": "ef8f8a3f73ccdb1b96d34adcfed55efa"
+  },
+  "cadastros/migrations/0037_agente_nome_mae_nome_pai.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "854bfd6c524f5e3fc324c35ccad64c55",
+    "semantic_hash": "854bfd6c524f5e3fc324c35ccad64c55"
+  },
+  "cadastros/migrations/0038_agente_certidao_pdfs.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "0b4b443a8b33d1f30644764c06f40615",
+    "semantic_hash": "0b4b443a8b33d1f30644764c06f40615"
+  },
+  "cadastros/migrations/0039_alter_agente_certidao_tjdf_consultado_em_and_more.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "b1992ee6855b0e93411297de7359e027",
+    "semantic_hash": "b1992ee6855b0e93411297de7359e027"
+  },
+  "cadastros/migrations/0040_consultaprocesso.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "046ee12efc6408e3ceac8f83e994853a",
+    "semantic_hash": "046ee12efc6408e3ceac8f83e994853a"
+  },
+  "cadastros/migrations/0041_consultaprocesso_origem.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "40e472da79e96526eb34b3f5f2844820",
+    "semantic_hash": "40e472da79e96526eb34b3f5f2844820"
+  },
+  "cadastros/migrations/0042_agente_endereco.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "5bdbeb0352127143947083601ffcaaba",
+    "semantic_hash": "5bdbeb0352127143947083601ffcaaba"
+  },
+  "cadastros/migrations/0043_funcionariopatrimonial_nome_mae.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "65049dcf7efcf9abaa02077bcf400c52",
+    "semantic_hash": "65049dcf7efcf9abaa02077bcf400c52"
+  },
+  "cadastros/migrations/0044_funcionariopatrimonial_empresa_funcionariopatrimonial_cargo.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "730e914aad36ffa4da45b6abf07610fa",
+    "semantic_hash": "730e914aad36ffa4da45b6abf07610fa"
+  },
+  "cadastros/migrations/0045_funcionariopatrimonial_empresa_freelance.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "0104f99eebb245d4aaa5adb1226670e0",
+    "semantic_hash": "0104f99eebb245d4aaa5adb1226670e0"
+  },
+  "cadastros/migrations/0046_add_snap_val_endereco_renavan.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "a22981c372971766bb86aa002bc0ae91",
+    "semantic_hash": "a22981c372971766bb86aa002bc0ae91"
+  },
+  "cadastros/migrations/0047_tabelapreco_velocidade_media.py": {
+    "mtime": 1783077296.0,
+    "ast_hash": "2436cd01050838ba9073be63263364cd",
+    "semantic_hash": "2436cd01050838ba9073be63263364cd"
+  },
+  "cadastros/migrations/0048_diarias_lancamento.py": {
+    "mtime": 1783424454.0,
+    "ast_hash": "36a2b9c20a4f8b2b9e61760658cd455f",
+    "semantic_hash": "36a2b9c20a4f8b2b9e61760658cd455f"
+  },
+  "cadastros/migrations/__init__.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "cadastros/models.py": {
+    "mtime": 1783424436.0,
+    "ast_hash": "22c84e2b6e018136d34424bdc4fab9fc",
+    "semantic_hash": "22c84e2b6e018136d34424bdc4fab9fc"
+  },
+  "cadastros/models_perfil.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "983d7820b59c59190fe38021192b12df",
+    "semantic_hash": "983d7820b59c59190fe38021192b12df"
+  },
+  "cadastros/omnilink.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "25718b8375bbfb7faedc03ff7a2b4b5c",
+    "semantic_hash": "25718b8375bbfb7faedc03ff7a2b4b5c"
+  },
+  "cadastros/os_pdf.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "b99bc3aa9ac2ef5d34231e6ed015f1e0",
+    "semantic_hash": "b99bc3aa9ac2ef5d34231e6ed015f1e0"
+  },
+  "cadastros/pdf_processo.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "33eb39c2423ffc2b8130db9de62335ec",
+    "semantic_hash": "33eb39c2423ffc2b8130db9de62335ec"
+  },
+  "cadastros/permissoes.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "9c5b24f835f06a4f4f6935dc75aee302",
+    "semantic_hash": "9c5b24f835f06a4f4f6935dc75aee302"
+  },
+  "cadastros/services/__init__.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "cadastros/services/driverid_service.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "397b9309f28d89fc85b56dc9a06d575a",
+    "semantic_hash": "397b9309f28d89fc85b56dc9a06d575a"
+  },
+  "cadastros/signals.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "1c3adda47fc95f478548929a6e99672b",
+    "semantic_hash": "1c3adda47fc95f478548929a6e99672b"
+  },
+  "cadastros/static/cadastros/toasts.js": {
+    "mtime": 1782844264.0,
+    "ast_hash": "2b800c5fb8beec24e523c6d8698e716b",
+    "semantic_hash": "2b800c5fb8beec24e523c6d8698e716b"
+  },
+  "cadastros/templatetags/__init__.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "cadastros/templatetags/cadastros_extras.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "c3ef37925e97b312afb36ff73858c3ec",
+    "semantic_hash": "c3ef37925e97b312afb36ff73858c3ec"
+  },
+  "cadastros/urls.py": {
+    "mtime": 1783599878.0,
+    "ast_hash": "4ef5bce9000293f4c4acef0f5489689c",
+    "semantic_hash": "4ef5bce9000293f4c4acef0f5489689c"
+  },
+  "cadastros/views.py": {
+    "mtime": 1783601072.0,
+    "ast_hash": "e440e3970a85cfd07367666c7699825f",
+    "semantic_hash": "e440e3970a85cfd07367666c7699825f"
+  },
+  "escolta_system/__init__.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "81051bcc2cf1bedf378224b0a93e2877",
+    "semantic_hash": "81051bcc2cf1bedf378224b0a93e2877"
+  },
+  "escolta_system/settings.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "9cd798558d2d5025c59421a5979b6e45",
+    "semantic_hash": "9cd798558d2d5025c59421a5979b6e45"
+  },
+  "escolta_system/urls.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "11e278ae07cdd6f205aeab279947f9dd",
+    "semantic_hash": "11e278ae07cdd6f205aeab279947f9dd"
+  },
+  "escolta_system/wsgi.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "7b56d84daf8369e24176a4bc7c366a80",
+    "semantic_hash": "7b56d84daf8369e24176a4bc7c366a80"
+  },
+  "manage.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "e25c4b0d98a8a7c72955fa31371d79b5",
+    "semantic_hash": "e25c4b0d98a8a7c72955fa31371d79b5"
+  },
+  "settings.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "c589adcc84527cf875f2bd4ea806a30a",
+    "semantic_hash": "c589adcc84527cf875f2bd4ea806a30a"
+  },
+  "urls.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "abbde11d671863f65284003511ccdeca",
+    "semantic_hash": "abbde11d671863f65284003511ccdeca"
+  },
+  "wsgi.py": {
+    "mtime": 1782844264.0,
+    "ast_hash": "7b56d84daf8369e24176a4bc7c366a80",
+    "semantic_hash": "7b56d84daf8369e24176a4bc7c366a80"
+  }
+}

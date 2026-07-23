@@ -1,0 +1,1402 @@
+{
+  "communities": {
+    "0": [
+      "cadastros_admin",
+      "cadastros_admin_agenteadmin",
+      "cadastros_admin_armamentoadmin",
+      "cadastros_admin_clienteadmin",
+      "cadastros_admin_coleteadmin",
+      "cadastros_admin_consultaprocessoadmin",
+      "cadastros_admin_rastreadoradmin",
+      "cadastros_admin_viaturaadmin",
+      "cadastros_forms",
+      "cadastros_forms_agenteform",
+      "cadastros_forms_armamentoform",
+      "cadastros_forms_clienteform",
+      "cadastros_forms_coleteform",
+      "cadastros_forms_freelanceform",
+      "cadastros_forms_funcionariopatrimonialform",
+      "cadastros_forms_jrsfacilitiesform",
+      "cadastros_forms_meta",
+      "cadastros_forms_rastreadorform",
+      "cadastros_forms_rationale_132",
+      "cadastros_forms_rationale_158",
+      "cadastros_forms_viaturaform",
+      "cadastros_integracao",
+      "cadastros_management_commands_backup_to_google",
+      "cadastros_management_commands_backup_to_google_rationale_1",
+      "cadastros_management_commands_fix_total_processos",
+      "cadastros_management_commands_fix_total_processos_command",
+      "cadastros_management_commands_fix_total_processos_command_handle",
+      "cadastros_management_commands_fix_total_processos_py_basecommand",
+      "cadastros_management_commands_fix_total_processos_rationale_1",
+      "cadastros_management_commands_remover_cliente_teste",
+      "cadastros_management_commands_remover_cliente_teste_rationale_1",
+      "cadastros_migrations_0022_despesaos_trocamotorista_parada_incidente_and_more",
+      "cadastros_migrations_0022_despesaos_trocamotorista_parada_incidente_and_more_foto_upload_path",
+      "cadastros_migrations_0022_despesaos_trocamotorista_parada_incidente_and_more_migration",
+      "cadastros_migrations_0025_remove_despesaos_os_alter_assinaturaos_imagem_and_more",
+      "cadastros_migrations_0025_remove_despesaos_os_alter_assinaturaos_imagem_and_more_migration",
+      "cadastros_models",
+      "cadastros_models_agente",
+      "cadastros_models_agente_str",
+      "cadastros_models_armamento",
+      "cadastros_models_armamento_str",
+      "cadastros_models_assinaturaos",
+      "cadastros_models_assinaturaos_str",
+      "cadastros_models_cliente",
+      "cadastros_models_cliente_str",
+      "cadastros_models_colete",
+      "cadastros_models_colete_str",
+      "cadastros_models_consultaprocesso",
+      "cadastros_models_consultaprocesso_str",
+      "cadastros_models_despesaos",
+      "cadastros_models_despesaos_os",
+      "cadastros_models_despesaos_str",
+      "cadastros_models_foto_upload_path",
+      "cadastros_models_fototrocamotorista",
+      "cadastros_models_fototrocamotorista_os",
+      "cadastros_models_meta",
+      "cadastros_models_perfil",
+      "cadastros_models_perfil_criar_perfil_automatico",
+      "cadastros_models_perfil_meta",
+      "cadastros_models_perfil_perfilusuario",
+      "cadastros_models_perfil_perfilusuario_is_admin",
+      "cadastros_models_perfil_perfilusuario_is_developer",
+      "cadastros_models_perfil_perfilusuario_str",
+      "cadastros_models_perfil_rationale_1",
+      "cadastros_models_perfil_salvar_perfil_automatico",
+      "cadastros_models_rastreador",
+      "cadastros_models_rastreador_str",
+      "cadastros_models_rationale_622",
+      "cadastros_models_rationale_809",
+      "cadastros_models_rationale_833",
+      "cadastros_models_rationale_852",
+      "cadastros_models_rationale_882",
+      "cadastros_models_trocamotorista",
+      "cadastros_models_trocamotorista_str",
+      "cadastros_models_viatura",
+      "cadastros_models_viatura_str",
+      "cadastros_views_agente_edit",
+      "cadastros_views_armamento_edit",
+      "cadastros_views_cliente_edit",
+      "cadastros_views_colete_edit",
+      "cadastros_views_os_field_despesa_delete",
+      "cadastros_views_rastreador_edit",
+      "cadastros_views_viatura_edit"
+    ],
+    "1": [
+      "bytesio",
+      "cadastros_management_commands_consultar_processos",
+      "cadastros_management_commands_consultar_processos_command",
+      "cadastros_management_commands_consultar_processos_command_add_arguments",
+      "cadastros_management_commands_consultar_processos_command_handle",
+      "cadastros_management_commands_consultar_processos_py_basecommand",
+      "cadastros_management_commands_consultar_processos_rationale_1",
+      "cadastros_pdf_processo",
+      "cadastros_pdf_processo_gerar_pdf_consulta",
+      "cadastros_pdf_processo_rationale_1",
+      "cadastros_pdf_processo_rationale_14",
+      "cadastros_services_driverid_service",
+      "cadastros_services_driverid_service_consultar_cpf",
+      "cadastros_services_driverid_service_decode_jwt_exp",
+      "cadastros_services_driverid_service_driveriderror",
+      "cadastros_services_driverid_service_driveridtimeout",
+      "cadastros_services_driverid_service_get_processos_detalhados",
+      "cadastros_services_driverid_service_get_token",
+      "cadastros_services_driverid_service_headers",
+      "cadastros_services_driverid_service_login",
+      "cadastros_services_driverid_service_poll_resultado",
+      "cadastros_services_driverid_service_post_consulta",
+      "cadastros_services_driverid_service_rationale_1",
+      "cadastros_services_driverid_service_rationale_107",
+      "cadastros_services_driverid_service_rationale_116",
+      "cadastros_services_driverid_service_rationale_137",
+      "cadastros_services_driverid_service_rationale_158",
+      "cadastros_services_driverid_service_rationale_181",
+      "cadastros_services_driverid_service_rationale_196",
+      "cadastros_services_driverid_service_rationale_35",
+      "cadastros_services_driverid_service_rationale_39",
+      "cadastros_services_driverid_service_rationale_43",
+      "cadastros_services_driverid_service_rationale_57",
+      "cadastros_services_driverid_service_rationale_97",
+      "cadastros_services_driverid_service_request_with_reauth",
+      "cadastros_signals",
+      "cadastros_signals_consultar_ao_salvar",
+      "cadastros_signals_executar_consulta",
+      "cadastros_signals_rationale_1",
+      "cadastros_signals_rationale_17",
+      "cadastros_signals_rationale_66",
+      "cadastros_views_consulta_processo_reconsultar",
+      "cadastros_views_rationale_5353",
+      "response"
+    ],
+    "2": [
+      "cadastros_templates_cadastros_boletim_list",
+      "cadastros_templates_cadastros_boletim_list_export_snippet",
+      "cadastros_templates_cadastros_boletim_marco_row",
+      "cadastros_templates_cadastros_cliente_force_delete_confirm",
+      "cadastros_templates_cadastros_cliente_form",
+      "cadastros_templates_cadastros_cliente_list",
+      "cadastros_templates_cadastros_colete_list",
+      "cadastros_templates_cadastros_confirm_delete",
+      "cadastros_templates_cadastros_dashboard",
+      "cadastros_templates_cadastros_dashboard_operacional",
+      "cadastros_templates_cadastros_diarias_agentes",
+      "cadastros_templates_cadastros_equipe_form",
+      "cadastros_templates_cadastros_espelhamento_list",
+      "concept_alertas_vencimento",
+      "model_agente",
+      "model_armamento",
+      "model_boletim",
+      "model_cliente",
+      "model_colete",
+      "model_diaria",
+      "model_equipe",
+      "model_espelhamento",
+      "model_os",
+      "model_tabela_preco",
+      "model_viatura",
+      "service_chartjs",
+      "service_cnpj_ws",
+      "service_omnilink_api",
+      "url_boletim_detalhe",
+      "url_boletim_export_pdf",
+      "url_boletim_export_xlsx",
+      "url_boletim_finalizar",
+      "url_boletim_list",
+      "url_cliente_create",
+      "url_cliente_delete",
+      "url_cliente_edit",
+      "url_diarias_export_xlsx",
+      "url_diarias_lancamento_salvar",
+      "url_os_detalhe",
+      "url_os_print"
+    ],
+    "3": [
+      "cadastros_os_pdf",
+      "cadastros_os_pdf_agent_block",
+      "cadastros_os_pdf_dados_operacao_block",
+      "cadastros_os_pdf_fmt_dt",
+      "cadastros_os_pdf_fotos_marcos_block",
+      "cadastros_os_pdf_fotos_veiculos_block",
+      "cadastros_os_pdf_gerar_os_pdf",
+      "cadastros_os_pdf_header_block",
+      "cadastros_os_pdf_identificacao_os_block",
+      "cadastros_os_pdf_img_field",
+      "cadastros_os_pdf_info_table",
+      "cadastros_os_pdf_p",
+      "cadastros_os_pdf_rationale_1",
+      "cadastros_os_pdf_rationale_107",
+      "cadastros_os_pdf_rationale_126",
+      "cadastros_os_pdf_rationale_165",
+      "cadastros_os_pdf_rationale_228",
+      "cadastros_os_pdf_rationale_256",
+      "cadastros_os_pdf_rationale_273",
+      "cadastros_os_pdf_rationale_324",
+      "cadastros_os_pdf_rationale_378",
+      "cadastros_os_pdf_rationale_452",
+      "cadastros_os_pdf_rationale_46",
+      "cadastros_os_pdf_rationale_487",
+      "cadastros_os_pdf_rationale_538",
+      "cadastros_os_pdf_rationale_56",
+      "cadastros_os_pdf_rationale_65",
+      "cadastros_os_pdf_rationale_75",
+      "cadastros_os_pdf_rationale_85",
+      "cadastros_os_pdf_s",
+      "cadastros_os_pdf_safe_file_path",
+      "cadastros_os_pdf_section_header",
+      "cadastros_os_pdf_trajeto_block",
+      "cadastros_os_pdf_veiculos_table",
+      "cadastros_os_pdf_viatura_block",
+      "cadastros_views_os_pdf_download",
+      "cadastros_views_rationale_1796"
+    ],
+    "4": [
+      "cadastros_models_equipe",
+      "cadastros_models_equipe_str",
+      "cadastros_views",
+      "cadastros_views_agente_create",
+      "cadastros_views_agente_delete",
+      "cadastros_views_agente_list",
+      "cadastros_views_armamento_create",
+      "cadastros_views_armamento_delete",
+      "cadastros_views_armamento_list",
+      "cadastros_views_colete_create",
+      "cadastros_views_colete_delete",
+      "cadastros_views_colete_list",
+      "cadastros_views_dashboard",
+      "cadastros_views_dashboard_os_por_cliente",
+      "cadastros_views_equipe_create",
+      "cadastros_views_equipe_delete",
+      "cadastros_views_equipe_edit",
+      "cadastros_views_equipe_finalizar",
+      "cadastros_views_equipe_list",
+      "cadastros_views_fleet_data",
+      "cadastros_views_freelance_create",
+      "cadastros_views_freelance_list",
+      "cadastros_views_funcionario_patrimonial_create",
+      "cadastros_views_funcionario_patrimonial_list",
+      "cadastros_views_jrsfacilities_create",
+      "cadastros_views_jrsfacilities_list",
+      "cadastros_views_os_por_dia",
+      "cadastros_views_patrimonial_dashboard",
+      "cadastros_views_rastreador_create",
+      "cadastros_views_rastreador_delete",
+      "cadastros_views_rastreador_list",
+      "cadastros_views_rationale_4602",
+      "cadastros_views_viatura_create",
+      "cadastros_views_viatura_delete",
+      "cadastros_views_viatura_list"
+    ],
+    "5": [
+      "cadastros_management_commands_importar_freelance",
+      "cadastros_management_commands_importar_freelance_command",
+      "cadastros_management_commands_importar_freelance_command_add_arguments",
+      "cadastros_management_commands_importar_freelance_command_handle",
+      "cadastros_management_commands_importar_freelance_py_basecommand",
+      "cadastros_management_commands_importar_jrs_facilities",
+      "cadastros_management_commands_importar_jrs_facilities_command",
+      "cadastros_management_commands_importar_jrs_facilities_command_add_arguments",
+      "cadastros_management_commands_importar_jrs_facilities_command_handle",
+      "cadastros_management_commands_importar_jrs_facilities_py_basecommand",
+      "cadastros_models_funcionariopatrimonial",
+      "cadastros_models_funcionariopatrimonial_cnh_status_vencimento",
+      "cadastros_models_funcionariopatrimonial_cnv_status_vencimento",
+      "cadastros_models_funcionariopatrimonial_curso_status_vencimento",
+      "cadastros_models_funcionariopatrimonial_status_validade",
+      "cadastros_models_funcionariopatrimonial_str",
+      "cadastros_models_funcionariopatrimonial_tem_alerta_vencimento",
+      "cadastros_models_funcionariopatrimonial_ultima_consulta_processo",
+      "cadastros_models_rationale_1042",
+      "cadastros_models_rationale_1075",
+      "cadastros_models_rationale_1082",
+      "cadastros_views_freelance_delete",
+      "cadastros_views_freelance_detail",
+      "cadastros_views_freelance_edit",
+      "cadastros_views_funcionario_patrimonial_delete",
+      "cadastros_views_funcionario_patrimonial_detail",
+      "cadastros_views_funcionario_patrimonial_edit",
+      "cadastros_views_jrsfacilities_delete",
+      "cadastros_views_jrsfacilities_detail",
+      "cadastros_views_jrsfacilities_edit"
+    ],
+    "6": [
+      "cadastros_management_commands_remover_cliente_teste_command",
+      "cadastros_management_commands_remover_cliente_teste_command_handle",
+      "cadastros_management_commands_remover_cliente_teste_py_basecommand",
+      "cadastros_models_ordemservico",
+      "cadastros_models_ordemservico_is_cancelada",
+      "cadastros_models_ordemservico_is_finalizada",
+      "cadastros_models_ordemservico_str",
+      "cadastros_views_os_cancelar",
+      "cadastros_views_os_desativar_link",
+      "cadastros_views_os_detalhe",
+      "cadastros_views_os_detalhe_novo",
+      "cadastros_views_os_email_html",
+      "cadastros_views_os_finalizar",
+      "cadastros_views_os_gerar_link",
+      "cadastros_views_os_observacoes_save",
+      "cadastros_views_os_operacional_save",
+      "cadastros_views_os_print",
+      "cadastros_views_rationale_1397",
+      "cadastros_views_rationale_1481",
+      "cadastros_views_rationale_1591",
+      "cadastros_views_rationale_1602",
+      "cadastros_views_rationale_1652",
+      "cadastros_views_rationale_1803",
+      "cadastros_views_rationale_4000",
+      "cadastros_views_rationale_4012"
+    ],
+    "7": [
+      "cadastros_management_commands_recomprimir_fotos",
+      "cadastros_management_commands_recomprimir_fotos_command",
+      "cadastros_management_commands_recomprimir_fotos_command_add_arguments",
+      "cadastros_management_commands_recomprimir_fotos_command_handle",
+      "cadastros_management_commands_recomprimir_fotos_corrigir_orientacao",
+      "cadastros_management_commands_recomprimir_fotos_py_basecommand",
+      "cadastros_management_commands_recomprimir_fotos_rationale_1",
+      "cadastros_management_commands_recomprimir_fotos_rationale_64",
+      "cadastros_management_commands_recomprimir_fotos_recomprimir_arquivo",
+      "cadastros_models_fotoincidente",
+      "cadastros_models_fotoincidente_os",
+      "cadastros_models_fotomarco",
+      "cadastros_models_fotomarco_str",
+      "cadastros_models_fotoparada",
+      "cadastros_models_fotoparada_os",
+      "cadastros_models_fotoveiculoescoltado",
+      "cadastros_models_fotoveiculoescoltado_os",
+      "cadastros_models_rationale_637",
+      "cadastros_models_rationale_705",
+      "cadastros_models_rationale_764",
+      "cadastros_models_rationale_783",
+      "cadastros_views_os_field_foto_veiculo_delete",
+      "cadastros_views_rationale_4298"
+    ],
+    "8": [
+      "cadastros_management_commands_corrigir_boletins_cancelados",
+      "cadastros_management_commands_corrigir_boletins_cancelados_command",
+      "cadastros_management_commands_corrigir_boletins_cancelados_command_handle",
+      "cadastros_management_commands_corrigir_boletins_cancelados_py_basecommand",
+      "cadastros_models_boletimmedicao",
+      "cadastros_models_boletimmedicao_calcular",
+      "cadastros_models_boletimmedicao_str",
+      "cadastros_models_ordemservico_save",
+      "cadastros_models_tabelapreco",
+      "cadastros_models_tabelapreco_franquia_horas_minutos",
+      "cadastros_models_tabelapreco_str",
+      "cadastros_views_boletim_detalhe",
+      "cadastros_views_boletim_finalizar",
+      "cadastros_views_boletim_list",
+      "cadastros_views_pode_faturamento",
+      "cadastros_views_rationale_3502",
+      "cadastros_views_tabela_preco_create",
+      "cadastros_views_tabela_preco_delete",
+      "cadastros_views_tabela_preco_edit",
+      "cadastros_views_tabela_preco_list"
+    ],
+    "9": [
+      "cadastros_boletim_export",
+      "cadastros_boletim_export_fmt_brl",
+      "cadastros_boletim_export_gerar_pdf_bytes",
+      "cadastros_boletim_export_gerar_xlsx_bytes",
+      "cadastros_boletim_export_missao_to_row",
+      "cadastros_boletim_export_rationale_1",
+      "cadastros_boletim_export_rationale_98",
+      "cadastros_views_boletim_export_pdf",
+      "cadastros_views_boletim_export_xlsx",
+      "cadastros_views_boletim_queryset",
+      "cadastros_views_boletim_to_missao",
+      "cadastros_views_calcular_totais",
+      "cadastros_views_rationale_3220",
+      "cadastros_views_rationale_3294",
+      "cadastros_views_rationale_3380",
+      "cadastros_views_rationale_3440"
+    ],
+    "10": [
+      "cadastros_management_commands_backup_to_google_command",
+      "cadastros_management_commands_backup_to_google_command_add_arguments",
+      "cadastros_management_commands_backup_to_google_command_drive_service",
+      "cadastros_management_commands_backup_to_google_command_drive_service_sa",
+      "cadastros_management_commands_backup_to_google_command_dump_db",
+      "cadastros_management_commands_backup_to_google_command_dump_media",
+      "cadastros_management_commands_backup_to_google_command_gerar_excel",
+      "cadastros_management_commands_backup_to_google_command_handle",
+      "cadastros_management_commands_backup_to_google_command_purgar_antigos",
+      "cadastros_management_commands_backup_to_google_command_upload",
+      "cadastros_management_commands_backup_to_google_py_basecommand",
+      "cadastros_management_commands_backup_to_google_rationale_130",
+      "cadastros_management_commands_backup_to_google_rationale_141",
+      "cadastros_management_commands_backup_to_google_rationale_154",
+      "cadastros_management_commands_backup_to_google_rationale_172",
+      "cadastros_management_commands_backup_to_google_rationale_191"
+    ],
+    "11": [
+      "cadastros_templates_cadastros_base",
+      "cadastros_templates_cadastros_cliente_deletar_confirm",
+      "cadastros_templates_cadastros_cliente_inativar",
+      "cadastros_templates_cadastros_colete_form",
+      "cadastros_templates_cadastros_login",
+      "cadastros_templates_cadastros_omnilink_frota",
+      "cadastros_templates_cadastros_rastreador_form",
+      "cadastros_templates_cadastros_tabela_preco_form",
+      "cadastros_templates_cadastros_usuario_delete",
+      "cadastros_templates_cadastros_usuario_form",
+      "cadastros_templates_cadastros_usuario_senha",
+      "url_dashboard",
+      "url_omnilink_frota_posicoes",
+      "url_rastreador_list",
+      "url_tabela_preco_list",
+      "url_usuario_list"
+    ],
+    "12": [
+      "cadastros_views_cliente_create",
+      "cadastros_views_cliente_deletar_definitivo",
+      "cadastros_views_cliente_inativar",
+      "cadastros_views_cliente_list",
+      "cadastros_views_is_admin_or_developer",
+      "cadastros_views_rationale_3508",
+      "cadastros_views_rationale_3546",
+      "cadastros_views_rationale_3623",
+      "cadastros_views_rationale_3701",
+      "cadastros_views_rationale_3755",
+      "cadastros_views_rationale_933",
+      "cadastros_views_usuario_create",
+      "cadastros_views_usuario_delete",
+      "cadastros_views_usuario_edit",
+      "cadastros_views_usuario_list",
+      "cadastros_views_usuario_senha"
+    ],
+    "13": [
+      "cadastros_omnilink",
+      "cadastros_omnilink_codmsg_to_int",
+      "cadastros_omnilink_coord_decimal",
+      "cadastros_omnilink_parse_coord",
+      "cadastros_omnilink_parse_posicoes_atuais_xml",
+      "cadastros_omnilink_parse_teleeventos_xml",
+      "cadastros_omnilink_rationale_1",
+      "cadastros_omnilink_rationale_140",
+      "cadastros_omnilink_rationale_158",
+      "cadastros_omnilink_rationale_873",
+      "cadastros_omnilink_rationale_88",
+      "cadastros_omnilink_rationale_893"
+    ],
+    "14": [
+      "cadastros_omnilink_carregar_centrais_fixture",
+      "cadastros_omnilink_criar_espelhamento",
+      "cadastros_omnilink_extrair_centrais_dos_espelhamentos",
+      "cadastros_omnilink_listar_espelhamentos",
+      "cadastros_omnilink_parse_espelhamentos_xml",
+      "cadastros_omnilink_rationale_523",
+      "cadastros_omnilink_rationale_578",
+      "cadastros_omnilink_rationale_612",
+      "cadastros_omnilink_rationale_761",
+      "cadastros_omnilink_rationale_779",
+      "cadastros_views_espelhamento_criar_ajax",
+      "cadastros_views_rationale_2537"
+    ],
+    "15": [
+      "cadastros_omnilink_descobrir_metodos_wsdl",
+      "cadastros_omnilink_get_client",
+      "cadastros_omnilink_listar_centrais_disponiveis",
+      "cadastros_omnilink_pede_posicao_avulsa",
+      "cadastros_omnilink_rationale_494",
+      "cadastros_omnilink_rationale_53",
+      "cadastros_omnilink_rationale_716",
+      "cadastros_omnilink_rationale_802",
+      "cadastros_views_espelhamento_centrais_ajax",
+      "cadastros_views_espelhamento_debug_ajax",
+      "cadastros_views_rationale_2428",
+      "cadastros_views_rationale_2517"
+    ],
+    "16": [
+      "cadastros_templates_cadastros_rastreador_list",
+      "cadastros_templates_cadastros_viatura_form",
+      "cadastros_templates_cadastros_viatura_list",
+      "concept_rastreador",
+      "concept_viatura",
+      "url_rastreador_create",
+      "url_rastreador_delete",
+      "url_rastreador_edit",
+      "url_viatura_create",
+      "url_viatura_delete",
+      "url_viatura_edit",
+      "url_viatura_list"
+    ],
+    "17": [
+      "backup_drive_standalone",
+      "backup_drive_standalone_main",
+      "backup_drive_standalone_run_command",
+      "cadastros_management_commands_sincronizar_local",
+      "cadastros_management_commands_sincronizar_local_command",
+      "cadastros_management_commands_sincronizar_local_command_add_arguments",
+      "cadastros_management_commands_sincronizar_local_command_drive_service",
+      "cadastros_management_commands_sincronizar_local_command_handle",
+      "cadastros_management_commands_sincronizar_local_py_basecommand",
+      "cadastros_management_commands_sincronizar_local_rationale_1",
+      "exception"
+    ],
+    "18": [
+      "cadastros_models_osoperacional",
+      "cadastros_models_osoperacional_diff_hhmm",
+      "cadastros_models_osoperacional_km_total",
+      "cadastros_models_osoperacional_km_trecho_chegada",
+      "cadastros_models_osoperacional_km_trecho_termino_op",
+      "cadastros_models_osoperacional_str",
+      "cadastros_models_osoperacional_tempo_chegada",
+      "cadastros_models_osoperacional_tempo_inicio_op",
+      "cadastros_models_osoperacional_tempo_termino_op",
+      "cadastros_models_osoperacional_tempo_termino_viagem",
+      "cadastros_models_rationale_352"
+    ],
+    "19": [
+      "cadastros_omnilink_get_historico_operacao",
+      "cadastros_omnilink_get_historico_posicoes",
+      "cadastros_omnilink_mct_id_to_terminal",
+      "cadastros_omnilink_parse_datetime",
+      "cadastros_omnilink_rationale_129",
+      "cadastros_omnilink_rationale_402",
+      "cadastros_omnilink_rationale_471",
+      "cadastros_omnilink_rationale_72",
+      "cadastros_views_omnilink_historico",
+      "cadastros_views_rationale_1858",
+      "datetime"
+    ],
+    "20": [
+      "cadastros_templates_cadastros_os_list",
+      "cadastros_templates_cadastros_os_nova",
+      "cadastros_templates_cadastros_tabela_preco_list",
+      "concept_cliente",
+      "concept_equipe",
+      "concept_ordem_de_servico",
+      "concept_tabela_preco",
+      "url_os_nova",
+      "url_tabela_preco_create",
+      "url_tabela_preco_delete",
+      "url_tabela_preco_edit"
+    ],
+    "21": [
+      "cadastros_permissoes",
+      "cadastros_permissoes_admin_required",
+      "cadastros_permissoes_developer_required",
+      "cadastros_permissoes_get_nivel",
+      "cadastros_permissoes_is_admin",
+      "cadastros_permissoes_is_developer",
+      "cadastros_permissoes_rationale_1",
+      "cadastros_permissoes_rationale_36",
+      "cadastros_permissoes_rationale_44",
+      "cadastros_permissoes_rationale_55"
+    ],
+    "22": [
+      "cadastros_templates_cadastros_equipe_list",
+      "cadastros_templates_cadastros_os_cancelar",
+      "cadastros_templates_cadastros_os_detalhe",
+      "cadastros_templates_cadastros_os_email",
+      "cadastros_templates_cadastros_os_field_desativado",
+      "url_equipe_create",
+      "url_os_delete",
+      "url_os_list",
+      "url_os_observacoes_save",
+      "url_os_operacional_save"
+    ],
+    "23": [
+      "cadastros_templates_cadastros_freelance_detail",
+      "cadastros_templates_cadastros_freelance_list",
+      "cadastros_templates_cadastros_funcionario_patrimonial_detail",
+      "cadastros_templates_cadastros_funcionario_patrimonial_list",
+      "concept_processos_judiciais",
+      "model_consulta_processo",
+      "model_freelance",
+      "model_funcionario_patrimonial",
+      "url_consulta_processo_reconsultar",
+      "url_patrimonial_export_pdf"
+    ],
+    "24": [
+      "baseuseradmin",
+      "cadastros_admin_perfil",
+      "cadastros_admin_perfil_perfilinline",
+      "cadastros_admin_perfil_perfilusuarioadmin",
+      "cadastros_admin_perfil_perfilusuarioadmin_get_queryset",
+      "cadastros_admin_perfil_rationale_1",
+      "cadastros_admin_perfil_useradmincustom",
+      "cadastros_admin_perfil_useradmincustom_get_queryset"
+    ],
+    "25": [
+      "cadastros_migrations_0027_seed_espelhamentos_historicos",
+      "cadastros_migrations_0027_seed_espelhamentos_historicos_migration",
+      "cadastros_migrations_0027_seed_espelhamentos_historicos_rationale_1",
+      "cadastros_migrations_0027_seed_espelhamentos_historicos_remove_historicos",
+      "cadastros_migrations_0027_seed_espelhamentos_historicos_seed_historicos",
+      "cadastros_models_espelhamentoenviado",
+      "cadastros_models_espelhamentoenviado_str",
+      "cadastros_models_rationale_924"
+    ],
+    "26": [
+      "cadastros_omnilink_buscar_ultimo_id_post",
+      "cadastros_omnilink_get_eventos_normais",
+      "cadastros_omnilink_get_ultima_posicao",
+      "cadastros_omnilink_rationale_251",
+      "cadastros_omnilink_rationale_303",
+      "cadastros_omnilink_rationale_352",
+      "cadastros_views_omnilink_posicao_atual",
+      "cadastros_views_rationale_1825"
+    ],
+    "27": [
+      "cadastros_omnilink_get_posicao_por_placa",
+      "cadastros_omnilink_get_todas_posicoes_atuais",
+      "cadastros_omnilink_rationale_816",
+      "cadastros_omnilink_rationale_957",
+      "cadastros_omnilink_rationale_981",
+      "cadastros_omnilink_reverse_geocode",
+      "cadastros_views_omnilink_frota_posicoes",
+      "cadastros_views_rationale_1970"
+    ],
+    "28": [
+      "cadastros_templates_cadastros_jrsfacilities_detail",
+      "cadastros_templates_cadastros_jrsfacilities_form",
+      "cadastros_templates_cadastros_jrsfacilities_list",
+      "url_jrsfacilities_create",
+      "url_jrsfacilities_detail",
+      "url_jrsfacilities_edit",
+      "url_jrsfacilities_list",
+      "url_jrsfacilities_reconsultar"
+    ],
+    "29": [
+      "cadastros_templates_cadastros_os_print",
+      "cadastros_templates_cadastros_patrimonial_dashboard",
+      "concept_agente",
+      "tag_cadastros_extras",
+      "url_freelance_list",
+      "url_funcionario_patrimonial_create",
+      "url_funcionario_patrimonial_edit",
+      "url_funcionario_patrimonial_list"
+    ],
+    "30": [
+      "cadastros_criar_usuarios",
+      "cadastros_criar_usuarios_command",
+      "cadastros_criar_usuarios_command_add_arguments",
+      "cadastros_criar_usuarios_command_criar_ou_atualizar",
+      "cadastros_criar_usuarios_command_handle",
+      "cadastros_criar_usuarios_py_basecommand",
+      "cadastros_criar_usuarios_rationale_1"
+    ],
+    "31": [
+      "cadastros_models_parada",
+      "cadastros_models_parada_duracao_minutos",
+      "cadastros_models_parada_str",
+      "cadastros_models_rationale_667",
+      "cadastros_views_os_field_parada_delete",
+      "cadastros_views_os_field_parada_salvar",
+      "cadastros_views_rationale_4119"
+    ],
+    "32": [
+      "cadastros_models_rationale_442",
+      "cadastros_models_veiculoescoltado",
+      "cadastros_models_veiculoescoltado_str",
+      "cadastros_views_os_field_veiculo_delete",
+      "cadastros_views_os_field_veiculo_salvar",
+      "cadastros_views_rationale_4537",
+      "cadastros_views_rationale_4582"
+    ],
+    "33": [
+      "cadastros_templates_cadastros_usuario_list",
+      "concept_perfil",
+      "concept_usuario",
+      "url_usuario_create",
+      "url_usuario_delete",
+      "url_usuario_edit",
+      "url_usuario_senha"
+    ],
+    "34": [
+      "understand_anything_tmp_finalize",
+      "understand_anything_tmp_finalize_graph",
+      "understand_anything_tmp_finalize_hash",
+      "understand_anything_tmp_finalize_intermediatedir",
+      "understand_anything_tmp_finalize_metadata",
+      "understand_anything_tmp_finalize_tmpdir",
+      "understand_anything_tmp_finalize_uadir"
+    ],
+    "35": [
+      "cadastros_management_commands_criar_developer",
+      "cadastros_management_commands_criar_developer_command",
+      "cadastros_management_commands_criar_developer_command_add_arguments",
+      "cadastros_management_commands_criar_developer_command_handle",
+      "cadastros_management_commands_criar_developer_py_basecommand",
+      "cadastros_management_commands_criar_developer_rationale_1"
+    ],
+    "36": [
+      "cadastros_models_incidente",
+      "cadastros_models_incidente_str",
+      "cadastros_models_rationale_725",
+      "cadastros_views_os_field_incidente_delete",
+      "cadastros_views_os_field_incidente_salvar",
+      "cadastros_views_rationale_4199"
+    ],
+    "37": [
+      "cadastros_views_agente_certidao_tjdf",
+      "cadastros_views_agente_certidao_trf",
+      "cadastros_views_gerar_certidao_pdf",
+      "cadastros_views_rationale_468",
+      "cadastros_views_rationale_567",
+      "cadastros_views_rationale_659"
+    ],
+    "38": [
+      "cadastros_views_cliente_force_delete",
+      "cadastros_views_get_nivel",
+      "cadastros_views_is_developer",
+      "cadastros_views_is_financeiro",
+      "cadastros_views_rationale_3484",
+      "cadastros_views_rationale_961"
+    ],
+    "39": [
+      "cadastros_views_comprimir_imagem",
+      "cadastros_views_os_field_foto_marco",
+      "cadastros_views_os_field_foto_veiculo",
+      "cadastros_views_rationale_22",
+      "cadastros_views_rationale_4052",
+      "cadastros_views_rationale_4276"
+    ],
+    "40": [
+      "understand_anything_tmp_fix_tour_dangling",
+      "understand_anything_tmp_fix_tour_dangling_finalnodeids",
+      "understand_anything_tmp_fix_tour_dangling_graph",
+      "understand_anything_tmp_fix_tour_dangling_nodeids",
+      "understand_anything_tmp_fix_tour_dangling_step12",
+      "understand_anything_tmp_fix_tour_dangling_tour"
+    ],
+    "41": [
+      "cadastros_models_diariaslancamento",
+      "cadastros_models_diariaslancamento_str",
+      "cadastros_models_rationale_1124",
+      "cadastros_views_diarias_lancamento_salvar",
+      "cadastros_views_rationale_5813"
+    ],
+    "42": [
+      "understand_anything_tmp_add_project_meta",
+      "understand_anything_tmp_add_project_meta_fullkg",
+      "understand_anything_tmp_add_project_meta_kg",
+      "understand_anything_tmp_add_project_meta_layers",
+      "understand_anything_tmp_add_project_meta_tour"
+    ],
+    "43": [
+      "understand_anything_tmp_rebuild_graph",
+      "understand_anything_tmp_rebuild_graph_graph",
+      "understand_anything_tmp_rebuild_graph_knowledgegraph",
+      "understand_anything_tmp_rebuild_graph_layers",
+      "understand_anything_tmp_rebuild_graph_tour"
+    ],
+    "44": [
+      "appconfig",
+      "cadastros_apps",
+      "cadastros_apps_cadastrosconfig",
+      "cadastros_apps_cadastrosconfig_ready"
+    ],
+    "45": [
+      "cadastros_management_commands_importar_consultas",
+      "cadastros_management_commands_importar_consultas_command",
+      "cadastros_management_commands_importar_consultas_command_handle",
+      "cadastros_management_commands_importar_consultas_py_basecommand"
+    ],
+    "46": [
+      "cadastros_management_commands_importar_patrimonial",
+      "cadastros_management_commands_importar_patrimonial_command",
+      "cadastros_management_commands_importar_patrimonial_command_handle",
+      "cadastros_management_commands_importar_patrimonial_py_basecommand"
+    ],
+    "47": [
+      "cadastros_migrations_0018_populate_perfis",
+      "cadastros_migrations_0018_populate_perfis_migration",
+      "cadastros_migrations_0018_populate_perfis_populate_perfis",
+      "cadastros_migrations_0018_populate_perfis_rollback"
+    ],
+    "48": [
+      "cadastros_omnilink_aceitar_espelhamento",
+      "cadastros_omnilink_rationale_680",
+      "cadastros_views_espelhamento_aceitar_ajax",
+      "cadastros_views_rationale_2603"
+    ],
+    "49": [
+      "cadastros_omnilink_excluir_espelhamento",
+      "cadastros_omnilink_rationale_700",
+      "cadastros_views_espelhamento_cancelar_ajax",
+      "cadastros_views_rationale_2625"
+    ],
+    "50": [
+      "cadastros_static_cadastros_toasts",
+      "cadastros_static_cadastros_toasts_consumedjangomessages",
+      "cadastros_static_cadastros_toasts_ensurestack",
+      "cadastros_static_cadastros_toasts_push"
+    ],
+    "51": [
+      "cadastros_templatetags_cadastros_extras",
+      "cadastros_templatetags_cadastros_extras_get_item",
+      "cadastros_templatetags_cadastros_extras_iso_to_date",
+      "cadastros_templatetags_cadastros_extras_rationale_11"
+    ],
+    "52": [
+      "cadastros_views_base64_to_file",
+      "cadastros_views_os_field_assinatura",
+      "cadastros_views_rationale_4041",
+      "cadastros_views_rationale_4392"
+    ],
+    "53": [
+      "cadastros_views_espelhamento_listar_ajax",
+      "cadastros_views_garantir_tabela_espelhamento",
+      "cadastros_views_rationale_2128",
+      "cadastros_views_rationale_2226"
+    ],
+    "54": [
+      "cadastros_cadastros_extras",
+      "cadastros_cadastros_extras_get_item",
+      "cadastros_cadastros_extras_rationale_7"
+    ],
+    "55": [
+      "cadastros_migrations_0015_setup_groups_and_users",
+      "cadastros_migrations_0015_setup_groups_and_users_migration",
+      "cadastros_migrations_0015_setup_groups_and_users_setup_groups_and_users"
+    ],
+    "56": [
+      "cadastros_init",
+      "cadastros_urls"
+    ],
+    "57": [
+      "cadastros_migrations_0001_initial",
+      "cadastros_migrations_0001_initial_migration"
+    ],
+    "58": [
+      "cadastros_migrations_0002_remove_fields",
+      "cadastros_migrations_0002_remove_fields_migration"
+    ],
+    "59": [
+      "cadastros_migrations_0003_add_colete",
+      "cadastros_migrations_0003_add_colete_migration"
+    ],
+    "60": [
+      "cadastros_migrations_0004_add_equipe",
+      "cadastros_migrations_0004_add_equipe_migration"
+    ],
+    "61": [
+      "cadastros_migrations_0005_equipe_viatura",
+      "cadastros_migrations_0005_equipe_viatura_migration"
+    ],
+    "62": [
+      "cadastros_migrations_0006_ordemservico",
+      "cadastros_migrations_0006_ordemservico_migration"
+    ],
+    "63": [
+      "cadastros_migrations_0007_os_operacional_veiculos",
+      "cadastros_migrations_0007_os_operacional_veiculos_migration"
+    ],
+    "64": [
+      "cadastros_migrations_0008_alter_agente_funcao_alter_agente_observacoes_and_more",
+      "cadastros_migrations_0008_alter_agente_funcao_alter_agente_observacoes_and_more_migration"
+    ],
+    "65": [
+      "cadastros_migrations_0009_status_novos",
+      "cadastros_migrations_0009_status_novos_migration"
+    ],
+    "66": [
+      "cadastros_migrations_0010_merge_20260319_0827",
+      "cadastros_migrations_0010_merge_20260319_0827_migration"
+    ],
+    "67": [
+      "cadastros_migrations_0011_equipe_finalizada_os_finalizada",
+      "cadastros_migrations_0011_equipe_finalizada_os_finalizada_migration"
+    ],
+    "68": [
+      "cadastros_migrations_0012_osoperacional_pedagio",
+      "cadastros_migrations_0012_osoperacional_pedagio_migration"
+    ],
+    "69": [
+      "cadastros_migrations_0013_tabela_preco_boletim",
+      "cadastros_migrations_0013_tabela_preco_boletim_migration"
+    ],
+    "70": [
+      "cadastros_migrations_0014_os_snapshot_equipe",
+      "cadastros_migrations_0014_os_snapshot_equipe_migration"
+    ],
+    "71": [
+      "cadastros_migrations_0016_perfilusuario",
+      "cadastros_migrations_0016_perfilusuario_migration"
+    ],
+    "72": [
+      "cadastros_migrations_0017_osoperacional_token",
+      "cadastros_migrations_0017_osoperacional_token_migration"
+    ],
+    "73": [
+      "cadastros_migrations_0019_osoperacional_gps",
+      "cadastros_migrations_0019_osoperacional_gps_migration"
+    ],
+    "74": [
+      "cadastros_migrations_0020_cliente_nome_fantasia",
+      "cadastros_migrations_0020_cliente_nome_fantasia_migration"
+    ],
+    "75": [
+      "cadastros_migrations_0021_cliente_ativo",
+      "cadastros_migrations_0021_cliente_ativo_migration"
+    ],
+    "76": [
+      "cadastros_migrations_0023_despesaos_os_fk",
+      "cadastros_migrations_0023_despesaos_os_fk_migration"
+    ],
+    "77": [
+      "cadastros_migrations_0024_merge_0013_tabela_preco_boletim_0023_despesaos_os_fk",
+      "cadastros_migrations_0024_merge_0013_tabela_preco_boletim_0023_despesaos_os_fk_migration"
+    ],
+    "78": [
+      "cadastros_migrations_0026_espelhamentoenviado",
+      "cadastros_migrations_0026_espelhamentoenviado_migration"
+    ],
+    "79": [
+      "cadastros_migrations_0028_alter_espelhamentoenviado_id",
+      "cadastros_migrations_0028_alter_espelhamentoenviado_id_migration"
+    ],
+    "80": [
+      "cadastros_migrations_0029_funcionariopatrimonial",
+      "cadastros_migrations_0029_funcionariopatrimonial_migration"
+    ],
+    "81": [
+      "cadastros_migrations_0030_cancelamento_tipo",
+      "cadastros_migrations_0030_cancelamento_tipo_migration"
+    ],
+    "82": [
+      "cadastros_migrations_0031_funcionariopatrimonial_curso",
+      "cadastros_migrations_0031_funcionariopatrimonial_curso_migration"
+    ],
+    "83": [
+      "cadastros_migrations_0032_agente_curso",
+      "cadastros_migrations_0032_agente_curso_migration"
+    ],
+    "84": [
+      "cadastros_migrations_0033_funcionariopatrimonial_tipo_brigadista",
+      "cadastros_migrations_0033_funcionariopatrimonial_tipo_brigadista_migration"
+    ],
+    "85": [
+      "cadastros_migrations_0034_funcionariopatrimonial_funcao_brigadista",
+      "cadastros_migrations_0034_funcionariopatrimonial_funcao_brigadista_migration"
+    ],
+    "86": [
+      "cadastros_migrations_0035_agente_certidao_tjdf",
+      "cadastros_migrations_0035_agente_certidao_tjdf_migration"
+    ],
+    "87": [
+      "cadastros_migrations_0036_agente_certidao_trf",
+      "cadastros_migrations_0036_agente_certidao_trf_migration"
+    ],
+    "88": [
+      "cadastros_migrations_0037_agente_nome_mae_nome_pai",
+      "cadastros_migrations_0037_agente_nome_mae_nome_pai_migration"
+    ],
+    "89": [
+      "cadastros_migrations_0038_agente_certidao_pdfs",
+      "cadastros_migrations_0038_agente_certidao_pdfs_migration"
+    ],
+    "90": [
+      "cadastros_migrations_0039_alter_agente_certidao_tjdf_consultado_em_and_more",
+      "cadastros_migrations_0039_alter_agente_certidao_tjdf_consultado_em_and_more_migration"
+    ],
+    "91": [
+      "cadastros_migrations_0040_consultaprocesso",
+      "cadastros_migrations_0040_consultaprocesso_migration"
+    ],
+    "92": [
+      "cadastros_migrations_0041_consultaprocesso_origem",
+      "cadastros_migrations_0041_consultaprocesso_origem_migration"
+    ],
+    "93": [
+      "cadastros_migrations_0042_agente_endereco",
+      "cadastros_migrations_0042_agente_endereco_migration"
+    ],
+    "94": [
+      "cadastros_migrations_0043_funcionariopatrimonial_nome_mae",
+      "cadastros_migrations_0043_funcionariopatrimonial_nome_mae_migration"
+    ],
+    "95": [
+      "cadastros_migrations_0044_funcionariopatrimonial_empresa_funcionariopatrimonial_cargo",
+      "cadastros_migrations_0044_funcionariopatrimonial_empresa_funcionariopatrimonial_cargo_migration"
+    ],
+    "96": [
+      "cadastros_migrations_0045_funcionariopatrimonial_empresa_freelance",
+      "cadastros_migrations_0045_funcionariopatrimonial_empresa_freelance_migration"
+    ],
+    "97": [
+      "cadastros_migrations_0046_add_snap_val_endereco_renavan",
+      "cadastros_migrations_0046_add_snap_val_endereco_renavan_migration"
+    ],
+    "98": [
+      "cadastros_migrations_0047_tabelapreco_velocidade_media",
+      "cadastros_migrations_0047_tabelapreco_velocidade_media_migration"
+    ],
+    "99": [
+      "cadastros_migrations_0048_diarias_lancamento",
+      "cadastros_migrations_0048_diarias_lancamento_migration"
+    ],
+    "100": [
+      "cadastros_views_agente_export_pdf",
+      "cadastros_views_rationale_283"
+    ],
+    "101": [
+      "cadastros_views_auto_consultar_processos",
+      "cadastros_views_rationale_5325"
+    ],
+    "102": [
+      "cadastros_views_clientes_json",
+      "cadastros_views_rationale_3097"
+    ],
+    "103": [
+      "cadastros_views_dashboard_operacional",
+      "cadastros_views_rationale_1031"
+    ],
+    "104": [
+      "cadastros_views_diarias_agentes",
+      "cadastros_views_rationale_5411"
+    ],
+    "105": [
+      "cadastros_views_diarias_export_xlsx",
+      "cadastros_views_rationale_5601"
+    ],
+    "106": [
+      "cadastros_views_diarias_lancamento_deletar",
+      "cadastros_views_rationale_5911"
+    ],
+    "107": [
+      "cadastros_views_diarias_lancamento_excluir_auto",
+      "cadastros_views_rationale_5870"
+    ],
+    "108": [
+      "cadastros_views_espelhamento_list",
+      "cadastros_views_rationale_2121"
+    ],
+    "109": [
+      "cadastros_views_omnilink_frota",
+      "cadastros_views_rationale_1962"
+    ],
+    "110": [
+      "cadastros_views_os_delete",
+      "cadastros_views_rationale_1585"
+    ],
+    "111": [
+      "cadastros_views_os_field_despesa_salvar",
+      "cadastros_views_rationale_4443"
+    ],
+    "112": [
+      "cadastros_views_os_field_foto_marco_delete",
+      "cadastros_views_rationale_4104"
+    ],
+    "113": [
+      "cadastros_views_os_field_link",
+      "cadastros_views_rationale_3865"
+    ],
+    "114": [
+      "cadastros_views_os_field_marco_salvar",
+      "cadastros_views_rationale_3786"
+    ],
+    "115": [
+      "cadastros_views_os_field_pedagio_salvar",
+      "cadastros_views_rationale_4521"
+    ],
+    "116": [
+      "cadastros_views_os_field_troca_motorista",
+      "cadastros_views_rationale_4313"
+    ],
+    "117": [
+      "cadastros_views_os_field_troca_motorista_delete",
+      "cadastros_views_rationale_4376"
+    ],
+    "118": [
+      "cadastros_views_os_list",
+      "cadastros_views_rationale_1248"
+    ],
+    "119": [
+      "cadastros_views_os_nova",
+      "cadastros_views_rationale_1372"
+    ],
+    "120": [
+      "cadastros_views_patrimonial_export_pdf",
+      "cadastros_views_rationale_4886"
+    ],
+    "121": [
+      "escolta_system_settings",
+      "escolta_system_settings_rationale_1"
+    ],
+    "122": [
+      "manage",
+      "manage_main"
+    ],
+    "123": [
+      "urls",
+      "urls_logout_view"
+    ],
+    "124": [
+      "cadastros_management_commands_init"
+    ],
+    "125": [
+      "cadastros_management_init"
+    ],
+    "126": [
+      "cadastros_migrations_init"
+    ],
+    "127": [
+      "cadastros_services_init"
+    ],
+    "128": [
+      "cadastros_templates_cadastros_os_field_link"
+    ],
+    "129": [
+      "cadastros_templatetags_init"
+    ],
+    "130": [
+      "concept_dashboard_aviso"
+    ],
+    "131": [
+      "concept_dashboard_operacional"
+    ],
+    "132": [
+      "concept_espelhamento_shared"
+    ],
+    "133": [
+      "escolta_system_init"
+    ],
+    "134": [
+      "escolta_system_urls"
+    ],
+    "135": [
+      "escolta_system_wsgi"
+    ],
+    "136": [
+      "settings"
+    ],
+    "137": [
+      "url_agente_list"
+    ],
+    "138": [
+      "url_armamento_list"
+    ],
+    "139": [
+      "url_cliente_list"
+    ],
+    "140": [
+      "url_equipe_list"
+    ],
+    "141": [
+      "wsgi"
+    ]
+  },
+  "cohesion": {
+    "0": 0.07023214810461358,
+    "1": 0.07505285412262157,
+    "2": 0.07692307692307693,
+    "3": 0.10510510510510511,
+    "4": 0.06722689075630252,
+    "5": 0.07816091954022988,
+    "6": 0.08,
+    "7": 0.11067193675889328,
+    "8": 0.11578947368421053,
+    "9": 0.18333333333333332,
+    "10": 0.18333333333333332,
+    "11": 0.175,
+    "12": 0.125,
+    "13": 0.21212121212121213,
+    "14": 0.18181818181818182,
+    "15": 0.19696969696969696,
+    "16": 0.18181818181818182,
+    "17": 0.23636363636363636,
+    "18": 0.2545454545454545,
+    "19": 0.23636363636363636,
+    "20": 0.18181818181818182,
+    "21": 0.24444444444444444,
+    "22": 0.2222222222222222,
+    "23": 0.4444444444444444,
+    "24": 0.2857142857142857,
+    "25": 0.25,
+    "26": 0.25,
+    "27": 0.25,
+    "28": 0.35714285714285715,
+    "29": 0.25,
+    "30": 0.3333333333333333,
+    "31": 0.2857142857142857,
+    "32": 0.2857142857142857,
+    "33": 0.2857142857142857,
+    "34": 0.2857142857142857,
+    "35": 0.3333333333333333,
+    "36": 0.3333333333333333,
+    "37": 0.3333333333333333,
+    "38": 0.3333333333333333,
+    "39": 0.3333333333333333,
+    "40": 0.3333333333333333,
+    "41": 0.4,
+    "42": 0.4,
+    "43": 0.4,
+    "44": 0.5,
+    "45": 0.5,
+    "46": 0.5,
+    "47": 0.5,
+    "48": 0.5,
+    "49": 0.5,
+    "50": 0.8333333333333334,
+    "51": 0.5,
+    "52": 0.5,
+    "53": 0.5,
+    "54": 0.6666666666666666,
+    "55": 0.6666666666666666,
+    "56": 1.0,
+    "57": 1.0,
+    "58": 1.0,
+    "59": 1.0,
+    "60": 1.0,
+    "61": 1.0,
+    "62": 1.0,
+    "63": 1.0,
+    "64": 1.0,
+    "65": 1.0,
+    "66": 1.0,
+    "67": 1.0,
+    "68": 1.0,
+    "69": 1.0,
+    "70": 1.0,
+    "71": 1.0,
+    "72": 1.0,
+    "73": 1.0,
+    "74": 1.0,
+    "75": 1.0,
+    "76": 1.0,
+    "77": 1.0,
+    "78": 1.0,
+    "79": 1.0,
+    "80": 1.0,
+    "81": 1.0,
+    "82": 1.0,
+    "83": 1.0,
+    "84": 1.0,
+    "85": 1.0,
+    "86": 1.0,
+    "87": 1.0,
+    "88": 1.0,
+    "89": 1.0,
+    "90": 1.0,
+    "91": 1.0,
+    "92": 1.0,
+    "93": 1.0,
+    "94": 1.0,
+    "95": 1.0,
+    "96": 1.0,
+    "97": 1.0,
+    "98": 1.0,
+    "99": 1.0,
+    "100": 1.0,
+    "101": 1.0,
+    "102": 1.0,
+    "103": 1.0,
+    "104": 1.0,
+    "105": 1.0,
+    "106": 1.0,
+    "107": 1.0,
+    "108": 1.0,
+    "109": 1.0,
+    "110": 1.0,
+    "111": 1.0,
+    "112": 1.0,
+    "113": 1.0,
+    "114": 1.0,
+    "115": 1.0,
+    "116": 1.0,
+    "117": 1.0,
+    "118": 1.0,
+    "119": 1.0,
+    "120": 1.0,
+    "121": 1.0,
+    "122": 1.0,
+    "123": 1.0,
+    "124": 1.0,
+    "125": 1.0,
+    "126": 1.0,
+    "127": 1.0,
+    "128": 1.0,
+    "129": 1.0,
+    "130": 1.0,
+    "131": 1.0,
+    "132": 1.0,
+    "133": 1.0,
+    "134": 1.0,
+    "135": 1.0,
+    "136": 1.0,
+    "137": 1.0,
+    "138": 1.0,
+    "139": 1.0,
+    "140": 1.0,
+    "141": 1.0
+  },
+  "gods": [
+    {
+      "id": "cadastros_models_funcionariopatrimonial",
+      "label": "FuncionarioPatrimonial",
+      "degree": 39
+    },
+    {
+      "id": "cadastros_templates_cadastros_base",
+      "label": "Base Template",
+      "degree": 37
+    },
+    {
+      "id": "cadastros_models_perfil_perfilusuario",
+      "label": "PerfilUsuario",
+      "degree": 35
+    },
+    {
+      "id": "cadastros_models_cliente",
+      "label": "Cliente",
+      "degree": 32
+    },
+    {
+      "id": "cadastros_models_osoperacional",
+      "label": "OSOperacional",
+      "degree": 32
+    },
+    {
+      "id": "cadastros_models_agente",
+      "label": "Agente",
+      "degree": 30
+    },
+    {
+      "id": "cadastros_models_viatura",
+      "label": "Viatura",
+      "degree": 28
+    },
+    {
+      "id": "cadastros_models_rastreador",
+      "label": "Rastreador",
+      "degree": 26
+    },
+    {
+      "id": "cadastros_models_armamento",
+      "label": "Armamento",
+      "degree": 26
+    },
+    {
+      "id": "cadastros_models_colete",
+      "label": "Colete",
+      "degree": 26
+    }
+  ],
+  "surprises": [
+    {
+      "source": "agente_delete()",
+      "target": "Agente",
+      "source_files": [
+        "cadastros/views.py",
+        "cadastros/models.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "indirect_call",
+      "why": "inferred connection - not explicitly stated in source; bridges separate communities; peripheral node `agente_delete()` unexpectedly reaches hub `Agente`"
+    },
+    {
+      "source": "viatura_delete()",
+      "target": "Viatura",
+      "source_files": [
+        "cadastros/views.py",
+        "cadastros/models.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "indirect_call",
+      "why": "inferred connection - not explicitly stated in source; bridges separate communities; peripheral node `viatura_delete()` unexpectedly reaches hub `Viatura`"
+    },
+    {
+      "source": "rastreador_delete()",
+      "target": "Rastreador",
+      "source_files": [
+        "cadastros/views.py",
+        "cadastros/models.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "indirect_call",
+      "why": "inferred connection - not explicitly stated in source; bridges separate communities; peripheral node `rastreador_delete()` unexpectedly reaches hub `Rastreador`"
+    },
+    {
+      "source": "armamento_delete()",
+      "target": "Armamento",
+      "source_files": [
+        "cadastros/views.py",
+        "cadastros/models.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "indirect_call",
+      "why": "inferred connection - not explicitly stated in source; bridges separate communities; peripheral node `armamento_delete()` unexpectedly reaches hub `Armamento`"
+    },
+    {
+      "source": "colete_delete()",
+      "target": "Colete",
+      "source_files": [
+        "cadastros/views.py",
+        "cadastros/models.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "indirect_call",
+      "why": "inferred connection - not explicitly stated in source; bridges separate communities; peripheral node `colete_delete()` unexpectedly reaches hub `Colete`"
+    }
+  ],
+  "tokens": {
+    "input": 167126,
+    "output": 31410
+  }
+}
