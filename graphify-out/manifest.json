@@ -725,9 +725,9 @@
     "semantic_hash": "64c55bf1f5eec12a8982047b6f64d8f4"
   },
   "cadastros/templates/cadastros/os_detalhe.html": {
-    "mtime": 1782844264.0,
-    "ast_hash": "f773c6e5ee41640e7fcba1a340f2b94e",
-    "semantic_hash": "f773c6e5ee41640e7fcba1a340f2b94e"
+    "mtime": 1784806018.0,
+    "ast_hash": "3830c33cd859f303367ff4f0d34584fc",
+    "semantic_hash": ""
   },
   "cadastros/templates/cadastros/os_email.html": {
     "mtime": 1782844264.0,
@@ -877,6 +877,11 @@
   "graphify-out/converted/contexto_sistema_escolta_9d77df0e.md": {
     "mtime": 1784233894.0,
     "ast_hash": "b19801867be457c98e761964a3bd8eae",
+    "semantic_hash": ""
+  },
+  "_push.ps1": {
+    "mtime": 1784806184.0,
+    "ast_hash": "18a5d0d8a7f6d3ea361493a725f9960d",
     "semantic_hash": ""
   }
 }

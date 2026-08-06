@@ -5735,10 +5735,12 @@ def diarias_export_xlsx(request):
             d_ini = os.previsao_inicio.date()
             dias = [d_ini] if month_start2 <= d_ini <= month_end2 else []
 
+        os_num_fmt = f'OS-{str(os.numero)[4:]}' if os.numero else '—'
         for data in dias:
             for nome in nomes:
                 agrupado[nome].append({
                     'data': data.strftime('%d/%m/%Y'),
+                    'os_numero': os_num_fmt,
                     'cliente': cliente_nome,
                     'rota': rota,
                     'missao': missao,
@@ -5757,7 +5759,7 @@ def diarias_export_xlsx(request):
     borda = Border(left=thin, right=thin, top=thin, bottom=thin)
 
     # Título
-    ws.merge_cells('A1:G1')
+    ws.merge_cells('A1:F1')
     c = ws['A1']
     c.value = f'ESCOLTA ARMADA — DIÁRIAS {mes_nome.upper()} DE {ano}'
     c.font = Font(name='Calibri', bold=True, size=13, color='FFFFFFFF')
@@ -5772,7 +5774,7 @@ def diarias_export_xlsx(request):
         linhas = sorted(agrupado[nome], key=lambda x: x['data'])
 
         # Cabeçalho do agente
-        ws.merge_cells(f'A{row}:G{row}')
+        ws.merge_cells(f'A{row}:F{row}')
         c = ws.cell(row=row, column=1, value=nome.upper())
         c.font = Font(name='Calibri', bold=True, size=11, color='FF1A1A1A')
         c.fill = PatternFill('solid', fgColor='FFE8E8E8')
@@ -5781,7 +5783,7 @@ def diarias_export_xlsx(request):
         row += 1
 
         # Cabeçalho das colunas
-        headers = ['DATA', 'CLIENTE', 'ORIGEM X DESTINO', 'MISSÃO', 'VALOR DIÁRIA']
+        headers = ['DATA', 'Nº OS', 'CLIENTE', 'ORIGEM X DESTINO', 'MISSÃO', 'VALOR DIÁRIA']
         for col, h in enumerate(headers, 1):
             c = ws.cell(row=row, column=col, value=h)
             c.font = Font(name='Calibri', bold=True, size=9, color='FF555555')
@@ -5794,20 +5796,24 @@ def diarias_export_xlsx(request):
         subtotal = 0.0
         for i, l in enumerate(linhas):
             fill_color = branco if i % 2 == 0 else 'FFFAFAFA'
-            for col, val in enumerate([l['data'], l['cliente'], l['rota'], l['missao'], l['valor']], 1):
+            for col, val in enumerate([l['data'], l['os_numero'], l['cliente'], l['rota'], l['missao'], l['valor']], 1):
                 c = ws.cell(row=row, column=col, value=val)
                 c.fill = PatternFill('solid', fgColor=fill_color)
                 c.border = borda
                 c.alignment = Alignment(vertical='center')
+                # Nº OS centralizado
+                if col == 2:
+                    c.font = Font(name='Calibri', size=10, bold=True, color='FF1F5FA8')
+                    c.alignment = Alignment(horizontal='center', vertical='center')
                 # Missão com cor especial
-                if col == 4:
+                elif col == 5:
                     if val == 'INTERESTADUAL':
                         c.font = Font(name='Calibri', size=10, bold=True, color='FFC0392B')
                     elif val == 'OPERAÇÃO CANCELADA':
                         c.font = Font(name='Calibri', size=10, color='FFB8860B')
                     else:
                         c.font = Font(name='Calibri', size=10, color='FF276B47')
-                elif col == 5:
+                elif col == 6:
                     c.font = Font(name='Calibri', size=10)
                     c.number_format = 'R$ #,##0.00'
                     c.alignment = Alignment(horizontal='right', vertical='center')
@@ -5817,12 +5823,12 @@ def diarias_export_xlsx(request):
             row += 1
 
         # Subtotal do agente
-        c = ws.cell(row=row, column=4, value='SUBTOTAL')
+        c = ws.cell(row=row, column=5, value='SUBTOTAL')
         c.font = Font(name='Calibri', bold=True, size=10)
         c.fill = PatternFill('solid', fgColor='FFE8E8E8')
         c.alignment = Alignment(horizontal='right', vertical='center')
         c.border = borda
-        c = ws.cell(row=row, column=5, value=subtotal)
+        c = ws.cell(row=row, column=6, value=subtotal)
         c.font = Font(name='Calibri', bold=True, size=10, color='FFB85000')
         c.fill = PatternFill('solid', fgColor='FFE8E8E8')
         c.number_format = 'R$ #,##0.00'
@@ -5832,12 +5838,12 @@ def diarias_export_xlsx(request):
         row += 2  # linha em branco entre agentes
 
     # Total geral
-    ws.merge_cells(f'A{row}:D{row}')
+    ws.merge_cells(f'A{row}:E{row}')
     c = ws.cell(row=row, column=1, value='TOTAL GERAL')
     c.font = Font(name='Calibri', bold=True, size=12, color='FFFFFFFF')
     c.fill = PatternFill('solid', fgColor=laranja)
     c.alignment = Alignment(horizontal='right', vertical='center')
-    c = ws.cell(row=row, column=5, value=total_geral)
+    c = ws.cell(row=row, column=6, value=total_geral)
     c.font = Font(name='Calibri', bold=True, size=12, color='FFFFFFFF')
     c.fill = PatternFill('solid', fgColor=laranja)
     c.number_format = 'R$ #,##0.00'
@@ -5845,11 +5851,12 @@ def diarias_export_xlsx(request):
     ws.row_dimensions[row].height = 24
 
     # Larguras das colunas
-    ws.column_dimensions['A'].width = 13
-    ws.column_dimensions['B'].width = 28
-    ws.column_dimensions['C'].width = 42
-    ws.column_dimensions['D'].width = 22
-    ws.column_dimensions['E'].width = 15
+    ws.column_dimensions['A'].width = 13   # DATA
+    ws.column_dimensions['B'].width = 12   # Nº OS
+    ws.column_dimensions['C'].width = 28   # CLIENTE
+    ws.column_dimensions['D'].width = 42   # ORIGEM X DESTINO
+    ws.column_dimensions['E'].width = 22   # MISSÃO
+    ws.column_dimensions['F'].width = 15   # VALOR DIÁRIA
 
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
