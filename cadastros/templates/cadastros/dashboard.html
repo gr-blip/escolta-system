@@ -390,10 +390,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var css = getComputedStyle(document.documentElement);
   var colorText = (css.getPropertyValue('--text2') || '#9db0cd').trim();
-  var colorGrid = 'rgba(120,140,170,0.12)';
+  var colorGrid = 'rgba(120,140,170,0.1)';
   var ACCENT = '#E0884A';   /* laranja JR */
   var BLUE   = '#5B9BD8';
   var GREEN  = '#5CC089', AMBER = '#E3B24A', GRAY = '#7E8A9C';
+  var PURPLE = '#A78BFA', RED = '#EF4444';
+
+  // Paleta para gráfico OS por cliente
+  var CLIENT_COLORS = ['#5B9BD8', '#5CC089', '#E0884A', '#A78BFA', '#E3B24A', '#EF4444', '#06B6D4', '#8B5CF6', '#F59E0B', '#10B981'];
 
   Chart.defaults.font.family = "'IBM Plex Sans', system-ui, sans-serif";
   Chart.defaults.font.size = 12;
@@ -412,12 +416,17 @@ document.addEventListener('DOMContentLoaded', function () {
         datasets: [{
           data: [f.ativa || 0, f.manutencao || 0, f.inativa || 0],
           backgroundColor: [GREEN, AMBER, GRAY],
-          borderWidth: 0, hoverOffset: 6
+          borderWidth: 0, hoverOffset: 8,
+          borderRadius: 4
         }]
       },
       options: {
-        responsive: true, maintainAspectRatio: false, cutout: '64%',
-        plugins: { legend: { position: 'bottom', labels: { boxWidth: 9, padding: 16, usePointStyle: true, pointStyle: 'circle' } } }
+        responsive: true, maintainAspectRatio: false, cutout: '68%',
+        animation: { animateRotate: true, duration: 1200 },
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 10, padding: 18, usePointStyle: true, pointStyle: 'circle', font: { size: 12, weight: '500' } } },
+          tooltip: { backgroundColor: 'rgba(15,20,32,.9)', titleFont: { size: 13 }, bodyFont: { size: 12 }, padding: 12, cornerRadius: 8 }
+        }
       }
     });
   }
@@ -428,15 +437,24 @@ document.addEventListener('DOMContentLoaded', function () {
   if (osEl && osRaw) {
     var o = { labels: [], values: [] };
     try { o = JSON.parse(osRaw.textContent || '{}'); } catch (_) {}
+    // Gradiente laranja
+    var ctxOS = osEl.getContext('2d');
+    var gradOS = ctxOS.createLinearGradient(0, 0, 0, 240);
+    gradOS.addColorStop(0, 'rgba(224,136,74,.9)');
+    gradOS.addColorStop(1, 'rgba(224,136,74,.5)');
     new Chart(osEl, {
       type: 'bar',
-      data: { labels: o.labels || [], datasets: [{ label: 'OS', data: o.values || [], backgroundColor: ACCENT, borderRadius: 5, maxBarThickness: 20 }] },
+      data: { labels: o.labels || [], datasets: [{ label: 'OS', data: o.values || [], backgroundColor: gradOS, borderRadius: 6, maxBarThickness: 22 }] },
       options: {
         responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        animation: { duration: 800, easing: 'easeOutQuart' },
+        plugins: {
+          legend: { display: false },
+          tooltip: { backgroundColor: 'rgba(15,20,32,.9)', titleFont: { size: 13 }, bodyFont: { size: 12, weight: '600' }, padding: 12, cornerRadius: 8, displayColors: false }
+        },
         scales: {
-          x: { grid: { display: false }, ticks: { color: colorText } },
-          y: { grid: { color: colorGrid }, ticks: { color: colorText, precision: 0 }, beginAtZero: true }
+          x: { grid: { display: false }, ticks: { color: colorText, font: { size: 11 } } },
+          y: { grid: { color: colorGrid }, ticks: { color: colorText, precision: 0, font: { size: 11 } }, beginAtZero: true }
         }
       }
     });
@@ -449,6 +467,9 @@ document.addEventListener('DOMContentLoaded', function () {
 (function () {
   var URL_OS_CLIENTE = "{% url 'dashboard_os_por_cliente' %}";
   var chartInstance = null;
+
+  // Paleta de cores para barras
+  var COLORS = ['#5B9BD8', '#5CC089', '#E0884A', '#A78BFA', '#E3B24A', '#06B6D4', '#8B5CF6', '#F59E0B', '#10B981', '#EF4444'];
 
   function defaultDates() {
     var hoje = new Date();
@@ -483,25 +504,52 @@ document.addEventListener('DOMContentLoaded', function () {
     canvas.style.display = 'block';
     emptyEl.style.display = 'none';
 
-    var barH = 34;
-    canvas.parentElement.style.minHeight = Math.max(220, data.labels.length * barH + 40) + 'px';
+    var barH = 38;
+    canvas.parentElement.style.minHeight = Math.max(240, data.labels.length * barH + 40) + 'px';
 
     var css = getComputedStyle(document.documentElement);
     var colorText = (css.getPropertyValue('--text2') || '#9db0cd').trim();
-    var colorGrid = 'rgba(120,140,170,0.12)';
+    var colorGrid = 'rgba(120,140,170,0.1)';
+
+    // Cores alternadas para barras
+    var barColors = data.labels.map(function (_, i) { return COLORS[i % COLORS.length]; });
 
     if (chartInstance) { chartInstance.destroy(); }
     chartInstance = new Chart(canvas, {
       type: 'bar',
-      data: { labels: data.labels, datasets: [{ label: 'Ordens de Serviço', data: data.values, backgroundColor: '#5B9BD8', borderRadius: 5, maxBarThickness: 24 }] },
+      data: { labels: data.labels, datasets: [{ label: 'Ordens de Serviço', data: data.values, backgroundColor: barColors, borderRadius: 6, maxBarThickness: 28 }] },
       options: {
         indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (ctx) { return '  ' + ctx.parsed.x + ' OS'; } } } },
+        animation: { duration: 900, easing: 'easeOutQuart' },
+        plugins: {
+          legend: { display: false },
+          tooltip: { backgroundColor: 'rgba(15,20,32,.9)', titleFont: { size: 13 }, bodyFont: { size: 12, weight: '600' }, padding: 12, cornerRadius: 8, displayColors: true },
+          // Datalabels inline (valores nas barras)
+          datalabels: { display: true }
+        },
         scales: {
-          x: { beginAtZero: true, grid: { color: colorGrid }, ticks: { color: colorText, precision: 0 } },
-          y: { grid: { display: false }, ticks: { color: colorText, font: { size: 12 } } }
+          x: { beginAtZero: true, grid: { color: colorGrid }, ticks: { color: colorText, precision: 0, font: { size: 11 } } },
+          y: { grid: { display: false }, ticks: { color: colorText, font: { size: 12, weight: '500' } } }
         }
-      }
+      },
+      plugins: [{
+        // Plugin customizado para mostrar valores nas barras
+        id: 'barValue',
+        afterDatasetsDraw: function(chart) {
+          var ctx = chart.ctx;
+          chart.data.datasets.forEach(function (dataset, i) {
+            var meta = chart.getDatasetMeta(i);
+            meta.data.forEach(function (bar, index) {
+              var value = dataset.data[index];
+              ctx.fillStyle = 'rgba(255,255,255,.9)';
+              ctx.font = '600 11px "IBM Plex Sans", system-ui, sans-serif';
+              ctx.textAlign = 'left';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(value, bar.x + 8, bar.y);
+            });
+          });
+        }
+      }]
     });
   }
 

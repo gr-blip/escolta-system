@@ -297,12 +297,17 @@ body::before{
   background:var(--bg-elevated);
   border:1px solid var(--border);
   border-radius:var(--radius-lg);
-  padding:20px;
+  padding:22px;
   box-shadow:var(--shadow-md);
   position:relative;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+.card:hover{
+  box-shadow:0 8px 24px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.08);
+  border-color:rgba(77,141,240,.2);
 }
 .card-title{
-  font-size:13.5px;font-weight:700;color:var(--text);
+  font-size:14px;font-weight:700;color:var(--text);
   margin-bottom:18px;padding-bottom:14px;
   border-bottom:1px solid var(--border);
   display:flex;align-items:center;gap:9px;letter-spacing:-.005em;
@@ -582,20 +587,41 @@ tbody tr:hover td:first-child{box-shadow:inset 3px 0 0 var(--blue)}
   background:var(--bg-elevated);
   border:1px solid var(--border);
   border-radius:var(--radius-lg);
-  padding:18px 20px;
+  padding:20px 22px;
   box-shadow:var(--shadow-sm);
   position:relative;overflow:hidden;
-  transition:all .2s;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
 }
 .stat-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--blue),var(--blue-light));
-  opacity:.6;
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--blue),var(--blue-light),var(--accent));
+  opacity:.8;
 }
-.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--border2)}
+.stat-card::after{
+  content:'';position:absolute;top:0;right:0;width:80px;height:80px;
+  background:radial-gradient(circle at top right,rgba(77,141,240,.08),transparent 70%);
+  pointer-events:none;
+}
+.stat-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 24px rgba(0,0,0,.15),0 4px 8px rgba(0,0,0,.1);
+  border-color:var(--blue);
+}
 .stat-label{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em}
-.stat-value{font-size:30px;font-weight:800;color:var(--text);margin-top:6px;line-height:1;letter-spacing:-.02em}
-.stat-sub{font-size:12px;color:var(--text3);margin-top:6px}
+.stat-value{font-size:32px;font-weight:800;color:var(--text);margin-top:8px;line-height:1;letter-spacing:-.02em}
+.stat-sub{font-size:12px;color:var(--text3);margin-top:8px}
+.stat-sub a{color:var(--blue-light);text-decoration:none;transition:color .15s}
+.stat-sub a:hover{color:var(--accent)}
+.stat-ico{
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(77,141,240,.1);color:var(--blue-light);
+  transition:all .2s;
+}
+.stat-card:hover .stat-ico{
+  background:rgba(77,141,240,.15);
+  transform:scale(1.05);
+}
 
 /* SEARCH BAR */
 .search-bar{display:flex;gap:10px;margin-bottom:18px;align-items:center;flex-wrap:wrap}
@@ -832,6 +858,89 @@ tbody tr:hover td:first-child{box-shadow:inset 3px 0 0 var(--blue)}
   .os-tab{padding:5px 8px;font-size:10px}
   .os-tab-count{min-width:14px;height:14px;font-size:8px;padding:0 3px}
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   DASHBOARD — Estilos customizados para o Painel de Avisos
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* Cards de resumo — variações de cor por tipo */
+.stat-card:nth-child(1) .stat-ico{background:rgba(91,155,216,.12);color:#5B9BD8}
+.stat-card:nth-child(2) .stat-ico{background:rgba(92,192,137,.12);color:#5CC089}
+.stat-card:nth-child(3) .stat-ico{background:rgba(224,136,74,.12);color:#E0884A}
+.stat-card:nth-child(4) .stat-ico{background:rgba(167,139,250,.12);color:#A78BFA}
+
+.stat-card:nth-child(1)::before{background:linear-gradient(90deg,#5B9BD8,#60A5FA)}
+.stat-card:nth-child(2)::before{background:linear-gradient(90deg,#5CC089,#34D399)}
+.stat-card:nth-child(3)::before{background:linear-gradient(90deg,#E0884A,#F59E0B)}
+.stat-card:nth-child(4)::before{background:linear-gradient(90deg,#A78BFA,#8B5CF6)}
+
+/* Título dos cards de gráfico */
+.card-title svg{
+  width:18px;height:18px;color:var(--blue-light);
+  opacity:.8;transition:all .2s;
+}
+.card-title:hover svg{opacity:1;transform:scale(1.1)}
+
+/* Seção de alertas */
+.section-head{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:14px;
+}
+.section-ico{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(224,136,74,.1);color:#E0884A;
+}
+.section-head h2{font-size:15px;font-weight:700;color:var(--text);margin:0}
+.section-head .hint{font-size:12px;color:var(--text3)}
+
+/* Grid de alertas */
+.grid-alerts{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:16px;
+}
+@media(max-width:900px){.grid-alerts{grid-template-columns:1fr}}
+
+/* Cards de alerta */
+.alert-card{padding:16px;border-radius:var(--radius-lg)}
+.alert-head{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:14px;padding-bottom:12px;
+  border-bottom:1px solid var(--border);
+}
+.alert-dot{
+  width:28px;height:28px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+}
+.alert-dot svg{width:16px;height:16px}
+.tone-amber .alert-dot{background:rgba(227,178,74,.12);color:#E3B24A}
+.tone-red .alert-dot{background:rgba(239,68,68,.12);color:#EF4444}
+.tone-green .alert-dot{background:rgba(92,192,137,.12);color:#5CC089}
+.tone-blue .alert-dot{background:rgba(91,155,216,.12);color:#5B9BD8}
+
+.alert-name{font-size:13px;font-weight:600;color:var(--text);flex:1}
+.alert-count{
+  min-width:22px;height:22px;padding:0 6px;
+  border-radius:11px;font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+.tone-amber .alert-count{background:rgba(227,178,74,.15);color:#E3B24A}
+.tone-red .alert-count{background:rgba(239,68,68,.15);color:#EF4444}
+.tone-green .alert-count{background:rgba(92,192,137,.15);color:#5CC089}
+.tone-blue .alert-count{background:rgba(91,155,216,.15);color:#5B9BD8}
+
+/* OK banner */
+.ok-banner{
+  display:flex;align-items:center;gap:12px;
+  background:rgba(92,192,137,.08);border:1px solid rgba(92,192,137,.2);
+  border-radius:var(--radius);padding:14px 18px;
+}
+.ok-ico{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(92,192,137,.15);color:#5CC089;flex-shrink:0;
+}
+.ok-banner strong{color:#5CC089;font-size:14px}
+.ok-banner .sub{color:var(--text2);font-size:13px}
 
 /* ── Impressão / Salvar como PDF ───────────────────────────────────────── */
 @media print {
