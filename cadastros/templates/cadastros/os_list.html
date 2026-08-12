@@ -260,48 +260,51 @@
     text-overflow: ellipsis !important;
   }
 
-  /* Solicitante — oculto */
-  .os-card-table td:nth-child(3) { display: none !important; }
-
   /* Origem → Destino */
-  .os-card-table td:nth-child(4) {
+  .os-card-table td:nth-child(3) {
     grid-area: rota;
     font-size: 12px; color: var(--text2);
     line-height: 1.4;
   }
 
   /* Tipo */
-  .os-card-table td:nth-child(5) { grid-area: tipo; align-self: center; }
+  .os-card-table td:nth-child(4) { grid-area: tipo; align-self: center; }
 
   /* Data */
-  .os-card-table td:nth-child(6) {
+  .os-card-table td:nth-child(5) {
     grid-area: data;
     font-size: 11px; color: var(--text3);
     text-align: right; align-self: center;
   }
 
   /* Equipe — oculto */
+  .os-card-table td:nth-child(6) { display: none !important; }
+
+  /* Viatura — oculto no mobile */
   .os-card-table td:nth-child(7) { display: none !important; }
 
+  /* Escotado — oculto no mobile */
+  .os-card-table td:nth-child(8) { display: none !important; }
+
   /* Status */
-  .os-card-table td:nth-child(8) {
+  .os-card-table td:nth-child(9) {
     grid-area: status;
     justify-self: end; align-self: center;
   }
 
   /* Ações */
-  .os-card-table td:nth-child(9) {
+  .os-card-table td:nth-child(10) {
     grid-area: acoes;
     border-top: 1px solid var(--border);
     padding-top: 10px;
     margin-top: 4px;
   }
-  .os-card-table td:nth-child(9) > div {
+  .os-card-table td:nth-child(10) > div {
     flex-wrap: wrap;
     gap: 8px !important;
   }
   /* Botões de ação maiores para toque */
-  .os-card-table td:nth-child(9) .btn-icon {
+  .os-card-table td:nth-child(10) .btn-icon {
     width: 40px; height: 40px;
   }
 }
@@ -500,12 +503,48 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });</script>
 
-{% if not tem_filtro %}
+{% if not tem_filtro and not status_selecionado %}
 <div style="background:var(--blue-bg, #0f1830);border:1px solid #1a3a8f;border-left:3px solid var(--blue-light, #4d8df0);color:var(--text2);border-radius:6px;padding:10px 14px;margin:10px 0;font-size:12px;display:flex;align-items:center;gap:10px">
   <svg width="14" height="14" fill="none" viewBox="0 0 14 14" style="flex-shrink:0"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 4v3.5M7 10v.01" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
   <span>OS <b>Finalizadas</b> e <b>Canceladas</b> estao em <a href="{% url 'boletim_list' %}" style="color:var(--blue-light, #4d8df0);text-decoration:underline">Boletim de Medicao</a>. Aplique filtro (busca ou data) para exibi-las nesta lista.</span>
 </div>
 {% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     STATUS TABS — Filtrar por status da OS
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<div class="os-status-tabs" id="os-status-tabs">
+  <a href="#" class="os-tab{% if not status_selecionado %} active{% endif %}" data-status="">
+    <span class="os-tab-dot dot-todas"></span>
+    Todas
+    <span class="os-tab-count">{{ total_geral }}</span>
+  </a>
+  <a href="#" class="os-tab{% if status_selecionado == 'aberta' %} active{% endif %}" data-status="aberta">
+    <span class="os-tab-dot dot-aberta"></span>
+    Abertas
+    <span class="os-tab-count">{{ contadores.aberta|default:0 }}</span>
+  </a>
+  <a href="#" class="os-tab{% if status_selecionado == 'em_viagem' %} active{% endif %}" data-status="em_viagem">
+    <span class="os-tab-dot dot-viagem"></span>
+    Em Viagem
+    <span class="os-tab-count">{{ contadores.em_viagem|default:0 }}</span>
+  </a>
+  <a href="#" class="os-tab{% if status_selecionado == 'em_operacao' %} active{% endif %}" data-status="em_operacao">
+    <span class="os-tab-dot dot-operacao"></span>
+    Em Operação
+    <span class="os-tab-count">{{ contadores.em_operacao|default:0 }}</span>
+  </a>
+  <a href="#" class="os-tab{% if status_selecionado == 'encerrando' %} active{% endif %}" data-status="encerrando">
+    <span class="os-tab-dot dot-encerrando"></span>
+    Encerrando
+    <span class="os-tab-count">{{ contadores.encerrando|default:0 }}</span>
+  </a>
+  <a href="#" class="os-tab{% if status_selecionado == 'concluida' %} active{% endif %}" data-status="concluida">
+    <span class="os-tab-dot dot-concluida"></span>
+    Concluída
+    <span class="os-tab-count">{{ contadores.concluida|default:0 }}</span>
+  </a>
+</div>
 
 <div class="card os-list-card" style="padding:0">
   {% if ordens %}
@@ -513,24 +552,26 @@ document.addEventListener('DOMContentLoaded', function () {
     <table class="os-card-table" style="font-size:12px;table-layout:fixed;width:100%">
       <colgroup>
         <col style="width:76px">   <!-- Nº OS -->
-        <col style="width:12%">   <!-- Cliente -->
-        <col style="width:7%">    <!-- Solicitante -->
+        <col style="width:11%">   <!-- Cliente -->
         <col style="width:20%">   <!-- Origem → Destino -->
         <col style="width:68px">  <!-- Tipo -->
         <col style="width:100px"> <!-- Previsão Início -->
-        <col style="width:9%">    <!-- Equipe -->
-        <col style="width:116px"> <!-- Status -->
-        <col style="width:160px"> <!-- Ações -->
+        <col style="width:8%">    <!-- Equipe -->
+        <col style="width:70px">  <!-- Viatura -->
+        <col style="width:70px">  <!-- Escotado -->
+        <col style="width:100px"> <!-- Status -->
+        <col style="width:140px"> <!-- Ações -->
       </colgroup>
       <thead>
         <tr>
           <th>Nº OS</th>
           <th>Cliente</th>
-          <th>Solicitante</th>
           <th>Origem → Destino</th>
           <th>Tipo</th>
           <th>Previsão Início</th>
           <th>Equipe</th>
+          <th>Viatura</th>
+          <th>Escotado</th>
           <th>Status</th>
           <th>Ações</th>
         </tr>
@@ -540,7 +581,6 @@ document.addEventListener('DOMContentLoaded', function () {
         <tr>
           <td style="white-space:nowrap"><strong style="color:var(--blue-light)">OS-{{ o.numero|slice:"4:" }}</strong></td>
           <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)" title="{{ o.cliente.razao_social }}">{{ o.cliente.razao_social }}</td>
-          <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2)" title="{{ o.solicitante }}">{{ o.solicitante|default:"---" }}</td>
           <td style="font-size:12px;word-break:break-word;white-space:normal">
             {% if o.cidade_origem %}
             <span style="color:var(--text)">{{ o.cidade_origem }}/{{ o.uf_origem }}</span>
@@ -551,6 +591,14 @@ document.addEventListener('DOMContentLoaded', function () {
           <td><span class="badge badge-gray">{{ o.get_tipo_viagem_display }}</span></td>
           <td style="color:var(--text2);font-size:12px">{{ o.previsao_inicio|date:"d/m/Y H:i" }}</td>
           <td style="color:var(--text2)">{{ o.equipe.nome|default:"---" }}</td>
+          <td style="color:var(--text);font-size:12px;white-space:nowrap" title="{{ o.equipe.viatura.placa|default:'' }}">{% if o.equipe.viatura.placa %}{{ o.equipe.viatura.placa }}{% else %}<span style="color:var(--text3)">---</span>{% endif %}</td>
+          <td style="font-size:12px;white-space:nowrap">
+            {% for ve in o.veiculos.all %}
+              {% if ve.placa_cavalo %}<span style="color:var(--text)" title="{{ ve.placa_cavalo }}{% if ve.placa_carreta %} / {{ ve.placa_carreta }}{% endif %}">{{ ve.placa_cavalo }}</span>{% endif %}
+            {% empty %}
+              <span style="color:var(--text3)">---</span>
+            {% endfor %}
+          </td>
           <td>
             {% if o.status == 'aberta' %}<span class="badge badge-blue">Aberta</span>
             {% elif o.status == 'em_viagem' %}<span class="badge badge-amber">Em Viagem</span>
@@ -641,6 +689,33 @@ document.addEventListener('DOMContentLoaded', function () {
   </div>
   {% endif %}
 </div>
+
+<script>
+// ─── Status Tabs — URL preserva todos os filtros ativos ─────────────────────
+(function(){
+  var tabs = document.getElementById('os-status-tabs');
+  if (!tabs) return;
+  var base = '{% url "os_list" %}';
+  // Lê todos os params da URL atual (incluindo clientes multi-value)
+  var params = new URLSearchParams(window.location.search);
+  tabs.querySelectorAll('.os-tab').forEach(function(tab){
+    tab.addEventListener('click', function(e){
+      e.preventDefault();
+      var st = this.getAttribute('data-status');
+      // Monta nova URL preservando q, data_de, data_ate, clientes
+      var p = new URLSearchParams();
+      if (st) p.set('status', st);
+      if (params.get('q')) p.set('q', params.get('q'));
+      if (params.get('data_de')) p.set('data_de', params.get('data_de'));
+      if (params.get('data_ate')) p.set('data_ate', params.get('data_ate'));
+      // Preserva todos os valores de clientes (multi-select)
+      params.getAll('clientes').forEach(function(c){ p.append('clientes', c); });
+      var qs = p.toString();
+      window.location.href = base + (qs ? '?' + qs : '');
+    });
+  });
+})();
+</script>
 
 <script>
 // ─── Copiar OS ───────────────────────────────────────────────────────────────

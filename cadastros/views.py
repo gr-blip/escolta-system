@@ -1246,7 +1246,7 @@ from .models import OrdemServico
 @login_required
 def os_list(request):
     """
-    Listagem de Ordens de Serviço.
+    Listagem de Ordens de Serviço com tabs de status.
 
     Por padrão (sem filtros), esconde OS com status='finalizada' ou 'cancelada'
     — finalizadas ficam visíveis na tela de Boletim de Medição, canceladas
@@ -1257,10 +1257,12 @@ def os_list(request):
     pra permitir consulta histórica.
     """
     from django.utils.dateparse import parse_date
+    from django.db.models import Count, Q as QModel
 
     q = request.GET.get('q', '').strip()
     data_de_str = request.GET.get('data_de', '').strip()
     data_ate_str = request.GET.get('data_ate', '').strip()
+    status_filtro = request.GET.get('status', '').strip()
     # Multi-select de clientes: espera `clientes=1&clientes=7&...`.
     # getlist preserva múltiplos valores do mesmo name no GET.
     # Sanitização: aceita só dígitos pra não explodir o queryset com valor
@@ -1271,9 +1273,34 @@ def os_list(request):
     data_de = parse_date(data_de_str) if data_de_str else None
     data_ate = parse_date(data_ate_str) if data_ate_str else None
 
-    ordens = OrdemServico.objects.select_related('cliente', 'equipe').all()
+    # Base queryset — select_related para equipe/viatura, prefetch_related para veiculos escoltados
+    base_qs = OrdemServico.objects.select_related('cliente', 'equipe__viatura').prefetch_related('veiculos')
 
     tem_filtro = bool(q or data_de or data_ate or clientes_ids)
+
+    # ── Contadores por status (para as tabs) ──────────────────────────────────
+    # Base para contagem: mesma lógica de filtro (exclui finalizada/cancelada se sem filtro)
+    contagem_qs = base_qs
+    if q:
+        contagem_qs = contagem_qs.filter(
+            QModel(numero__icontains=q) |
+            QModel(cliente__razao_social__icontains=q) |
+            QModel(solicitante__icontains=q)
+        )
+    if data_de:
+        contagem_qs = contagem_qs.filter(previsao_inicio__date__gte=data_de)
+    if data_ate:
+        contagem_qs = contagem_qs.filter(previsao_inicio__date__lte=data_ate)
+    if clientes_ids:
+        contagem_qs = contagem_qs.filter(cliente_id__in=clientes_ids)
+
+    # Contadores para tabs — sem excluir finalizadas/canceladas aqui
+    contadores_raw = contagem_qs.values('status').annotate(total=Count('id'))
+    contadores = {item['status']: item['total'] for item in contadores_raw}
+    total_geral = sum(contadores.values())
+
+    # ── Queryset principal ─────────────────────────────────────────────────────
+    ordens = base_qs
 
     if q:
         ordens = ordens.filter(
@@ -1288,9 +1315,20 @@ def os_list(request):
     if clientes_ids:
         ordens = ordens.filter(cliente_id__in=clientes_ids)
 
+    # Se não tem filtro de texto/data/cliente, aplica lógica padrão
     if not tem_filtro:
-        # Sem filtros: esconde finalizadas (vão pra Boletim) e canceladas.
-        ordens = ordens.exclude(status__in=['finalizada', 'cancelada'])
+        if not status_filtro:
+            # Sem filtros e sem tab: esconde finalizadas e canceladas
+            ordens = ordens.exclude(status__in=['finalizada', 'cancelada'])
+        elif status_filtro not in ('finalizada', 'cancelada'):
+            # Tab ativa: filtra por status (exceto finalizada/cancelada que ficam no boletim)
+            ordens = ordens.filter(status=status_filtro)
+        else:
+            # Tab de finalizada/cancelada: filtra normalmente
+            ordens = ordens.filter(status=status_filtro)
+    elif status_filtro:
+        # Com filtro ativo + tab: aplica ambos
+        ordens = ordens.filter(status=status_filtro)
 
     # Lista completa (ativos + inativos) pro dropdown do filtro.
     # Inativos entram pra permitir consulta histórica de OS de clientes
@@ -1305,6 +1343,10 @@ def os_list(request):
         'tem_filtro': tem_filtro,
         'todos_clientes': todos_clientes,
         'clientes_selecionados': clientes_ids,  # lista de strings de IDs
+        # Tabs de status
+        'status_selecionado': status_filtro,
+        'contadores': contadores,
+        'total_geral': total_geral,
     })
 
 
