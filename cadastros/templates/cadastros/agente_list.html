@@ -107,9 +107,23 @@
               <a href="{% url 'agente_edit' a.pk %}" class="btn-icon" title="Editar">
                 <svg viewBox="0 0 24 24" fill="none"><path d="M4 20h4L19 9l-4-4L4 16v4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 6l4 4" stroke="currentColor" stroke-width="1.7"/></svg>
               </a>
-              <a href="{% url 'agente_delete' a.pk %}" class="btn-icon danger" title="Excluir">
-                <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M9 6V4h6v2M6 6l1 14h10l1-14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </a>
+              {% if a.status == 'inativo' %}
+              <form method="post" action="{% url 'agente_toggle_ativo' a.pk %}" style="display:inline;margin:0"
+                    onsubmit="return confirm('Reativar o agente {{ a.nome|escapejs }}?')">
+                {% csrf_token %}
+                <button type="submit" class="btn-icon success" title="Reativar agente">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 1 1 2.34 5.66" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M4 20v-4h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </form>
+              {% else %}
+              <form method="post" action="{% url 'agente_toggle_ativo' a.pk %}" style="display:inline;margin:0"
+                    onsubmit="return confirm('Inativar o agente {{ a.nome|escapejs }}?\n\nEle sairá das seleções de equipe, mas o histórico e as Ordens de Serviço serão preservados. Você pode reativá-lo depois.')">
+                {% csrf_token %}
+                <button type="submit" class="btn-icon danger" title="Inativar agente">
+                  <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/><path d="M6 6l12 12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+                </button>
+              </form>
+              {% endif %}
             </div>
           </td>
         </tr>

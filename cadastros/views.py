@@ -464,6 +464,29 @@ def agente_delete(request, pk):
     return render(request, 'cadastros/confirm_delete.html', {'obj': agente, 'tipo': 'Agente'})
 
 
+@login_required
+def agente_toggle_ativo(request, pk):
+    """
+    Inativa ou reativa um agente (soft-delete).
+
+    Substitui a exclusão física: preserva todo o histórico do agente e não
+    afeta as Ordens de Serviço, que guardam os dados em campos snap_* (texto
+    congelado). Um agente inativo some das seleções de equipe, mas continua
+    no cadastro para consulta histórica.
+    """
+    agente = get_object_or_404(Agente, pk=pk)
+    if request.method == 'POST':
+        if agente.status == 'inativo':
+            agente.status = 'ativo'
+            agente.save(update_fields=['status', 'atualizado_em'])
+            messages.success(request, f'Agente {agente.nome} reativado.')
+        else:
+            agente.status = 'inativo'
+            agente.save(update_fields=['status', 'atualizado_em'])
+            messages.success(request, f'Agente {agente.nome} inativado. O histórico e as OS foram preservados.')
+    return redirect('agente_list')
+
+
 def _gerar_certidao_pdf(tipo, agente, status, detalhe, codigo=None, consultado_em=None):
     """Gera um PDF de certidão usando ReportLab e retorna os bytes."""
     import io

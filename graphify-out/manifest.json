@@ -635,9 +635,9 @@
     "semantic_hash": "e4081a22b304182e626235f442315f8b"
   },
   "cadastros/templates/cadastros/dashboard.html": {
-    "mtime": 1783598544.0,
-    "ast_hash": "30efc13ae9ec99afa7e42f6b566e4867",
-    "semantic_hash": "30efc13ae9ec99afa7e42f6b566e4867"
+    "mtime": 1786574764.0,
+    "ast_hash": "b183e84e1af5bc932d22995837fb527d",
+    "semantic_hash": ""
   },
   "cadastros/templates/cadastros/dashboard_operacional.html": {
     "mtime": 1780660320.0,

@@ -490,8 +490,8 @@
     "semantic_hash": "4ef5bce9000293f4c4acef0f5489689c"
   },
   "cadastros/views.py": {
-    "mtime": 1786016600.0,
-    "ast_hash": "aeabeee65477b530eb327aa5d03927d8",
+    "mtime": 1786572442.0,
+    "ast_hash": "94ad2f9fd5a06cbdd3c0fe37aaa0136f",
     "semantic_hash": ""
   },
   "escolta_system/__init__.py": {
@@ -745,9 +745,9 @@
     "semantic_hash": "197f70d940f33cde55d838fc563a3fd7"
   },
   "cadastros/templates/cadastros/os_list.html": {
-    "mtime": 1782844264.0,
-    "ast_hash": "335de9143945a9aca8fe87b8ad534f15",
-    "semantic_hash": "335de9143945a9aca8fe87b8ad534f15"
+    "mtime": 1786572714.0,
+    "ast_hash": "6030304fe470d0f427e7564bdf2bc5d0",
+    "semantic_hash": ""
   },
   "cadastros/templates/cadastros/os_nova.html": {
     "mtime": 1780660320.0,
@@ -887,6 +887,186 @@
   "cadastros/management/commands/diag_omnilink.py": {
     "mtime": 1785337138.0,
     "ast_hash": "2a26aeabfed2cb7a3592763822a4a9b9",
+    "semantic_hash": ""
+  },
+  ".aionrs/skills/skill-creator/scripts/init_skill.py": {
+    "mtime": 1786148864.0,
+    "ast_hash": "03a52b6d3e8f7c6f8be4bca685579a11",
+    "semantic_hash": ""
+  },
+  ".aionrs/skills/skill-creator/scripts/package_skill.py": {
+    "mtime": 1786148864.0,
+    "ast_hash": "071c99fc2872361570b9e75ec95439cf",
+    "semantic_hash": ""
+  },
+  ".aionrs/skills/skill-creator/scripts/quick_validate.py": {
+    "mtime": 1786148864.0,
+    "ast_hash": "26ffcaac2365113845f18e7b04639a6e",
+    "semantic_hash": ""
+  },
+  ".claude/skills/skill-creator/scripts/init_skill.py": {
+    "mtime": 1786148864.0,
+    "ast_hash": "03a52b6d3e8f7c6f8be4bca685579a11",
+    "semantic_hash": ""
+  },
+  ".claude/skills/skill-creator/scripts/package_skill.py": {
+    "mtime": 1786148864.0,
+    "ast_hash": "071c99fc2872361570b9e75ec95439cf",
+    "semantic_hash": ""
+  },
+  ".claude/skills/skill-creator/scripts/quick_validate.py": {
+    "mtime": 1786148864.0,
+    "ast_hash": "26ffcaac2365113845f18e7b04639a6e",
+    "semantic_hash": ""
+  },
+  ".aionrs/skills/aionui-config/SKILL.md": {
+    "mtime": 1786148864.0,
+    "ast_hash": "489b93f25d7f94dab7c59a27dbadd810",
+    "semantic_hash": ""
+  },
+  ".aionrs/skills/aionui-troubleshooting/SKILL.md": {
+    "mtime": 1786148864.0,
+    "ast_hash": "a0cbeadb801a68d4de8044206e2137f7",
+    "semantic_hash": ""
+  },
+  ".aionrs/skills/aionui-webui-public/SKILL.md": {
+    "mtime": 1786148864.0,
+    "ast_hash": "075f3d7b602c60237a6ef03428df6da8",
+    "semantic_hash": ""
+  },
+  ".aionrs/skills/cron/SKILL.md": {
+    "mtime": 1786148864.0,
+    "ast_hash": "5549218df1413673ed93ac3174d0664a",
+    "semantic_hash": ""
+  },
+  ".aionrs/skills/officecli/SKILL.md": {
+    "mtime": 1786148864.0,
+    "ast_hash": "95e8649a212aa1472319beda4f52b708",
+    "semantic_hash": ""
+  },
+  ".aionrs/skills/skill-creator/LICENSE.txt": {
+    "mtime": 1786148864.0,
+    "ast_hash": "d273d63619c9aeaf15cdaf76422c4f87",
+    "semantic_hash": ""
+  },
+  ".aionrs/skills/skill-creator/SKILL.md": {
+    "mtime": 1786148864.0,
+    "ast_hash": "dea6fcd4e558a74f760aa34530637126",
+    "semantic_hash": ""
+  },
+  ".aionrs/skills/skill-creator/references/output-patterns.md": {
+    "mtime": 1786148864.0,
+    "ast_hash": "1e8201da7c8f69ed139fdaeaea769e09",
+    "semantic_hash": ""
+  },
+  ".aionrs/skills/skill-creator/references/workflows.md": {
+    "mtime": 1786148864.0,
+    "ast_hash": "59ef2223726858b311467fb7ea66d4a3",
+    "semantic_hash": ""
+  },
+  ".claude/skills/aionui-config/SKILL.md": {
+    "mtime": 1786148864.0,
+    "ast_hash": "489b93f25d7f94dab7c59a27dbadd810",
+    "semantic_hash": ""
+  },
+  ".claude/skills/cron/SKILL.md": {
+    "mtime": 1786148864.0,
+    "ast_hash": "5549218df1413673ed93ac3174d0664a",
+    "semantic_hash": ""
+  },
+  ".claude/skills/officecli/SKILL.md": {
+    "mtime": 1786148864.0,
+    "ast_hash": "95e8649a212aa1472319beda4f52b708",
+    "semantic_hash": ""
+  },
+  ".claude/skills/skill-creator/LICENSE.txt": {
+    "mtime": 1786148864.0,
+    "ast_hash": "d273d63619c9aeaf15cdaf76422c4f87",
+    "semantic_hash": ""
+  },
+  ".claude/skills/skill-creator/SKILL.md": {
+    "mtime": 1786148864.0,
+    "ast_hash": "dea6fcd4e558a74f760aa34530637126",
+    "semantic_hash": ""
+  },
+  ".claude/skills/skill-creator/references/output-patterns.md": {
+    "mtime": 1786148864.0,
+    "ast_hash": "1e8201da7c8f69ed139fdaeaea769e09",
+    "semantic_hash": ""
+  },
+  ".claude/skills/skill-creator/references/workflows.md": {
+    "mtime": 1786148864.0,
+    "ast_hash": "59ef2223726858b311467fb7ea66d4a3",
+    "semantic_hash": ""
+  },
+  ".claude/skills/superpowers-brainstorming/SKILL.md": {
+    "mtime": 1786057682.0,
+    "ast_hash": "f0ea7520699a39e1b4ce635027041102",
+    "semantic_hash": ""
+  },
+  ".claude/skills/superpowers-dispatching-parallel-agents/SKILL.md": {
+    "mtime": 1786057682.0,
+    "ast_hash": "b039bd77e12a53a4ea48436c1e459d13",
+    "semantic_hash": ""
+  },
+  ".claude/skills/superpowers-executing-plans/SKILL.md": {
+    "mtime": 1786057682.0,
+    "ast_hash": "6fdeb6c1f0af7a654a9d8efc121a7473",
+    "semantic_hash": ""
+  },
+  ".claude/skills/superpowers-finishing-a-development-branch/SKILL.md": {
+    "mtime": 1786057682.0,
+    "ast_hash": "2c1b8d0bbc9a751adecdf6a96f76add6",
+    "semantic_hash": ""
+  },
+  ".claude/skills/superpowers-receiving-code-review/SKILL.md": {
+    "mtime": 1786057682.0,
+    "ast_hash": "cc319b82e750bbe62de7976e9b029199",
+    "semantic_hash": ""
+  },
+  ".claude/skills/superpowers-requesting-code-review/SKILL.md": {
+    "mtime": 1786057682.0,
+    "ast_hash": "327d072578b621a6171c052742770a31",
+    "semantic_hash": ""
+  },
+  ".claude/skills/superpowers-subagent-driven-development/SKILL.md": {
+    "mtime": 1786057682.0,
+    "ast_hash": "39921b609a06c90657cc06091ed76454",
+    "semantic_hash": ""
+  },
+  ".claude/skills/superpowers-systematic-debugging/SKILL.md": {
+    "mtime": 1786057682.0,
+    "ast_hash": "83dbe9be0620a2b8ef1f75d73bd0c8d8",
+    "semantic_hash": ""
+  },
+  ".claude/skills/superpowers-test-driven-development/SKILL.md": {
+    "mtime": 1786057682.0,
+    "ast_hash": "c669c1b0fedad0cff90c589591e175dc",
+    "semantic_hash": ""
+  },
+  ".claude/skills/superpowers-using-git-worktrees/SKILL.md": {
+    "mtime": 1786057682.0,
+    "ast_hash": "87f4da0d80ccb375be85e5a3f49bb979",
+    "semantic_hash": ""
+  },
+  ".claude/skills/superpowers-using-superpowers/SKILL.md": {
+    "mtime": 1786057682.0,
+    "ast_hash": "ce5ed7f704fb502c0127621196a39859",
+    "semantic_hash": ""
+  },
+  ".claude/skills/superpowers-verification-before-completion/SKILL.md": {
+    "mtime": 1786057682.0,
+    "ast_hash": "19fc317010dbdc465aed417b927ccae4",
+    "semantic_hash": ""
+  },
+  ".claude/skills/superpowers-writing-plans/SKILL.md": {
+    "mtime": 1786057682.0,
+    "ast_hash": "c389f841b5543a57069cce4eb6b62e63",
+    "semantic_hash": ""
+  },
+  ".claude/skills/superpowers-writing-skills/SKILL.md": {
+    "mtime": 1786057682.0,
+    "ast_hash": "42f60c2296329df029e287f83b3bb0d1",
     "semantic_hash": ""
   }
 }
