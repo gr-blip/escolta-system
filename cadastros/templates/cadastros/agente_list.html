@@ -15,7 +15,7 @@
   <form method="get" style="display:flex;gap:10px;flex-wrap:wrap;flex:1;align-items:center">
     <input type="text" name="q" value="{{ q }}" placeholder="Buscar por nome, CPF ou RG..." style="flex:1;min-width:220px">
     <select name="status" style="min-width:140px">
-      <option value="">Todos os status</option>
+      <option value="">Ativos e afastados</option>
       <option value="ativo"    {% if status_filtro == 'ativo'    %}selected{% endif %}>Ativo</option>
       <option value="afastado" {% if status_filtro == 'afastado' %}selected{% endif %}>Afastado</option>
       <option value="inativo"  {% if status_filtro == 'inativo'  %}selected{% endif %}>Inativo</option>

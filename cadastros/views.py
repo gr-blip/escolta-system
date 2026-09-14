@@ -263,6 +263,10 @@ def agente_list(request):
         agentes = agentes.filter(Q(nome__icontains=q) | Q(cpf__icontains=q) | Q(rg__icontains=q))
     if status_filtro in ('ativo', 'afastado', 'inativo'):
         agentes = agentes.filter(status=status_filtro)
+    else:
+        # Padrão: oculta inativos da listagem principal.
+        # Eles só aparecem ao selecionar o filtro "Inativo".
+        agentes = agentes.exclude(status='inativo')
     if letra and len(letra) == 1 and letra.isalpha():
         agentes = agentes.filter(nome__istartswith=letra)
 
@@ -3317,6 +3321,9 @@ def boletim_detalhe(request, pk):
                 _v_exc_k  = (_D(_km_exc) * _tab.excedente_km).quantize(_D('0.01'))
             _ped = _D(str(pedagio_sugerido)) if pedagio_sugerido else _D('0')
             op_preview.update({
+                'franquia_horas_calc': f'{_fran_min // 60:03d}:{_fran_min % 60:02d}',
+                'modo_velocidade': bool(_tab.velocidade_media),
+                'velocidade_media': _tab.velocidade_media,
                 'horas_excedentes': f'{_exc_min // 60:02d}:{_exc_min % 60:02d}',
                 'km_excedente': _km_exc,
                 'valor_escolta': _tab.valor_escolta,

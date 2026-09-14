@@ -485,13 +485,13 @@
     "semantic_hash": "c3ef37925e97b312afb36ff73858c3ec"
   },
   "cadastros/urls.py": {
-    "mtime": 1787844026.0,
-    "ast_hash": "ca2363f7fdbed9550bdfddd70420dcec",
-    "semantic_hash": ""
+    "mtime": 1783599878.0,
+    "ast_hash": "4ef5bce9000293f4c4acef0f5489689c",
+    "semantic_hash": "4ef5bce9000293f4c4acef0f5489689c"
   },
   "cadastros/views.py": {
-    "mtime": 1787844020.0,
-    "ast_hash": "ceb60f30e1333a14cb3d226907d521c1",
+    "mtime": 1786572442.0,
+    "ast_hash": "94ad2f9fd5a06cbdd3c0fe37aaa0136f",
     "semantic_hash": ""
   },
   "escolta_system/__init__.py": {
@@ -555,8 +555,8 @@
     "semantic_hash": ""
   },
   "cadastros/templates/cadastros/agente_list.html": {
-    "mtime": 1787844042.0,
-    "ast_hash": "60d77637af3b96395289803a45bececc",
+    "mtime": 1783599910.0,
+    "ast_hash": "27bedc55996e53eedd26d048e4d4b69c",
     "semantic_hash": ""
   },
   "cadastros/templates/cadastros/armamento_form.html": {
