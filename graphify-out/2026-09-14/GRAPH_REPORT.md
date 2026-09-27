@@ -1,16 +1,16 @@
-# Graph Report - Sistema Escolta  (2026-09-14)
+# Graph Report - Sistema Escolta  (2026-08-27)
 
 ## Corpus Check
-- 152 files · ~459,508 words
+- 146 files · ~456,177 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1650 nodes · 1968 edges · 219 communities (106 shown, 113 thin omitted)
+- 1613 nodes · 1935 edges · 218 communities (101 shown, 117 thin omitted)
 - Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 187 edges (avg confidence: 0.53)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `85036867`
+- Built from commit: `20c19997`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -219,7 +219,6 @@
 - .tem_alerta_vencimento
 - .ultima_consulta_processo
 - agente_toggle_ativo
-- 0022_despesaos_trocamotorista_parada_incidente_and_more.py
 
 ## God Nodes (most connected - your core abstractions)
 1. `PerfilUsuario` - 35 edges
@@ -234,16 +233,16 @@
 10. `Command` - 17 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `AgenteForm` --uses--> `FuncionarioPatrimonial`  [INFERRED]
-  cadastros/forms.py → cadastros/models.py
-- `Meta` --uses--> `FuncionarioPatrimonial`  [INFERRED]
-  cadastros/forms.py → cadastros/models.py
-- `ViaturaForm` --uses--> `FuncionarioPatrimonial`  [INFERRED]
-  cadastros/forms.py → cadastros/models.py
-- `RastreadorForm` --uses--> `FuncionarioPatrimonial`  [INFERRED]
-  cadastros/forms.py → cadastros/models.py
-- `ArmamentoForm` --uses--> `FuncionarioPatrimonial`  [INFERRED]
-  cadastros/forms.py → cadastros/models.py
+- `Command` --uses--> `Agente`  [INFERRED]
+  cadastros/management/commands/backup_to_google.py → cadastros/models.py
+- `Command` --uses--> `BoletimMedicao`  [INFERRED]
+  cadastros/management/commands/backup_to_google.py → cadastros/models.py
+- `Command` --uses--> `Cliente`  [INFERRED]
+  cadastros/management/commands/backup_to_google.py → cadastros/models.py
+- `Command` --uses--> `FuncionarioPatrimonial`  [INFERRED]
+  cadastros/management/commands/backup_to_google.py → cadastros/models.py
+- `Command` --uses--> `OrdemServico`  [INFERRED]
+  cadastros/management/commands/backup_to_google.py → cadastros/models.py
 
 ## Import Cycles
 - None detected.
@@ -256,7 +255,7 @@
 - **Patrimonial Document Alert Flow — CNH, CNV, Curso Vencimento** — cadastros_templates_cadastros_patrimonial_dashboard, concept_agente, url_funcionario_patrimonial_edit [EXTRACTED 0.90]
 - **Viatura-Rastreador Integration — Vehicle linked to Tracker** — cadastros_templates_cadastros_viatura_form, concept_viatura, concept_rastreador, url_rastreador_create [EXTRACTED 0.95]
 
-## Communities (219 total, 113 thin omitted)
+## Communities (218 total, 117 thin omitted)
 
 ### Community 0 - "omnilink.py"
 Cohesion: 0.33
@@ -268,7 +267,7 @@ Nodes (3): dashboard(), _fleet_data(), _os_por_dia()
 
 ### Community 3 - "driverid_service.py"
 Cohesion: 0.06
-Nodes (41): main(), run_command(), BytesIO, Command, BaseCommand, Command, BaseCommand, cadastros/management/commands/sincronizar_local.py ──────────────────────────── (+33 more)
+Nodes (42): main(), run_command(), BytesIO, Command, BaseCommand, cadastros/management/commands/consultar_processos.py ━━━━━━━━━━━━━━━━━━━━━━━━━━, Command, BaseCommand (+34 more)
 
 ### Community 4 - "Boletim List View"
 Cohesion: 0.18
@@ -279,20 +278,20 @@ Cohesion: 0.05
 Nodes (43): 1. Think Before Code, 2. Isolate Work, 3. Plan Before Implement, 4. Test First, 5. Review Before Merge, Brainstorming, Common Mistakes, Continuous Improvement (+35 more)
 
 ### Community 6 - "Cliente"
-Cohesion: 0.23
+Cohesion: 0.24
 Nodes (27): AgenteAdmin, ArmamentoAdmin, ClienteAdmin, ColeteAdmin, ConsultaProcessoAdmin, RastreadorAdmin, ViaturaAdmin, AgenteForm (+19 more)
 
 ### Community 7 - "os_pdf.py"
-Cohesion: 0.11
-Nodes (35): _agent_block(), _dados_operacao_block(), _fmt_dt(), _fotos_marcos_block(), _fotos_veiculos_block(), gerar_os_pdf(), _header_block(), _identificacao_os_block() (+27 more)
+Cohesion: 0.09
+Nodes (34): _agent_block(), _dados_operacao_block(), _fmt_dt(), _fotos_marcos_block(), _fotos_veiculos_block(), gerar_os_pdf(), _header_block(), _identificacao_os_block() (+26 more)
 
 ### Community 8 - "Command"
 Cohesion: 0.18
 Nodes (7): Command, BaseCommand, Autenticação via Service Account JSON., Autenticação via OAuth2 (legado)., Django dumpdata → JSON comprimido em memória., Compacta /app/media em tarball gzip em memória., Gera Excel com 4 abas: OS, Boletins, Cadastros, Patrimonial.
 
 ### Community 9 - "recomprimir_fotos.py"
-Cohesion: 0.11
-Nodes (16): Command, _corrigir_orientacao(), BaseCommand, Management command para recomprimir fotos existentes no sistema.  Uso:     py, Recomprime um arquivo de imagem no disco.     Retorna (antes_kb, depois_kb, nov, _recomprimir_arquivo(), FotoIncidente, FotoMarco (+8 more)
+Cohesion: 0.10
+Nodes (17): Command, _corrigir_orientacao(), BaseCommand, Management command para recomprimir fotos existentes no sistema.  Uso:     py, Recomprime um arquivo de imagem no disco.     Retorna (antes_kb, depois_kb, nov, _recomprimir_arquivo(), FotoIncidente, FotoMarco (+9 more)
 
 ### Community 10 - "FuncionarioPatrimonial"
 Cohesion: 0.14
@@ -319,8 +318,8 @@ Cohesion: 0.05
 Nodes (41): Assets, Bad Descriptions, Bad Names, Common Skill Patterns, Content Planning, Deployment Steps, Deprecation, Directory Structure (+33 more)
 
 ### Community 16 - "OrdemServico"
-Cohesion: 0.18
-Nodes (4): Command, BaseCommand, Comando de uso único: remove o cliente de teste WILKER e a OS vinculada. Uso: p, OrdemServico
+Cohesion: 0.15
+Nodes (5): cadastros/management/commands/backup_to_google.py ─────────────────────────────, Command, BaseCommand, Comando de uso único: remove o cliente de teste WILKER e a OS vinculada. Uso: p, OrdemServico
 
 ### Community 18 - "Price Table List Template"
 Cohesion: 0.33
@@ -442,10 +441,6 @@ Nodes (9): `BoletimMedicao`, `Equipe`, FATURAMENTO, 🗄️ Models (tabelas do b
 Cohesion: 0.22
 Nodes (10): _carregar_centrais_fixture(), _extrair_centrais_dos_espelhamentos(), listar_centrais_disponiveis(), listar_espelhamentos(), _parse_espelhamentos_xml(), Parseia XML de ListarEspelhamentosByClienteStatus., Lista espelhamentos da conta via ListarEspelhamentosByClienteStatus.      stat, Lista as centrais/bases disponíveis para espelhamento.     Tenta múltiplos nome (+2 more)
 
-### Community 104 - "diarias_lancamento_deletar"
-Cohesion: 0.11
-Nodes (9): cadastros/management/commands/consultar_processos.py ━━━━━━━━━━━━━━━━━━━━━━━━━━, Command, BaseCommand, Command, BaseCommand, FuncionarioPatrimonial, Retorna o status de vencimento de uma data:           - 'vencido'  : ja passou, True se qualquer documento esta vencido ou vencendo. (+1 more)
-
 ### Community 105 - "diarias_lancamento_excluir_auto"
 Cohesion: 0.29
 Nodes (7): `Agente`, `Armamento`, CADASTROS, `Cliente`, `Colete`, `Rastreador`, `Viatura`
@@ -475,8 +470,8 @@ Cohesion: 0.67
 Nodes (3): ⚙️ Infraestrutura, Variáveis de ambiente no Railway, Volume de mídia (Railway)
 
 ### Community 128 - "os_field_parada_salvar"
-Cohesion: 0.07
-Nodes (24): Command, BaseCommand, Migration, AssinaturaOS, BoletimMedicao, DespesaOS, DiariasLancamento, Equipe (+16 more)
+Cohesion: 0.06
+Nodes (25): Command, BaseCommand, Migration, Migration, AssinaturaOS, BoletimMedicao, DespesaOS, DiariasLancamento (+17 more)
 
 ### Community 150 - "Painel de Avisos"
 Cohesion: 0.33
@@ -606,40 +601,24 @@ Nodes (3): Examples Pattern, Output Patterns, Template Pattern
 Cohesion: 0.50
 Nodes (3): Conditional Workflows, Sequential Workflows, Workflow Patterns
 
-### Community 210 - "0022_despesaos_trocamotorista_parada_incidente_and_more.py"
-Cohesion: 0.17
-Nodes (10): caveman, Example output, How to invoke, See also, What it does, Auto-Clarity, Boundaries, Intensity (+2 more)
-
 ### Community 211 - "Espelhamento List View"
 Cohesion: 1.00
 Nodes (3): Espelhamento List View, Espelhamento Omnilink, Omnilink API
 
-### Community 214 - "._status_validade"
-Cohesion: 0.18
-Nodes (9): caveman-review, Example output, How to invoke, See also, What it does, Auto-Clarity, Boundaries, Examples (+1 more)
-
-### Community 215 - ".tem_alerta_vencimento"
-Cohesion: 0.22
-Nodes (8): Boundaries, Intensity, Output, Persistence, Ponytail, Rules, The ladder, When NOT to be lazy
-
-### Community 216 - ".ultima_consulta_processo"
-Cohesion: 0.40
-Nodes (4): Boundaries, Examples, Format, Scoring
-
 ## Knowledge Gaps
-- **679 isolated node(s):** `What it does`, `How to invoke`, `Example output`, `See also`, `Rules` (+674 more)
+- **651 isolated node(s):** `Rules`, `Output`, `Capability Discovery`, `Context`, `Assistant Change Timing` (+646 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **113 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **117 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `OSOperacional` connect `OSOperacional` to `os_field_parada_salvar`, `os_pdf.py`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
-- **Why does `FuncionarioPatrimonial` connect `diarias_lancamento_deletar` to `Command`, `driverid_service.py`, `os_field_parada_salvar`, `Cliente`?**
+- **Why does `FuncionarioPatrimonial` connect `Cliente` to `os_field_parada_salvar`, `driverid_service.py`, `Command`, `diarias_lancamento_deletar`, `OrdemServico`, `0022_despesaos_trocamotorista_parada_incidente_and_more.py`, `._status_validade`, `.tem_alerta_vencimento`, `.ultima_consulta_processo`?**
+  _High betweenness centrality (0.012) - this node is a cross-community bridge._
+- **Why does `PerfilUsuario` connect `os_field_parada_salvar` to `Command`, `Cliente`, `recomprimir_fotos.py`, `OrdemServico`, `OSOperacional`, `Mirroring History Migration`, `Command`, `Armamento List URL`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+- **Why does `OrdemServico` connect `OrdemServico` to `os_field_parada_salvar`, `Command`, `recomprimir_fotos.py`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
-- **Why does `DriverIDError` connect `driverid_service.py` to `diarias_lancamento_deletar`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **Are the 29 inferred relationships involving `PerfilUsuario` (e.g. with `.handle()` and `Command`) actually correct?**
   _`PerfilUsuario` has 29 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 15 inferred relationships involving `FuncionarioPatrimonial` (e.g. with `AgenteForm` and `ArmamentoForm`) actually correct?**

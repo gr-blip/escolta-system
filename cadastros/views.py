@@ -1667,6 +1667,23 @@ def os_observacoes_save(request, pk):
 
 
 @login_required
+def os_cliente_save(request, pk):
+    """Troca apenas o cliente — funciona mesmo com OS finalizada/cancelada."""
+    os_obj = get_object_or_404(OrdemServico, pk=pk)
+    if request.method == 'POST':
+        novo = get_object_or_404(Cliente, pk=request.POST.get('cliente'))
+        if novo.pk != os_obj.cliente_id:
+            antigo = os_obj.cliente
+            os_obj.cliente = novo
+            os_obj.save(update_fields=['cliente'])
+            messages.success(request, f'Cliente alterado: {antigo} → {novo}.')
+            bol = getattr(os_obj, 'boletim', None)
+            if bol and bol.tabela_preco and bol.tabela_preco.cliente_id != novo.pk:
+                messages.warning(request, 'Boletim usa tabela de preço do cliente anterior — ajuste a tabela no Boletim e recalcule.')
+    return redirect('os_detalhe', pk=pk)
+
+
+@login_required
 def os_cancelar(request, pk):
     """
     Cancela uma OS sem excluí-la do banco.

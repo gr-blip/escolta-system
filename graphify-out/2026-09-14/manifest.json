@@ -490,8 +490,8 @@
     "semantic_hash": ""
   },
   "cadastros/views.py": {
-    "mtime": 1789391946.0,
-    "ast_hash": "47718cef5574f9ba5fae51e6e48133cf",
+    "mtime": 1787844020.0,
+    "ast_hash": "ceb60f30e1333a14cb3d226907d521c1",
     "semantic_hash": ""
   },
   "escolta_system/__init__.py": {
@@ -555,8 +555,8 @@
     "semantic_hash": ""
   },
   "cadastros/templates/cadastros/agente_list.html": {
-    "mtime": 1787846714.0,
-    "ast_hash": "18df3738a1bb5e2438a7d20b24fa9f94",
+    "mtime": 1787844042.0,
+    "ast_hash": "60d77637af3b96395289803a45bececc",
     "semantic_hash": ""
   },
   "cadastros/templates/cadastros/armamento_form.html": {
@@ -575,8 +575,8 @@
     "semantic_hash": "32566b8d4d573c7bd43370202cd8d332"
   },
   "cadastros/templates/cadastros/boletim_detalhe.html": {
-    "mtime": 1789391968.0,
-    "ast_hash": "bad822c44e5d91265540e5958810058c",
+    "mtime": 1784208096.0,
+    "ast_hash": "f839210ec53232559fe718d0816ce69b",
     "semantic_hash": ""
   },
   "cadastros/templates/cadastros/boletim_list.html": {
@@ -1067,36 +1067,6 @@
   ".claude/skills/superpowers-writing-skills/SKILL.md": {
     "mtime": 1786057682.0,
     "ast_hash": "42f60c2296329df029e287f83b3bb0d1",
-    "semantic_hash": ""
-  },
-  ".claude/skills/caveman-review/README.md": {
-    "mtime": 1789001428.0,
-    "ast_hash": "ae3bdc81125037690fc50504e2917c83",
-    "semantic_hash": ""
-  },
-  ".claude/skills/caveman-review/SKILL.md": {
-    "mtime": 1789001428.0,
-    "ast_hash": "627809fbc078161cc1f060dd3524f051",
-    "semantic_hash": ""
-  },
-  ".claude/skills/caveman/README.md": {
-    "mtime": 1789001428.0,
-    "ast_hash": "14801a83830df3284b11a2752da83a39",
-    "semantic_hash": ""
-  },
-  ".claude/skills/caveman/SKILL.md": {
-    "mtime": 1789001428.0,
-    "ast_hash": "38e8d1a0788697d909a374680361ba9a",
-    "semantic_hash": ""
-  },
-  ".claude/skills/ponytail-review/SKILL.md": {
-    "mtime": 1789001870.0,
-    "ast_hash": "52f93e973047baa9a906c6dc5879a4a6",
-    "semantic_hash": ""
-  },
-  ".claude/skills/ponytail/SKILL.md": {
-    "mtime": 1789001870.0,
-    "ast_hash": "33f013ce03c8c66a6002ef941a433b81",
     "semantic_hash": ""
   }
 }

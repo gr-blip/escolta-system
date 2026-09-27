@@ -107,6 +107,8 @@
   pointer-events:none!important;opacity:.6!important;cursor:not-allowed!important;
 }
 .os-bloqueada .btn-primary { display:none!important; }
+.os-bloqueada .cliente-livre { pointer-events:auto!important; opacity:1!important; cursor:pointer!important; display:inline-flex!important; }
+.os-bloqueada select.cliente-livre { display:block!important; }
 .banner-finalizada {
   background:#0f2a1a;border:1px solid #1a4d2a;border-radius:8px;
   padding:12px 18px;margin-bottom:16px;
@@ -159,7 +161,8 @@
       <div class="g3" style="margin-bottom:10px">
         <div class="field g-col2">
           <label>Cliente <span class="required">!</span></label>
-          <select name="cliente" required>
+          <div style="display:flex;gap:6px">
+          <select name="cliente" required {% if not novo and os.status in 'finalizada,cancelada' %}form="form-cliente" class="cliente-livre"{% endif %}>
             <option value="">— Selecione —</option>
             {% for c in clientes %}
             <option value="{{ c.pk }}"
@@ -169,6 +172,11 @@
             </option>
             {% endfor %}
           </select>
+          {% if not novo and os.status in 'finalizada,cancelada' %}
+          <button type="submit" form="form-cliente" class="btn btn-primary cliente-livre" style="font-size:11px;padding:5px 10px;white-space:nowrap"
+            onclick="return confirm('Alterar o cliente desta OS finalizada?')">Salvar Cliente</button>
+          {% endif %}
+          </div>
         </div>
         <div class="field">
           <label>Solicitante</label>
@@ -347,6 +355,10 @@
 </div>
 
 </form>
+
+{% if not novo %}
+<form method="post" action="{% url 'os_cliente_save' os.pk %}" id="form-cliente">{% csrf_token %}</form>
+{% endif %}
 
 {% if not novo %}
 <!-- ── CARD OBSERVAÇÕES (fora do form principal — editável mesmo com OS finalizada) ── -->
