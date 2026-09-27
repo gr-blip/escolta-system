@@ -485,13 +485,13 @@
     "semantic_hash": "c3ef37925e97b312afb36ff73858c3ec"
   },
   "cadastros/urls.py": {
-    "mtime": 1787844026.0,
-    "ast_hash": "ca2363f7fdbed9550bdfddd70420dcec",
+    "mtime": 1790523306.0,
+    "ast_hash": "f61837af9f05a7ba489f3f96869e2b72",
     "semantic_hash": ""
   },
   "cadastros/views.py": {
-    "mtime": 1789391946.0,
-    "ast_hash": "47718cef5574f9ba5fae51e6e48133cf",
+    "mtime": 1790523306.0,
+    "ast_hash": "9c1abdfd8053122373796e98c9d7c215",
     "semantic_hash": ""
   },
   "escolta_system/__init__.py": {
@@ -725,8 +725,8 @@
     "semantic_hash": "64c55bf1f5eec12a8982047b6f64d8f4"
   },
   "cadastros/templates/cadastros/os_detalhe.html": {
-    "mtime": 1784806018.0,
-    "ast_hash": "3830c33cd859f303367ff4f0d34584fc",
+    "mtime": 1790529684.0,
+    "ast_hash": "9c10ea35cbf190b4e75e3fde1f54268d",
     "semantic_hash": ""
   },
   "cadastros/templates/cadastros/os_email.html": {
@@ -880,8 +880,8 @@
     "semantic_hash": ""
   },
   "_push.ps1": {
-    "mtime": 1784806184.0,
-    "ast_hash": "18a5d0d8a7f6d3ea361493a725f9960d",
+    "mtime": 1790524938.0,
+    "ast_hash": "96e16c33e509fb3baa9fe60ef40aabd9",
     "semantic_hash": ""
   },
   "cadastros/management/commands/diag_omnilink.py": {

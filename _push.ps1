@@ -52,11 +52,12 @@ Write-Host "      OK" -ForegroundColor Green
 # ── 4. Graphify update ───────────────────────────────────────────────────
 Write-Host "[4/6] Atualizando grafo do projeto (graphify)..." -ForegroundColor Yellow
 $graphifyOK = $false
-try {
-    & graphify update . 2>&1 | Out-Null
+if (Get-Command graphify -ErrorAction SilentlyContinue) {
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"   # stderr do graphify nao deve abortar
+    & graphify update . *> $null
     if ($LASTEXITCODE -eq 0) { $graphifyOK = $true }
-} catch {
-    # graphify não instalado ou falhou
+    $ErrorActionPreference = $prevEAP
 }
 
 if ($graphifyOK) {
