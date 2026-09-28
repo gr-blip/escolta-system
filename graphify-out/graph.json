@@ -4,23 +4,6 @@
   "graph": {
     "hyperedges": [
       {
-        "id": "boletim_lifecycle_os_cliente_preco",
-        "label": "Boletim de Medi\u00e7\u00e3o lifecycle \u2014 links OS, client, price table, and status workflow (aberto\u2192faturado)",
-        "nodes": [
-          "model_boletim",
-          "model_os",
-          "model_cliente",
-          "model_tabela_preco",
-          "url_boletim_finalizar",
-          "url_boletim_export_pdf",
-          "url_boletim_export_xlsx"
-        ],
-        "relation": "participate_in",
-        "confidence": "EXTRACTED",
-        "confidence_score": 0.95,
-        "source_file": "cadastros/templates/cadastros/boletim_list.html"
-      },
-      {
         "id": "patrimonial_employee_consulta_processo",
         "label": "Patrimonial employee background check \u2014 Funcionario Patrimonial, Freelance, and Consulta Processo share judicial process monitoring",
         "nodes": [
@@ -2715,8 +2698,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "cadastros_migrations_0022_despesaos_trocamotorista_parada_incidente_and_more",
-      "community": 35,
-      "community_name": "_garantir_tabela_espelhamento",
+      "community": 29,
+      "community_name": "Command",
       "norm_label": "0022_despesaos_trocamotorista_parada_incidente_and_more.py"
     },
     {
@@ -2726,8 +2709,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "cadastros_migrations_0022_despesaos_trocamotorista_parada_incidente_and_more_foto_upload_path",
-      "community": 35,
-      "community_name": "_garantir_tabela_espelhamento",
+      "community": 29,
+      "community_name": "Command",
       "norm_label": "_foto_upload_path()"
     },
     {
@@ -2737,8 +2720,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "cadastros_migrations_0022_despesaos_trocamotorista_parada_incidente_and_more_migration",
-      "community": 35,
-      "community_name": "_garantir_tabela_espelhamento",
+      "community": 29,
+      "community_name": "Command",
       "norm_label": "migration"
     },
     {
@@ -3749,8 +3732,8 @@
       "source_location": "L446",
       "_origin": "ast",
       "id": "cadastros_models_veiculoescoltado",
-      "community": 29,
-      "community_name": "Command",
+      "community": 35,
+      "community_name": "_garantir_tabela_espelhamento",
       "norm_label": "veiculoescoltado"
     },
     {
@@ -3760,8 +3743,8 @@
       "source_location": "L462",
       "_origin": "ast",
       "id": "cadastros_models_veiculoescoltado_str",
-      "community": 29,
-      "community_name": "Command",
+      "community": 35,
+      "community_name": "_garantir_tabela_espelhamento",
       "norm_label": ".__str__()"
     },
     {
@@ -3870,8 +3853,8 @@
       "source_location": "L671",
       "_origin": "ast",
       "id": "cadastros_models_parada",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 32,
+      "community_name": "Command",
       "norm_label": "parada"
     },
     {
@@ -3881,8 +3864,8 @@
       "source_location": "L699",
       "_origin": "ast",
       "id": "cadastros_models_parada_str",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 32,
+      "community_name": "Command",
       "norm_label": ".__str__()"
     },
     {
@@ -3892,8 +3875,8 @@
       "source_location": "L703",
       "_origin": "ast",
       "id": "cadastros_models_parada_duracao_minutos",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 32,
+      "community_name": "Command",
       "norm_label": ".duracao_minutos()"
     },
     {
@@ -3925,8 +3908,8 @@
       "source_location": "L729",
       "_origin": "ast",
       "id": "cadastros_models_incidente",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 47,
+      "community_name": "DespesaOS",
       "norm_label": "incidente"
     },
     {
@@ -3936,8 +3919,8 @@
       "source_location": "L764",
       "_origin": "ast",
       "id": "cadastros_models_incidente_str",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 47,
+      "community_name": "DespesaOS",
       "norm_label": ".__str__()"
     },
     {
@@ -4255,8 +4238,8 @@
       "source_location": "L447",
       "_origin": "ast",
       "id": "cadastros_models_rationale_447",
-      "community": 29,
-      "community_name": "Command",
+      "community": 35,
+      "community_name": "_garantir_tabela_espelhamento",
       "norm_label": "veiculos escoltados na os (max 4)"
     },
     {
@@ -4288,8 +4271,8 @@
       "source_location": "L672",
       "_origin": "ast",
       "id": "cadastros_models_rationale_672",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 32,
+      "community_name": "Command",
       "norm_label": "parada registrada durante a os \u2014 com motivo, duracao e fotos."
     },
     {
@@ -4310,8 +4293,8 @@
       "source_location": "L730",
       "_origin": "ast",
       "id": "cadastros_models_rationale_730",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 47,
+      "community_name": "DespesaOS",
       "norm_label": "registro de ocorrencia/incidente durante a os."
     },
     {
@@ -4728,8 +4711,8 @@
       "source_location": "L679",
       "_origin": "ast",
       "id": "cadastros_omnilink_aceitar_espelhamento",
-      "community": 107,
-      "community_name": "espelhamento_aceitar_ajax",
+      "community": 123,
+      "community_name": "aceitar_espelhamento",
       "norm_label": "aceitar_espelhamento()"
     },
     {
@@ -4739,8 +4722,8 @@
       "source_location": "L699",
       "_origin": "ast",
       "id": "cadastros_omnilink_excluir_espelhamento",
-      "community": 130,
-      "community_name": "espelhamento_cancelar_ajax",
+      "community": 125,
+      "community_name": "excluir_espelhamento",
       "norm_label": "excluir_espelhamento()"
     },
     {
@@ -5025,8 +5008,8 @@
       "source_location": "L680",
       "_origin": "ast",
       "id": "cadastros_omnilink_rationale_680",
-      "community": 107,
-      "community_name": "espelhamento_aceitar_ajax",
+      "community": 123,
+      "community_name": "aceitar_espelhamento",
       "norm_label": "aceita (aceitar=true) ou rejeita (aceitar=false) uma solicitacao recebida."
     },
     {
@@ -5036,8 +5019,8 @@
       "source_location": "L700",
       "_origin": "ast",
       "id": "cadastros_omnilink_rationale_700",
-      "community": 130,
-      "community_name": "espelhamento_cancelar_ajax",
+      "community": 125,
+      "community_name": "excluir_espelhamento",
       "norm_label": "exclui/cancela um espelhamento pelo idsolicitacao."
     },
     {
@@ -6191,8 +6174,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "cadastros_views_comprimir_imagem",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 100,
+      "community_name": "2.2 Operacional",
       "norm_label": "_comprimir_imagem()"
     },
     {
@@ -6906,8 +6889,8 @@
       "source_location": "L2688",
       "_origin": "ast",
       "id": "cadastros_views_espelhamento_aceitar_ajax",
-      "community": 107,
-      "community_name": "espelhamento_aceitar_ajax",
+      "community": 123,
+      "community_name": "aceitar_espelhamento",
       "norm_label": "espelhamento_aceitar_ajax()"
     },
     {
@@ -6917,8 +6900,8 @@
       "source_location": "L2710",
       "_origin": "ast",
       "id": "cadastros_views_espelhamento_cancelar_ajax",
-      "community": 130,
-      "community_name": "espelhamento_cancelar_ajax",
+      "community": 125,
+      "community_name": "excluir_espelhamento",
       "norm_label": "espelhamento_cancelar_ajax()"
     },
     {
@@ -7192,8 +7175,8 @@
       "source_location": "L4008",
       "_origin": "ast",
       "id": "cadastros_views_os_field_link",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 110,
+      "community_name": "7. Hist\u00f3rico de Melhorias Recentes (Maio 2026)",
       "norm_label": "os_field_link()"
     },
     {
@@ -7225,8 +7208,8 @@
       "source_location": "L4184",
       "_origin": "ast",
       "id": "cadastros_views_base64_to_file",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 101,
+      "community_name": "2.3 Rastreamento GPS \u2014 Integra\u00e7\u00e3o Omnilink",
       "norm_label": "_base64_to_file()"
     },
     {
@@ -7236,8 +7219,8 @@
       "source_location": "L4195",
       "_origin": "ast",
       "id": "cadastros_views_os_field_foto_marco",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 100,
+      "community_name": "2.2 Operacional",
       "norm_label": "os_field_foto_marco()"
     },
     {
@@ -7258,8 +7241,8 @@
       "source_location": "L4262",
       "_origin": "ast",
       "id": "cadastros_views_os_field_parada_salvar",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 32,
+      "community_name": "Command",
       "norm_label": "os_field_parada_salvar()"
     },
     {
@@ -7269,8 +7252,8 @@
       "source_location": "L4326",
       "_origin": "ast",
       "id": "cadastros_views_os_field_parada_delete",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 32,
+      "community_name": "Command",
       "norm_label": "os_field_parada_delete()"
     },
     {
@@ -7280,8 +7263,8 @@
       "source_location": "L4342",
       "_origin": "ast",
       "id": "cadastros_views_os_field_incidente_salvar",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 47,
+      "community_name": "DespesaOS",
       "norm_label": "os_field_incidente_salvar()"
     },
     {
@@ -7291,8 +7274,8 @@
       "source_location": "L4403",
       "_origin": "ast",
       "id": "cadastros_views_os_field_incidente_delete",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 47,
+      "community_name": "DespesaOS",
       "norm_label": "os_field_incidente_delete()"
     },
     {
@@ -7302,8 +7285,8 @@
       "source_location": "L4419",
       "_origin": "ast",
       "id": "cadastros_views_os_field_foto_veiculo",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 100,
+      "community_name": "2.2 Operacional",
       "norm_label": "os_field_foto_veiculo()"
     },
     {
@@ -7324,8 +7307,8 @@
       "source_location": "L4456",
       "_origin": "ast",
       "id": "cadastros_views_os_field_troca_motorista",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 114,
+      "community_name": "6. Integra\u00e7\u00f5es Externas",
       "norm_label": "os_field_troca_motorista()"
     },
     {
@@ -7335,8 +7318,8 @@
       "source_location": "L4519",
       "_origin": "ast",
       "id": "cadastros_views_os_field_troca_motorista_delete",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 115,
+      "community_name": "4. Fluxo Operacional Completo",
       "norm_label": "os_field_troca_motorista_delete()"
     },
     {
@@ -7346,8 +7329,8 @@
       "source_location": "L4535",
       "_origin": "ast",
       "id": "cadastros_views_os_field_assinatura",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 101,
+      "community_name": "2.3 Rastreamento GPS \u2014 Integra\u00e7\u00e3o Omnilink",
       "norm_label": "os_field_assinatura()"
     },
     {
@@ -7357,8 +7340,8 @@
       "source_location": "L4586",
       "_origin": "ast",
       "id": "cadastros_views_os_field_despesa_salvar",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 107,
+      "community_name": "espelhamento_aceitar_ajax",
       "norm_label": "os_field_despesa_salvar()"
     },
     {
@@ -7379,8 +7362,8 @@
       "source_location": "L4664",
       "_origin": "ast",
       "id": "cadastros_views_os_field_pedagio_salvar",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 111,
+      "community_name": "8. URLs e Rotas Principais",
       "norm_label": "os_field_pedagio_salvar()"
     },
     {
@@ -7390,8 +7373,8 @@
       "source_location": "L4680",
       "_origin": "ast",
       "id": "cadastros_views_os_field_veiculo_salvar",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 35,
+      "community_name": "_garantir_tabela_espelhamento",
       "norm_label": "os_field_veiculo_salvar()"
     },
     {
@@ -7401,8 +7384,8 @@
       "source_location": "L4725",
       "_origin": "ast",
       "id": "cadastros_views_os_field_veiculo_delete",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 35,
+      "community_name": "_garantir_tabela_espelhamento",
       "norm_label": "os_field_veiculo_delete()"
     },
     {
@@ -7500,8 +7483,8 @@
       "source_location": "L4961",
       "_origin": "ast",
       "id": "cadastros_views_jrsfacilities_edit",
-      "community": 104,
-      "community_name": "diarias_lancamento_deletar",
+      "community": 6,
+      "community_name": "Cliente",
       "norm_label": "jrsfacilities_edit()"
     },
     {
@@ -7709,8 +7692,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "cadastros_views_rationale_22",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 100,
+      "community_name": "2.2 Operacional",
       "norm_label": "comprime e redimensiona imagem antes de salvar. retorna inmemoryuploadedfile."
     },
     {
@@ -8039,8 +8022,8 @@
       "source_location": "L2689",
       "_origin": "ast",
       "id": "cadastros_views_rationale_2689",
-      "community": 107,
-      "community_name": "espelhamento_aceitar_ajax",
+      "community": 123,
+      "community_name": "aceitar_espelhamento",
       "norm_label": "ajax post \u2014 aceita ou rejeita espelhamento recebido."
     },
     {
@@ -8050,8 +8033,8 @@
       "source_location": "L2711",
       "_origin": "ast",
       "id": "cadastros_views_rationale_2711",
-      "community": 130,
-      "community_name": "espelhamento_cancelar_ajax",
+      "community": 125,
+      "community_name": "excluir_espelhamento",
       "norm_label": "ajax post \u2014 cancela/exclui espelhamento."
     },
     {
@@ -8215,8 +8198,8 @@
       "source_location": "L4009",
       "_origin": "ast",
       "id": "cadastros_views_rationale_4009",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 110,
+      "community_name": "7. Hist\u00f3rico de Melhorias Recentes (Maio 2026)",
       "norm_label": "pagina publica para agente externo preencher dados operacionais da os."
     },
     {
@@ -8248,8 +8231,8 @@
       "source_location": "L4185",
       "_origin": "ast",
       "id": "cadastros_views_rationale_4185",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 101,
+      "community_name": "2.3 Rastreamento GPS \u2014 Integra\u00e7\u00e3o Omnilink",
       "norm_label": "converte data:image/png;base64,... \u2192 contentfile para salvar no imagefield."
     },
     {
@@ -8259,8 +8242,8 @@
       "source_location": "L4196",
       "_origin": "ast",
       "id": "cadastros_views_rationale_4196",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 100,
+      "community_name": "2.2 Operacional",
       "norm_label": "recebe upload de foto de um marco via post ajax (multipart).     permite apenas"
     },
     {
@@ -8281,8 +8264,8 @@
       "source_location": "L4263",
       "_origin": "ast",
       "id": "cadastros_views_rationale_4263",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 32,
+      "community_name": "Command",
       "norm_label": "cria ou atualiza uma parada."
     },
     {
@@ -8292,8 +8275,8 @@
       "source_location": "L4343",
       "_origin": "ast",
       "id": "cadastros_views_rationale_4343",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 47,
+      "community_name": "DespesaOS",
       "norm_label": "cria ou atualiza um incidente."
     },
     {
@@ -8303,8 +8286,8 @@
       "source_location": "L4420",
       "_origin": "ast",
       "id": "cadastros_views_rationale_4420",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 100,
+      "community_name": "2.2 Operacional",
       "norm_label": "salva foto de um veiculo escoltado."
     },
     {
@@ -8325,8 +8308,8 @@
       "source_location": "L4457",
       "_origin": "ast",
       "id": "cadastros_views_rationale_4457",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 114,
+      "community_name": "6. Integra\u00e7\u00f5es Externas",
       "norm_label": "registra troca de motorista."
     },
     {
@@ -8336,8 +8319,8 @@
       "source_location": "L4520",
       "_origin": "ast",
       "id": "cadastros_views_rationale_4520",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 115,
+      "community_name": "4. Fluxo Operacional Completo",
       "norm_label": "remove uma troca de motorista."
     },
     {
@@ -8347,8 +8330,8 @@
       "source_location": "L4536",
       "_origin": "ast",
       "id": "cadastros_views_rationale_4536",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 101,
+      "community_name": "2.3 Rastreamento GPS \u2014 Integra\u00e7\u00e3o Omnilink",
       "norm_label": "salva assinatura digital (base64 png vindo do canvas)."
     },
     {
@@ -8358,8 +8341,8 @@
       "source_location": "L4587",
       "_origin": "ast",
       "id": "cadastros_views_rationale_4587",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 107,
+      "community_name": "espelhamento_aceitar_ajax",
       "norm_label": "cria uma despesa/credito."
     },
     {
@@ -8369,8 +8352,8 @@
       "source_location": "L4665",
       "_origin": "ast",
       "id": "cadastros_views_rationale_4665",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 111,
+      "community_name": "8. URLs e Rotas Principais",
       "norm_label": "salva o valor do pedagio via ajax (link externo do agente)."
     },
     {
@@ -8380,8 +8363,8 @@
       "source_location": "L4681",
       "_origin": "ast",
       "id": "cadastros_views_rationale_4681",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 35,
+      "community_name": "_garantir_tabela_espelhamento",
       "norm_label": "cria ou edita um veiculoescoltado via ajax (link externo do agente)."
     },
     {
@@ -8391,8 +8374,8 @@
       "source_location": "L4726",
       "_origin": "ast",
       "id": "cadastros_views_rationale_4726",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 35,
+      "community_name": "_garantir_tabela_espelhamento",
       "norm_label": "deleta um veiculoescoltado via ajax (link externo do agente)."
     },
     {
@@ -17103,8 +17086,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "graphify_out_converted_contrato_jr_wilker_001_2026_revisado_2_c5a6b0ec",
-      "community": 115,
-      "community_name": "4. Fluxo Operacional Completo",
+      "community": 128,
+      "community_name": "CONTRATO_JR_WILKER_001_2026_REVISADO_2_c5a6b0ec.md",
       "norm_label": "contrato_jr_wilker_001_2026_revisado_2_c5a6b0ec.md"
     },
     {
@@ -17114,8 +17097,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "graphify_out_converted_manual_developer_grupojr_v3_fc98287c",
-      "community": 116,
-      "community_name": "CONTRATO_JR_WILKER_001_2026_REVISADO_2_c5a6b0ec.md",
+      "community": 130,
+      "community_name": "Manual_Developer_GrupoJR_v3_fc98287c.md",
       "norm_label": "manual_developer_grupojr_v3_fc98287c.md"
     },
     {
@@ -17158,8 +17141,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_2_m\u00f3dulos_do_sistema",
-      "community": 32,
-      "community_name": "Command",
+      "community": 103,
+      "community_name": "5. Infraestrutura e Deploy",
       "norm_label": "2. modulos do sistema"
     },
     {
@@ -17169,8 +17152,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_2_1_cadastros_base",
-      "community": 47,
-      "community_name": "DespesaOS",
+      "community": 108,
+      "community_name": "espelhamento_cancelar_ajax",
       "norm_label": "2.1 cadastros (base)"
     },
     {
@@ -17180,8 +17163,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_agentes",
-      "community": 47,
-      "community_name": "DespesaOS",
+      "community": 108,
+      "community_name": "espelhamento_cancelar_ajax",
       "norm_label": "agentes"
     },
     {
@@ -17191,8 +17174,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_viaturas",
-      "community": 47,
-      "community_name": "DespesaOS",
+      "community": 108,
+      "community_name": "espelhamento_cancelar_ajax",
       "norm_label": "viaturas"
     },
     {
@@ -17202,8 +17185,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_rastreadores",
-      "community": 47,
-      "community_name": "DespesaOS",
+      "community": 108,
+      "community_name": "espelhamento_cancelar_ajax",
       "norm_label": "rastreadores"
     },
     {
@@ -17213,8 +17196,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_armamento",
-      "community": 47,
-      "community_name": "DespesaOS",
+      "community": 108,
+      "community_name": "espelhamento_cancelar_ajax",
       "norm_label": "armamento"
     },
     {
@@ -17224,8 +17207,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_coletes_bal\u00edsticos",
-      "community": 47,
-      "community_name": "DespesaOS",
+      "community": 108,
+      "community_name": "espelhamento_cancelar_ajax",
       "norm_label": "coletes balisticos"
     },
     {
@@ -17235,8 +17218,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_clientes",
-      "community": 47,
-      "community_name": "DespesaOS",
+      "community": 108,
+      "community_name": "espelhamento_cancelar_ajax",
       "norm_label": "clientes"
     },
     {
@@ -17246,7 +17229,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_2_2_operacional",
-      "community": 100,
+      "community": 116,
       "community_name": "2.2 Operacional",
       "norm_label": "2.2 operacional"
     },
@@ -17257,7 +17240,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_equipes",
-      "community": 100,
+      "community": 116,
       "community_name": "2.2 Operacional",
       "norm_label": "equipes"
     },
@@ -17268,7 +17251,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_ordens_de_servi\u00e7o_os",
-      "community": 100,
+      "community": 116,
       "community_name": "2.2 Operacional",
       "norm_label": "ordens de servico (os)"
     },
@@ -17279,7 +17262,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_execu\u00e7\u00e3o_marcos_operacionais_osoperacional",
-      "community": 100,
+      "community": 116,
       "community_name": "2.2 Operacional",
       "norm_label": "execucao / marcos operacionais (osoperacional)"
     },
@@ -17290,7 +17273,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_link_externo_do_agente_field",
-      "community": 100,
+      "community": 116,
       "community_name": "2.2 Operacional",
       "norm_label": "link externo do agente (field)"
     },
@@ -17301,7 +17284,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_2_3_rastreamento_gps_integra\u00e7\u00e3o_omnilink",
-      "community": 101,
+      "community": 117,
       "community_name": "2.3 Rastreamento GPS \u2014 Integra\u00e7\u00e3o Omnilink",
       "norm_label": "2.3 rastreamento gps \u2014 integracao omnilink"
     },
@@ -17312,7 +17295,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_mapa_de_frota_omnilink_frota",
-      "community": 101,
+      "community": 117,
       "community_name": "2.3 Rastreamento GPS \u2014 Integra\u00e7\u00e3o Omnilink",
       "norm_label": "mapa de frota (omnilink_frota)"
     },
@@ -17323,7 +17306,7 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_detec\u00e7\u00e3o_de_status_em_opera\u00e7\u00e3o",
-      "community": 101,
+      "community": 117,
       "community_name": "2.3 Rastreamento GPS \u2014 Integra\u00e7\u00e3o Omnilink",
       "norm_label": "deteccao de status \"em operacao\""
     },
@@ -17334,7 +17317,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_rastreamento_individual_de_os",
-      "community": 101,
+      "community": 117,
       "community_name": "2.3 Rastreamento GPS \u2014 Integra\u00e7\u00e3o Omnilink",
       "norm_label": "rastreamento individual de os"
     },
@@ -17345,7 +17328,7 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_espelhamentos_omnilink",
-      "community": 101,
+      "community": 117,
       "community_name": "2.3 Rastreamento GPS \u2014 Integra\u00e7\u00e3o Omnilink",
       "norm_label": "espelhamentos omnilink"
     },
@@ -17356,8 +17339,8 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_2_4_faturamento",
-      "community": 32,
-      "community_name": "Command",
+      "community": 103,
+      "community_name": "5. Infraestrutura e Deploy",
       "norm_label": "2.4 faturamento"
     },
     {
@@ -17367,8 +17350,8 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_tabelas_de_pre\u00e7o",
-      "community": 32,
-      "community_name": "Command",
+      "community": 103,
+      "community_name": "5. Infraestrutura e Deploy",
       "norm_label": "tabelas de preco"
     },
     {
@@ -17378,8 +17361,8 @@
       "source_location": "L109",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_boletim_de_medi\u00e7\u00e3o",
-      "community": 32,
-      "community_name": "Command",
+      "community": 103,
+      "community_name": "5. Infraestrutura e Deploy",
       "norm_label": "boletim de medicao"
     },
     {
@@ -17389,8 +17372,8 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_2_5_patrimonial",
-      "community": 32,
-      "community_name": "Command",
+      "community": 103,
+      "community_name": "5. Infraestrutura e Deploy",
       "norm_label": "2.5 patrimonial"
     },
     {
@@ -17400,8 +17383,8 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_2_6_dashboards",
-      "community": 32,
-      "community_name": "Command",
+      "community": 103,
+      "community_name": "5. Infraestrutura e Deploy",
       "norm_label": "2.6 dashboards"
     },
     {
@@ -17411,8 +17394,8 @@
       "source_location": "L125",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_dashboard_principal",
-      "community": 32,
-      "community_name": "Command",
+      "community": 103,
+      "community_name": "5. Infraestrutura e Deploy",
       "norm_label": "dashboard principal"
     },
     {
@@ -17422,8 +17405,8 @@
       "source_location": "L131",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_dashboard_operacional",
-      "community": 32,
-      "community_name": "Command",
+      "community": 103,
+      "community_name": "5. Infraestrutura e Deploy",
       "norm_label": "dashboard operacional"
     },
     {
@@ -17455,8 +17438,8 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_4_fluxo_operacional_completo",
-      "community": 114,
-      "community_name": "6. Integra\u00e7\u00f5es Externas",
+      "community": 127,
+      "community_name": "4. Fluxo Operacional Completo",
       "norm_label": "4. fluxo operacional completo"
     },
     {
@@ -17466,8 +17449,8 @@
       "source_location": "L146",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_4_1_ciclo_de_uma_os",
-      "community": 114,
-      "community_name": "6. Integra\u00e7\u00f5es Externas",
+      "community": 127,
+      "community_name": "4. Fluxo Operacional Completo",
       "norm_label": "4.1 ciclo de uma os"
     },
     {
@@ -17477,8 +17460,8 @@
       "source_location": "L147",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_4_2_gest\u00e3o_de_fotos_e_arquivos",
-      "community": 114,
-      "community_name": "6. Integra\u00e7\u00f5es Externas",
+      "community": 127,
+      "community_name": "4. Fluxo Operacional Completo",
       "norm_label": "4.2 gestao de fotos e arquivos"
     },
     {
@@ -17488,7 +17471,7 @@
       "source_location": "L154",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_5_infraestrutura_e_deploy",
-      "community": 103,
+      "community": 118,
       "community_name": "5. Infraestrutura e Deploy",
       "norm_label": "5. infraestrutura e deploy"
     },
@@ -17499,7 +17482,7 @@
       "source_location": "L155",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_5_1_railway_configura\u00e7\u00e3o",
-      "community": 103,
+      "community": 118,
       "community_name": "5. Infraestrutura e Deploy",
       "norm_label": "5.1 railway \u2014 configuracao"
     },
@@ -17510,7 +17493,7 @@
       "source_location": "L162",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_vari\u00e1veis_de_ambiente_necess\u00e1rias",
-      "community": 103,
+      "community": 118,
       "community_name": "5. Infraestrutura e Deploy",
       "norm_label": "variaveis de ambiente necessarias"
     },
@@ -17521,7 +17504,7 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_5_2_seguran\u00e7a",
-      "community": 103,
+      "community": 118,
       "community_name": "5. Infraestrutura e Deploy",
       "norm_label": "5.2 seguranca"
     },
@@ -17532,7 +17515,7 @@
       "source_location": "L170",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_5_3_cache",
-      "community": 103,
+      "community": 118,
       "community_name": "5. Infraestrutura e Deploy",
       "norm_label": "5.3 cache"
     },
@@ -17543,8 +17526,8 @@
       "source_location": "L175",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_6_integra\u00e7\u00f5es_externas",
-      "community": 111,
-      "community_name": "8. URLs e Rotas Principais",
+      "community": 126,
+      "community_name": "6. Integra\u00e7\u00f5es Externas",
       "norm_label": "6. integracoes externas"
     },
     {
@@ -17554,8 +17537,8 @@
       "source_location": "L176",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_6_1_omnilink_rastreamento_gps",
-      "community": 111,
-      "community_name": "8. URLs e Rotas Principais",
+      "community": 126,
+      "community_name": "6. Integra\u00e7\u00f5es Externas",
       "norm_label": "6.1 omnilink (rastreamento gps)"
     },
     {
@@ -17565,8 +17548,8 @@
       "source_location": "L183",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_6_2_infosimples_certid\u00f5es",
-      "community": 111,
-      "community_name": "8. URLs e Rotas Principais",
+      "community": 126,
+      "community_name": "6. Integra\u00e7\u00f5es Externas",
       "norm_label": "6.2 infosimples (certidoes)"
     },
     {
@@ -17576,8 +17559,8 @@
       "source_location": "L188",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_6_3_nominatim_geocodifica\u00e7\u00e3o",
-      "community": 111,
-      "community_name": "8. URLs e Rotas Principais",
+      "community": 126,
+      "community_name": "6. Integra\u00e7\u00f5es Externas",
       "norm_label": "6.3 nominatim (geocodificacao)"
     },
     {
@@ -17587,8 +17570,8 @@
       "source_location": "L191",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_7_hist\u00f3rico_de_melhorias_recentes_maio_2026",
-      "community": 108,
-      "community_name": "espelhamento_cancelar_ajax",
+      "community": 119,
+      "community_name": "7. Hist\u00f3rico de Melhorias Recentes (Maio 2026)",
       "norm_label": "7. historico de melhorias recentes (maio 2026)"
     },
     {
@@ -17598,8 +17581,8 @@
       "source_location": "L192",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_7_1_rastreamento_status_em_opera\u00e7\u00e3o_no_mapa",
-      "community": 108,
-      "community_name": "espelhamento_cancelar_ajax",
+      "community": 119,
+      "community_name": "7. Hist\u00f3rico de Melhorias Recentes (Maio 2026)",
       "norm_label": "7.1 rastreamento \u2014 status \"em operacao\" no mapa"
     },
     {
@@ -17609,8 +17592,8 @@
       "source_location": "L199",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_7_2_performance_compress\u00e3o_de_imagens",
-      "community": 108,
-      "community_name": "espelhamento_cancelar_ajax",
+      "community": 119,
+      "community_name": "7. Hist\u00f3rico de Melhorias Recentes (Maio 2026)",
       "norm_label": "7.2 performance \u2014 compressao de imagens"
     },
     {
@@ -17620,8 +17603,8 @@
       "source_location": "L204",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_7_3_estabilidade_gunicorn_gthread",
-      "community": 108,
-      "community_name": "espelhamento_cancelar_ajax",
+      "community": 119,
+      "community_name": "7. Hist\u00f3rico de Melhorias Recentes (Maio 2026)",
       "norm_label": "7.3 estabilidade \u2014 gunicorn gthread"
     },
     {
@@ -17631,8 +17614,8 @@
       "source_location": "L208",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_7_4_informa\u00e7\u00f5es_da_os_no_mapa",
-      "community": 108,
-      "community_name": "espelhamento_cancelar_ajax",
+      "community": 119,
+      "community_name": "7. Hist\u00f3rico de Melhorias Recentes (Maio 2026)",
       "norm_label": "7.4 informacoes da os no mapa"
     },
     {
@@ -17642,8 +17625,8 @@
       "source_location": "L213",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_8_urls_e_rotas_principais",
-      "community": 110,
-      "community_name": "7. Hist\u00f3rico de Melhorias Recentes (Maio 2026)",
+      "community": 121,
+      "community_name": "8. URLs e Rotas Principais",
       "norm_label": "8. urls e rotas principais"
     },
     {
@@ -17653,8 +17636,8 @@
       "source_location": "L214",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_8_1_cadastros",
-      "community": 110,
-      "community_name": "7. Hist\u00f3rico de Melhorias Recentes (Maio 2026)",
+      "community": 121,
+      "community_name": "8. URLs e Rotas Principais",
       "norm_label": "8.1 cadastros"
     },
     {
@@ -17664,8 +17647,8 @@
       "source_location": "L215",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_8_2_operacional",
-      "community": 110,
-      "community_name": "7. Hist\u00f3rico de Melhorias Recentes (Maio 2026)",
+      "community": 121,
+      "community_name": "8. URLs e Rotas Principais",
       "norm_label": "8.2 operacional"
     },
     {
@@ -17675,8 +17658,8 @@
       "source_location": "L216",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_8_3_link_do_agente_em_campo",
-      "community": 110,
-      "community_name": "7. Hist\u00f3rico de Melhorias Recentes (Maio 2026)",
+      "community": 121,
+      "community_name": "8. URLs e Rotas Principais",
       "norm_label": "8.3 link do agente em campo"
     },
     {
@@ -17686,8 +17669,8 @@
       "source_location": "L217",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_8_4_faturamento",
-      "community": 110,
-      "community_name": "7. Hist\u00f3rico de Melhorias Recentes (Maio 2026)",
+      "community": 121,
+      "community_name": "8. URLs e Rotas Principais",
       "norm_label": "8.4 faturamento"
     },
     {
@@ -18093,9 +18076,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 12,
       "norm_label": "cliente form view",
-      "community_name": "Boletim List View",
+      "community_name": "Base Template",
       "id": "cadastros_templates_cadastros_cliente_form"
     },
     {
@@ -18107,9 +18090,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 12,
       "norm_label": "cnpj.ws public api",
-      "community_name": "Boletim List View",
+      "community_name": "Base Template",
       "id": "service_cnpj_ws"
     },
     {
@@ -18125,90 +18108,6 @@
       "norm_label": "cliente inativar/reativar view",
       "community_name": "Base Template",
       "id": "cadastros_templates_cadastros_cliente_inativar"
-    },
-    {
-      "label": "Cliente List View",
-      "file_type": "code",
-      "source_file": "cadastros/templates/cadastros/cliente_list.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 119,
-      "norm_label": "cliente list view",
-      "community_name": "os_detalhe",
-      "id": "cadastros_templates_cadastros_cliente_list"
-    },
-    {
-      "label": "Cliente",
-      "file_type": "concept",
-      "source_file": "cadastros/templates/cadastros/cliente_list.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 4,
-      "norm_label": "cliente",
-      "community_name": "Boletim List View",
-      "id": "model_cliente"
-    },
-    {
-      "label": "Cliente List URL",
-      "file_type": "concept",
-      "source_file": "cadastros/templates/cadastros/cliente_list.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 159,
-      "norm_label": "cliente list url",
-      "community_name": "Cliente List URL",
-      "id": "url_cliente_list"
-    },
-    {
-      "label": "Cliente Create URL",
-      "file_type": "concept",
-      "source_file": "cadastros/templates/cadastros/cliente_list.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 119,
-      "norm_label": "cliente create url",
-      "community_name": "os_detalhe",
-      "id": "url_cliente_create"
-    },
-    {
-      "label": "Cliente Edit URL",
-      "file_type": "concept",
-      "source_file": "cadastros/templates/cadastros/cliente_list.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 119,
-      "norm_label": "cliente edit url",
-      "community_name": "os_detalhe",
-      "id": "url_cliente_edit"
-    },
-    {
-      "label": "Cliente Delete URL",
-      "file_type": "concept",
-      "source_file": "cadastros/templates/cadastros/cliente_list.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 119,
-      "norm_label": "cliente delete url",
-      "community_name": "os_detalhe",
-      "id": "url_cliente_delete"
     },
     {
       "label": "Colete Form View",
@@ -18317,9 +18216,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 28,
+      "community": 4,
       "norm_label": "diaria de agente",
-      "community_name": "boletim_export.py",
+      "community_name": "Boletim List View",
       "id": "model_diaria"
     },
     {
@@ -19297,9 +19196,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 14,
+      "community": 27,
       "norm_label": "vehicle list template",
-      "community_name": "Tracker List Template",
+      "community_name": "Patrimonial Dashboard Template",
       "id": "cadastros_templates_cadastros_viatura_list"
     },
     {
@@ -19311,9 +19210,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 14,
+      "community": 27,
       "norm_label": "viatura (vehicle)",
-      "community_name": "Tracker List Template",
+      "community_name": "Patrimonial Dashboard Template",
       "id": "concept_viatura"
     },
     {
@@ -19325,9 +19224,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 14,
+      "community": 27,
       "norm_label": "url: viatura_create",
-      "community_name": "Tracker List Template",
+      "community_name": "Patrimonial Dashboard Template",
       "id": "url_viatura_create"
     },
     {
@@ -19339,9 +19238,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 14,
+      "community": 27,
       "norm_label": "url: viatura_edit",
-      "community_name": "Tracker List Template",
+      "community_name": "Patrimonial Dashboard Template",
       "id": "url_viatura_edit"
     },
     {
@@ -19353,9 +19252,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 14,
+      "community": 27,
       "norm_label": "url: viatura_delete",
-      "community_name": "Tracker List Template",
+      "community_name": "Patrimonial Dashboard Template",
       "id": "url_viatura_delete"
     }
   ],
@@ -40736,16 +40635,6 @@
       "relation": "implements",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "cadastros/templates/cadastros/cliente_list.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "cadastros_templates_cadastros_cliente_list",
-      "target": "cadastros_templates_cadastros_base"
-    },
-    {
-      "relation": "implements",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
       "source_file": "cadastros/templates/cadastros/colete_form.html",
       "source_location": null,
       "weight": 1.0,
@@ -41040,16 +40929,6 @@
       "source_location": null,
       "weight": 1.0,
       "source": "cadastros_templates_cadastros_boletim_list",
-      "target": "model_cliente"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "cadastros/templates/cadastros/boletim_list.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "cadastros_templates_cadastros_boletim_list",
       "target": "model_os"
     },
     {
@@ -41213,16 +41092,6 @@
       "target": "model_os"
     },
     {
-      "relation": "shares_data_with",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "cadastros/templates/cadastros/boletim_list.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "model_os",
-      "target": "model_cliente"
-    },
-    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
@@ -41246,71 +41115,11 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "cadastros/templates/cadastros/cliente_force_delete_confirm.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "cadastros_templates_cadastros_cliente_force_delete_confirm",
-      "target": "model_cliente"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "cadastros/templates/cadastros/cliente_form.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "cadastros_templates_cadastros_cliente_form",
-      "target": "model_cliente"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
       "source_file": "cadastros/templates/cadastros/cliente_form.html",
       "source_location": null,
       "weight": 1.0,
       "source": "cadastros_templates_cadastros_cliente_form",
       "target": "service_cnpj_ws"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "cadastros/templates/cadastros/cliente_list.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "cadastros_templates_cadastros_cliente_list",
-      "target": "model_cliente"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "cadastros/templates/cadastros/cliente_list.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "cadastros_templates_cadastros_cliente_list",
-      "target": "url_cliente_create"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "cadastros/templates/cadastros/cliente_list.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "cadastros_templates_cadastros_cliente_list",
-      "target": "url_cliente_delete"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "cadastros/templates/cadastros/cliente_list.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "cadastros_templates_cadastros_cliente_list",
-      "target": "url_cliente_edit"
     },
     {
       "relation": "references",
@@ -42065,23 +41874,6 @@
   ],
   "hyperedges": [
     {
-      "id": "boletim_lifecycle_os_cliente_preco",
-      "label": "Boletim de Medi\u00e7\u00e3o lifecycle \u2014 links OS, client, price table, and status workflow (aberto\u2192faturado)",
-      "nodes": [
-        "model_boletim",
-        "model_os",
-        "model_cliente",
-        "model_tabela_preco",
-        "url_boletim_finalizar",
-        "url_boletim_export_pdf",
-        "url_boletim_export_xlsx"
-      ],
-      "relation": "participate_in",
-      "confidence": "EXTRACTED",
-      "confidence_score": 0.95,
-      "source_file": "cadastros/templates/cadastros/boletim_list.html"
-    },
-    {
       "id": "patrimonial_employee_consulta_processo",
       "label": "Patrimonial employee background check \u2014 Funcionario Patrimonial, Freelance, and Consulta Processo share judicial process monitoring",
       "nodes": [
@@ -42149,5 +41941,5 @@
       "source_file": "cadastros/templates/cadastros/viatura_form.html"
     }
   ],
-  "built_at_commit": "d9c7f104e54df12f972adc871cd39eb6bcb27652"
+  "built_at_commit": "953bcab8e50d97950c65ca357139f563287925b7"
 }

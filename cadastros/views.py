@@ -6185,7 +6185,7 @@ def api_cliente_operacoes(request, token):
                 'desconto': float(b.desconto),
                 'valor_total': float(b.valor_total),
                 'observacoes': b.observacoes or '',
-                'tabela_preco': b.tabela_preco.descricao if b.tabela_preco else None,
+                'tabela_preco': str(b.tabela_preco) if b.tabela_preco else None,
                 'criado_em': _dt(b.criado_em),
                 'atualizado_em': _dt(b.atualizado_em),
             }
