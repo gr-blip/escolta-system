@@ -6073,3 +6073,359 @@ def diarias_lancamento_deletar(request):
         return JsonResponse({'ok': True})
     except DiariasLancamento.DoesNotExist:
         return JsonResponse({'ok': False, 'erro': 'Lançamento não encontrado'}, status=404)
+
+
+# ==============================================================================
+# API DO CLIENTE (portal agregador - Spartacus). Read-only.
+# ==============================================================================
+
+def api_cliente_operacoes(request, token):
+    """API JSON (read-only) das operações de um cliente, identificado pelo token_portal.
+    Consumida por sistemas agregadores (ex: painel do Spartacus).
+    Segurança: token secreto na URL + (opcional) header X-API-Key = settings.PORTAL_API_KEY."""
+    from .models import Cliente, OrdemServico, BoletimMedicao
+    from django.conf import settings as _s
+
+    api_key_req = getattr(_s, 'PORTAL_API_KEY', '')
+    if api_key_req and request.headers.get('X-API-Key') != api_key_req:
+        return JsonResponse({'erro': 'API key inválida'}, status=401)
+
+    cliente = get_object_or_404(Cliente, token_portal=token)
+    oss = (OrdemServico.objects.filter(cliente=cliente).order_by('-criado_em')
+           .select_related('equipe', 'operacional')
+           .prefetch_related('fotos_marcos', 'veiculos', 'veiculos__fotos',
+                              'incidentes', 'incidentes__fotos',
+                              'paradas', 'paradas__fotos',
+                              'trocas_motorista', 'trocas_motorista__fotos',
+                              'assinaturas'))
+    boletins = {b.os_id: b for b in BoletimMedicao.objects.filter(os__cliente=cliente)}
+
+    def _dt(d):
+        return d.isoformat() if d else None
+
+    def _foto_url(f):
+        if not f:
+            return None
+        try:
+            return request.build_absolute_uri(f.url)
+        except Exception:
+            return None
+
+    # ponytail: despesas saem vazias neste sistema, reativar quando a FK voltar.
+    # O model DespesaOS aqui tem um @property 'os' que sobrescreve a ForeignKey de
+    # mesmo nome - a migration 0025 chegou a REMOVER a coluna do banco. Entao nao
+    # existe como saber de qual OS e cada despesa. Bug pre-existente, nao deste
+    # endpoint; corrigir exige migration nova e decidir o que fazer com as linhas
+    # orfas, o que nao cabe aqui.
+
+    operacoes = []
+    for o in oss:
+        b = boletins.get(o.pk)
+
+        # --- Agente 1 ---
+        agente1 = None
+        if o.snap_agente1_nome:
+            agente1 = {
+                'nome': o.snap_agente1_nome,
+                'cpf': o.snap_agente1_cpf or '',
+                'rg': o.snap_agente1_rg or '',
+                'telefone': o.snap_agente1_telefone or '',
+                'cnh': o.snap_agente1_cnh or '',
+                'val_cnh': _dt(o.snap_agente1_val_cnh),
+                'cnv': o.snap_agente1_cnv or '',
+                'val_cnv': _dt(o.snap_agente1_val_cnv),
+                'endereco': o.snap_agente1_endereco or '',
+                'foto': o.snap_agente1_foto or '',
+            }
+
+        # --- Agente 2 ---
+        agente2 = None
+        if o.snap_agente2_nome:
+            agente2 = {
+                'nome': o.snap_agente2_nome,
+                'cpf': o.snap_agente2_cpf or '',
+                'rg': o.snap_agente2_rg or '',
+                'telefone': o.snap_agente2_telefone or '',
+                'cnh': o.snap_agente2_cnh or '',
+                'val_cnh': _dt(o.snap_agente2_val_cnh),
+                'cnv': o.snap_agente2_cnv or '',
+                'val_cnv': _dt(o.snap_agente2_val_cnv),
+                'endereco': o.snap_agente2_endereco or '',
+                'foto': o.snap_agente2_foto or '',
+            }
+
+        # --- Viatura ---
+        viatura = None
+        if o.snap_viatura_modelo or o.snap_viatura_placa:
+            viatura = {
+                'modelo': o.snap_viatura_modelo or '',
+                'placa': o.snap_viatura_placa or '',
+                'cor': o.snap_viatura_cor or '',
+                'frota': o.snap_viatura_frota or '',
+                'mct': o.snap_viatura_mct or '',
+                'renavan': o.snap_viatura_renavan or '',
+            }
+
+        # --- Boletim detalhado ---
+        boletim = None
+        if b:
+            boletim = {
+                'status': b.status,
+                'status_display': b.get_status_display(),
+                'numero_nota': b.numero_nota or '',
+                'horas_realizadas': b.horas_realizadas,
+                'horas_excedentes': b.horas_excedentes,
+                'km_realizado': b.km_realizado,
+                'km_excedente': b.km_excedente,
+                'valor_escolta': float(b.valor_escolta),
+                'valor_excedente_km': float(b.valor_excedente_km),
+                'valor_excedente_hora': float(b.valor_excedente_hora),
+                'valor_pedagio': float(b.valor_pedagio),
+                'acrescimo': float(b.acrescimo),
+                'desconto': float(b.desconto),
+                'valor_total': float(b.valor_total),
+                'observacoes': b.observacoes or '',
+                'tabela_preco': b.tabela_preco.descricao if b.tabela_preco else None,
+                'criado_em': _dt(b.criado_em),
+                'atualizado_em': _dt(b.atualizado_em),
+            }
+
+        # --- Operacional (marcos, KM, GPS, pedágio) ---
+        op = getattr(o, 'operacional', None)
+        operacional = None
+        if op:
+            marcos = ('inicio_viagem', 'chegada_operacao', 'inicio_operacao',
+                      'termino_operacao', 'termino_viagem')
+            operacional = {
+                'numero_folha': op.numero_folha or '',
+                'pedagio': float(op.pedagio) if op.pedagio is not None else None,
+                'marcos': {
+                    m: {
+                        'data_hora': _dt(getattr(op, m)),
+                        'km': getattr(op, 'km_%s' % m),
+                        'lat': float(getattr(op, 'gps_%s_lat' % m)) if getattr(op, 'gps_%s_lat' % m) is not None else None,
+                        'lng': float(getattr(op, 'gps_%s_lng' % m)) if getattr(op, 'gps_%s_lng' % m) is not None else None,
+                    } for m in marcos
+                },
+            }
+
+        # --- Fotos dos marcos ---
+        fotos_marcos = [{
+            'marco': f.marco,
+            'marco_display': f.get_marco_display(),
+            'foto': _foto_url(f.foto),
+            'latitude': float(f.latitude) if f.latitude is not None else None,
+            'longitude': float(f.longitude) if f.longitude is not None else None,
+            'criado_em': _dt(f.criado_em),
+        } for f in o.fotos_marcos.all()]
+
+        # --- Veículos escoltados (com fotos antes/depois) ---
+        veiculos_escoltados = [{
+            'veiculo': v.veiculo,
+            'placa_cavalo': v.placa_cavalo,
+            'placa_carreta': v.placa_carreta,
+            'placa_carreta2': v.placa_carreta2,
+            'motorista': v.motorista,
+            'fotos': [{
+                'momento': fv.momento,
+                'foto': _foto_url(fv.foto),
+                'criado_em': _dt(fv.criado_em),
+            } for fv in v.fotos.all()],
+        } for v in o.veiculos.all()]
+
+        # --- Incidentes (com fotos) ---
+        incidentes = [{
+            'tipo': i.tipo,
+            'tipo_display': i.get_tipo_display(),
+            'gravidade': i.gravidade,
+            'descricao': i.descricao,
+            'ocorrido_em': _dt(i.ocorrido_em),
+            'latitude': float(i.latitude) if i.latitude is not None else None,
+            'longitude': float(i.longitude) if i.longitude is not None else None,
+            'fotos': [_foto_url(fi.foto) for fi in i.fotos.all()],
+        } for i in o.incidentes.all()]
+
+        # --- Paradas (com fotos) ---
+        paradas = [{
+            'motivo': p.motivo,
+            'motivo_display': p.get_motivo_display(),
+            'descricao': p.descricao,
+            'inicio': _dt(p.inicio),
+            'fim': _dt(p.fim),
+            'latitude': float(p.latitude) if p.latitude is not None else None,
+            'longitude': float(p.longitude) if p.longitude is not None else None,
+            'fotos': [_foto_url(fp.foto) for fp in p.fotos.all()],
+        } for p in o.paradas.all()]
+
+        # --- Trocas de motorista (com fotos) ---
+        trocas_motorista = [{
+            'motorista_saindo': t.motorista_saindo,
+            'motorista_entrando': t.motorista_entrando,
+            'ocorrido_em': _dt(t.ocorrido_em),
+            'motivo': t.motivo,
+            'fotos': [_foto_url(ft.foto) for ft in t.fotos.all()],
+        } for t in o.trocas_motorista.all()]
+
+        # --- Assinaturas digitais ---
+        assinaturas = [{
+            'tipo': a.tipo,
+            'tipo_display': a.get_tipo_display(),
+            'nome': a.nome,
+            'imagem': _foto_url(a.imagem),
+            'criado_em': _dt(a.criado_em),
+        } for a in o.assinaturas.all()]
+
+        operacoes.append({
+            'numero': str(o.numero),
+            'status': o.status,
+            'status_display': o.get_status_display(),
+            'solicitante': o.solicitante or '',
+            'forma_solicitacao': o.forma_solicitacao or '',
+            'forma_solicitacao_display': o.get_forma_solicitacao_display(),
+            'tipo_viagem': o.tipo_viagem or '',
+            'tipo_viagem_display': o.get_tipo_viagem_display(),
+            'imediata': o.imediata,
+            'cidade_origem': o.cidade_origem,
+            'uf_origem': o.uf_origem,
+            'cidade_destino': o.cidade_destino,
+            'uf_destino': o.uf_destino,
+            'previsao_inicio': _dt(o.previsao_inicio),
+            'previsao_retorno': _dt(o.previsao_retorno),
+            'criado_em': _dt(o.criado_em),
+            'atualizado_em': _dt(o.atualizado_em),
+            'finalizada_em': _dt(o.finalizada_em),
+            'cancelada_em': _dt(o.cancelada_em),
+            'tipo_cancelamento': o.tipo_cancelamento or None,
+            'observacoes': o.observacoes or '',
+            'equipe': o.snap_equipe_nome or (o.equipe.nome if o.equipe else ''),
+            'agente1': agente1,
+            'agente2': agente2,
+            'viatura': viatura,
+            'boletim': boletim,
+            'despesas': [],         # ver nota sobre DespesaOS.os acima
+            'operacional': operacional,
+            'fotos_marcos': fotos_marcos,
+            'veiculos_escoltados': veiculos_escoltados,
+            'incidentes': incidentes,
+            'paradas': paradas,
+            'trocas_motorista': trocas_motorista,
+            'assinaturas': assinaturas,
+            'abastecimentos': [],   # o JR nao tem esse modulo
+        })
+
+    return JsonResponse({
+        'sistema': getattr(_s, 'SISTEMA_NOME', '') or request.get_host(),
+        'cliente': {
+            'razao_social': cliente.razao_social,
+            'nome_fantasia': cliente.nome_fantasia,
+            'cnpj': cliente.cnpj,
+        },
+        'total_os': oss.count(),
+        'operacoes': operacoes,
+    })
+
+
+# API DO CLIENTE - POSICAO AO VIVO DAS VIATURAS (janela da operacao)
+# ==============================================================================
+# O cliente (ex: painel do Spartacus) ve a viatura no mapa **so entre a Chegada
+# Operacao e o Termino Operacao**. Antes disso a equipe ainda esta se deslocando
+# da base, e depois esta voltando - trajeto interno da escolta, que nao e da
+# conta de quem contratou.
+#
+# A REGRA VALE AQUI, no servidor. Escondar so na tela do cliente nao adiantaria:
+# o dado sairia da empresa do mesmo jeito pra quem chamasse a API direto.
+
+JANELA_POSICAO_TTL = 120     # 2 min: dez pessoas com o mapa aberto custam como uma
+
+
+def _os_em_operacao(cliente):
+    """OS deste cliente que estao DENTRO da janela: chegou na origem e ainda
+    nao terminou. Cancelada nunca entra."""
+    from .models import OrdemServico
+    return (OrdemServico.objects
+            .filter(cliente=cliente,
+                    status__in=['aberta', 'em_viagem', 'em_operacao', 'encerrando'],
+                    operacional__chegada_operacao__isnull=False,
+                    operacional__termino_operacao__isnull=True)
+            .select_related('operacional', 'equipe', 'equipe__viatura'))
+
+
+@csrf_exempt
+def api_cliente_posicoes(request, token):
+    """Posicao atual das viaturas em operacao para este cliente.
+
+    Mesma autenticacao da rota de operacoes: token secreto na URL +
+    X-API-Key opcional. So devolve viatura de OS dentro da janela.
+    """
+    if request.method != 'GET':
+        return JsonResponse({'erro': 'Metodo nao permitido'}, status=405)
+    from django.conf import settings as _s
+    from django.core.cache import cache
+    from .models import Cliente
+
+    api_key_req = getattr(_s, 'PORTAL_API_KEY', '')
+    if api_key_req and request.headers.get('X-API-Key') != api_key_req:
+        return JsonResponse({'erro': 'API key inválida'}, status=401)
+
+    cliente = get_object_or_404(Cliente, token_portal=token)
+
+    cache_key = f'api_posicoes_{token}'
+    pronto = cache.get(cache_key)
+    if pronto is not None:
+        return JsonResponse(pronto)
+
+    # placa -> dados da OS. snap primeiro, equipe como reserva (mesmo padrao do
+    # rastreamento: OS antiga pode nao ter snapshot).
+    por_placa = {}
+    for o in _os_em_operacao(cliente):
+        placa = (o.snap_viatura_placa or '').strip().upper()
+        if not placa and o.equipe and o.equipe.viatura:
+            placa = (o.equipe.viatura.placa or '').strip().upper()
+        if not placa:
+            continue
+        op = getattr(o, 'operacional', None)
+        por_placa[placa] = {
+            'os_numero': o.numero,
+            'os_status': o.status,
+            'origem':  f'{o.cidade_origem}/{o.uf_origem}'.strip('/'),
+            'destino': f'{o.cidade_destino}/{o.uf_destino}'.strip('/'),
+            'equipe': o.snap_equipe_nome or '',
+            'agentes': ' / '.join(filter(None, [o.snap_agente1_nome, o.snap_agente2_nome])),
+            'inicio_operacao': op.inicio_operacao.isoformat() if op and op.inicio_operacao else None,
+            'chegada_operacao': op.chegada_operacao.isoformat() if op and op.chegada_operacao else None,
+        }
+
+    viaturas = []
+    if por_placa:
+        # uma chamada traz TODAS as placas, com cache proprio de 60s - filtrar
+        # aqui nao custa consulta extra ao rastreador.
+        try:
+            from .omnilink import get_todas_posicoes_atuais
+            for p in get_todas_posicoes_atuais():
+                placa = (p.get('placa') or '').strip().upper()
+                if placa not in por_placa:
+                    continue
+                info = dict(por_placa[placa])
+                info.update({
+                    'placa': placa,
+                    'lat': p.get('lat'),
+                    'lng': p.get('lng'),
+                    'velocidade': p.get('velocidade') or 0,
+                    'data_utc': p.get('data_hora') or '',
+                    'endereco': p.get('endereco') or '',
+                    'fonte': 'omnilink',
+                })
+                viaturas.append(info)
+        except Exception as e:
+            logger.warning('api_cliente_posicoes: Omnilink falhou: %s', e)
+
+    resposta = {
+        'cliente': {'razao_social': cliente.razao_social,
+                    'nome_fantasia': cliente.nome_fantasia},
+        'total': len(viaturas),
+        'em_operacao': len(por_placa),     # quantas OS estao na janela
+        'viaturas': viaturas,
+        'janela': 'Chegada Operação → Término Operação',
+    }
+    cache.set(cache_key, resposta, JANELA_POSICAO_TTL)
+    return JsonResponse(resposta)

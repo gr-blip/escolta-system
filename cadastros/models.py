@@ -1,5 +1,6 @@
 ﻿# Outras importações...
 from .models_perfil import PerfilUsuario
+import uuid
 from django.db import models
 
 
@@ -163,6 +164,10 @@ class Cliente(models.Model):
     cep = models.CharField(max_length=9, blank=True, verbose_name='CEP')
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
+    # Chave secreta que o painel agregador (Spartacus) usa pra ler as OS deste
+    # cliente pela API. Vale como senha: nao expor em tela publica nem em log.
+    token_portal = models.UUIDField(default=uuid.uuid4, editable=False, unique=True,
+                                    verbose_name='Token Portal do Cliente')
 
     class Meta:
         verbose_name = 'Cliente'

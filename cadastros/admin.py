@@ -34,6 +34,9 @@ class ArmamentoAdmin(admin.ModelAdmin):
 class ClienteAdmin(admin.ModelAdmin):
     list_display = ['razao_social', 'cnpj', 'cidade_uf']
     search_fields = ['razao_social', 'cnpj']
+    # o token e a senha que o painel agregador usa pra ler as OS deste cliente;
+    # fica visivel aqui (so admin) pra poder ser copiado, e nunca editavel
+    readonly_fields = ['token_portal']
 
 
 from .models import Colete

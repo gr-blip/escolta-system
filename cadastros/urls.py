@@ -173,4 +173,8 @@ urlpatterns += [
     # Auto-consulta agendada (cron externo chama esta URL)
     path('patrimonial/auto-consultar/<str:token>/', views.auto_consultar_processos, name='auto_consultar_processos'),
     path('patrimonial/exportar-pdf/', views.patrimonial_export_pdf, name='patrimonial_export_pdf'),
+
+    # API read-only consumida pelo painel agregador (Spartacus)
+    path('api/v1/cliente/<uuid:token>/operacoes/', views.api_cliente_operacoes, name='api_cliente_operacoes'),
+    path('api/v1/cliente/<uuid:token>/posicoes/',  views.api_cliente_posicoes,  name='api_cliente_posicoes'),
 ]
