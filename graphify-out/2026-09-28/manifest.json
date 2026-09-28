@@ -70,9 +70,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "cadastros/admin.py": {
-    "mtime": 1782844264.0,
-    "ast_hash": "f31dd7e893d68162fe422375f79fe90b",
-    "semantic_hash": "f31dd7e893d68162fe422375f79fe90b"
+    "mtime": 1790607214.0,
+    "ast_hash": "2aca6092de6a94a6d0b383a1f36e14f6",
+    "semantic_hash": ""
   },
   "cadastros/admin_perfil.py": {
     "mtime": 1782844264.0,
@@ -425,9 +425,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "cadastros/models.py": {
-    "mtime": 1783424436.0,
-    "ast_hash": "22c84e2b6e018136d34424bdc4fab9fc",
-    "semantic_hash": "22c84e2b6e018136d34424bdc4fab9fc"
+    "mtime": 1790606974.0,
+    "ast_hash": "8e029d72b90185fcc8ae5969483be409",
+    "semantic_hash": ""
   },
   "cadastros/models_perfil.py": {
     "mtime": 1782844264.0,
@@ -485,13 +485,13 @@
     "semantic_hash": "c3ef37925e97b312afb36ff73858c3ec"
   },
   "cadastros/urls.py": {
-    "mtime": 1790523306.0,
-    "ast_hash": "f61837af9f05a7ba489f3f96869e2b72",
+    "mtime": 1790607030.0,
+    "ast_hash": "b163fd23132d3bd1dd002d8b2fa63319",
     "semantic_hash": ""
   },
   "cadastros/views.py": {
-    "mtime": 1790523306.0,
-    "ast_hash": "9c1abdfd8053122373796e98c9d7c215",
+    "mtime": 1790607184.0,
+    "ast_hash": "6e184a0d3a5c65f8842af10052e95790",
     "semantic_hash": ""
   },
   "escolta_system/__init__.py": {
@@ -1097,6 +1097,11 @@
   ".claude/skills/ponytail/SKILL.md": {
     "mtime": 1789001870.0,
     "ast_hash": "33f013ce03c8c66a6002ef941a433b81",
+    "semantic_hash": ""
+  },
+  "cadastros/migrations/0049_cliente_token_portal.py": {
+    "mtime": 1790606974.0,
+    "ast_hash": "4d48165e84b803774fa855d8159a4c88",
     "semantic_hash": ""
   }
 }

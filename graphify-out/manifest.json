@@ -615,9 +615,9 @@
     "semantic_hash": "29f9e5951d93e044c5c87c5b633c771e"
   },
   "cadastros/templates/cadastros/cliente_list.html": {
-    "mtime": 1780660320.0,
-    "ast_hash": "279b9ac76f576b642a34b58f7ac5bafb",
-    "semantic_hash": "279b9ac76f576b642a34b58f7ac5bafb"
+    "mtime": 1790607714.0,
+    "ast_hash": "0256208c2e6ee64ab9dc2a1c2b90f64b",
+    "semantic_hash": ""
   },
   "cadastros/templates/cadastros/colete_form.html": {
     "mtime": 1782844264.0,
