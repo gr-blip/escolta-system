@@ -1,16 +1,16 @@
 # Graph Report - Sistema Escolta  (2026-09-28)
 
 ## Corpus Check
-- 156 files · ~469,836 words
+- 156 files · ~469,993 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1714 nodes · 2216 edges · 189 communities (120 shown, 69 thin omitted)
+- 1716 nodes · 2219 edges · 190 communities (120 shown, 70 thin omitted)
 - Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 267 edges (avg confidence: 0.61)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `953bcab8`
+- Built from commit: `bf06a696`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -142,6 +142,7 @@
 - excluir_espelhamento
 - 6. Integrações Externas
 - 4. Fluxo Operacional Completo
+- CONTRATO_JR_WILKER_001_2026_REVISADO_2_c5a6b0ec.md
 - os_field_troca_motorista_delete
 - os_field_veiculo_salvar
 - os_gerar_link
@@ -224,7 +225,7 @@
 - **Patrimonial Document Alert Flow — CNH, CNV, Curso Vencimento** — cadastros_templates_cadastros_patrimonial_dashboard, concept_agente, url_funcionario_patrimonial_edit [EXTRACTED 0.90]
 - **Viatura-Rastreador Integration — Vehicle linked to Tracker** — cadastros_templates_cadastros_viatura_form, concept_viatura, concept_rastreador, url_rastreador_create [EXTRACTED 0.95]
 
-## Communities (189 total, 69 thin omitted)
+## Communities (190 total, 70 thin omitted)
 
 ### Community 0 - "omnilink.py"
 Cohesion: 0.11
@@ -232,11 +233,11 @@ Nodes (12): Command, BaseCommand, Autenticação via Service Account JSON., Aute
 
 ### Community 2 - "views.py"
 Cohesion: 0.03
-Nodes (55): Equipe, agente_create(), agente_delete(), agente_export_pdf(), agente_toggle_ativo(), armamento_create(), armamento_delete(), auto_consultar_processos() (+47 more)
+Nodes (53): Equipe, agente_create(), agente_delete(), agente_export_pdf(), armamento_create(), armamento_delete(), auto_consultar_processos(), clientes_json() (+45 more)
 
 ### Community 3 - "driverid_service.py"
 Cohesion: 0.06
-Nodes (43): main(), run_command(), BytesIO, Command, BaseCommand, Command, BaseCommand, cadastros/management/commands/sincronizar_local.py ──────────────────────────── (+35 more)
+Nodes (44): main(), run_command(), BytesIO, Command, BaseCommand, cadastros/management/commands/consultar_processos.py ━━━━━━━━━━━━━━━━━━━━━━━━━━, Command, BaseCommand (+36 more)
 
 ### Community 4 - "Boletim List View"
 Cohesion: 0.19
@@ -247,20 +248,20 @@ Cohesion: 0.05
 Nodes (43): 1. Think Before Code, 2. Isolate Work, 3. Plan Before Implement, 4. Test First, 5. Review Before Merge, Brainstorming, Common Mistakes, Continuous Improvement (+35 more)
 
 ### Community 6 - "Cliente"
-Cohesion: 0.18
-Nodes (34): AgenteAdmin, ArmamentoAdmin, ClienteAdmin, ColeteAdmin, ConsultaProcessoAdmin, RastreadorAdmin, ViaturaAdmin, AgenteForm (+26 more)
+Cohesion: 0.20
+Nodes (31): AgenteAdmin, ArmamentoAdmin, ClienteAdmin, ColeteAdmin, ConsultaProcessoAdmin, RastreadorAdmin, ViaturaAdmin, AgenteForm (+23 more)
 
 ### Community 7 - "os_pdf.py"
 Cohesion: 0.09
-Nodes (39): _agent_block(), _dados_operacao_block(), _fmt_dt(), _fotos_marcos_block(), _fotos_veiculos_block(), gerar_os_pdf(), _header_block(), _identificacao_os_block() (+31 more)
+Nodes (41): _agent_block(), _dados_operacao_block(), _fmt_dt(), _fotos_marcos_block(), _fotos_veiculos_block(), gerar_os_pdf(), _header_block(), _identificacao_os_block() (+33 more)
 
 ### Community 8 - "Command"
 Cohesion: 0.08
 Nodes (21): OrdemServico, os_cancelar(), os_cliente_save(), os_desativar_link(), os_detalhe(), os_detalhe_novo(), os_email_html(), os_finalizar() (+13 more)
 
 ### Community 9 - "recomprimir_fotos.py"
-Cohesion: 0.11
-Nodes (16): Command, _corrigir_orientacao(), BaseCommand, Management command para recomprimir fotos existentes no sistema.  Uso:     py, Recomprime um arquivo de imagem no disco.     Retorna (antes_kb, depois_kb, nov, _recomprimir_arquivo(), FotoMarco, FotoParada (+8 more)
+Cohesion: 0.06
+Nodes (30): Command, _corrigir_orientacao(), BaseCommand, Management command para recomprimir fotos existentes no sistema.  Uso:     py, Recomprime um arquivo de imagem no disco.     Retorna (antes_kb, depois_kb, nov, _recomprimir_arquivo(), Migration, Migration (+22 more)
 
 ### Community 10 - "FuncionarioPatrimonial"
 Cohesion: 0.12
@@ -274,10 +275,6 @@ Nodes (16): cliente_create(), cliente_deletar_definitivo(), cliente_inativar(), 
 Cohesion: 0.12
 Nodes (19): Base Template, Cliente Permanent Delete Confirm, Cliente Form View, Cliente Inativar/Reativar View, Colete Form View, Dashboard Operacional View, OS Cancel Template, New OS Form Template (+11 more)
 
-### Community 13 - "_pode_faturamento"
-Cohesion: 0.22
-Nodes (8): 1.1 Stack Técnica, 1. Visão Geral do Sistema, 3.1 Relações Principais, 3. Estrutura do Banco de Dados, 9.1 Pontos de Atenção, 9.2 Comandos de Management Disponíveis, 9.3 Convenções de Código, 9. Observações Técnicas e Próximos Passos
-
 ### Community 14 - "Tracker List Template"
 Cohesion: 0.40
 Nodes (6): Tracker List Template, Vehicle Form Template, Rastreador (Tracker), URL: rastreador_create, URL: rastreador_delete, URL: rastreador_edit
@@ -289,6 +286,10 @@ Nodes (41): Assets, Bad Descriptions, Bad Names, Common Skill Patterns, Content 
 ### Community 16 - "OrdemServico"
 Cohesion: 0.40
 Nodes (3): Command, BaseCommand, Comando de uso único: remove o cliente de teste WILKER e a OS vinculada. Uso: p
+
+### Community 17 - "OSOperacional"
+Cohesion: 0.22
+Nodes (8): 1.1 Stack Técnica, 1. Visão Geral do Sistema, 3.1 Relações Principais, 3. Estrutura do Banco de Dados, 9.1 Pontos de Atenção, 9.2 Comandos de Management Disponíveis, 9.3 Convenções de Código, 9. Observações Técnicas e Próximos Passos
 
 ### Community 18 - "Price Table List Template"
 Cohesion: 0.33
@@ -331,8 +332,8 @@ Cohesion: 0.50
 Nodes (4): Diárias Agentes View, Diárias Export XLSX URL, Diárias Lancamento Salvar URL, OS Detalhe URL
 
 ### Community 29 - "Command"
-Cohesion: 0.08
-Nodes (19): Migration, Migration, AssinaturaOS, DespesaOS, _foto_upload_path(), FotoIncidente, FotoTrocaMotorista, Meta (+11 more)
+Cohesion: 0.29
+Nodes (5): DespesaOS, _foto_upload_path(), Salva fotos em media/os_fotos/<numero_os>/<tipo>/<filename>, Despesas e créditos registrados pelo agente durante a OS., os_field_despesa_delete()
 
 ### Community 30 - "User List Template"
 Cohesion: 0.05
@@ -428,7 +429,7 @@ Nodes (8): 2.4 Faturamento, 2.5 Patrimonial, 2.6 Dashboards, 2. Módulos do Sist
 
 ### Community 104 - "diarias_lancamento_deletar"
 Cohesion: 0.07
-Nodes (17): cadastros/management/commands/backup_to_google.py ─────────────────────────────, cadastros/management/commands/consultar_processos.py ━━━━━━━━━━━━━━━━━━━━━━━━━━, Command, BaseCommand, Command, BaseCommand, FuncionarioPatrimonial, Retorna o status de vencimento de uma data:           - 'vencido'  : ja passou (+9 more)
+Nodes (19): FreelanceForm, Form para Freelance — cargo livre, sem tipo., cadastros/management/commands/backup_to_google.py ─────────────────────────────, Command, BaseCommand, Command, BaseCommand, FuncionarioPatrimonial (+11 more)
 
 ### Community 105 - "diarias_lancamento_excluir_auto"
 Cohesion: 0.29
@@ -490,11 +491,11 @@ Nodes (3): ⚙️ Infraestrutura, Variáveis de ambiente no Railway, Volume de m
 Cohesion: 0.50
 Nodes (4): excluir_espelhamento(), Exclui/cancela um espelhamento pelo IdSolicitacao., espelhamento_cancelar_ajax(), AJAX POST — cancela/exclui espelhamento.
 
-### Community 126 - "6. Integrações Externas"
+### Community 127 - "4. Fluxo Operacional Completo"
 Cohesion: 0.50
 Nodes (4): 6.1 Omnilink (Rastreamento GPS), 6.2 InfoSimples (Certidões), 6.3 Nominatim (Geocodificação), 6. Integrações Externas
 
-### Community 127 - "4. Fluxo Operacional Completo"
+### Community 128 - "CONTRATO_JR_WILKER_001_2026_REVISADO_2_c5a6b0ec.md"
 Cohesion: 0.67
 Nodes (3): 4.1 Ciclo de uma OS, 4.2 Gestão de Fotos e Arquivos, 4. Fluxo Operacional Completo
 
@@ -649,16 +650,16 @@ Nodes (4): Boundaries, Examples, Format, Scoring
 ## Knowledge Gaps
 - **716 isolated node(s):** `kg`, `layers`, `tour`, `fullKg`, `uaDir` (+711 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **69 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **70 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `PerfilUsuario` connect `Command` to `2.1 Cadastros (Base)`, `omnilink.py`, `views.py`, `Command`, `_garantir_tabela_espelhamento`, `fix_total_processos.py`, `Cliente`, `diarias_lancamento_deletar`, `recomprimir_fotos.py`, `diarias_lancamento_salvar`, `Command`, `FuncionarioPatrimonial`, `DespesaOS`, `OSOperacional`, `Mirroring History Migration`?**
+- **Why does `PerfilUsuario` connect `recomprimir_fotos.py` to `2.1 Cadastros (Base)`, `omnilink.py`, `views.py`, `Command`, `_garantir_tabela_espelhamento`, `fix_total_processos.py`, `Cliente`, `diarias_lancamento_deletar`, `Command`, `diarias_lancamento_salvar`, `FuncionarioPatrimonial`, `_pode_faturamento`, `DespesaOS`, `Mirroring History Migration`, `Command`?**
   _High betweenness centrality (0.015) - this node is a cross-community bridge._
-- **Why does `FuncionarioPatrimonial` connect `diarias_lancamento_deletar` to `omnilink.py`, `views.py`, `driverid_service.py`, `Cliente`, `Command`?**
-  _High betweenness centrality (0.013) - this node is a cross-community bridge._
-- **Why does `DriverIDError` connect `driverid_service.py` to `diarias_lancamento_deletar`, `views.py`?**
+- **Why does `FuncionarioPatrimonial` connect `diarias_lancamento_deletar` to `omnilink.py`, `views.py`, `driverid_service.py`, `Cliente`, `recomprimir_fotos.py`?**
+  _High betweenness centrality (0.012) - this node is a cross-community bridge._
+- **Why does `DriverIDError` connect `driverid_service.py` to `views.py`?**
   _High betweenness centrality (0.012) - this node is a cross-community bridge._
 - **Are the 25 inferred relationships involving `FuncionarioPatrimonial` (e.g. with `AgenteForm` and `ArmamentoForm`) actually correct?**
   _`FuncionarioPatrimonial` has 25 INFERRED edges - model-reasoned connections that need verification._

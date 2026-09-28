@@ -6079,6 +6079,32 @@ def diarias_lancamento_deletar(request):
 # API DO CLIENTE (portal agregador - Spartacus). Read-only.
 # ==============================================================================
 
+def _api_agente(o, n, _dt, url_foto):
+    """Dados do agente N pro payload da API: usa o snapshot da OS e, quando ele
+    esta vazio, cai pra equipe ao vivo (mesmo padrao 'snap primario, FK
+    reserva' do rastreamento). Sem nenhum dos dois, devolve None."""
+    snap = lambda campo: getattr(o, 'snap_agente%d_%s' % (n, campo), None)
+    if snap('nome'):
+        return {
+            'nome': snap('nome'), 'cpf': snap('cpf') or '', 'rg': snap('rg') or '',
+            'telefone': snap('telefone') or '', 'cnh': snap('cnh') or '',
+            'val_cnh': _dt(snap('val_cnh')), 'cnv': snap('cnv') or '',
+            'val_cnv': _dt(snap('val_cnv')), 'endereco': snap('endereco') or '',
+            'foto': url_foto(snap('foto')),
+        }
+    ag = getattr(o.equipe, 'agente%d' % n, None) if o.equipe_id else None
+    if not ag:
+        return None
+    return {
+        'nome': ag.nome, 'cpf': ag.cpf or '', 'rg': ag.rg or '',
+        'telefone': ag.telefone or '', 'cnh': ag.cnh or '',
+        'val_cnh': _dt(getattr(ag, 'cnh_validade', None)),
+        'cnv': ag.cnv or '', 'val_cnv': _dt(getattr(ag, 'cnv_validade', None)),
+        'endereco': getattr(ag, 'endereco', '') or '',
+        'foto': url_foto(ag.foto),
+    }
+
+
 def api_cliente_operacoes(request, token):
     """API JSON (read-only) das operações de um cliente, identificado pelo token_portal.
     Consumida por sistemas agregadores (ex: painel do Spartacus).
@@ -6092,7 +6118,7 @@ def api_cliente_operacoes(request, token):
 
     cliente = get_object_or_404(Cliente, token_portal=token)
     oss = (OrdemServico.objects.filter(cliente=cliente).order_by('-criado_em')
-           .select_related('equipe', 'operacional')
+           .select_related('equipe', 'equipe__agente1', 'equipe__agente2', 'operacional')
            .prefetch_related('fotos_marcos', 'veiculos', 'veiculos__fotos',
                               'incidentes', 'incidentes__fotos',
                               'paradas', 'paradas__fotos',
@@ -6104,9 +6130,16 @@ def api_cliente_operacoes(request, token):
         return d.isoformat() if d else None
 
     def _foto_url(f):
+        """URL absoluta da foto. Aceita o campo de imagem e tambem o caminho
+        cru que os campos snap_* guardam (ex: 'agentes/x.jpg') - relativo
+        quebra na tela de quem consome, que esta em outro dominio."""
         if not f:
             return None
         try:
+            if isinstance(f, str):
+                from django.conf import settings as _st
+                caminho = f if f.startswith('/') else _st.MEDIA_URL + f.lstrip('/')
+                return request.build_absolute_uri(caminho)
             return request.build_absolute_uri(f.url)
         except Exception:
             return None
@@ -6122,37 +6155,11 @@ def api_cliente_operacoes(request, token):
     for o in oss:
         b = boletins.get(o.pk)
 
-        # --- Agente 1 ---
-        agente1 = None
-        if o.snap_agente1_nome:
-            agente1 = {
-                'nome': o.snap_agente1_nome,
-                'cpf': o.snap_agente1_cpf or '',
-                'rg': o.snap_agente1_rg or '',
-                'telefone': o.snap_agente1_telefone or '',
-                'cnh': o.snap_agente1_cnh or '',
-                'val_cnh': _dt(o.snap_agente1_val_cnh),
-                'cnv': o.snap_agente1_cnv or '',
-                'val_cnv': _dt(o.snap_agente1_val_cnv),
-                'endereco': o.snap_agente1_endereco or '',
-                'foto': o.snap_agente1_foto or '',
-            }
-
-        # --- Agente 2 ---
-        agente2 = None
-        if o.snap_agente2_nome:
-            agente2 = {
-                'nome': o.snap_agente2_nome,
-                'cpf': o.snap_agente2_cpf or '',
-                'rg': o.snap_agente2_rg or '',
-                'telefone': o.snap_agente2_telefone or '',
-                'cnh': o.snap_agente2_cnh or '',
-                'val_cnh': _dt(o.snap_agente2_val_cnh),
-                'cnv': o.snap_agente2_cnv or '',
-                'val_cnv': _dt(o.snap_agente2_val_cnv),
-                'endereco': o.snap_agente2_endereco or '',
-                'foto': o.snap_agente2_foto or '',
-            }
+        # --- Agentes (snapshot primario, equipe ao vivo como reserva) ---
+        # O snapshot so e preenchido ao vincular a equipe; OS criada por outro
+        # caminho fica com ele vazio e o agente sumia do painel do cliente.
+        agente1 = _api_agente(o, 1, _dt, _foto_url)
+        agente2 = _api_agente(o, 2, _dt, _foto_url)
 
         # --- Viatura ---
         viatura = None

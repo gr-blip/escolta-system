@@ -685,8 +685,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "cadastros_integracao",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "integracao.py"
     },
     {
@@ -1213,8 +1213,8 @@
       "source_location": "L131",
       "_origin": "ast",
       "id": "cadastros_forms_freelanceform",
-      "community": 6,
-      "community_name": "Cliente",
+      "community": 104,
+      "community_name": "diarias_lancamento_deletar",
       "norm_label": "freelanceform"
     },
     {
@@ -1235,8 +1235,8 @@
       "source_location": "L132",
       "_origin": "ast",
       "id": "cadastros_forms_rationale_132",
-      "community": 6,
-      "community_name": "Cliente",
+      "community": 104,
+      "community_name": "diarias_lancamento_deletar",
       "norm_label": "form para freelance \u2014 cargo livre, sem tipo."
     },
     {
@@ -1477,8 +1477,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "cadastros_management_commands_consultar_processos",
-      "community": 104,
-      "community_name": "diarias_lancamento_deletar",
+      "community": 3,
+      "community_name": "driverid_service.py",
       "norm_label": "consultar_processos.py"
     },
     {
@@ -1532,8 +1532,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "cadastros_management_commands_consultar_processos_rationale_1",
-      "community": 104,
-      "community_name": "diarias_lancamento_deletar",
+      "community": 3,
+      "community_name": "driverid_service.py",
       "norm_label": "cadastros/management/commands/consultar_processos.py \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501"
     },
     {
@@ -2698,8 +2698,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "cadastros_migrations_0022_despesaos_trocamotorista_parada_incidente_and_more",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "0022_despesaos_trocamotorista_parada_incidente_and_more.py"
     },
     {
@@ -2709,8 +2709,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "cadastros_migrations_0022_despesaos_trocamotorista_parada_incidente_and_more_foto_upload_path",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "_foto_upload_path()"
     },
     {
@@ -2720,8 +2720,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "cadastros_migrations_0022_despesaos_trocamotorista_parada_incidente_and_more_migration",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "migration"
     },
     {
@@ -2775,8 +2775,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "cadastros_migrations_0025_remove_despesaos_os_alter_assinaturaos_imagem_and_more",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "0025_remove_despesaos_os_alter_assinaturaos_imagem_and_more.py"
     },
     {
@@ -2786,8 +2786,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "cadastros_migrations_0025_remove_despesaos_os_alter_assinaturaos_imagem_and_more_migration",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "migration"
     },
     {
@@ -3391,8 +3391,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "cadastros_models",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "models.py"
     },
     {
@@ -3413,8 +3413,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "cadastros_models_meta",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "meta"
     },
     {
@@ -3622,8 +3622,8 @@
       "source_location": "L356",
       "_origin": "ast",
       "id": "cadastros_models_osoperacional",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 13,
+      "community_name": "_pode_faturamento",
       "norm_label": "osoperacional"
     },
     {
@@ -3633,8 +3633,8 @@
       "source_location": "L398",
       "_origin": "ast",
       "id": "cadastros_models_osoperacional_str",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 13,
+      "community_name": "_pode_faturamento",
       "norm_label": ".__str__()"
     },
     {
@@ -3644,8 +3644,8 @@
       "source_location": "L403",
       "_origin": "ast",
       "id": "cadastros_models_osoperacional_diff_hhmm",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 13,
+      "community_name": "_pode_faturamento",
       "norm_label": "._diff_hhmm()"
     },
     {
@@ -3655,8 +3655,8 @@
       "source_location": "L412",
       "_origin": "ast",
       "id": "cadastros_models_osoperacional_tempo_chegada",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 13,
+      "community_name": "_pode_faturamento",
       "norm_label": ".tempo_chegada()"
     },
     {
@@ -3666,8 +3666,8 @@
       "source_location": "L416",
       "_origin": "ast",
       "id": "cadastros_models_osoperacional_tempo_inicio_op",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 13,
+      "community_name": "_pode_faturamento",
       "norm_label": ".tempo_inicio_op()"
     },
     {
@@ -3677,8 +3677,8 @@
       "source_location": "L420",
       "_origin": "ast",
       "id": "cadastros_models_osoperacional_tempo_termino_op",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 13,
+      "community_name": "_pode_faturamento",
       "norm_label": ".tempo_termino_op()"
     },
     {
@@ -3688,8 +3688,8 @@
       "source_location": "L424",
       "_origin": "ast",
       "id": "cadastros_models_osoperacional_tempo_termino_viagem",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 13,
+      "community_name": "_pode_faturamento",
       "norm_label": ".tempo_termino_viagem()"
     },
     {
@@ -3699,8 +3699,8 @@
       "source_location": "L428",
       "_origin": "ast",
       "id": "cadastros_models_osoperacional_km_trecho_chegada",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 13,
+      "community_name": "_pode_faturamento",
       "norm_label": ".km_trecho_chegada()"
     },
     {
@@ -3710,8 +3710,8 @@
       "source_location": "L434",
       "_origin": "ast",
       "id": "cadastros_models_osoperacional_km_trecho_termino_op",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 13,
+      "community_name": "_pode_faturamento",
       "norm_label": ".km_trecho_termino_op()"
     },
     {
@@ -3721,8 +3721,8 @@
       "source_location": "L440",
       "_origin": "ast",
       "id": "cadastros_models_osoperacional_km_total",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 13,
+      "community_name": "_pode_faturamento",
       "norm_label": ".km_total()"
     },
     {
@@ -3930,8 +3930,8 @@
       "source_location": "L768",
       "_origin": "ast",
       "id": "cadastros_models_fotoincidente",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "fotoincidente"
     },
     {
@@ -3941,8 +3941,8 @@
       "source_location": "L776",
       "_origin": "ast",
       "id": "cadastros_models_fotoincidente_os",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": ".os()"
     },
     {
@@ -3974,8 +3974,8 @@
       "source_location": "L813",
       "_origin": "ast",
       "id": "cadastros_models_trocamotorista",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "trocamotorista"
     },
     {
@@ -3985,8 +3985,8 @@
       "source_location": "L833",
       "_origin": "ast",
       "id": "cadastros_models_trocamotorista_str",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": ".__str__()"
     },
     {
@@ -3996,8 +3996,8 @@
       "source_location": "L837",
       "_origin": "ast",
       "id": "cadastros_models_fototrocamotorista",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "fototrocamotorista"
     },
     {
@@ -4007,8 +4007,8 @@
       "source_location": "L845",
       "_origin": "ast",
       "id": "cadastros_models_fototrocamotorista_os",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": ".os()"
     },
     {
@@ -4018,8 +4018,8 @@
       "source_location": "L856",
       "_origin": "ast",
       "id": "cadastros_models_assinaturaos",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "assinaturaos"
     },
     {
@@ -4029,8 +4029,8 @@
       "source_location": "L879",
       "_origin": "ast",
       "id": "cadastros_models_assinaturaos_str",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": ".__str__()"
     },
     {
@@ -4227,8 +4227,8 @@
       "source_location": "L357",
       "_origin": "ast",
       "id": "cadastros_models_rationale_357",
-      "community": 17,
-      "community_name": "OSOperacional",
+      "community": 13,
+      "community_name": "_pode_faturamento",
       "norm_label": "dados operacionais de execucao da os \u2014 tempos, km e folha"
     },
     {
@@ -4304,8 +4304,8 @@
       "source_location": "L769",
       "_origin": "ast",
       "id": "cadastros_models_rationale_769",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "fotos vinculadas a um incidente."
     },
     {
@@ -4326,8 +4326,8 @@
       "source_location": "L814",
       "_origin": "ast",
       "id": "cadastros_models_rationale_814",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "registro de troca de motorista durante a os."
     },
     {
@@ -4337,8 +4337,8 @@
       "source_location": "L838",
       "_origin": "ast",
       "id": "cadastros_models_rationale_838",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "fotos da troca de motorista (cnh, rosto, etc.)."
     },
     {
@@ -4348,8 +4348,8 @@
       "source_location": "L857",
       "_origin": "ast",
       "id": "cadastros_models_rationale_857",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "assinatura digital capturada via canvas no link do agente."
     },
     {
@@ -4425,8 +4425,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "cadastros_models_perfil",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "models_perfil.py"
     },
     {
@@ -4436,8 +4436,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "cadastros_models_perfil_perfilusuario",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "perfilusuario"
     },
     {
@@ -4447,8 +4447,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "cadastros_models_perfil_meta",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "meta"
     },
     {
@@ -4458,8 +4458,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "cadastros_models_perfil_perfilusuario_str",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": ".__str__()"
     },
     {
@@ -4469,8 +4469,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "cadastros_models_perfil_perfilusuario_is_developer",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": ".is_developer()"
     },
     {
@@ -4480,8 +4480,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "cadastros_models_perfil_perfilusuario_is_admin",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": ".is_admin()"
     },
     {
@@ -4491,8 +4491,8 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "cadastros_models_perfil_criar_perfil_automatico",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "criar_perfil_automatico()"
     },
     {
@@ -4502,8 +4502,8 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "cadastros_models_perfil_salvar_perfil_automatico",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "salvar_perfil_automatico()"
     },
     {
@@ -4513,8 +4513,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "cadastros_models_perfil_rationale_1",
-      "community": 29,
-      "community_name": "Command",
+      "community": 9,
+      "community_name": "recomprimir_fotos.py",
       "norm_label": "cadastros/models_perfil.py \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501"
     },
     {
@@ -6284,8 +6284,8 @@
       "source_location": "L472",
       "_origin": "ast",
       "id": "cadastros_views_agente_toggle_ativo",
-      "community": 2,
-      "community_name": "views.py",
+      "community": 126,
+      "community_name": "6. Integra\u00e7\u00f5es Externas",
       "norm_label": "agente_toggle_ativo()"
     },
     {
@@ -7549,8 +7549,8 @@
       "source_location": "L5431",
       "_origin": "ast",
       "id": "cadastros_views_freelance_edit",
-      "community": 6,
-      "community_name": "Cliente",
+      "community": 104,
+      "community_name": "diarias_lancamento_deletar",
       "norm_label": "freelance_edit()"
     },
     {
@@ -7653,10 +7653,21 @@
       "norm_label": "diarias_lancamento_deletar()"
     },
     {
-      "label": "api_cliente_operacoes()",
+      "label": "_api_agente()",
       "file_type": "code",
       "source_file": "cadastros/views.py",
       "source_location": "L6082",
+      "_origin": "ast",
+      "id": "cadastros_views_api_agente",
+      "community": 7,
+      "community_name": "os_pdf.py",
+      "norm_label": "_api_agente()"
+    },
+    {
+      "label": "api_cliente_operacoes()",
+      "file_type": "code",
+      "source_file": "cadastros/views.py",
+      "source_location": "L6108",
       "_origin": "ast",
       "id": "cadastros_views_api_cliente_operacoes",
       "community": 7,
@@ -7667,7 +7678,7 @@
       "label": "_os_em_operacao()",
       "file_type": "code",
       "source_file": "cadastros/views.py",
-      "source_location": "L6341",
+      "source_location": "L6348",
       "_origin": "ast",
       "id": "cadastros_views_os_em_operacao",
       "community": 113,
@@ -7678,7 +7689,7 @@
       "label": "api_cliente_posicoes()",
       "file_type": "code",
       "source_file": "cadastros/views.py",
-      "source_location": "L6354",
+      "source_location": "L6361",
       "_origin": "ast",
       "id": "cadastros_views_api_cliente_posicoes",
       "community": 113,
@@ -7714,8 +7725,8 @@
       "source_location": "L473",
       "_origin": "ast",
       "id": "cadastros_views_rationale_473",
-      "community": 2,
-      "community_name": "views.py",
+      "community": 126,
+      "community_name": "6. Integra\u00e7\u00f5es Externas",
       "norm_label": "inativa ou reativa um agente (soft-delete).      substitui a exclusao fisica: pr"
     },
     {
@@ -8478,12 +8489,23 @@
       "norm_label": "deleta um diariaslancamento (lancamento manual ou override)."
     },
     {
-      "label": "API JSON (read-only) das opera\u00e7\u00f5es de um cliente, identificado pelo token_portal",
+      "label": "Dados do agente N pro payload da API: usa o snapshot da OS e, quando ele     est",
       "file_type": "rationale",
       "source_file": "cadastros/views.py",
       "source_location": "L6083",
       "_origin": "ast",
       "id": "cadastros_views_rationale_6083",
+      "community": 7,
+      "community_name": "os_pdf.py",
+      "norm_label": "dados do agente n pro payload da api: usa o snapshot da os e, quando ele     est"
+    },
+    {
+      "label": "API JSON (read-only) das opera\u00e7\u00f5es de um cliente, identificado pelo token_portal",
+      "file_type": "rationale",
+      "source_file": "cadastros/views.py",
+      "source_location": "L6109",
+      "_origin": "ast",
+      "id": "cadastros_views_rationale_6109",
       "community": 7,
       "community_name": "os_pdf.py",
       "norm_label": "api json (read-only) das operacoes de um cliente, identificado pelo token_portal"
@@ -8492,9 +8514,9 @@
       "label": "OS deste cliente que estao DENTRO da janela: chegou na origem e ainda     nao te",
       "file_type": "rationale",
       "source_file": "cadastros/views.py",
-      "source_location": "L6342",
+      "source_location": "L6349",
       "_origin": "ast",
-      "id": "cadastros_views_rationale_6342",
+      "id": "cadastros_views_rationale_6349",
       "community": 113,
       "community_name": "api_cliente_posicoes",
       "norm_label": "os deste cliente que estao dentro da janela: chegou na origem e ainda     nao te"
@@ -8503,9 +8525,9 @@
       "label": "Posicao atual das viaturas em operacao para este cliente.      Mesma autenticaca",
       "file_type": "rationale",
       "source_file": "cadastros/views.py",
-      "source_location": "L6355",
+      "source_location": "L6362",
       "_origin": "ast",
-      "id": "cadastros_views_rationale_6355",
+      "id": "cadastros_views_rationale_6362",
       "community": 113,
       "community_name": "api_cliente_posicoes",
       "norm_label": "posicao atual das viaturas em operacao para este cliente.      mesma autenticaca"
@@ -17086,8 +17108,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "graphify_out_converted_contrato_jr_wilker_001_2026_revisado_2_c5a6b0ec",
-      "community": 128,
-      "community_name": "CONTRATO_JR_WILKER_001_2026_REVISADO_2_c5a6b0ec.md",
+      "community": 130,
+      "community_name": "Manual_Developer_GrupoJR_v3_fc98287c.md",
       "norm_label": "contrato_jr_wilker_001_2026_revisado_2_c5a6b0ec.md"
     },
     {
@@ -17097,8 +17119,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "graphify_out_converted_manual_developer_grupojr_v3_fc98287c",
-      "community": 130,
-      "community_name": "Manual_Developer_GrupoJR_v3_fc98287c.md",
+      "community": 132,
+      "community_name": "consulta_processo_reconsultar",
       "norm_label": "manual_developer_grupojr_v3_fc98287c.md"
     },
     {
@@ -17108,8 +17130,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e",
-      "community": 13,
-      "community_name": "_pode_faturamento",
+      "community": 17,
+      "community_name": "OSOperacional",
       "norm_label": "contexto_sistema_escolta_9d77df0e.md"
     },
     {
@@ -17119,8 +17141,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_1_vis\u00e3o_geral_do_sistema",
-      "community": 13,
-      "community_name": "_pode_faturamento",
+      "community": 17,
+      "community_name": "OSOperacional",
       "norm_label": "1. visao geral do sistema"
     },
     {
@@ -17130,8 +17152,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_1_1_stack_t\u00e9cnica",
-      "community": 13,
-      "community_name": "_pode_faturamento",
+      "community": 17,
+      "community_name": "OSOperacional",
       "norm_label": "1.1 stack tecnica"
     },
     {
@@ -17416,8 +17438,8 @@
       "source_location": "L134",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_3_estrutura_do_banco_de_dados",
-      "community": 13,
-      "community_name": "_pode_faturamento",
+      "community": 17,
+      "community_name": "OSOperacional",
       "norm_label": "3. estrutura do banco de dados"
     },
     {
@@ -17427,8 +17449,8 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_3_1_rela\u00e7\u00f5es_principais",
-      "community": 13,
-      "community_name": "_pode_faturamento",
+      "community": 17,
+      "community_name": "OSOperacional",
       "norm_label": "3.1 relacoes principais"
     },
     {
@@ -17438,8 +17460,8 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_4_fluxo_operacional_completo",
-      "community": 127,
-      "community_name": "4. Fluxo Operacional Completo",
+      "community": 128,
+      "community_name": "CONTRATO_JR_WILKER_001_2026_REVISADO_2_c5a6b0ec.md",
       "norm_label": "4. fluxo operacional completo"
     },
     {
@@ -17449,8 +17471,8 @@
       "source_location": "L146",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_4_1_ciclo_de_uma_os",
-      "community": 127,
-      "community_name": "4. Fluxo Operacional Completo",
+      "community": 128,
+      "community_name": "CONTRATO_JR_WILKER_001_2026_REVISADO_2_c5a6b0ec.md",
       "norm_label": "4.1 ciclo de uma os"
     },
     {
@@ -17460,8 +17482,8 @@
       "source_location": "L147",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_4_2_gest\u00e3o_de_fotos_e_arquivos",
-      "community": 127,
-      "community_name": "4. Fluxo Operacional Completo",
+      "community": 128,
+      "community_name": "CONTRATO_JR_WILKER_001_2026_REVISADO_2_c5a6b0ec.md",
       "norm_label": "4.2 gestao de fotos e arquivos"
     },
     {
@@ -17526,8 +17548,8 @@
       "source_location": "L175",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_6_integra\u00e7\u00f5es_externas",
-      "community": 126,
-      "community_name": "6. Integra\u00e7\u00f5es Externas",
+      "community": 127,
+      "community_name": "4. Fluxo Operacional Completo",
       "norm_label": "6. integracoes externas"
     },
     {
@@ -17537,8 +17559,8 @@
       "source_location": "L176",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_6_1_omnilink_rastreamento_gps",
-      "community": 126,
-      "community_name": "6. Integra\u00e7\u00f5es Externas",
+      "community": 127,
+      "community_name": "4. Fluxo Operacional Completo",
       "norm_label": "6.1 omnilink (rastreamento gps)"
     },
     {
@@ -17548,8 +17570,8 @@
       "source_location": "L183",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_6_2_infosimples_certid\u00f5es",
-      "community": 126,
-      "community_name": "6. Integra\u00e7\u00f5es Externas",
+      "community": 127,
+      "community_name": "4. Fluxo Operacional Completo",
       "norm_label": "6.2 infosimples (certidoes)"
     },
     {
@@ -17559,8 +17581,8 @@
       "source_location": "L188",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_6_3_nominatim_geocodifica\u00e7\u00e3o",
-      "community": 126,
-      "community_name": "6. Integra\u00e7\u00f5es Externas",
+      "community": 127,
+      "community_name": "4. Fluxo Operacional Completo",
       "norm_label": "6.3 nominatim (geocodificacao)"
     },
     {
@@ -17680,8 +17702,8 @@
       "source_location": "L219",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_9_observa\u00e7\u00f5es_t\u00e9cnicas_e_pr\u00f3ximos_passos",
-      "community": 13,
-      "community_name": "_pode_faturamento",
+      "community": 17,
+      "community_name": "OSOperacional",
       "norm_label": "9. observacoes tecnicas e proximos passos"
     },
     {
@@ -17691,8 +17713,8 @@
       "source_location": "L220",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_9_1_pontos_de_aten\u00e7\u00e3o",
-      "community": 13,
-      "community_name": "_pode_faturamento",
+      "community": 17,
+      "community_name": "OSOperacional",
       "norm_label": "9.1 pontos de atencao"
     },
     {
@@ -17702,8 +17724,8 @@
       "source_location": "L226",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_9_2_comandos_de_management_dispon\u00edveis",
-      "community": 13,
-      "community_name": "_pode_faturamento",
+      "community": 17,
+      "community_name": "OSOperacional",
       "norm_label": "9.2 comandos de management disponiveis"
     },
     {
@@ -17713,8 +17735,8 @@
       "source_location": "L227",
       "_origin": "ast",
       "id": "graphify_out_converted_contexto_sistema_escolta_9d77df0e_9_3_conven\u00e7\u00f5es_de_c\u00f3digo",
-      "community": 13,
-      "community_name": "_pode_faturamento",
+      "community": 17,
+      "community_name": "OSOperacional",
       "norm_label": "9.3 convencoes de codigo"
     },
     {
@@ -25030,7 +25052,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "cadastros/views.py",
-      "source_location": "L6093",
+      "source_location": "L6119",
       "weight": 1.0,
       "source": "cadastros_views_api_cliente_operacoes",
       "target": "cadastros_models_cliente"
@@ -25041,7 +25063,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "cadastros/views.py",
-      "source_location": "L6370",
+      "source_location": "L6377",
       "weight": 1.0,
       "source": "cadastros_views_api_cliente_posicoes",
       "target": "cadastros_models_cliente"
@@ -28376,7 +28398,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "cadastros/views.py",
-      "source_location": "L6404",
+      "source_location": "L6411",
       "weight": 1.0,
       "source": "cadastros_views_api_cliente_posicoes",
       "target": "cadastros_omnilink_get_todas_posicoes_atuais"
@@ -28697,7 +28719,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "cadastros/views.py",
-      "source_location": "L6089",
+      "source_location": "L6115",
       "weight": 1.0,
       "source": "cadastros_views_api_cliente_operacoes",
       "target": "cadastros_os_pdf_s"
@@ -28708,7 +28730,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "cadastros/views.py",
-      "source_location": "L6366",
+      "source_location": "L6373",
       "weight": 1.0,
       "source": "cadastros_views_api_cliente_posicoes",
       "target": "cadastros_os_pdf_s"
@@ -30111,6 +30133,16 @@
       "source_location": "L6082",
       "weight": 1.0,
       "source": "cadastros_views",
+      "target": "cadastros_views_api_agente",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "cadastros/views.py",
+      "source_location": "L6108",
+      "weight": 1.0,
+      "source": "cadastros_views",
       "target": "cadastros_views_api_cliente_operacoes",
       "confidence_score": 1.0
     },
@@ -30118,7 +30150,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "cadastros/views.py",
-      "source_location": "L6354",
+      "source_location": "L6361",
       "weight": 1.0,
       "source": "cadastros_views",
       "target": "cadastros_views_api_cliente_posicoes",
@@ -30918,7 +30950,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "cadastros/views.py",
-      "source_location": "L6341",
+      "source_location": "L6348",
       "weight": 1.0,
       "source": "cadastros_views",
       "target": "cadastros_views_os_em_operacao",
@@ -32521,12 +32553,33 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "cadastros/views.py",
+      "source_location": "L6161",
+      "weight": 1.0,
+      "source": "cadastros_views_api_cliente_operacoes",
+      "target": "cadastros_views_api_agente",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "cadastros/views.py",
       "source_location": "L6083",
       "weight": 1.0,
       "source": "cadastros_views_rationale_6083",
+      "target": "cadastros_views_api_agente",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "cadastros/views.py",
+      "source_location": "L6109",
+      "weight": 1.0,
+      "source": "cadastros_views_rationale_6109",
       "target": "cadastros_views_api_cliente_operacoes",
       "confidence_score": 1.0
     },
@@ -32535,7 +32588,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "cadastros/views.py",
-      "source_location": "L6380",
+      "source_location": "L6387",
       "weight": 1.0,
       "source": "cadastros_views_api_cliente_posicoes",
       "target": "cadastros_views_os_em_operacao",
@@ -32545,9 +32598,9 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "cadastros/views.py",
-      "source_location": "L6342",
+      "source_location": "L6349",
       "weight": 1.0,
-      "source": "cadastros_views_rationale_6342",
+      "source": "cadastros_views_rationale_6349",
       "target": "cadastros_views_os_em_operacao",
       "confidence_score": 1.0
     },
@@ -32555,9 +32608,9 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "cadastros/views.py",
-      "source_location": "L6355",
+      "source_location": "L6362",
       "weight": 1.0,
-      "source": "cadastros_views_rationale_6355",
+      "source": "cadastros_views_rationale_6362",
       "target": "cadastros_views_api_cliente_posicoes",
       "confidence_score": 1.0
     },
@@ -41941,5 +41994,5 @@
       "source_file": "cadastros/templates/cadastros/viatura_form.html"
     }
   ],
-  "built_at_commit": "953bcab8e50d97950c65ca357139f563287925b7"
+  "built_at_commit": "bf06a696a4f926fe2c70ba6588560f377efc29e3"
 }
