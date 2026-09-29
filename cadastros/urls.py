@@ -1,7 +1,14 @@
 from django.urls import path
 from . import views
+from . import solicitacoes
 
 urlpatterns = [
+    # Solicitacoes de escolta recebidas de um contratante (ex: painel Spartacus)
+    path('api/v1/solicitacoes/', solicitacoes.api_receber, name='api_solicitacao_receber'),
+    path('api/v1/solicitacoes/<int:pk>/', solicitacoes.api_status, name='api_solicitacao_status'),
+    path('operacional/solicitacoes/', solicitacoes.lista, name='solicitacoes'),
+    path('operacional/solicitacoes/<int:pk>/aceitar/', solicitacoes.aceitar, name='solicitacao_aceitar'),
+    path('operacional/solicitacoes/<int:pk>/recusar/', solicitacoes.recusar, name='solicitacao_recusar'),
     path('', views.dashboard, name='dashboard'),
     path('dashboard/os-por-cliente/', views.dashboard_os_por_cliente, name='dashboard_os_por_cliente'),
 

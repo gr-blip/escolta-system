@@ -425,8 +425,8 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "cadastros/models.py": {
-    "mtime": 1790606974.0,
-    "ast_hash": "8e029d72b90185fcc8ae5969483be409",
+    "mtime": 1790710262.0,
+    "ast_hash": "10804ac883a4c53d2db8cf20e2a147d4",
     "semantic_hash": ""
   },
   "cadastros/models_perfil.py": {
@@ -485,8 +485,8 @@
     "semantic_hash": "c3ef37925e97b312afb36ff73858c3ec"
   },
   "cadastros/urls.py": {
-    "mtime": 1790607030.0,
-    "ast_hash": "b163fd23132d3bd1dd002d8b2fa63319",
+    "mtime": 1790710286.0,
+    "ast_hash": "1a8a55aa19f8bb0ff2edab4e6b910e1b",
     "semantic_hash": ""
   },
   "cadastros/views.py": {
@@ -500,9 +500,9 @@
     "semantic_hash": "81051bcc2cf1bedf378224b0a93e2877"
   },
   "escolta_system/settings.py": {
-    "mtime": 1782844264.0,
-    "ast_hash": "9cd798558d2d5025c59421a5979b6e45",
-    "semantic_hash": "9cd798558d2d5025c59421a5979b6e45"
+    "mtime": 1790710286.0,
+    "ast_hash": "4e3df284edce2afe030deb47cfd5a119",
+    "semantic_hash": ""
   },
   "escolta_system/urls.py": {
     "mtime": 1782844264.0,
@@ -570,9 +570,9 @@
     "semantic_hash": ""
   },
   "cadastros/templates/cadastros/base.html": {
-    "mtime": 1782844264.0,
-    "ast_hash": "32566b8d4d573c7bd43370202cd8d332",
-    "semantic_hash": "32566b8d4d573c7bd43370202cd8d332"
+    "mtime": 1790710286.0,
+    "ast_hash": "d55e6ea6872e39812f4f804225244aa4",
+    "semantic_hash": ""
   },
   "cadastros/templates/cadastros/boletim_detalhe.html": {
     "mtime": 1789391968.0,
@@ -1102,6 +1102,26 @@
   "cadastros/migrations/0049_cliente_token_portal.py": {
     "mtime": 1790606974.0,
     "ast_hash": "4d48165e84b803774fa855d8159a4c88",
+    "semantic_hash": ""
+  },
+  "cadastros/context_processors.py": {
+    "mtime": 1790710286.0,
+    "ast_hash": "cb0a8de25c1d374998a184998462c11d",
+    "semantic_hash": ""
+  },
+  "cadastros/migrations/0050_solicitacao_escolta.py": {
+    "mtime": 1790710292.0,
+    "ast_hash": "ff9ce89b3c1c0594e41f43264a358163",
+    "semantic_hash": ""
+  },
+  "cadastros/solicitacoes.py": {
+    "mtime": 1790710348.0,
+    "ast_hash": "48da63154b877db6870114c947fe312f",
+    "semantic_hash": ""
+  },
+  "cadastros/templates/cadastros/solicitacoes.html": {
+    "mtime": 1790710262.0,
+    "ast_hash": "e120bd7b4b294ed623a1a7fc2c05ba3f",
     "semantic_hash": ""
   }
 }

@@ -112,6 +112,11 @@
           <svg viewBox="0 0 24 24" fill="none"><path d="M9 3h6l1 3h3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h3l1-3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
           Ordens de Serviço
         </a>
+        <a class="nav-item" href="{% url 'solicitacoes' %}" onclick="closeSidebar()">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+          Solicitações
+          {% if solicitacoes_pendentes %}<span class="nav-badge">{{ solicitacoes_pendentes }}</span>{% endif %}
+        </a>
         <a class="nav-item" href="{% url 'omnilink_frota' %}" onclick="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg>
           Rastreamento

@@ -1,0 +1,103 @@
+{% extends 'cadastros/base.html' %}
+{% block title %}Solicitações{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Solicitações de Escolta</h1>
+    <p class="page-sub">Pedidos recebidos dos contratantes. A OS só nasce quando você aceita.</p>
+  </div>
+</div>
+
+<div class="kpi-tabs">
+  <a href="?status=aguardando" class="kpi-tab {% if status == 'aguardando' %}kpi-tab-active{% endif %}">
+    Aguardando <span class="kpi-tab-count">{{ contagens.aguardando }}</span>
+  </a>
+  <a href="?status=aceita" class="kpi-tab {% if status == 'aceita' %}kpi-tab-active{% endif %}">
+    Aceitas <span class="kpi-tab-count">{{ contagens.aceita }}</span>
+  </a>
+  <a href="?status=recusada" class="kpi-tab {% if status == 'recusada' %}kpi-tab-active{% endif %}">
+    Recusadas <span class="kpi-tab-count">{{ contagens.recusada }}</span>
+  </a>
+  <a href="?status=todas" class="kpi-tab {% if status == 'todas' %}kpi-tab-active{% endif %}">Todas</a>
+</div>
+
+{% for s in solicitacoes %}
+<div class="card sol-card">
+  <div class="sol-cab">
+    <div>
+      <span class="sol-origem">{{ s.origem }}</span>
+      <strong class="sol-num">OS {{ s.numero_os_hub }}</strong>
+      {% if s.numero_se %}<span class="sol-se">S.E. {{ s.numero_se }}</span>{% endif %}
+      {% if s.os %}<span class="sol-se">Nossa OS {{ s.os.numero }}</span>{% endif %}
+    </div>
+    <div>
+      {% if s.status == 'aguardando' %}<span class="badge badge-amber">Aguardando</span>
+      {% elif s.status == 'aceita' %}<span class="badge badge-green">Aceita</span>
+      {% else %}<span class="badge badge-red">Recusada</span>{% endif %}
+    </div>
+  </div>
+
+  <table class="sol-dados">
+    <tr><th>Data / Hora da missão</th>
+        <td>{{ s.data_missao|date:"d/m/Y"|default:"—" }} {{ s.hora_missao|time:"H:i" }}</td></tr>
+    <tr><th>Qtde de equipes / VTR</th><td>{{ s.equipes|default:"—" }}</td></tr>
+    <tr><th>Endereço de origem</th><td>{{ s.endereco_origem|default:"—" }}</td></tr>
+    <tr><th>Endereço de destino</th><td>{{ s.endereco_destino|default:"—" }}</td></tr>
+    <tr><th>Placa do veículo</th><td class="mono">{{ s.placa_veiculo|default:"—" }}</td></tr>
+    <tr><th>Motorista</th><td>{{ s.motorista|default:"—" }} {% if s.motorista_telefone %}· <a href="tel:{{ s.motorista_telefone }}">{{ s.motorista_telefone }}</a>{% endif %}</td></tr>
+    <tr><th>Conta para espelhamento</th><td>{{ s.conta_espelhamento|default:"—" }}</td></tr>
+    <tr><th>Solicitante</th><td>{{ s.solicitante|default:"—" }}</td></tr>
+    {% if s.observacoes %}<tr><th>Observações</th><td>{{ s.observacoes }}</td></tr>{% endif %}
+    {% if s.motivo_recusa %}<tr><th>Motivo da recusa</th><td>{{ s.motivo_recusa }}</td></tr>{% endif %}
+  </table>
+
+  {% if s.status == 'aguardando' %}
+  <form method="post" action="{% url 'solicitacao_aceitar' s.pk %}" class="sol-aceite">
+    {% csrf_token %}
+    <div class="sol-grid">
+      <label>Cliente
+        <select name="cliente" required>
+          <option value="">Selecione…</option>
+          {% for c in clientes %}<option value="{{ c.pk }}">{{ c.razao_social }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Tipo de viagem
+        <select name="tipo_viagem">
+          <option value="rodoviaria">Rodoviária</option>
+          <option value="urbana">Urbana</option>
+          <option value="administrativa">Administrativa</option>
+          <option value="preservacao">Preservação</option>
+        </select>
+      </label>
+      <label>Cidade de origem
+        <input type="text" name="cidade_origem" value="{{ s.sugestao_origem.0 }}" required></label>
+      <label>UF <input type="text" name="uf_origem" value="{{ s.sugestao_origem.1 }}" maxlength="2" required></label>
+      <label>Cidade de destino
+        <input type="text" name="cidade_destino" value="{{ s.sugestao_destino.0 }}" required></label>
+      <label>UF <input type="text" name="uf_destino" value="{{ s.sugestao_destino.1 }}" maxlength="2" required></label>
+    </div>
+    <p class="sol-dica">Cidade e UF vieram do endereço que o contratante digitou — confira antes de aceitar.</p>
+    <div class="sol-acoes">
+      <button type="submit" class="btn btn-primary">Aceitar e gerar OS</button>
+      <button type="button" class="btn" onclick="recusar({{ s.pk }})">Recusar</button>
+    </div>
+  </form>
+  <form method="post" action="{% url 'solicitacao_recusar' s.pk %}" id="recusa-{{ s.pk }}" class="oculto">
+    {% csrf_token %}<input type="hidden" name="motivo" id="motivo-{{ s.pk }}">
+  </form>
+  {% endif %}
+</div>
+{% empty %}
+<div class="card"><div class="empty-state"><div class="empty-state-text">Nenhuma solicitação aqui.</div></div></div>
+{% endfor %}
+
+<script>
+function recusar(pk) {
+  var motivo = prompt('Motivo da recusa (o contratante vai ler):');
+  if (!motivo) return;
+  document.getElementById('motivo-' + pk).value = motivo;
+  document.getElementById('recusa-' + pk).submit();
+}
+</script>
+{% endblock %}

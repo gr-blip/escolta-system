@@ -1,12 +1,12 @@
-# Graph Report - Sistema Escolta  (2026-09-29)
+# Graph Report - Sistema Escolta  (2026-09-28)
 
 ## Corpus Check
-- 159 files · ~472,237 words
+- 153 files · ~461,351 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1746 nodes · 2271 edges · 190 communities (117 shown, 73 thin omitted)
-- Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 273 edges (avg confidence: 0.61)
+- 1658 nodes · 1977 edges · 221 communities (108 shown, 113 thin omitted)
+- Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 188 edges (avg confidence: 0.53)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
@@ -140,18 +140,46 @@
 - aceitar_espelhamento
 - os_field_foto_veiculo_delete
 - excluir_espelhamento
-- 4. Fluxo Operacional Completo
+- 6. Integrações Externas
+- CONTRATO_JR_WILKER_001_2026_REVISADO_2_c5a6b0ec.md
+- Manual_Developer_GrupoJR_v3_fc98287c.md
 - os_field_troca_motorista_delete
+- consulta_processo_reconsultar
 - os_field_veiculo_salvar
 - os_gerar_link
+- consulta_processo_reconsultar
+- dashboard_operacional
+- diarias_agentes
+- diarias_export_xlsx
+- diarias_lancamento_deletar
+- diarias_lancamento_excluir_auto
+- espelhamento_centrais_ajax
 - OS Field Link Template
 - Painel de Avisos
 - Dashboard Operacional
 - Espelhamento Shared Pattern
+- espelhamento_debug_ajax
 - Agente List URL
+- espelhamento_list
+- omnilink_frota
 - Equipe List URL
+- omnilink_frota_posicoes
+- omnilink_historico
+- omnilink_posicao_atual
+- os_cliente_save
+- os_delete
+- os_desativar_link
+- os_detalhe
+- os_detalhe_novo
+- os_email_html
 - os_field_foto_marco_delete
 - os_field_foto_veiculo_delete
+- os_field_marco_salvar
+- os_field_veiculo_salvar
+- os_gerar_link
+- os_list
+- os_nova
+- os_observacoes_save
 - Finishing a Development Branch Skill
 - officecli
 - officecli
@@ -190,30 +218,34 @@
 - ._status_validade
 - .tem_alerta_vencimento
 - .ultima_consulta_processo
+- os_operacional_save
+- os_pdf_download
+- patrimonial_dashboard
+- patrimonial_export_pdf
 
 ## God Nodes (most connected - your core abstractions)
-1. `FuncionarioPatrimonial` - 39 edges
-2. `Cliente` - 36 edges
-3. `PerfilUsuario` - 36 edges
-4. `Base Template` - 33 edges
-5. `OSOperacional` - 32 edges
-6. `Agente` - 31 edges
-7. `Viatura` - 30 edges
-8. `OrdemServico` - 28 edges
-9. `Rastreador` - 26 edges
-10. `Armamento` - 26 edges
+1. `PerfilUsuario` - 35 edges
+2. `Base Template` - 33 edges
+3. `FuncionarioPatrimonial` - 28 edges
+4. `Viatura` - 27 edges
+5. `Cliente` - 27 edges
+6. `Agente` - 25 edges
+7. `Rastreador` - 23 edges
+8. `Armamento` - 23 edges
+9. `Colete` - 23 edges
+10. `Command` - 17 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `agente_delete()` --indirect_call--> `Agente`  [INFERRED]
-  cadastros/views.py → cadastros/models.py
-- `viatura_delete()` --indirect_call--> `Viatura`  [INFERRED]
-  cadastros/views.py → cadastros/models.py
-- `rastreador_delete()` --indirect_call--> `Rastreador`  [INFERRED]
-  cadastros/views.py → cadastros/models.py
-- `armamento_delete()` --indirect_call--> `Armamento`  [INFERRED]
-  cadastros/views.py → cadastros/models.py
-- `colete_delete()` --indirect_call--> `Colete`  [INFERRED]
-  cadastros/views.py → cadastros/models.py
+- `AgenteForm` --uses--> `FuncionarioPatrimonial`  [INFERRED]
+  cadastros/forms.py → cadastros/models.py
+- `Meta` --uses--> `FuncionarioPatrimonial`  [INFERRED]
+  cadastros/forms.py → cadastros/models.py
+- `ViaturaForm` --uses--> `FuncionarioPatrimonial`  [INFERRED]
+  cadastros/forms.py → cadastros/models.py
+- `RastreadorForm` --uses--> `FuncionarioPatrimonial`  [INFERRED]
+  cadastros/forms.py → cadastros/models.py
+- `ArmamentoForm` --uses--> `FuncionarioPatrimonial`  [INFERRED]
+  cadastros/forms.py → cadastros/models.py
 
 ## Import Cycles
 - None detected.
@@ -225,19 +257,19 @@
 - **Patrimonial Document Alert Flow — CNH, CNV, Curso Vencimento** — cadastros_templates_cadastros_patrimonial_dashboard, concept_agente, url_funcionario_patrimonial_edit [EXTRACTED 0.90]
 - **Viatura-Rastreador Integration — Vehicle linked to Tracker** — cadastros_templates_cadastros_viatura_form, concept_viatura, concept_rastreador, url_rastreador_create [EXTRACTED 0.95]
 
-## Communities (190 total, 73 thin omitted)
+## Communities (221 total, 113 thin omitted)
 
 ### Community 0 - "omnilink.py"
-Cohesion: 0.11
-Nodes (12): Command, BaseCommand, Autenticação via Service Account JSON., Autenticação via OAuth2 (legado)., Django dumpdata → JSON comprimido em memória., Compacta /app/media em tarball gzip em memória., Gera Excel com 4 abas: OS, Boletins, Cadastros, Patrimonial., Command (+4 more)
+Cohesion: 0.18
+Nodes (7): Command, BaseCommand, Autenticação via Service Account JSON., Autenticação via OAuth2 (legado)., Django dumpdata → JSON comprimido em memória., Compacta /app/media em tarball gzip em memória., Gera Excel com 4 abas: OS, Boletins, Cadastros, Patrimonial.
 
 ### Community 2 - "views.py"
-Cohesion: 0.03
-Nodes (55): Equipe, agente_create(), agente_delete(), agente_export_pdf(), agente_toggle_ativo(), armamento_create(), armamento_delete(), auto_consultar_processos() (+47 more)
+Cohesion: 0.04
+Nodes (3): dashboard(), _fleet_data(), _os_por_dia()
 
 ### Community 3 - "driverid_service.py"
 Cohesion: 0.06
-Nodes (44): main(), run_command(), BytesIO, Command, BaseCommand, cadastros/management/commands/consultar_processos.py ━━━━━━━━━━━━━━━━━━━━━━━━━━, Command, BaseCommand (+36 more)
+Nodes (41): main(), run_command(), BytesIO, Command, BaseCommand, Command, BaseCommand, cadastros/management/commands/sincronizar_local.py ──────────────────────────── (+33 more)
 
 ### Community 4 - "Boletim List View"
 Cohesion: 0.19
@@ -248,28 +280,24 @@ Cohesion: 0.05
 Nodes (43): 1. Think Before Code, 2. Isolate Work, 3. Plan Before Implement, 4. Test First, 5. Review Before Merge, Brainstorming, Common Mistakes, Continuous Improvement (+35 more)
 
 ### Community 6 - "Cliente"
-Cohesion: 0.20
-Nodes (31): AgenteAdmin, ArmamentoAdmin, ClienteAdmin, ColeteAdmin, ConsultaProcessoAdmin, RastreadorAdmin, ViaturaAdmin, AgenteForm (+23 more)
+Cohesion: 0.25
+Nodes (26): AgenteAdmin, ArmamentoAdmin, ClienteAdmin, ColeteAdmin, ConsultaProcessoAdmin, RastreadorAdmin, ViaturaAdmin, AgenteForm (+18 more)
 
 ### Community 7 - "os_pdf.py"
-Cohesion: 0.09
-Nodes (41): _agent_block(), _dados_operacao_block(), _fmt_dt(), _fotos_marcos_block(), _fotos_veiculos_block(), gerar_os_pdf(), _header_block(), _identificacao_os_block() (+33 more)
-
-### Community 8 - "Command"
-Cohesion: 0.08
-Nodes (21): OrdemServico, os_cancelar(), os_cliente_save(), os_desativar_link(), os_detalhe(), os_detalhe_novo(), os_email_html(), os_finalizar() (+13 more)
+Cohesion: 0.11
+Nodes (35): _agent_block(), _dados_operacao_block(), _fmt_dt(), _fotos_marcos_block(), _fotos_veiculos_block(), gerar_os_pdf(), _header_block(), _identificacao_os_block() (+27 more)
 
 ### Community 9 - "recomprimir_fotos.py"
-Cohesion: 0.06
-Nodes (31): Command, _corrigir_orientacao(), BaseCommand, Management command para recomprimir fotos existentes no sistema.  Uso:     py, Recomprime um arquivo de imagem no disco.     Retorna (antes_kb, depois_kb, nov, _recomprimir_arquivo(), Migration, Migration (+23 more)
+Cohesion: 0.11
+Nodes (16): Command, _corrigir_orientacao(), BaseCommand, Management command para recomprimir fotos existentes no sistema.  Uso:     py, Recomprime um arquivo de imagem no disco.     Retorna (antes_kb, depois_kb, nov, _recomprimir_arquivo(), FotoIncidente, FotoMarco (+8 more)
 
 ### Community 10 - "FuncionarioPatrimonial"
-Cohesion: 0.12
-Nodes (14): TabelaPreco, boletim_list(), cliente_force_delete(), _get_nivel(), _is_developer(), _is_financeiro(), _pode_faturamento(), Retorna o nível do perfil. O usuário 'demark' é sempre developer. (+6 more)
+Cohesion: 0.14
+Nodes (14): boletim_finalizar(), boletim_list(), cliente_force_delete(), _get_nivel(), _is_developer(), _is_financeiro(), _pode_faturamento(), Retorna o nível do perfil. O usuário 'demark' é sempre developer. (+6 more)
 
 ### Community 11 - "_is_admin_or_developer"
 Cohesion: 0.12
-Nodes (16): cliente_create(), cliente_deletar_definitivo(), cliente_inativar(), cliente_list(), _is_admin_or_developer(), Lista usuários. O usuário 'demark' (developer) é invisível para todos exceto ele, Cria um novo usuário. Apenas admin e developer podem criar usuários., Edita dados de um usuário. Admin/developer podem editar qualquer um. Outros só a (+8 more)
+Nodes (17): cliente_create(), cliente_deletar_definitivo(), cliente_edit(), cliente_inativar(), cliente_list(), _is_admin_or_developer(), Lista usuários. O usuário 'demark' (developer) é invisível para todos exceto ele, Cria um novo usuário. Apenas admin e developer podem criar usuários. (+9 more)
 
 ### Community 12 - "Base Template"
 Cohesion: 0.12
@@ -284,12 +312,12 @@ Cohesion: 0.05
 Nodes (41): Assets, Bad Descriptions, Bad Names, Common Skill Patterns, Content Planning, Deployment Steps, Deprecation, Directory Structure (+33 more)
 
 ### Community 16 - "OrdemServico"
-Cohesion: 0.40
-Nodes (3): Command, BaseCommand, Comando de uso único: remove o cliente de teste WILKER e a OS vinculada. Uso: p
+Cohesion: 0.15
+Nodes (5): cadastros/management/commands/backup_to_google.py ─────────────────────────────, Command, BaseCommand, Comando de uso único: remove o cliente de teste WILKER e a OS vinculada. Uso: p, OrdemServico
 
 ### Community 17 - "OSOperacional"
-Cohesion: 0.22
-Nodes (8): 1.1 Stack Técnica, 1. Visão Geral do Sistema, 3.1 Relações Principais, 3. Estrutura do Banco de Dados, 9.1 Pontos de Atenção, 9.2 Comandos de Management Disponíveis, 9.3 Convenções de Código, 9. Observações Técnicas e Próximos Passos
+Cohesion: 0.25
+Nodes (8): _buscar_ultimo_id_post(), _get_eventos_normais(), get_ultima_posicao(), _mct_id_to_terminal(), Obtém os IDs sequenciais atuais via BuscarUltimoIdPost.      Retorna dict: {'i, Obtém e cacheia o buffer de eventos normais da plataforma Omnilink.      Compa, Retorna a última posição conhecida do veículo.      Estratégia:       1. Obte, Converte MCT ID para IdTerminal hexadecimal (formato usado nos teleeventos).
 
 ### Community 18 - "Price Table List Template"
 Cohesion: 0.33
@@ -304,12 +332,12 @@ Cohesion: 0.40
 Nodes (10): Freelance Employee Detail, Freelance Employee List, JR Segurança Employee Detail, JR Segurança Employee List, Processos Judiciais Monitoring, Consulta de Processo Judicial, Freelance Employee, Funcionário Patrimonial (JR Segurança) (+2 more)
 
 ### Community 22 - "Contrato de Prestação de Serviços Tecnológicos Especializados Nº 001/2026"
-Cohesion: 0.25
-Nodes (8): 2.4 Faturamento, 2.5 Patrimonial, 2.6 Dashboards, 2. Módulos do Sistema, Boletim de Medição, Dashboard Operacional, Dashboard Principal, Tabelas de Preço
+Cohesion: 0.24
+Nodes (9): _codmsg_to_int(), _parse_coord(), _parse_teleeventos_xml(), Integração com API Omnilink WSTT v1.159 (SOAP/WSDL) Documentação oficial: Manua, Converte CodMsg (sempre hexadecimal no XML, ex: "92") para inteiro.     Valores, Parseia XML de teleeventos retornado pela API Omnilink.      Retorna lista de, Geocodificação reversa via Nominatim (OSM). Retorna dict com 'cidade' e 'estado', Converte coordenada Omnilink para graus decimais.      Suporta dois formatos c (+1 more)
 
 ### Community 23 - "boletim_export_pdf"
-Cohesion: 0.16
-Nodes (16): _fmt_brl(), gerar_pdf_bytes(), gerar_xlsx_bytes(), _missao_to_row(), cadastros/boletim_export.py ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━, Converte dict da missão para lista de 30 valores (mesma ordem de _COLUNAS)., boletim_export_pdf(), boletim_export_xlsx() (+8 more)
+Cohesion: 0.24
+Nodes (10): boletim_export_pdf(), boletim_export_xlsx(), _boletim_queryset(), _boletim_to_missao(), _calcular_totais(), Aplica os mesmos filtros da boletim_list e retorna (qs, cliente_label, periodo_l, Converte um BoletimMedicao em dict compatível com o exportador., Calcula linha de totais a partir da lista de boletins. (+2 more)
 
 ### Community 24 - "Admin User Profile Config"
 Cohesion: 0.29
@@ -332,8 +360,8 @@ Cohesion: 0.50
 Nodes (4): Diárias Agentes View, Diárias Export XLSX URL, Diárias Lancamento Salvar URL, OS Detalhe URL
 
 ### Community 29 - "Command"
-Cohesion: 0.29
-Nodes (5): Parada, Parada registrada durante a OS — com motivo, duração e fotos., os_field_parada_delete(), os_field_parada_salvar(), Cria ou atualiza uma parada.
+Cohesion: 0.07
+Nodes (24): Command, BaseCommand, Migration, AssinaturaOS, BoletimMedicao, DespesaOS, DiariasLancamento, Equipe (+16 more)
 
 ### Community 30 - "User List Template"
 Cohesion: 0.05
@@ -343,21 +371,13 @@ Nodes (37): Analyze Each Comment, Ask for Clarification, Categorize Feedback, Co
 Cohesion: 0.29
 Nodes (6): graph, hash, intermediateDir, metadata, tmpDir, uaDir
 
-### Community 32 - "Command"
-Cohesion: 0.29
-Nodes (7): 2.1 Cadastros (Base), Agentes, Armamento, Clientes, Coletes Balísticos, Rastreadores, Viaturas
-
 ### Community 33 - "_gerar_certidao_pdf"
 Cohesion: 0.33
 Nodes (6): agente_certidao_tjdf(), agente_certidao_trf(), _gerar_certidao_pdf(), Gera um PDF de certidão usando ReportLab e retorna os bytes., Consulta certidão TJDF via InfoSimples e salva o resultado no agente., Consulta certidão TRF 1ª Região (Seção DF) via InfoSimples e salva o resultado n
 
 ### Community 34 - "_comprimir_imagem"
-Cohesion: 0.08
-Nodes (40): aceitar_espelhamento(), _buscar_ultimo_id_post(), _codmsg_to_int(), criar_espelhamento(), descobrir_metodos_wsdl(), excluir_espelhamento(), _get_client(), _get_eventos_normais() (+32 more)
-
-### Community 35 - "_garantir_tabela_espelhamento"
-Cohesion: 0.29
-Nodes (6): Veículos escoltados na OS (máx 4), VeiculoEscoltado, os_field_veiculo_delete(), os_field_veiculo_salvar(), Cria ou edita um VeiculoEscoltado via AJAX (link externo do agente)., Deleta um VeiculoEscoltado via AJAX (link externo do agente).
+Cohesion: 0.17
+Nodes (12): aceitar_espelhamento(), criar_espelhamento(), descobrir_metodos_wsdl(), excluir_espelhamento(), _get_client(), pede_posicao_avulsa(), Solicita posição sob demanda ao veículo via PedePosicaoAvulsa.      Retorna o, Retorna cliente SOAP zeep com timeout configurado. (+4 more)
 
 ### Community 36 - "fix-tour-dangling.mjs"
 Cohesion: 0.33
@@ -382,10 +402,6 @@ Nodes (4): graph, knowledgeGraph, layers, tour
 ### Community 45 - "toasts.js"
 Cohesion: 0.83
 Nodes (3): consumeDjangoMessages(), ensureStack(), push()
-
-### Community 47 - "DespesaOS"
-Cohesion: 0.33
-Nodes (5): Incidente, Registro de ocorrência/incidente durante a OS., os_field_incidente_delete(), os_field_incidente_salvar(), Cria ou atualiza um incidente.
 
 ### Community 51 - "0022_despesaos_trocamotorista_parada_incidente_and_more.py"
 Cohesion: 0.38
@@ -420,28 +436,24 @@ Cohesion: 0.50
 Nodes (4): _base64_to_file(), os_field_assinatura(), Converte data:image/png;base64,... → ContentFile para salvar no ImageField., Salva assinatura digital (base64 PNG vindo do canvas).
 
 ### Community 102 - "diarias_agentes"
-Cohesion: 0.12
-Nodes (18): _carregar_centrais_fixture(), _extrair_centrais_dos_espelhamentos(), listar_centrais_disponiveis(), listar_espelhamentos(), _parse_espelhamentos_xml(), Parseia XML de ListarEspelhamentosByClienteStatus., Lista espelhamentos da conta via ListarEspelhamentosByClienteStatus.      stat, Lista as centrais/bases disponíveis para espelhamento.     Tenta múltiplos nome (+10 more)
+Cohesion: 0.22
+Nodes (10): _carregar_centrais_fixture(), _extrair_centrais_dos_espelhamentos(), listar_centrais_disponiveis(), listar_espelhamentos(), _parse_espelhamentos_xml(), Parseia XML de ListarEspelhamentosByClienteStatus., Lista espelhamentos da conta via ListarEspelhamentosByClienteStatus.      stat, Lista as centrais/bases disponíveis para espelhamento.     Tenta múltiplos nome (+2 more)
 
 ### Community 103 - "5. Infraestrutura e Deploy"
-Cohesion: 0.11
-Nodes (18): _coord_decimal(), get_posicao_por_placa(), get_todas_posicoes_atuais(), _parse_posicoes_atuais_xml(), Geocodificação reversa via Nominatim (OSM). Retorna dict com 'cidade' e 'estado', Converte coordenada Omnilink para decimal. Aceita decimal direto ou formato gg_m, Parser do XML de ObtemAllPosicoesAtuais.     Retorna lista de dicts normalizado, Chama ObtemAllPosicoesAtuais — retorna posição atual de todas as viaturas. (+10 more)
+Cohesion: 0.25
+Nodes (8): _coord_decimal(), get_posicao_por_placa(), get_todas_posicoes_atuais(), _parse_posicoes_atuais_xml(), Converte coordenada Omnilink para decimal. Aceita decimal direto ou formato gg_m, Parser do XML de ObtemAllPosicoesAtuais.     Retorna lista de dicts normalizado, Chama ObtemAllPosicoesAtuais — retorna posição atual de todas as viaturas., Retorna a posição atual de uma viatura pela placa.     Usa o cache compartilhad
 
 ### Community 104 - "diarias_lancamento_deletar"
-Cohesion: 0.07
-Nodes (19): FreelanceForm, Form para Freelance — cargo livre, sem tipo., cadastros/management/commands/backup_to_google.py ─────────────────────────────, Command, BaseCommand, Command, BaseCommand, FuncionarioPatrimonial (+11 more)
+Cohesion: 0.11
+Nodes (9): cadastros/management/commands/consultar_processos.py ━━━━━━━━━━━━━━━━━━━━━━━━━━, Command, BaseCommand, Command, BaseCommand, FuncionarioPatrimonial, Retorna o status de vencimento de uma data:           - 'vencido'  : ja passou, True se qualquer documento esta vencido ou vencendo. (+1 more)
 
 ### Community 105 - "diarias_lancamento_excluir_auto"
 Cohesion: 0.29
 Nodes (7): `Agente`, `Armamento`, CADASTROS, `Cliente`, `Colete`, `Rastreador`, `Viatura`
 
-### Community 106 - "diarias_lancamento_salvar"
-Cohesion: 0.40
-Nodes (4): DiariasLancamento, Permite editar, excluir ou incluir linhas na planilha de diárias.      - excluid, diarias_lancamento_salvar(), Cria ou edita um DiariasLancamento (salva valor override ou lançamento manual).
-
 ### Community 108 - "espelhamento_cancelar_ajax"
-Cohesion: 0.40
-Nodes (5): 2.2 Operacional, Equipes, Execução / Marcos Operacionais (OSOperacional), Link Externo do Agente (Field), Ordens de Serviço (OS)
+Cohesion: 0.43
+Nodes (6): _fmt_brl(), gerar_pdf_bytes(), gerar_xlsx_bytes(), _missao_to_row(), cadastros/boletim_export.py ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━, Converte dict da missão para lista de 30 valores (mesma ordem de _COLUNAS).
 
 ### Community 109 - "espelhamento_centrais_ajax"
 Cohesion: 0.29
@@ -452,40 +464,28 @@ Cohesion: 0.50
 Nodes (3): gerar_tokens_unicos(), Migration, Atribui um UUID distinto a cada cliente existente.
 
 ### Community 113 - "api_cliente_posicoes"
-Cohesion: 0.40
-Nodes (5): 2.3 Rastreamento GPS — Integração Omnilink, Detecção de Status "Em Operação", Espelhamentos Omnilink, Mapa de Frota (omnilink_frota), Rastreamento Individual de OS
+Cohesion: 0.50
+Nodes (4): api_cliente_posicoes(), _os_em_operacao(), OS deste cliente que estao DENTRO da janela: chegou na origem e ainda     nao te, Posicao atual das viaturas em operacao para este cliente.      Mesma autenticaca
 
 ### Community 116 - "2.2 Operacional"
-Cohesion: 0.40
-Nodes (5): 5.1 Railway — Configuração, 5.2 Segurança, 5.3 Cache, 5. Infraestrutura e Deploy, Variáveis de Ambiente Necessárias
+Cohesion: 0.33
+Nodes (7): get_historico_operacao(), get_historico_posicoes(), _parse_datetime(), Converte string de data/hora para datetime. Aceita múltiplos formatos., Retorna lista de posições do veículo no intervalo inicio..fim.      Estratégia, Atalho: busca histórico para o período completo da OS.     Usa inicio_viagem →, datetime
 
 ### Community 117 - "2.3 Rastreamento GPS — Integração Omnilink"
-Cohesion: 0.40
-Nodes (5): 7.1 Rastreamento — Status "Em Operação" no Mapa, 7.2 Performance — Compressão de Imagens, 7.3 Estabilidade — Gunicorn gthread, 7.4 Informações da OS no Mapa, 7. Histórico de Melhorias Recentes (Maio 2026)
-
-### Community 118 - "5. Infraestrutura e Deploy"
-Cohesion: 0.40
-Nodes (5): 8.1 Cadastros, 8.2 Operacional, 8.3 Link do Agente em Campo, 8.4 Faturamento, 8. URLs e Rotas Principais
+Cohesion: 0.33
+Nodes (6): espelhamento_criar_ajax(), espelhamento_listar_ajax(), _garantir_tabela_espelhamento(), Cria a tabela EspelhamentoEnviado e semeia dados históricos se ainda não existir, AJAX — lista espelhamentos enviados (banco local) e recebidos (API Omnilink)., AJAX POST — cria novo espelhamento.
 
 ### Community 119 - "7. Histórico de Melhorias Recentes (Maio 2026)"
 Cohesion: 0.50
-Nodes (4): 6.1 Omnilink (Rastreamento GPS), 6.2 InfoSimples (Certidões), 6.3 Nominatim (Geocodificação), 6. Integrações Externas
+Nodes (4): _api_agente(), api_cliente_operacoes(), Dados do agente N pro payload da API: usa o snapshot da OS e, quando ele     est, API JSON (read-only) das operações de um cliente, identificado pelo token_portal
 
 ### Community 120 - "os_detalhe_novo"
 Cohesion: 0.50
 Nodes (4): App principal (cadastros/urls.py), Sub-rotas AJAX do link externo (token), 🌐 URLs principais, URLs raiz (escolta_system/urls.py)
 
-### Community 121 - "8. URLs e Rotas Principais"
-Cohesion: 0.67
-Nodes (3): 4.1 Ciclo de uma OS, 4.2 Gestão de Fotos e Arquivos, 4. Fluxo Operacional Completo
-
 ### Community 124 - "os_field_foto_veiculo_delete"
 Cohesion: 0.67
 Nodes (3): ⚙️ Infraestrutura, Variáveis de ambiente no Railway, Volume de mídia (Railway)
-
-### Community 127 - "4. Fluxo Operacional Completo"
-Cohesion: 0.10
-Nodes (25): Context processors do app cadastros., Contador na sidebar. Falha de banco nao pode derrubar TODA tela do     sistema p, solicitacoes_pendentes(), SolicitacaoEscolta, aceitar(), api_receber(), api_status(), _avisar_whatsapp() (+17 more)
 
 ### Community 150 - "Painel de Avisos"
 Cohesion: 0.33
@@ -636,24 +636,24 @@ Cohesion: 0.40
 Nodes (4): Boundaries, Examples, Format, Scoring
 
 ## Knowledge Gaps
-- **717 isolated node(s):** `kg`, `layers`, `tour`, `fullKg`, `uaDir` (+712 more)
+- **676 isolated node(s):** `kg`, `layers`, `tour`, `fullKg`, `uaDir` (+671 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **73 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **113 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `PerfilUsuario` connect `recomprimir_fotos.py` to `2.1 Cadastros (Base)`, `omnilink.py`, `views.py`, `_garantir_tabela_espelhamento`, `fix_total_processos.py`, `Cliente`, `diarias_lancamento_deletar`, `Command`, `diarias_lancamento_salvar`, `FuncionarioPatrimonial`, `_pode_faturamento`, `DespesaOS`, `Mirroring History Migration`, `Command`, `4. Fluxo Operacional Completo`?**
-  _High betweenness centrality (0.020) - this node is a cross-community bridge._
-- **Why does `OrdemServico` connect `Command` to `omnilink.py`, `views.py`, `_comprimir_imagem`, `os_pdf.py`, `diarias_lancamento_deletar`, `recomprimir_fotos.py`, `FuncionarioPatrimonial`, `5. Infraestrutura e Deploy`, `OrdemServico`, `4. Fluxo Operacional Completo`?**
-  _High betweenness centrality (0.013) - this node is a cross-community bridge._
-- **Why does `OSOperacional` connect `_pode_faturamento` to `views.py`, `_garantir_tabela_espelhamento`, `2.2 Operacional`, `2.3 Rastreamento GPS — Integração Omnilink`, `os_pdf.py`, `recomprimir_fotos.py`, `espelhamento_aceitar_ajax`, `os_field_foto_marco_delete`, `os_field_foto_veiculo_delete`, `7. Histórico de Melhorias Recentes (Maio 2026)`, `DespesaOS`, `8. URLs e Rotas Principais`, `6. Integrações Externas`, `4. Fluxo Operacional Completo`, `Command`?**
-  _High betweenness centrality (0.012) - this node is a cross-community bridge._
-- **Are the 25 inferred relationships involving `FuncionarioPatrimonial` (e.g. with `AgenteForm` and `ArmamentoForm`) actually correct?**
-  _`FuncionarioPatrimonial` has 25 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 27 inferred relationships involving `Cliente` (e.g. with `AgenteAdmin` and `ArmamentoAdmin`) actually correct?**
-  _`Cliente` has 27 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 30 inferred relationships involving `PerfilUsuario` (e.g. with `.handle()` and `Command`) actually correct?**
-  _`PerfilUsuario` has 30 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 18 inferred relationships involving `OSOperacional` (e.g. with `PerfilUsuario` and `os_field_assinatura()`) actually correct?**
-  _`OSOperacional` has 18 INFERRED edges - model-reasoned connections that need verification._
+- **Why does `FuncionarioPatrimonial` connect `diarias_lancamento_deletar` to `omnilink.py`, `driverid_service.py`, `Cliente`, `OrdemServico`, `Command`?**
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+- **Why does `Command` connect `omnilink.py` to `OrdemServico`, `diarias_lancamento_deletar`, `Command`, `Cliente`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+- **Why does `OSOperacional` connect `_pode_faturamento` to `Command`, `os_pdf.py`?**
+  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+- **Are the 29 inferred relationships involving `PerfilUsuario` (e.g. with `.handle()` and `Command`) actually correct?**
+  _`PerfilUsuario` has 29 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 15 inferred relationships involving `FuncionarioPatrimonial` (e.g. with `AgenteForm` and `ArmamentoForm`) actually correct?**
+  _`FuncionarioPatrimonial` has 15 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 20 inferred relationships involving `Viatura` (e.g. with `AgenteAdmin` and `ArmamentoAdmin`) actually correct?**
+  _`Viatura` has 20 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 20 inferred relationships involving `Cliente` (e.g. with `AgenteAdmin` and `ArmamentoAdmin`) actually correct?**
+  _`Cliente` has 20 INFERRED edges - model-reasoned connections that need verification._

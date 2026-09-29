@@ -1003,3 +1003,31 @@ tbody tr:hover td:first-child{box-shadow:inset 3px 0 0 var(--blue)}
   /* Valor total do boletim em destaque */
   .valor-total, [style*="color:var(--green)"] { color: #000 !important; font-weight: 700 !important; }
 }
+
+/* ── Solicitações de escolta ─────────────────────────────────────────────── */
+.nav-badge{margin-left:auto;background:#dc2626;color:#fff;font-size:11px;font-weight:700;
+  min-width:20px;height:20px;border-radius:10px;display:inline-flex;align-items:center;
+  justify-content:center;padding:0 6px}
+.sol-card{margin-bottom:18px;padding:0;overflow:hidden}
+.sol-cab{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 16px;border-bottom:1px solid var(--border,#1e2744);flex-wrap:wrap}
+.sol-origem{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text3,#7a86a8);margin-right:8px}
+.sol-num{font-size:15px}
+.sol-se{font-size:11px;color:var(--text3,#7a86a8);margin-left:10px}
+.sol-dados{width:100%;border-collapse:collapse}
+.sol-dados th{text-align:left;width:220px;padding:6px 16px;font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.05em;color:var(--text3,#7a86a8);vertical-align:top}
+.sol-dados td{padding:6px 16px;font-size:13px}
+.sol-aceite{padding:14px 16px;border-top:1px solid var(--border,#1e2744)}
+.sol-grid{display:grid;grid-template-columns:2fr 1fr 2fr 70px 2fr 70px;gap:10px}
+.sol-grid label{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.05em;color:var(--text3,#7a86a8)}
+.sol-dica{font-size:11px;color:var(--text3,#7a86a8);margin:8px 0 0}
+.sol-acoes{display:flex;gap:10px;margin-top:12px}
+.oculto{display:none}
+@media (max-width:900px){
+  .sol-grid{grid-template-columns:1fr 1fr}
+  .sol-dados th{width:auto;display:block;padding-bottom:0}
+  .sol-dados td{display:block;padding-top:2px}
+}

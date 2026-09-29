@@ -248,6 +248,7 @@ class OrdemServico(models.Model):
         ('email',    'E-mail'),
         ('telefone', 'Telefone'),
         ('whatsapp', 'WhatsApp'),
+        ('sistema',  'Sistema (contratante)'),
     ]
     TIPO_VIAGEM_CHOICES = [
         ('urbana',         'Urbana'),
@@ -1167,3 +1168,68 @@ class DiariasLancamento(models.Model):
 
     def __str__(self):
         return f'{self.agente_nome} · {self.data} · R${self.valor}'
+
+
+# ── Solicitação de escolta recebida de um contratante (hub) ─────────────────
+# O contratante (ex: painel da Spartacus) manda a solicitação pelo sistema; ela
+# NAO vira OS sozinha - a operação confere e aceita. Só no aceite a OS nasce e
+# o número dela volta pro contratante.
+#
+# São TRÊS números, cada um de um dono:
+#   numero_se        -> controle do cliente do contratante (S.E.)
+#   numero_os_hub    -> controle do contratante (OS Spartacus)
+#   os.numero        -> controle desta empresa, gerado aqui no aceite
+
+class SolicitacaoEscolta(models.Model):
+    STATUS_CHOICES = [
+        ('aguardando', 'Aguardando'),
+        ('aceita',     'Aceita'),
+        ('recusada',   'Recusada'),
+    ]
+
+    origem          = models.CharField(max_length=60, default='SPARTACUS',
+                                       verbose_name='Contratante')
+    numero_se       = models.CharField(max_length=40, blank=True,
+                                       verbose_name='Nº S.E. (cliente do contratante)')
+    numero_os_hub   = models.CharField(max_length=40,
+                                       verbose_name='Nº OS do contratante')
+    cliente_nome    = models.CharField(max_length=200, blank=True,
+                                       verbose_name='Cliente')
+    data_missao     = models.DateField(null=True, blank=True, verbose_name='Data da missão')
+    hora_missao     = models.TimeField(null=True, blank=True, verbose_name='Hora da missão')
+    equipes         = models.CharField(max_length=200, blank=True,
+                                       verbose_name='Qtde de equipes / VTR')
+    endereco_origem  = models.CharField(max_length=300, blank=True, verbose_name='Endereço de origem')
+    endereco_destino = models.CharField(max_length=300, blank=True, verbose_name='Endereço de destino')
+    placa_veiculo    = models.CharField(max_length=20, blank=True, verbose_name='Placa do veículo')
+    motorista        = models.CharField(max_length=200, blank=True, verbose_name='Motorista')
+    motorista_telefone = models.CharField(max_length=30, blank=True, verbose_name='Telefone do motorista')
+    conta_espelhamento = models.CharField(max_length=100, blank=True, verbose_name='Conta para espelhamento')
+    solicitante      = models.CharField(max_length=120, blank=True, verbose_name='Solicitante')
+    observacoes      = models.TextField(blank=True, verbose_name='Observações')
+
+    status        = models.CharField(max_length=12, choices=STATUS_CHOICES,
+                                     default='aguardando', verbose_name='Situação')
+    motivo_recusa = models.CharField(max_length=300, blank=True, verbose_name='Motivo da recusa')
+    os            = models.ForeignKey('OrdemServico', on_delete=models.SET_NULL,
+                                      null=True, blank=True, related_name='solicitacoes',
+                                      verbose_name='OS gerada')
+    recebida_em    = models.DateTimeField(auto_now_add=True)
+    respondida_em  = models.DateTimeField(null=True, blank=True)
+    respondida_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL,
+                                       null=True, blank=True,
+                                       related_name='solicitacoes_respondidas')
+
+    class Meta:
+        verbose_name = 'Solicitação de Escolta'
+        verbose_name_plural = 'Solicitações de Escolta'
+        ordering = ['-recebida_em']
+        constraints = [
+            # reenvio do contratante (retry de rede, duplo clique) nao pode
+            # virar duas solicitacoes na tela da operacao
+            models.UniqueConstraint(fields=['origem', 'numero_os_hub'],
+                                    name='uniq_solicitacao_por_origem'),
+        ]
+
+    def __str__(self):
+        return '%s OS %s' % (self.origem, self.numero_os_hub)

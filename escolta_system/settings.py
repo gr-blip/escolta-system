@@ -71,6 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'cadastros.context_processors.solicitacoes_pendentes',
             ],
         },
     },
@@ -176,3 +177,10 @@ LOGGING = {
         'cadastros': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
     },
 }
+
+# Solicitacoes de escolta recebidas de um contratante (ex: painel Spartacus).
+# Chave SO de escrita: o token do portal do cliente e de leitura e circula em
+# link/planilha - reaproveita-lo aqui deixaria quem tem um relatorio criar
+# servico no sistema. Vazia = recebimento desligado (responde 503).
+SOLICITACAO_API_KEY = config('SOLICITACAO_API_KEY', default='')
+SOLICITACAO_WHATSAPP = config('SOLICITACAO_WHATSAPP', default='')
